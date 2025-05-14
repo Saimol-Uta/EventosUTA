@@ -1,0 +1,101 @@
+---
+---
+
+
+<header class="header">
+  <div class="left-section">
+    <img src="/logo.png" alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial" class="logo-full" draggable="false" />
+  </div>
+
+  <div class="right-section">
+    <a href="/verificar-certificado" class="option" draggable="false">
+      <img src="/certificado.png" alt="Certificado" class="icon" draggable="false" />
+      <span class="text">Verifica tu certificado</span>
+    </a>
+    <a href="/iniciar-sesion" class="option" draggable="false">
+      <img src="/login.png" alt="Iniciar sesión" class="icon" draggable="false" />
+      <span class="text">Inicia sesión</span>
+    </a>
+  </div>
+</header>
+
+<style>
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: white;
+  border-bottom: 1px solid #ccc;
+  flex-wrap: wrap;
+}
+
+.left-section {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-full {
+  max-height: 80px;
+  width: auto;
+}
+
+.right-section {
+  display: flex;
+  gap: 2rem;
+  flex: 1;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 250px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #660000;
+  text-decoration: none;
+  user-select: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.option:hover {
+  color: #a00000;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  user-select: none;
+  pointer-events: none;
+}
+
+.text {
+  user-select: none;
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .right-section {
+    justify-content: center;
+    margin-top: 1rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .option {
+    justify-content: center;
+  }
+}
+</style>
