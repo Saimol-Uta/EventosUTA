@@ -5,9 +5,11 @@ import tailwindcss from '@tailwindcss/vite';
 
 import netlify from '@astrojs/netlify';
 
+import auth from 'auth-astro';
+
 // https://astro.build/config
 export default defineConfig({
-    integrations: [],
+    integrations: [auth()],
     vite: {
         plugins: [tailwindcss()]
     },
