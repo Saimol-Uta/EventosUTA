@@ -1,20 +1,45 @@
 ---
 ---
-
-
 <nav class="filtros">
   <ul class="lista-filtros">
-    <li><a href="#categorias">Categorías</a></li>
-    <li><a href="#carreras">Carreras</a></li>
-    <li><a href="#duracion">Duración</a></li>
+    <li>
+      <button class="btn-filtro" data-target="cat-list">Categorías</button>
+      <ul id="cat-list" class="submenu">
+        <li>Cursos</li>
+        <li>Congresos</li>
+        <li>Webinars</li>
+        <li>Conferencias</li>
+        <li>Socializaciones</li>
+      </ul>
+    </li>
+    <li>
+      <button class="btn-filtro" data-target="car-list">Carreras</button>
+      <ul id="car-list" class="submenu">
+        <li>Tecnologías de la Información</li>
+        <li>Telecomunicaciones</li>
+        <li>Ingeniería Industrial</li>
+        <li>Software</li>
+        <li>Automatización y Robótica</li>
+      </ul>
+    </li>
+   <li>
+  <button class="btn-filtro" data-target="dur-list">Duración</button>
+  <ul id="dur-list" class="submenu">
+    <li>Menos de 5 horas</li>
+    <li>De 5 a 10 horas</li>
+    <li>De 10 a 20 horas</li>
+    <li>De 20 a 40 horas</li>
+    <li>Más de 40 horas</li>
+  </ul>
+</li>
   </ul>
 </nav>
 
 <style>
   .filtros {
     display: flex;
-    justify-content: flex-start; /* Alinear a la izquierda */
-    padding: 1rem 2rem; /* Añade espacio lateral */
+    justify-content: flex-start;
+    padding: 1rem 2rem;
     background-color: white;
     border-top: 1px solid #e5e5e5;
     border-bottom: 1px solid #e5e5e5;
@@ -22,22 +47,92 @@
 
   .lista-filtros {
     display: flex;
-    gap: 2.5rem;
+    gap: 2rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  .lista-filtros li a {
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 1.1rem;
-    color: #5a1e1e;
-    transition: color 0.3s ease;
+  .lista-filtros > li {
+    position: relative;
   }
 
-  .lista-filtros li a:hover {
+  .btn-filtro {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #5a1e1e;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-filtro:hover {
     color: #9e1c1c;
+    background-color: #f3f3f3;
+  }
+
+  .submenu {
+    display: none;
+    position: absolute;
+    top: 2.2rem;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 0.5rem 1rem;
+    z-index: 100;
+    min-width: 200px;
+    border-radius: 0.4rem;
+  }
+
+  .submenu li {
+    padding: 0.4rem 0;
+    font-size: 0.95rem;
+    color: #333;
+    cursor: pointer;
+  }
+
+  .submenu li:hover {
+    color: #9e1c1c;
+  }
+
+  .submenu.show {
+    display: block;
   }
 </style>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = document.querySelectorAll('.btn-filtro');
+    const submenus = document.querySelectorAll('.submenu');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', event => {
+        event.stopPropagation(); // evita que se cierre inmediatamente
+        const targetId = button.getAttribute('data-target');
+        submenus.forEach(menu => {
+          if (menu.id === targetId) {
+            menu.classList.toggle('show');
+          } else {
+            menu.classList.remove('show');
+          }
+        });
+      });
+    });
+
+    document.addEventListener('click', event => {
+      const target = event.target;
+      if (target instanceof HTMLElement) {
+        const isButton = target.closest('.btn-filtro');
+        const isMenu = target.closest('.submenu');
+        if (!isButton && !isMenu) {
+          submenus.forEach(menu => menu.classList.remove('show'));
+        }
+      }
+    });
+  });
+</script>
