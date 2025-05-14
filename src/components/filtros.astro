@@ -1,9 +1,9 @@
----
----
 <nav class="filtros">
   <ul class="lista-filtros">
     <li>
-      <button class="btn-filtro" data-target="cat-list">Categorías</button>
+      <button class="btn-filtro" data-target="cat-list">
+        Categorías <span class="flecha">▼</span>
+      </button>
       <ul id="cat-list" class="submenu">
         <li>Cursos</li>
         <li>Congresos</li>
@@ -13,7 +13,9 @@
       </ul>
     </li>
     <li>
-      <button class="btn-filtro" data-target="car-list">Carreras</button>
+      <button class="btn-filtro" data-target="car-list">
+        Carreras <span class="flecha">▼</span>
+      </button>
       <ul id="car-list" class="submenu">
         <li>Tecnologías de la Información</li>
         <li>Telecomunicaciones</li>
@@ -22,16 +24,18 @@
         <li>Automatización y Robótica</li>
       </ul>
     </li>
-   <li>
-  <button class="btn-filtro" data-target="dur-list">Duración</button>
-  <ul id="dur-list" class="submenu">
-    <li>Menos de 5 horas</li>
-    <li>De 5 a 10 horas</li>
-    <li>De 10 a 20 horas</li>
-    <li>De 20 a 40 horas</li>
-    <li>Más de 40 horas</li>
-  </ul>
-</li>
+    <li>
+      <button class="btn-filtro" data-target="dur-list">
+        Duración <span class="flecha">▼</span>
+      </button>
+      <ul id="dur-list" class="submenu">
+        <li>Menos de 5 horas</li>
+        <li>De 5 a 10 horas</li>
+        <li>De 10 a 20 horas</li>
+        <li>De 20 a 40 horas</li>
+        <li>Más de 40 horas</li>
+      </ul>
+    </li>
   </ul>
 </nav>
 
@@ -73,6 +77,19 @@
     color: #9e1c1c;
     background-color: #f3f3f3;
   }
+
+.flecha {
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+  color: #777;
+  font-weight: 400;
+  transform: translateY(1px);
+  transition: color 0.3s ease;
+}
+
+.btn-filtro:hover .flecha {
+  color: #9e1c1c;
+}
 
   .submenu {
     display: none;
