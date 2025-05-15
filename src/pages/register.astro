@@ -1,0 +1,150 @@
+---
+---
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Registro - Talleres Tecnológicos</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .login-container {
+        border: 1px solid #ccc;
+        padding: 30px 40px;
+        text-align: center;
+        max-width: 350px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
+
+      .login-container img {
+        width: 100%;
+        max-width: 280px;
+        margin-bottom: 20px;
+      }
+
+      .login-container input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .login-container button {
+        background-color: #a00;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      .login-container button:hover {
+        background-color: #800000;
+      }
+
+      .login-container a {
+        display: block;
+        margin-top: 10px;
+        font-size: 14px;
+        text-decoration: none;
+        color: #800000;
+      }
+
+      .login-container a:hover {
+        text-decoration: underline;
+      }
+
+      .volver {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 14px;
+        color: #800000;
+      }
+
+      .volver:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="volver" href="/">Regresar</a>
+
+    <div class="login-container">
+      <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
+      <form>
+        <input type="text" placeholder="Nombre" required />
+        <input type="text" placeholder="Apellido" required />
+        <input type="text" placeholder="Correo" required />
+        <input type="password" placeholder="Contraseña" required />
+        <input type="date" id="fechNac" required />
+        <p id="edadResultado"></p>
+        <button type="submit">Registrarse</button>
+        <p>¿Ya tiene una cuenta?</p>
+        <a href="/login">Inicia sesión aquí</a>
+      </form>
+    </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const fechaInput = document.getElementById("fechNac");
+    const edadResultado = document.getElementById("edadResultado");
+
+    if (!fechaInput || !edadResultado) return;
+
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = (hoy.getMonth() + 1).toString().padStart(2, "0");
+    const dia = hoy.getDate().toString().padStart(2, "0");
+    const fechaMin = `${año - 100}-${mes}-${dia}`;
+    const fechaMax = `${año - 18}-12-31`; ;
+
+    fechaInput.setAttribute("min", fechaMin);
+    fechaInput.setAttribute("max", fechaMax);
+
+fechaInput.addEventListener("change", (e) => {
+  const input = e.target as HTMLInputElement;
+  const valorFecha = input.value;
+
+      if (!valorFecha) {
+        edadResultado.textContent = "";
+        return;
+      }
+
+      const nacimiento = new Date(valorFecha);
+      if (isNaN(nacimiento.getTime())) {
+        edadResultado.textContent = "Fecha inválida.";
+        edadResultado.style.color = "red";
+        return;
+      }
+
+      const hoy = new Date();
+      let edad = hoy.getFullYear() - nacimiento.getFullYear();
+      const m = hoy.getMonth() - nacimiento.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+      }
+
+      if (edad < 18) {
+        edadResultado.textContent = "Debe tener al menos 18 años.";
+        edadResultado.style.color = "red";
+      } else {
+        //si la edad es valida luego que se haya ingresado una edad invalida la edad el texto con el mensaje de error se desaparece
+        edadResultado.textContent = "";
+        
+      }
+    });
+  });
+</script>
+
+  </body>
+</html>
