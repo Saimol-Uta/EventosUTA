@@ -17,6 +17,18 @@ const eventos = [
   <Header />
   <Navbar />
 </Layout>
+<h3 style="text-align: center; margin-bottom: 1rem; color: #8B0000;">Otros cursos disponibles</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+  {eventos.map(evento => (
+    <EventoCard 
+      imagen={evento.imagen} 
+      titulo={evento.titulo} 
+      estado={evento.estado} 
+      horas={evento.horas} 
+    />
+  ))}
+</div>
+
 
 <section style="max-width: 1000px; margin: auto; padding: 2rem; font-family: Arial, sans-serif;">
   <h2 style="text-align: center; margin-bottom: 1rem;">Curso: <span style="font-weight: 600;">Introducción al Desarrollo Web</span></h2>
