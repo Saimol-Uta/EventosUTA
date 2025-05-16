@@ -1,0 +1,93 @@
+---
+const { titulo, contenido } = Astro.props;
+---
+
+<style>
+  .esquinas {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+  }
+
+  .esquinas::before,
+  .esquinas::after,
+  .esquinas span::before,
+  .esquinas span::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #a40000;
+  }
+
+  .esquinas::before {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .esquinas::after {
+    top: 0;
+    right: 0;
+    border-left: none;
+    border-bottom: none;
+  }
+
+  .esquinas span::before {
+    bottom: 0;
+    left: 0;
+    border-right: none;
+    border-top: none;
+  }
+
+  .esquinas span::after {
+    bottom: 0;
+    right: 0;
+    border-left: none;
+    border-top: none;
+  }
+
+  .contenido {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 20px;
+  }
+
+  .titulo {
+    color: #650000;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .texto {
+    color: #010101;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 480px) {
+    .titulo {
+      font-size: 18px;
+    }
+
+    .texto {
+      font-size: 15px;
+    }
+  }
+</style>
+
+<div class="esquinas">
+  <span></span>
+  <div class="contenido">
+    <div class="titulo">{titulo}</div>
+    <div class="texto">{contenido}</div>
+  </div>
+</div>
