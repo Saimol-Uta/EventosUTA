@@ -1,0 +1,143 @@
+---
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Buscar Certificado - FISEI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-left">
+        <img src="/img/logoFisei.png" alt="Facultad de Ingeniería en Sistemas" class="logo" />
+      </div>
+      <a href="/" class="back-link">Regresar</a>
+    </header>
+
+    <main class="main-content">
+      <h2>CTT-Talleres Tecnológicos FISEI</h2>
+
+      <form class="formulario">
+        <label for="codigo" class="codigo-label">Ingrese su código:</label>
+        <input type="text" id="codigo" name="codigo" required class="codigo-input" />
+
+        <button type="submit" class="verificar-btn">Verificar</button>
+      </form>
+    </main>
+  </body>
+</html>
+
+<style>
+/* Estilos base */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 2rem;
+  border-bottom: 1px solid #ccc;
+  flex-wrap: wrap;
+}
+
+.logo {
+  max-height: 70px;
+  width: auto;
+}
+
+.back-link {
+  color: #ad272e;
+  font-size: 0.9rem;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* Contenido principal */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+/* Formulario */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.codigo-label {
+  color: #800000;
+  font-weight: bold;
+}
+
+.codigo-input {
+  padding: 0.5rem;
+  width: 200px;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.verificar-btn {
+  background-color: #a00000;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.verificar-btn:hover {
+  background-color: #800000;
+}
+
+/* RESPONSIVE DESIGN 📱 */
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .codigo-input {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .verificar-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .back-link {
+    align-self: flex-end;
+    margin-right: 1rem;
+  }
+}
+
+</style>
