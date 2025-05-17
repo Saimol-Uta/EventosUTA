@@ -2,6 +2,48 @@
 
 ---
 <footer style="background-color: #3B3751; color: white; padding: 40px 60px; font-family: 'Segoe UI', sans-serif;">
+  <style>
+    footer a {
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: #C62828;
+    }
+
+    footer svg {
+      transition: transform 0.3s ease, fill 0.3s ease;
+    }
+
+    footer a:hover svg {
+      transform: scale(1.1);
+      fill: #C62828;
+    }
+
+    .footer-cursos li {
+      margin: 6px 0;
+    }
+
+    .footer-cursos a {
+      position: relative;
+    }
+
+    .footer-cursos a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 0%;
+      height: 2px;
+      background-color: #C62828;
+      transition: width 0.3s ease;
+    }
+
+    .footer-cursos a:hover::after {
+      width: 100%;
+    }
+  </style>
+
   <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px;">
     
     <!-- CONTACTO -->
@@ -12,7 +54,7 @@
       <p style="margin: 10px 0;"><span style="margin-right: 10px;">✉️</span>ctt.fisei@uta.edu.ec</p>
       <p style="margin: 10px 0;"><span style="margin-right: 10px;">💻</span><a href="#" style="color: #C62828; text-decoration: none;">Plataforma Educativa</a></p>
 
-      <div style="margin-top: 20px; display: flex; gap: 10px;">
+      <div style="margin-top: 20px; display: flex; gap: 12px;">
         <!-- Twitter -->
         <a href="https://twitter.com/tu_usuario" target="_blank" rel="noopener noreferrer">
           <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
@@ -44,7 +86,7 @@
     </div>
 
     <!-- CURSOS -->
-    <div>
+    <div class="footer-cursos">
       <h3 style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;">CURSOS</h3>
       <ul style="list-style: none; padding: 0;">
         <li><a href="/cursos/fundamentos-python-1" style="color: white; text-decoration: none;">› FUNDAMENTOS DE PYTHON 1</a></li>
@@ -62,13 +104,25 @@
     <div>
       <h3 style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;">INFORMACIÓN</h3>
       <p style="margin-bottom: 20px;">Cuéntanos tus inquietudes.</p>
-      <a href="/formulario" style="background-color: #C62828; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; display: inline-block;">SOLICITAR INFORMACIÓN – CTT</a>
+      <a href="/formulario" style="background-color: #C62828; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease;">SOLICITAR INFORMACIÓN – CTT</a>
     </div>
   </div>
 
-  <hr style="margin: 40px 0; border: 0; height: 1px; background-color: #555;" />
+  <!-- Línea roja -->
+<hr style="
+  margin: 40px auto;
+  border: none;
+  height: 3px;
+  max-width: 400px;
+  background: linear-gradient(to right, transparent, #C62828, transparent);
+  border-radius: 3px;
+" aria-hidden="true" />
+
+
 
   <div style="text-align: center; font-size: 14px;">
     © Copyright © Universidad Técnica de Ambato
   </div>
 </footer>
+
+
