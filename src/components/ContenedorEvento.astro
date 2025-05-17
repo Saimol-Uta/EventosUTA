@@ -1,0 +1,34 @@
+---
+import EventoCard from './EventoCard.astro';
+
+const eventos = [
+  { imagen: '/img/python.png', titulo: 'Curso de Python', estado: 'Activo', horas: '20h' },
+  { imagen: '/img/java.png', titulo: 'Curso de Java', estado: 'Activo', horas: '30h' },
+  { imagen: '/img/csharp.png', titulo: 'Curso de C#', estado: 'Finalizado', horas: '25h' },
+  { imagen: '/img/js.png', titulo: 'Curso de JavaScript', estado: 'Activo', horas: '15h' },
+  { imagen: '/img/ruby.png', titulo: 'Curso de Ruby', estado: 'Próximo', horas: '10h' },
+  { imagen: '/img/django.png', titulo: 'Curso de Django', estado: 'Activo', horas: '12h' },
+  { imagen: '/img/mysql.png', titulo: 'Curso de MySQL', estado: 'Finalizado', horas: '18h' },
+  { imagen: '/img/mongodb.png', titulo: 'Curso de MongoDB', estado: 'Próximo', horas: '20h' },
+  { imagen: '/img/html.png', titulo: 'Curso de HTML', estado: 'Activo', horas: '8h' }
+];
+---
+
+<div class="contenedor">
+  {eventos.map(evento => (
+    <EventoCard 
+      imagen={evento.imagen} 
+      titulo={evento.titulo} 
+      estado={evento.estado} 
+      horas={evento.horas} 
+    />
+  ))}
+</div>
+
+<style>
+  .contenedor {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+</style>
