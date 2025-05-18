@@ -1,0 +1,44 @@
+---
+import TarjetaConImagen from "../components/ContenedorInfo.astro";
+import "../styles/global.css";
+const {
+  tituloFacultad,
+  tituloDescripcion,
+  contenidoDescripcion,
+  imagenDescripcion,
+  tituloMision,
+  contenidoMision,
+  imagenMision,
+  tituloVision,
+  contenidoVision,
+  imagenVision
+} = Astro.props;
+---
+
+<div class="bg-gray-300 min-h-screen py-8">
+  <div class="max-w-6xl mx-auto px-4 text-center">
+    <h1 class="text-2xl md:text-3xl font-bold text-[#650000] mb-10">
+      {tituloFacultad}
+    </h1>
+
+  <TarjetaConImagen
+  titulo={tituloDescripcion}
+  contenido={contenidoDescripcion}
+  imagenUrl={imagenDescripcion}
+/>
+
+<TarjetaConImagen
+  titulo={tituloMision}
+  contenido={contenidoMision}
+  imagenUrl={imagenMision}
+  invertir={true}
+/>
+
+<TarjetaConImagen
+  titulo={tituloVision}
+  contenido={contenidoVision}
+  imagenUrl={imagenVision}
+/>
+
+  </div>
+</div>
