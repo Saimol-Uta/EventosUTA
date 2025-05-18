@@ -1,13 +1,18 @@
 ---
-import Header from '../components/Header.astro';
-import NavBar from '../components/Navbar.astro';
+import Header from "../components/Header.astro";
+import NavBar from "../components/Navbar.astro";
+import { prisma } from "../db";
+const carreras = await prisma.carreras.findMany();
+
+console.log(carreras);
 ---
+
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-  </head>
-  <body>
-<Header/>
-    <NavBar />
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+    </head>
+    <body>
+        <Header />
+        <NavBar />
+    </body>
 </html>

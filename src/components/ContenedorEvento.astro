@@ -1,72 +1,30 @@
 ---
 import EventoCard from "./EventoCard.astro";
+import { actions } from "astro:actions";
 
-const eventos = [
-    {
-        imagen: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de Python",
-        estado: "Activo",
-        horas: "20h",
-    },
-    {
-        imagen: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de Java",
-        estado: "Activo",
-        horas: "30h",
-    },
-    {
-        imagen: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de C#",
-        estado: "Finalizado",
-        horas: "25h",
-    },
-    {
-        imagen: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de JavaScript",
-        estado: "Activo",
-        horas: "15h",
-    },
-    {
-        imagen: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de Ruby",
-        estado: "Próximo",
-        horas: "10h",
-    },
-    {
-        imagen: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de Django",
-        estado: "Activo",
-        horas: "12h",
-    },
-    {
-        imagen: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de MySQL",
-        estado: "Finalizado",
-        horas: "18h",
-    },
-    {
-        imagen: "https://images.unsplash.com/photo-1461344577544-4e5dc9487184?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de MongoDB",
-        estado: "Próximo",
-        horas: "20h",
-    },
-    {
-        imagen: "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80",
-        titulo: "Curso de HTML",
-        estado: "Activo",
-        horas: "8h",
-    },
+const { data, error } = await Astro.callAction(actions.getEventos, {});
+
+const eventosIMG = [
+    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1461344577544-4e5dc9487184?auto=format&fit=crop&w=400&q=80",
+    "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80",
 ];
 ---
 
 <div class="contenedor">
     {
-        eventos.map((evento) => (
+        data?.eventos?.map((evento) => (
             <EventoCard
-                imagen={evento.imagen}
-                titulo={evento.titulo}
-                estado={evento.estado}
-                horas={evento.horas}
+                imagen={evento.img_eve}
+                titulo={evento.nom_eve}
+                estado={evento.asignaciones}
+                horas={evento.dur_eve}
             />
         ))
     }

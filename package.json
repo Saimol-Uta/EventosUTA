@@ -11,6 +11,7 @@
   "dependencies": {
     "@astrojs/netlify": "^6.3.3",
     "@auth/core": "^0.37.4",
+    "@prisma/client": "^6.8.2",
     "@tailwindcss/vite": "^4.1.6",
     "astro": "^5.7.13",
     "auth-astro": "^4.2.0",
