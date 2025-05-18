@@ -1,36 +1,35 @@
-
 <style>
-  nav {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: white;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-    font-family: sans-serif;
-  }
-
-  a {
-    text-decoration: none;
-    margin-right: 20px;
-    color: darkred;
-    font-size: 14px;
-  }
-
-  @media (max-width: 600px) {
     nav {
-      flex-direction: column;
-      align-items: flex-start;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: white;
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        font-family: sans-serif;
     }
 
     a {
-      margin-bottom: 10px;
+        text-decoration: none;
+        margin-right: 20px;
+        color: darkred;
+        font-size: 14px;
     }
-  }
+
+    @media (max-width: 600px) {
+        nav {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        a {
+            margin-bottom: 10px;
+        }
+    }
 </style>
 
 <nav>
-  <a href="/">Inicio</a>
-  <a href="/">Cursos</a>
+    <a href="/">Inicio</a>
+    <a href="/cursosCompleto">Cursos</a>
 </nav>
