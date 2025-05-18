@@ -1,5 +1,5 @@
-import { getCursos } from './Cursos/getCursos';
+import { getEventos } from './Eventos/getEventos';
 
 export const server = {
-    getCursos
+    getEventos
 };

@@ -64,6 +64,7 @@ model eventos {
   are_eve            String?            @db.VarChar(50)
   ubi_eve            String             @db.VarChar(150)
   ced_org_eve        String             @db.VarChar(10)
+  img_eve            String?
   asignaciones       asignaciones[]
   organizadores      organizadores      @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
   categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
