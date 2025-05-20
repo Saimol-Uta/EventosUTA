@@ -4,6 +4,13 @@ import Navbar from "../components/Navbar.astro";
 import Layout from "../layouts/Layout.astro";
 import Filtros from "../components/filtros.astro";
 import ContenedorEventos from "../components/ContenedorEvento.astro";
+
+// 🔧 Extraer filtros desde la URL
+const url = new URL(Astro.request.url);
+const filtros = {
+  categoria: url.searchParams.get("categoria") || "",
+  duracion: url.searchParams.get("duracion") || ""
+};
 ---
 
 <Layout>
@@ -18,7 +25,9 @@ import ContenedorEventos from "../components/ContenedorEvento.astro";
     </div>
 
     <h2 class="titulo-seccion">EVENTOS</h2>
-    <ContenedorEventos />
+
+    <!-- ✅ Pasar filtros al componente de eventos -->
+    <ContenedorEventos filtros={filtros} />
   </section>
 </Layout>
 
@@ -62,7 +71,7 @@ import ContenedorEventos from "../components/ContenedorEvento.astro";
     margin-bottom: 20px;
   }
 </style>
-<script src="/js/buscador.js" defer></script>
 
+<script src="/js/buscador.js" defer></script>
 
 
