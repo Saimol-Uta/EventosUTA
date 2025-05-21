@@ -38,11 +38,21 @@ const listaEventos = (data?.eventos || []) as Eventos[];
 </div>
 
 <style>
-  .contenedor {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-  }
+.contenedor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 300px); /* reemplaza auto-fit + minmax */
+  place-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+
+.card {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+
 
 .sin-resultados {
   grid-column: 1 / -1;
