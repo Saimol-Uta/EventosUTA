@@ -1,39 +1,94 @@
 ---
 import EventoCard from "./EventoCard.astro";
-import { actions } from "astro:actions";
+import { getEventosFiltrados } from "../actions/Eventos/getFiltros";
+import type { Eventos } from "../interface/eventosSimple";
 
-const { data, error } = await Astro.callAction(actions.getEventos, {});
+const { filtros = {} } = Astro.props;
 
-const eventosIMG = [
-    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1461344577544-4e5dc9487184?auto=format&fit=crop&w=400&q=80",
-    "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80",
-];
+const { data, error } = await Astro.callAction(getEventosFiltrados, filtros);
+
+// ✅ Solución segura: forzar el tipo del array
+const listaEventos = (data?.eventos || []) as Eventos[];
 ---
 
 <div class="contenedor">
-    {
-        data?.eventos?.map((evento) => (
-            <EventoCard
-                imagen={evento.img_eve}
-                titulo={evento.nom_eve}
-                estado={evento.asignaciones}
-                horas={evento.dur_eve}
-            />
-        ))
-    }
+  {
+    listaEventos.length > 0 ? (
+      listaEventos.map((evento) => (
+        <EventoCard
+          imagen={evento.img_eve}
+          titulo={evento.nom_eve}
+          estado={evento.asignaciones?.length?.toString() || "0"}
+          horas={evento.dur_eve ?? 0}
+        />
+      ))
+    ) : (
+  <div class="sin-resultados">
+  <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+    <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
+    <circle cx="22" cy="24" r="4" fill="#8A1538"/>
+    <circle cx="42" cy="24" r="4" fill="#8A1538"/>
+    <path d="M22 44c2.5-4 9.5-4 12 0" stroke="#8A1538" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>
+  <p class="titulo-vacio">¡Ups! No se encontraron resultados</p>
+  <p class="texto-vacio">Prueba cambiando los filtros o ajustando tu búsqueda</p>
+</div>
+    )
+  }
 </div>
 
 <style>
-    .contenedor {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-    }
+.contenedor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 300px); /* reemplaza auto-fit + minmax */
+  place-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+
+.card {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+
+
+.sin-resultados {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #444;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #fff7f7;
+  border: 1px solid #f3dada;
+  border-radius: 12px;
+}
+
+.icono-vacio {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  opacity: 0.85;
+}
+
+.titulo-vacio {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #8A1538;
+  margin-bottom: 8px;
+}
+
+.texto-vacio {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0;
+}
+
+
 </style>
+
+

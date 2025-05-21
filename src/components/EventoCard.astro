@@ -14,15 +14,18 @@ const { imagen, estado, horas, titulo } = Astro.props;
 </div>
 
 <style>
-  .card {
-    width: 300px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    background-color: white;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    font-family: 'Segoe UI', sans-serif;
-  }
+.card {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto; 
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Segoe UI', sans-serif;
+}
+
 
   .card:hover {
     transform: translateY(-4px);
