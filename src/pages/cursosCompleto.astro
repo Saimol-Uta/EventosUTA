@@ -19,28 +19,41 @@ const filtros = {
   <Filtros />
 
   <section class="seccion-principal">
+    <h2 class="titulo-seccion">EVENTOS</h2>
+
+    {(filtros.categoria || filtros.duracion) && (
+      <div class="filtros-activos">
+        <span class="titulo-filtros"> Filtros aplicados:</span>
+
+        {filtros.categoria && (
+          <span class="filtro-tag">
+            Categoría: <strong>{filtros.categoria}</strong>
+            <button class="cerrar-filtro" onclick="quitarFiltro('categoria')">×</button>
+          </span>
+        )}
+
+        {filtros.duracion && (
+          <span class="filtro-tag">
+            Duración: <strong>{filtros.duracion}</strong>
+            <button class="cerrar-filtro" onclick="quitarFiltro('duracion')">×</button>
+          </span>
+        )}
+
+        <a href="/cursosCompleto" class="btn-limpiar-filtros">Ver todos los cursos</a>
+      </div>
+    )}
+
     <div class="buscador">
       <input type="text" placeholder="Buscar evento" class="input-busqueda" />
       <button class="btn-buscar">🔍</button>
     </div>
-
-    <h2 class="titulo-seccion">EVENTOS</h2>
-
-    <!-- ✅ Mostrar filtros activos -->
-    {(filtros.categoria || filtros.duracion) && (
-      <div class="filtros-activos">
-        <strong>Filtros aplicados:</strong>
-        {filtros.categoria && <span class="filtro-tag">Categoría: {filtros.categoria}</span>}
-        {filtros.duracion && <span class="filtro-tag">Duración: {filtros.duracion}</span>}
-        <a href="/cursosCompleto" class="btn-limpiar-filtros">Limpiar filtros</a>
-      </div>
-    )}
 
     <!-- ✅ Pasar filtros al componente de eventos -->
     <ContenedorEventos filtros={filtros} />
   </section>
 </Layout>
 
+<!-- ✅ Estilos -->
 <style>
   .seccion-principal {
     padding: 20px 40px;
@@ -82,31 +95,65 @@ const filtros = {
   }
 
   .filtros-activos {
-    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    background-color: #f9f9f9;
+    padding: 12px 18px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 16px;
     font-size: 0.95rem;
-    color: #444;
+    color: #333;
   }
 
   .filtro-tag {
-    display: inline-block;
-    background-color: #f3f3f3;
-    color: #8A1538;
-    border-radius: 5px;
-    padding: 4px 10px;
-    margin-left: 10px;
+    background-color: #fff;
+    border: 1px solid #8a1538;
+    border-radius: 20px;
+    padding: 6px 14px;
+    color: #8a1538;
+    font-size: 0.85rem;
+  }
+
+  .titulo-filtros {
+    font-weight: 600;
+    color: #5a1e1e;
   }
 
   .btn-limpiar-filtros {
-    margin-left: 10px;
-    color: #8A1538;
-    text-decoration: underline;
-    font-size: 0.9rem;
-    cursor: pointer;
+    margin-left: auto;
+    color: #8a1538;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    transition: background 0.2s ease;
   }
 
   .btn-limpiar-filtros:hover {
-    text-decoration: none;
+    background-color: #e4e4e4;
+  }
+
+  .cerrar-filtro {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #8a1538;
+    margin-left: 8px;
+    cursor: pointer;
+    padding: 0;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .cerrar-filtro:hover {
+    color: #c30000;
   }
 </style>
 
-<script src="/js/buscador.js" defer></script>
+<!-- ✅ Script único centralizado -->
+<script src="/js/filtros.js" defer></script>
