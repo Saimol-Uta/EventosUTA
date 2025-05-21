@@ -13,14 +13,18 @@ const listaEventos = (data?.eventos || []) as Eventos[];
 
 <div class="contenedor">
   {
-    listaEventos.map((evento) => (
-      <EventoCard
-        imagen={evento.img_eve}
-        titulo={evento.nom_eve}
-        estado={evento.asignaciones?.length?.toString() || "0"}
-        horas={evento.dur_eve ?? 0}
-      />
-    ))
+    listaEventos.length > 0 ? (
+      listaEventos.map((evento) => (
+        <EventoCard
+          imagen={evento.img_eve}
+          titulo={evento.nom_eve}
+          estado={evento.asignaciones?.length?.toString() || "0"}
+          horas={evento.dur_eve ?? 0}
+        />
+      ))
+    ) : (
+      <p class="sin-resultados">No hay eventos que coincidan con los filtros seleccionados.</p>
+    )
   }
 </div>
 
@@ -30,5 +34,14 @@ const listaEventos = (data?.eventos || []) as Eventos[];
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
   }
+
+  .sin-resultados {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #888;
+    margin-top: 2rem;
+  }
 </style>
+
 

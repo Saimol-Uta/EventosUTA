@@ -26,6 +26,16 @@ const filtros = {
 
     <h2 class="titulo-seccion">EVENTOS</h2>
 
+    <!-- ✅ Mostrar filtros activos -->
+    {(filtros.categoria || filtros.duracion) && (
+      <div class="filtros-activos">
+        <strong>Filtros aplicados:</strong>
+        {filtros.categoria && <span class="filtro-tag">Categoría: {filtros.categoria}</span>}
+        {filtros.duracion && <span class="filtro-tag">Duración: {filtros.duracion}</span>}
+        <a href="/cursosCompleto" class="btn-limpiar-filtros">Limpiar filtros</a>
+      </div>
+    )}
+
     <!-- ✅ Pasar filtros al componente de eventos -->
     <ContenedorEventos filtros={filtros} />
   </section>
@@ -70,8 +80,33 @@ const filtros = {
     color: #a10000;
     margin-bottom: 20px;
   }
+
+  .filtros-activos {
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: #444;
+  }
+
+  .filtro-tag {
+    display: inline-block;
+    background-color: #f3f3f3;
+    color: #8A1538;
+    border-radius: 5px;
+    padding: 4px 10px;
+    margin-left: 10px;
+  }
+
+  .btn-limpiar-filtros {
+    margin-left: 10px;
+    color: #8A1538;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .btn-limpiar-filtros:hover {
+    text-decoration: none;
+  }
 </style>
 
 <script src="/js/buscador.js" defer></script>
-
-

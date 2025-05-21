@@ -6,15 +6,15 @@
         Categorías <span class="flecha">▼</span>
       </button>
       <ul id="cat-list" class="submenu">
-<li data-filter-type="categoria" data-filter-value="TECNICA">TÉCNICA</li>
-<li data-filter-type="categoria" data-filter-value="INDUSTRIAL">INDUSTRIAL</li>
-<li data-filter-type="categoria" data-filter-value="INVESTIGACION">INVESTIGACIÓN</li>
-<li data-filter-type="categoria" data-filter-value="REDES">REDES</li>
-<li data-filter-type="categoria" data-filter-value="EMPRESARIAL">EMPRESARIAL</li>
-<li data-filter-type="categoria" data-filter-value="ACADEMICA">ACADÉMICA</li>
-<li data-filter-type="categoria" data-filter-value="PRACTICA">PRÁCTICA</li>
-<li data-filter-type="categoria" data-filter-value="IA">IA</li>
-</ul>
+        <li data-filter-type="categoria" data-filter-value="TECNICA">TÉCNICA</li>
+        <li data-filter-type="categoria" data-filter-value="INDUSTRIAL">INDUSTRIAL</li>
+        <li data-filter-type="categoria" data-filter-value="INVESTIGACION">INVESTIGACIÓN</li>
+        <li data-filter-type="categoria" data-filter-value="REDES">REDES</li>
+        <li data-filter-type="categoria" data-filter-value="EMPRESARIAL">EMPRESARIAL</li>
+        <li data-filter-type="categoria" data-filter-value="ACADEMICA">ACADÉMICA</li>
+        <li data-filter-type="categoria" data-filter-value="PRACTICA">PRÁCTICA</li>
+        <li data-filter-type="categoria" data-filter-value="IA">IA</li>
+      </ul>
     </li>
 
     <!-- CARRERAS -->
@@ -32,19 +32,20 @@
       </ul>
     </li>
 
-<!-- DURACIÓN -->
-<li>
-  <button class="btn-filtro" data-target="dur-list">
-    Duración <span class="flecha">▼</span>
-  </button>
-  <ul id="dur-list" class="submenu">
-  <li data-filter-type="duracion" data-filter-value="Menos de 5 horas">Menos de 5 horas</li>
-  <li data-filter-type="duracion" data-filter-value="De 5 a 30 horas">De 5 a 30 horas</li>
-  <li data-filter-type="duracion" data-filter-value="De 30 a 60 horas">De 30 a 60 horas</li>
-  <li data-filter-type="duracion" data-filter-value="Más de 60 horas">Más de 60 horas</li>
-</ul>
-</li>
-
+    <!-- DURACIÓN -->
+    <li>
+      <button class="btn-filtro" data-target="dur-list">
+        Duración <span class="flecha">▼</span>
+      </button>
+      <ul id="dur-list" class="submenu">
+        <li data-filter-type="duracion" data-filter-value="Menos de 5 horas">Menos de 5 horas</li>
+        <li data-filter-type="duracion" data-filter-value="De 5 a 30 horas">De 5 a 30 horas</li>
+        <li data-filter-type="duracion" data-filter-value="De 30 a 60 horas">De 30 a 60 horas</li>
+        <li data-filter-type="duracion" data-filter-value="Más de 60 horas">Más de 60 horas</li>
+      </ul>
+    </li>
+  </ul>
+</nav>
 
 <style>
   .filtros {
@@ -120,8 +121,10 @@
     cursor: pointer;
   }
 
-  .submenu li:hover {
+  .submenu li:hover,
+  .submenu li.activo {
     color: #9e1c1c;
+    font-weight: bold;
   }
 
   .submenu.show {
@@ -140,11 +143,7 @@
         event.stopPropagation();
         const targetId = button.getAttribute('data-target');
         submenus.forEach(menu => {
-          if (menu.id === targetId) {
-            menu.classList.toggle('show');
-          } else {
-            menu.classList.remove('show');
-          }
+          menu.classList.toggle('show', menu.id === targetId);
         });
       });
     });
@@ -160,18 +159,28 @@
       }
     });
 
-    // Actualizar URL al hacer clic en una opción de filtro
-document.querySelectorAll('.submenu li').forEach(item => {
-  item.addEventListener('click', () => {
-    const tipo = item.getAttribute('data-filter-type');
-    const valor = item.getAttribute('data-filter-value');
+    // Actualizar URL combinando filtros sin borrar otros
+    document.querySelectorAll('.submenu li').forEach(item => {
+      item.addEventListener('click', () => {
+        const tipo = item.getAttribute('data-filter-type');
+        const valor = item.getAttribute('data-filter-value');
 
-    if (tipo && valor) { // ✅ Asegura que no sean null
-      const url = new URL(window.location.href);
-      url.searchParams.set(tipo, valor);
-      window.location.href = url.toString();
-    }
-  });
+        if (tipo && valor) {
+          const url = new URL(window.location.href);
+          url.searchParams.set(tipo, valor);
+          window.location.href = url.toString();
+        }
+      });
+    });
+
+    // ✅ Marcar visualmente los filtros activos
+    const params = new URLSearchParams(window.location.search);
+document.querySelectorAll('.submenu li').forEach(item => {
+  const tipo = item.getAttribute('data-filter-type');
+  const valor = item.getAttribute('data-filter-value');
+  if (tipo && valor && params.get(tipo) === valor) {
+    item.classList.add('activo');
+  }
 });
   });
 </script>
