@@ -73,23 +73,20 @@ import Menu from '../components/ComponenteMenuConfiguraciones.astro';
 }
 
 .icon {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: auto;
   user-select: none;
   pointer-events: none;
   flex-shrink: 0;
+  fill: #ad272e;
+  margin-right: 8px;
+  transform: scaleY(-1);
 }
 
 .text {
   user-select: none;
 }
-.icon {
-  width: 32px;
-  height: auto;
-  fill: #ad272e;
-  margin-right: 8px;
-  transform: scaleY(-1);
-}
+/* Removed duplicate .icon block */
 
 /* 📱 Responsive */
 @media (max-width: 768px) {
