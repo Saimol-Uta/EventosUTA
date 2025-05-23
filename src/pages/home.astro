@@ -1,7 +1,7 @@
 ---
 import Header from "../components/Header.astro";
 import NavBar from "../components/Navbar.astro";
-import { prisma } from "../db";
+import prisma from "../db";
 const carreras = await prisma.carreras.findMany();
 
 console.log(carreras);
