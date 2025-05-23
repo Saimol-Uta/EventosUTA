@@ -94,3 +94,46 @@
         </div>
     </body>
 </html>
+<script>
+
+    import Swal from "sweetalert2";
+    const { signIn } = await import("auth-astro/client");
+    const form = document.querySelector("form") as HTMLFormElement;
+    const btnSubmit = document.querySelector("#btn-submit",) as HTMLButtonElement;
+    form.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+        btnSubmit.setAttribute("disabled", "disabled");
+
+        const formData = new FormData(form);
+        // const { error } = await actions.loginUser.safe(formData);
+
+        const resp = await signIn("credentials",{
+
+                email: formData.get("email") as string,
+                password: formData.get("password") as string,
+            }, // Segundo argumento vacío si no hay opciones válidas
+        );
+
+        console.log({ resp });
+
+        if (resp) {
+
+            Swal.fire({
+
+                icon: "error",
+                title: "Error al ingresar",
+                // text: error.message,
+                text: "Usuario / Contraseña no son correctos",
+
+            });
+
+            btnSubmit.removeAttribute("disabled");
+            return;
+
+        }
+
+        window.location.replace("/");
+    });
+
+</script>
