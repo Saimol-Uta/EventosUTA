@@ -81,70 +81,96 @@
 
     <div class="login-container">
       <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
-      <form>
-        <input type="text" placeholder="Nombre" required />
-        <input type="text" placeholder="Apellido" required />
-        <input type="text" placeholder="Correo" required />
-        <input type="password" placeholder="Contraseña" required />
-        <input type="date" id="fechNac" required />
+      <form id="registroForm">
+        <input type="text" name="nombre" placeholder="Nombre" required />
+        <input type="text" name="apellido" placeholder="Apellido" required />
+        <input type="email" name="correo" placeholder="Correo" required />
+        <input type="password" name="contrasena" placeholder="Contraseña" required />
+        <input type="date" id="fechNac" name="fechNac" required />
         <p id="edadResultado"></p>
         <button type="submit">Registrarse</button>
         <p>¿Ya tiene una cuenta?</p>
         <a href="/login">Inicia sesión aquí</a>
       </form>
     </div>
+   <script>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const fechaInput = document.getElementById("fechNac");
-    const edadResultado = document.getElementById("edadResultado");
+    import { actions } from 'astro:actions';
 
-    if (!fechaInput || !edadResultado) return;
+      document.addEventListener("DOMContentLoaded", () => {
+        const fechaInput = document.getElementById("fechNac");
+        const edadResultado = document.getElementById("edadResultado");
+        const form = document.getElementById("registroForm") as HTMLFormElement;
 
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = (hoy.getMonth() + 1).toString().padStart(2, "0");
-    const dia = hoy.getDate().toString().padStart(2, "0");
-    const fechaMin = `${año - 100}-${mes}-${dia}`;
-    const fechaMax = `${año - 18}-12-31`; ;
+        if (!fechaInput || !edadResultado || !form) return;
 
-    fechaInput.setAttribute("min", fechaMin);
-    fechaInput.setAttribute("max", fechaMax);
+        const hoy = new Date();
+        const año = hoy.getFullYear();
+        const mes = (hoy.getMonth() + 1).toString().padStart(2, "0");
+        const dia = hoy.getDate().toString().padStart(2, "0");
+        const fechaMin = `${año - 100}-${mes}-${dia}`;
+        const fechaMax = `${año - 18}-12-31`;
 
-fechaInput.addEventListener("change", (e) => {
-  const input = e.target as HTMLInputElement;
-  const valorFecha = input.value;
+        fechaInput.setAttribute("min", fechaMin);
+        fechaInput.setAttribute("max", fechaMax);
 
-      if (!valorFecha) {
-        edadResultado.textContent = "";
-        return;
-      }
+        fechaInput.addEventListener("change", (e) => {
+          const input = e.target as HTMLInputElement;
+          const valorFecha = input.value;
 
-      const nacimiento = new Date(valorFecha);
-      if (isNaN(nacimiento.getTime())) {
-        edadResultado.textContent = "Fecha inválida.";
-        edadResultado.style.color = "red";
-        return;
-      }
+          if (!valorFecha) {
+            edadResultado.textContent = "";
+            return;
+          }
 
-      const hoy = new Date();
-      let edad = hoy.getFullYear() - nacimiento.getFullYear();
-      const m = hoy.getMonth() - nacimiento.getMonth();
-      if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-        edad--;
-      }
+          const nacimiento = new Date(valorFecha);
+          if (isNaN(nacimiento.getTime())) {
+            edadResultado.textContent = "Fecha inválida.";
+            edadResultado.style.color = "red";
+            return;
+          }
 
-      if (edad < 18) {
-        edadResultado.textContent = "Debe tener al menos 18 años.";
-        edadResultado.style.color = "red";
-      } else {
-        //si la edad es valida luego que se haya ingresado una edad invalida la edad el texto con el mensaje de error se desaparece
-        edadResultado.textContent = "";
-        
-      }
-    });
-  });
-</script>
+          let edad = hoy.getFullYear() - nacimiento.getFullYear();
+          const m = hoy.getMonth() - nacimiento.getMonth();
+          if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+            edad--;
+          }
 
+          if (edad < 18) {
+            edadResultado.textContent = "Debe tener al menos 18 años.";
+            edadResultado.style.color = "red";
+          } else {
+            edadResultado.textContent = "";
+          }
+        });
+
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+
+          // Validaciones previas aquí...
+
+          const formData = new FormData(form);
+          const obj = Object.fromEntries(formData.entries());
+
+          const cleanedObj = Object.fromEntries(
+            Object.entries(obj).map(([key, value]) => [key, String(value)])
+          ) as {
+            nombre: string;
+            apellido: string;
+            correo: string;
+            contrasena: string;
+            fechNac: string;
+          };
+
+          const { data, error } = await actions.SignIn(cleanedObj);
+
+          if (error) {
+            alert(error.message || 'Error en el registro');
+          } else {
+            window.location.href = '/';
+          }
+        });
+      });
+    </script>
   </body>
 </html>

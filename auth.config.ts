@@ -1,5 +1,4 @@
 import { defineConfig } from 'auth-astro';
-import Google from '@auth/core/providers/google';
 import Credentials from '@auth/core/providers/credentials';
 import prisma from './src/db';
 import type { AdapterUser } from '@auth/core/adapters';
@@ -66,7 +65,42 @@ export default defineConfig({
     },
 
     callbacks: {
+        async signIn({ user, account }) {
+            try {
+                // Solo queda validación para provider de tipo 'credentials'
+                if (!account) {
+                    return '/';
+                }
+                return true;
+            } catch (error) {
+                console.error('Error en signIn:', error);
+                return '/';
+            }
+        },
 
-   
+        async jwt({ token, user, account }) {
+            if (user && account?.provider === 'credentials') {
+                token.user = {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    rol: (user as any).rol, // usando `as any` para evitar el error
+                };
+                token.userId = user.id;
+                token.rol = (user as any).rol;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token?.user) {
+                session.user = {
+                    ...session.user,
+                    ...(token.user as any),  // ← evitamos error por propiedades extra
+                    rol: token.rol as string,
+                    id: token.userId as string,
+                } as any;  // ← evita error por propiedades adicionales
+            }
+            return session;
+        }
     }
 });
