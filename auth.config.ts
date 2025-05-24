@@ -62,14 +62,24 @@ export default defineConfig({
 
     callbacks: {
         async signIn({ user, account }) {
-            if (!user || !account) return false;
+        if (!user || !account) return false;
 
-            // Si el login es con credenciales y todo es correcto:
-            if (account.provider === "credentials") {
-            return '/';
+        if (account.provider === "credentials") {
+            const rol = (user as any).rol;
+
+            if (rol === 'USUARIO' || rol === 'ESTUDIANTE') {
+            return '/homeUser';
             }
 
-            return true;
+            if (rol === 'ADMINISTRADOR' || rol === 'MASTER') {
+            return '/homeAdmin';
+            }
+
+            // Redirección por defecto si el rol no coincide
+            return '/';
+        }
+
+        return true;
         },
 
         async jwt({ token, user, account }) {
