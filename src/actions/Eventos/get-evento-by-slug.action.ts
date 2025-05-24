@@ -20,7 +20,7 @@ export const getEventoBySlug = defineAction({
         });
 
         if (!evento) {
-            throw new Error('Evento not found');
+            throw new Error('Evento no encontrado');
         }
 
         return {
