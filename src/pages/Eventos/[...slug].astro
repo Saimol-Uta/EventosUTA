@@ -3,6 +3,7 @@ import Header from "../../components/Header.astro";
 import Layout from "../../layouts/Layout.astro";
 import Navbar from "../../components/Navbar.astro";
 import { actions } from "astro:actions";
+import "../../styles/global.css";
 
 interface Props {
     title?: string;
@@ -49,6 +50,14 @@ const { evento, requisitos, organizador } = data;
     <h2 style="text-align: center; margin-bottom: 1rem;">
         Curso: <span style="font-weight: 600;">{evento.nom_eve}</span>
     </h2>
+
+    <div class="flex justify-center mb-8">
+        <img
+            src={evento.img_eve}
+            alt="Imagen del evento"
+            class="w-full max-w-xl h-auto rounded-lg shadow-lg"
+        />
+    </div>
 
     <p
         style="text-align: center; color: #555; font-size: 15px; margin-bottom: 2rem;"
@@ -124,21 +133,10 @@ const { evento, requisitos, organizador } = data;
         </p>
     </div>
 
-    <div style="text-align: center; margin-bottom: 2rem;">
+    <div class="text-center mb-8">
         <a
-            href="#"
-            style="
-      background-color: #a00;
-      color: white;
-      padding: 12px 30px;
-      font-size: 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      transition: background-color 0.3s ease;
-    "
+            href={`/Eventos/Evento-Inscipcion/${slug}`}
+            class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
         >
             Registrarme en el curso
         </a>
