@@ -7,7 +7,6 @@ const { filtros = {} } = Astro.props;
 
 const { data, error } = await Astro.callAction(getEventosFiltrados, filtros);
 
-// ✅ Solución segura: forzar el tipo del array
 const listaEventos = (data?.eventos || []) as Eventos[];
 ---
 
