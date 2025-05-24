@@ -48,12 +48,17 @@ if (idUsuario) {
     </div>
   </div>
   <div class="w-full md:w-3/4 flex flex-col gap-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
       <Card title="Eventos Próximos">
-        {upcomingEvents.map(e => <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {e}</div>)}
+       <div class="flex flex-col gap-y-4">
+    {upcomingEvents.map(e => 
+      <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">{e}</div> )}
+      </div> 
       </Card>
       <Card title="Certificados">
+         <div class="flex flex-col gap-y-4">
         {certificates.map(c =><div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {c}</div>)}
+        </div> 
       </Card>
     </div>
     <h1 >Historial de Eventos</h1>

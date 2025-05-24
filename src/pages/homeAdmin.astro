@@ -2,7 +2,6 @@
 import Header from "../components/HeaderUsuario.astro";
 import NavBar from "../components/Navbar.astro";
 import MenuAdmin from "../components/MenuAdministrador.astro"
-import ContenedorEvento from "../components/ContenedorEvento.astro";
 import Avatar from '../components/Avatar.astro';
 import Button from '../components/Button.astro';
 import DocumentButton from '../components/DocumentButton.astro';
@@ -17,8 +16,8 @@ const links = [
      { label: 'Carreras', href: '/historial' },
 ];
 
-const upcomingEvents = ["Evento 1", "Evento 2", "Evento 3"];
-const inscripcionesPendientes = ["Inscripción 1", "Inscripción 2", "Incripción 3", "Incripción 4", "Incripción 5"];
+const upcomingEvents = ["Evento 1", "Evento 2", "Evento 3", "Evento 4"];
+const inscripcionesPendientes = ["Inscripción 1", "Inscripción 2", "Incripción 3", "Incripción 4"];
 ---
 <html lang="es">
     <head>
@@ -42,18 +41,22 @@ const inscripcionesPendientes = ["Inscripción 1", "Inscripción 2", "Incripció
     </div>
   </div>
   <div class="w-full md:w-3/4 flex flex-col gap-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
         <Card title="Inscripciones Pendientes ">
+            <div class="flex flex-col gap-y-4">
         {inscripcionesPendientes.map(c =><div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {c}</div>)}
+        </div>
       </Card>
       <Card title="Eventos Próximos">
-        {upcomingEvents.map(e => <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {e}</div>)}
+        <div class="flex flex-col gap-y-4">
+    {upcomingEvents.map(e => 
+      <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">{e}</div>
+    )}
       </Card>
     </div>
-    <h1 >Historial de Eventos</h1>
-      <ContenedorEvento />
   </div>
 </div>
 
     </body>
 </html>
+
