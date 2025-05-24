@@ -245,7 +245,7 @@
                 title: swalTitle,
                 html: errorMessagesToShow.join('<br/>'),
                 confirmButtonColor: '#a00',
-                heightAuto: false // <-- AÑADIDO
+                heightAuto: false
               }).then(() => {
                 submitButton.disabled = false;
               });
@@ -256,7 +256,7 @@
                 title: 'Error en el registro',
                 text: response.error.message,
                 confirmButtonColor: '#a00',
-                heightAuto: false // <-- AÑADIDO
+                heightAuto: false
               }).then(() => {
                 submitButton.disabled = false;
               });
@@ -268,9 +268,9 @@
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false,
-                heightAuto: false, // <-- AÑADIDO
+                heightAuto: false,
                 willClose: () => {
-                  window.location.href = '/'; 
+                  window.location.href = '/login'; 
                 }
               });
             } else {
@@ -279,7 +279,7 @@
                 title: 'Respuesta del servidor no reconocida',
                 text: 'La estructura de la respuesta no fue la esperada.',
                 confirmButtonColor: '#a00',
-                heightAuto: false // <-- AÑADIDO
+                heightAuto: false
               }).then(() => {
                 submitButton.disabled = false;
               });
@@ -291,7 +291,7 @@
               title: 'Error de conexión',
               text: e.message || 'No se pudo conectar con el servidor. Inténtalo de nuevo.',
               confirmButtonColor: '#a00',
-              heightAuto: false // <-- AÑADIDO
+              heightAuto: false
             }).then(() => {
                 submitButton.disabled = false;
             });

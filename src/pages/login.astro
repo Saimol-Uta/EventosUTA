@@ -1,5 +1,4 @@
 ---
-// No necesitas script aquí, es solo estático
 ---
 
 <html lang="es">
@@ -111,7 +110,7 @@
             title: "Error al ingresar",
             text: "Usuario / Contraseña no son correctos",
             confirmButtonColor: '#a00',
-            heightAuto: false, // <-- AÑADIDO
+            heightAuto: false,
         });
         }
     });
@@ -132,8 +131,6 @@
                 email: formData.get("email"),
                 password: formData.get("password"),
             });
-
-            // No manejamos nada aquí porque redirige automáticamente.
         });
     });
 </script>

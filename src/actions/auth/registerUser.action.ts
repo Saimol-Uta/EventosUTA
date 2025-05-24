@@ -1,5 +1,5 @@
 import { defineAction } from 'astro:actions';
-import prisma from '../../db'; // Asegúrate que la ruta a prisma sea correcta
+import prisma from '../../db';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
@@ -23,7 +23,7 @@ export const SignIn = defineAction({
       }, { message: "Debes ser mayor de 18 años para registrarte." }),
   }),
   handler: async (input) => {
-    // 'input' ya está validado por Zod.
+
     const { nombre, apellido, correo, contrasena, fechNac } = input;
 
     try {
@@ -44,6 +44,7 @@ export const SignIn = defineAction({
       const ape_usu2 = ape_usu2Rest.join(' ');
 
       const hashedPassword = await bcrypt.hash(contrasena, 10);
+      const rolAsignado = correo.endsWith('@uta.edu.ec') ? 'ESTUDIANTE' : 'USUARIO';
 
       // Transacción para crear usuario y cuenta asegurando atomicidad.
       const result = await prisma.$transaction(async (tx) => {
@@ -65,7 +66,7 @@ export const SignIn = defineAction({
           data: {
             cor_cue: correo,
             cont_cuenta: hashedPassword,
-            rol_cue: 'USUARIO',
+            rol_cue: rolAsignado,
             id_usu_per: usuario.id_usu,
             // Campos opcionales o a completar después:
             // enl_ced_cue: usuario.ced_usu,
@@ -80,7 +81,7 @@ export const SignIn = defineAction({
 
     } catch (error: any) {
       console.error('Error en registro (action):', error);
-      return { // Este objeto completo será 'response' en el cliente
+      return { 
         success: false,
         error: { message: error.message || 'Error interno del servidor.' }
       };

@@ -22,8 +22,10 @@ let success = false;
 
 if (idUsuario) {
   const result = await getEventosPorUsuario({ idUsuario });
-  success = result.success;
-  eventos = result.eventos || [];
+  if (result && result.data) {
+    success = result.data.success;
+    eventos = result.data.eventos || [];
+  }
 }
 
 ---

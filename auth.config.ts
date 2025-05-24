@@ -34,14 +34,13 @@ export default defineConfig({
                     return null;
                 }
 
-                // 👇 Aquí comparas la contraseña enviada con la almacenada
                 const isValid = await bcrypt.compare(credentials.password, user.cont_cuenta);
                 if (!isValid) {
                     console.log('Contraseña incorrecta');
                     return null;
                 }
 
-                // 👇 Devolver usuario válido
+                //Devolver usuario válido
                 return {
                     id: user.id_cue,
                     email: user.cor_cue,
@@ -67,7 +66,7 @@ export default defineConfig({
 
             // Si el login es con credenciales y todo es correcto:
             if (account.provider === "credentials") {
-            return '/';  // 👈 Esto forzará la redirección a /
+            return '/';
             }
 
             return true;
@@ -79,7 +78,7 @@ export default defineConfig({
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                    rol: (user as any).rol, // usando `as any` para evitar el error
+                    rol: (user as any).rol,
                 };
                 token.userId = user.id;
                 token.rol = (user as any).rol;
@@ -90,10 +89,10 @@ export default defineConfig({
             if (token?.user) {
                 session.user = {
                     ...session.user,
-                    ...(token.user as any),  // ← evitamos error por propiedades extra
+                    ...(token.user as any),
                     rol: token.rol as string,
                     id: token.userId as string,
-                } as any;  // ← evita error por propiedades adicionales
+                } as any;
             }
             return session;
         }
