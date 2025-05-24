@@ -1,62 +1,66 @@
 ---
-// src/components/EventoCard.astro
-const { imagen, estado, horas, titulo } = Astro.props;
+import "../styles/global.css";
+const { imagen, estado, horas, titulo, slug } = Astro.props;
 ---
-<div class="card" data-titulo={titulo.toLowerCase()}>
-  <img src={imagen} alt="Imagen del evento" />
-  <div class="info">
-    <div class="row">
-      <span>{estado}</span>
-      <span>{horas}</span>
+
+<a class="card" href={`/Eventos/${slug}`}>
+    <div class="card" data-titulo={titulo.toLowerCase()}>
+        <img src={imagen} alt="Imagen del evento" />
+        <div class="info">
+            <div class="row">
+                <span>{estado}</span>
+                <span>{horas}</span>
+            </div>
+            <div class="titulo">{titulo}</div>
+        </div>
     </div>
-    <div class="titulo">{titulo}</div>
-  </div>
-</div>
+</a>
 
 <style>
-.card {
-  width: 100%;
-  max-width: 300px;
-  margin: 0 auto; 
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  background-color: white;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  font-family: 'Segoe UI', sans-serif;
-}
+    .card {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+        font-family: "Segoe UI", sans-serif;
+    }
 
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+    }
 
-  .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  }
+    .card img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+    }
 
-  .card img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-  }
+    .info {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
 
-  .info {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+    .row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #171717;
+        font-weight: 500;
+    }
 
-  .row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    color: #171717;
-    font-weight: 500;
-  }
-
-  .titulo {
-    color: #8B0000;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-  }
+    .titulo {
+        color: #8b0000;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+    }
 </style>

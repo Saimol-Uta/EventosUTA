@@ -1,5 +1,7 @@
-import { getEventos } from './Eventos/getEventos';
+import { getEventoBySlug, getEventos } from './Eventos';
+
 
 export const server = {
-    getEventos
+    getEventos,
+    getEventoBySlug
 };

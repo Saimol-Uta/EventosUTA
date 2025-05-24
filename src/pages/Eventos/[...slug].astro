@@ -1,0 +1,144 @@
+---
+import Header from "../../components/Header.astro";
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import { actions } from "astro:actions";
+import "../../styles/global.css";
+
+interface Props {
+    title?: string;
+    category?: string;
+    description?: string;
+    location?: string;
+    duration?: string;
+    startDate?: string;
+    endDate?: string;
+    targetAudience?: string[];
+    requirements?: string[];
+    organizer?: string;
+    image?: string;
+    slug: string;
+}
+
+const { slug } = Astro.params;
+
+const { data, error } = await Astro.callAction(
+    actions.getEventoBySlug,
+    slug ?? "",
+);
+
+if (error) {
+    return Astro.redirect("/404");
+}
+
+const { evento, requisitos, organizador } = data;
+---
+
+<Layout>
+    <Header />
+    <Navbar />
+</Layout>
+
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"
+>
+</div>
+
+<section
+    style="max-width: 1000px; margin: auto; padding: 2rem; font-family: Arial, sans-serif;"
+>
+    <h2 style="text-align: center; margin-bottom: 1rem;">
+        Curso: <span style="font-weight: 600;">{evento.nom_eve}</span>
+    </h2>
+
+    <div class="flex justify-center mb-8">
+        <img
+            src={evento.img_eve}
+            alt="Imagen del evento"
+            class="w-full max-w-xl h-auto rounded-lg shadow-lg"
+        />
+    </div>
+
+    <p
+        style="text-align: center; color: #555; font-size: 15px; margin-bottom: 2rem;"
+    >
+        <strong>Categoría del evento:</strong>
+        {evento.categorias_eventos.nom_cat}
+    </p>
+
+    <div
+        style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;"
+    >
+        <strong style="display: block; margin-bottom: 0.5rem;"
+            >Descripción del curso:</strong
+        >
+        <p style="margin: 0;">
+            {evento.des_eve}
+        </p>
+    </div>
+
+    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+        <div style="flex: 1;">
+            <strong>Lugar de celebración:</strong>
+            <p>{evento.ubi_eve}</p>
+        </div>
+        <div style="flex: 1;">
+            <strong>Duración:</strong>
+            <p>{evento.dur_eve}</p>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+        <div style="flex: 1;">
+            <strong>Fecha de inicio:</strong>
+            <p>{evento.fec_ini_eve}</p>
+        </div>
+        <div style="flex: 1;">
+            <strong>Fecha de finalización:</strong>
+            <p>{evento.fec_fin_eve}</p>
+        </div>
+    </div>
+
+    <div
+        style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;"
+    >
+        <strong style="display: block; margin-bottom: 0.5rem;"
+            >Dirigido a:</strong
+        >
+        <ul style="margin: 0; padding-left: 1.5rem;">
+            {
+                evento.asignaciones.map((asignacion) => (
+                    <li>{asignacion.nom_asi}</li>
+                ))
+            }
+        </ul>
+    </div>
+    <div
+        style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;"
+    >
+        <strong style="display: block; margin-bottom: 0.5rem;"
+            >Requisitos para ingresar al grupo:</strong
+        >
+        <ul style="margin: 0; padding-left: 1.5rem;">
+            {requisitos.map((requisito) => <li>{requisito.nom_req}</li>)}
+        </ul>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+        <strong>Organizador:</strong>
+        <p>
+            {evento.organizadores.tit_aca_org}.
+            {evento.organizadores.nom_org1}{evento.organizadores.nom_org2}
+            {evento.organizadores.ape_org1}{evento.organizadores.ape_org2}
+        </p>
+    </div>
+
+    <div class="text-center mb-8">
+        <a
+            href={`/Eventos/Evento-Inscipcion/${slug}`}
+            class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
+        >
+            Registrarme en el curso
+        </a>
+    </div>
+</section>
