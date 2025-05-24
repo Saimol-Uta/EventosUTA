@@ -2,7 +2,11 @@
 import Header from "../components/HeaderUsuario.astro";
 import NavBar from "../components/Navbar.astro";
 import MenuAdmin from "../components/MenuAdministrador.astro"
-import InfoCard from "../components/ContenedorSimple.astro"
+import ContenedorEvento from "../components/ContenedorEvento.astro";
+import Avatar from '../components/Avatar.astro';
+import Button from '../components/Button.astro';
+import DocumentButton from '../components/DocumentButton.astro';
+import Card from '../components/Card.astro';
 
 const links = [
   { label: 'Eventos', href: '/' },
@@ -13,7 +17,10 @@ const links = [
      { label: 'Carreras', href: '/historial' },
 ];
 
----<html lang="es">
+const upcomingEvents = ["Evento 1", "Evento 2", "Evento 3"];
+const inscripcionesPendientes = ["Inscripción 1", "Inscripción 2", "Incripción 3", "Incripción 4", "Incripción 5"];
+---
+<html lang="es">
     <head>
         <meta charset="UTF-8" />
     </head>
@@ -21,21 +28,32 @@ const links = [
         <Header />
         <NavBar />
         <MenuAdmin links={links}/>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <InfoCard title="Usuarios Registrados" value="1240" icon="👥" />
-      <InfoCard title="Eventos Creados" value="48" icon="🗓️" />
-      <InfoCard title="Notificaciones Pendientes" value="5" icon="🔔" />
-      <InfoCard title="Reportes de Sistema" value="3" icon="📊" />
+           
+        <div class="flex flex-col md:flex-row gap-6 p-6">
+  <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
+    <Avatar />
+    <p class="text-red-800">Usuario</p>
+    <Button text="Editar Perfil" />
+    <div class="text-center mt-4 text-red-800">Documentos</div>
+    <div class="flex gap-2 mt-2">
+      <DocumentButton label="pdf cedula" />
+      <DocumentButton label="pdf matric" />
+      <DocumentButton label="pdf extra" />
     </div>
-    <div class="mt-6">
-      <QuickAccess
-        links={[
-          { name: 'Gestión de Usuarios', href: '/admin/usuarios' },
-          { name: 'Configuración', href: '/admin/configuracion' },
-          { name: 'Crear Evento', href: '/admin/eventos/nuevo' },
-        ]}
-      />
+  </div>
+  <div class="w-full md:w-3/4 flex flex-col gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card title="Inscripciones Pendientes ">
+        {inscripcionesPendientes.map(c =><div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {c}</div>)}
+      </Card>
+      <Card title="Eventos Próximos">
+        {upcomingEvents.map(e => <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {e}</div>)}
+      </Card>
     </div>
+    <h1 >Historial de Eventos</h1>
+      <ContenedorEvento />
+  </div>
+</div>
 
     </body>
 </html>
