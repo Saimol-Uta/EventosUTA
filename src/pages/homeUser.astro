@@ -8,8 +8,8 @@ import DocumentButton from '../components/DocumentButton.astro';
 import Card from '../components/Card.astro';
 
 
-const upcomingEvents = ["Evento 1", "Evento 2", "Evento 3"];
-const certificates = ["Certificado A", "Certificado B", "Certificado C"];
+const upcomingEvents = ["Evento 1", "Evento 2", "Evento 3", "Evento 4", "Evento 5"];
+const certificates = ["Certificado A", "Certificado B", "Certificado C", "Certificado D", "Certificado E"];
 
 import { getEventosPorUsuario } from '../actions/Eventos/getEventosPorUsuario'
 // Obtener id_user desde la URL
@@ -51,13 +51,19 @@ if (idUsuario) {
 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
       <Card title="Eventos Próximos">
        <div class="flex flex-col gap-y-4">
-    {upcomingEvents.map(e => 
+    {upcomingEvents.slice(0, 4).map(e => 
       <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">{e}</div> )}
+      {upcomingEvents.length > 4 && (
+                <a href="/eventos" class="text-red-800 underline text-sm mt-2">Ver más...</a>
+              )}
       </div> 
       </Card>
       <Card title="Certificados">
          <div class="flex flex-col gap-y-4">
-        {certificates.map(c =><div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {c}</div>)}
+        {certificates.slice(0, 4).map(c =><div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {c}</div>)}
+        {certificates.length > 4 && (
+                <a href="/certificados" class="text-red-800 underline text-sm mt-2">Ver más...</a>
+              )}
         </div> 
       </Card>
     </div>
