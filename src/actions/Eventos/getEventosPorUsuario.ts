@@ -6,7 +6,7 @@ export const getEventosPorUsuario = defineAction({
   accept: 'json',
 
   input: z.object({
-    idUsuario: z.string().uuid(), // 👈 UUID como string validado
+    idUsuario: z.string().uuid(), 
   }),
 
   handler: async ({ idUsuario }) => {
