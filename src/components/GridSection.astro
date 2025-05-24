@@ -1,9 +1,0 @@
----
-const { title, items = [] } = Astro.props;
----
-<div class="w-full">
-  <h2 class="text-red-800 font-medium mb-2">{title}</h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 border p-2">
-    {items.map(item => <div class="border p-2">{item}</div>)}
-  </div>
-</div>
