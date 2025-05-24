@@ -1,57 +1,26 @@
 ---
-import Header from "../components/HeaderUsuario.astro";
-import NavBar from "../components/Navbar.astro";
-import MenuAdmin from "../components/MenuAdministrador.astro"
-import ContenedorEvento from "../components/ContenedorEvento.astro";
-import Avatar from '../components/Avatar.astro';
-import Button from '../components/Button.astro';
-import DocumentButton from '../components/DocumentButton.astro';
-import Card from '../components/Card.astro';
-
-const links = [
-  { label: 'Eventos', href: '/' },
-  { label: 'Usuarios', href: '/perfil' },
-  { label: 'Organizadores', href: '/historial' },
-   { label: 'Inscripciones', href: '/historial' },
-    { label: 'Categorías', href: '/historial' },
-     { label: 'Carreras', href: '/historial' },
-];
-
-const upcomingEvents = ["Evento 1", "Evento 2", "Evento 3"];
-const inscripcionesPendientes = ["Inscripción 1", "Inscripción 2", "Incripción 3", "Incripción 4", "Incripción 5"];
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import InformacionFacultad from "../components/InformacionFacultad.astro";
+import Footer from "../components/Footer.astro";
+import Navbar from "../components/Navbar.astro";
+import { actions } from "astro:actions";
 ---
-<html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-    </head>
-    <body>
-        <Header />
-        <NavBar />
-        <MenuAdmin links={links}/>
-           
-        <div class="flex flex-col md:flex-row gap-6 p-6">
-  <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
-    <Avatar />
-    <p class="text-red-800">Usuario</p>
-    <Button text="Editar Perfil" />
-    <div class="text-center mt-4 text-red-800">Documentos</div>
-    <div class="flex gap-2 mt-2">
-      <DocumentButton label="pdf cedula" />
-      <DocumentButton label="pdf matric" />
-      <DocumentButton label="pdf extra" />
-    </div>
-  </div>
-  <div class="w-full md:w-3/4 flex flex-col gap-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card title="Inscripciones Pendientes ">
-        {inscripcionesPendientes.map(c =><div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {c}</div>)}
-      </Card>
-      <Card title="Eventos Próximos">
-        {upcomingEvents.map(e => <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">  {e}</div>)}
-      </Card>
-    </div>
-  </div>
-</div>
 
-    </body>
-</html>
+<Layout>
+    <Header />
+    <Navbar />
+    <InformacionFacultad
+        tituloFacultad="Facultad de Ciencias de la Computación"
+        tituloDescripcion="Descripción"
+        contenidoDescripcion="Computación y la tecnología. Ofrecemos programas de grado y posgrado que combinan teoría y práctica, preparando a nuestros estudiantes para enfrentar los desafíos del mundo digital."
+        imagenDescripcion="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
+        tituloMision="Misión"
+        contenidoMision="Buscamos fomentar un ambiente académico que promueva la investigación, el aprendizaje continuo y el trabajo colaborativo."
+        imagenMision="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80"
+        tituloVision="Visión"
+        contenidoVision="Aspiramos a formar profesionales que impacten positivamente en la sociedad a través de la tecnología."
+        imagenVision="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+    />
+    <Footer />
+</Layout>
