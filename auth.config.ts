@@ -19,43 +19,40 @@ export default defineConfig({
                 password: { label: 'Contraseña', type: 'password' },
             },
             authorize: async (credentials) => {
-                try {
-                    // 1. Validar que las credenciales no estén vacías
-                    if (!credentials?.email || typeof credentials.password !== 'string') { // Asegurar que password también es string
-                        console.log('Faltan credenciales o el formato es incorrecto.');
-                        return null;
-                    }
-
-                    const user = await prisma.cuentas.findFirst({
-                        where: {
-                            cor_cue: credentials.email
-                        }
-                    });
-
-                    if (!user || typeof user.cont_cuenta !== 'string') {
-                        if (!user) {
-                            console.log('Usuario no encontrado:', credentials.email);
-                        } else {
-                            // Esto indica que el usuario existe pero cont_cuenta es null o no es un string.
-                            // Para un login con credenciales, esto podría ser un estado anómalo.
-                            console.error('El usuario:', credentials.email, 'no tiene un hash de contraseña válido.');
-                        }
-                        return null;
-                    }
-
-                    // Devolver el usuario con la misma estructura que Google
-                    return {
-                        id: user.id_cue,
-                        email: user.cor_cue,
-                        rol: user.rol_cue,
-                        ci_pas: user.enl_ced_cue
-                    } as CustomUser;
-
-                } catch (error) {
-                    console.error('Error en autenticación:', error);
+            try {
+                if (!credentials?.email || typeof credentials.password !== 'string') {
+                    console.log('Faltan credenciales o formato inválido.');
                     return null;
                 }
+
+                const user = await prisma.cuentas.findFirst({
+                    where: { cor_cue: credentials.email }
+                });
+
+                if (!user || typeof user.cont_cuenta !== 'string') {
+                    console.log('Usuario no encontrado o contraseña inválida.');
+                    return null;
+                }
+
+                // 👇 Aquí comparas la contraseña enviada con la almacenada
+                const isValid = await bcrypt.compare(credentials.password, user.cont_cuenta);
+                if (!isValid) {
+                    console.log('Contraseña incorrecta');
+                    return null;
+                }
+
+                // 👇 Devolver usuario válido
+                return {
+                    id: user.id_cue,
+                    email: user.cor_cue,
+                    rol: user.rol_cue,
+                    ci_pas: user.enl_ced_cue,
+                };
+            } catch (error) {
+                console.error('Error en autorización:', error);
+                return null;
             }
+        }
         }),
     ],
     // Páginas de inicio de sesión y error
@@ -66,16 +63,14 @@ export default defineConfig({
 
     callbacks: {
         async signIn({ user, account }) {
-            try {
-                // Solo queda validación para provider de tipo 'credentials'
-                if (!account) {
-                    return '/';
-                }
-                return true;
-            } catch (error) {
-                console.error('Error en signIn:', error);
-                return '/';
+            if (!user || !account) return false;
+
+            // Si el login es con credenciales y todo es correcto:
+            if (account.provider === "credentials") {
+            return '/';  // 👈 Esto forzará la redirección a /
             }
+
+            return true;
         },
 
         async jwt({ token, user, account }) {

@@ -31,7 +31,7 @@
                 margin-bottom: 20px;
             }
 
-            .login-container input[type="text"],
+            .login-container input[type="email"],
             .login-container input[type="password"] {
                 width: 100%;
                 padding: 10px;
@@ -85,7 +85,7 @@
         <div class="login-container">
             <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
             <form>
-                <input type="text" name="email" placeholder="Usuario" required />
+                <input type="email" name="email" placeholder="Usuario" required />
                 <input type="password" name="password" placeholder="Contraseña" required />
                 <button type="submit" id="btn-submit">Acceder</button>
                 <p>¿No tiene una cuenta?</p>
@@ -96,44 +96,44 @@
 </html>
 <script>
 
-    import Swal from "sweetalert2";
-    const { signIn } = await import("auth-astro/client");
-    const form = document.querySelector("form") as HTMLFormElement;
-    const btnSubmit = document.querySelector("#btn-submit",) as HTMLButtonElement;
-    form.addEventListener("submit", async (e) => {
+    window.addEventListener("DOMContentLoaded", async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get("error");
 
-        e.preventDefault();
-        btnSubmit.setAttribute("disabled", "disabled");
+        // Limpiar URL inmediatamente, antes de mostrar algo
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
 
-        const formData = new FormData(form);
-        // const { error } = await actions.loginUser.safe(formData);
+        if (error) {
+        const { default: Swal } = await import("sweetalert2");
+        await Swal.fire({
+            icon: "error",
+            title: "Error al ingresar",
+            text: "Usuario / Contraseña no son correctos",
+            confirmButtonColor: '#a00',
+            heightAuto: false, // <-- AÑADIDO
+        });
+        }
+    });
 
-        const resp = await signIn("credentials",{
+    
+    window.addEventListener("DOMContentLoaded", async () => {
+        const { signIn } = await import("auth-astro/client");
+        const form = document.querySelector("form") as HTMLFormElement;
+        const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
 
-                email: formData.get("email") as string,
-                password: formData.get("password") as string,
-            }, // Segundo argumento vacío si no hay opciones válidas
-        );
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            btnSubmit.setAttribute("disabled", "disabled");
 
-        console.log({ resp });
+            const formData = new FormData(form);
 
-        if (resp) {
+            await signIn("credentials", {
+                email: formData.get("email"),
+                password: formData.get("password"),
+            });
 
-            Swal.fire({
-
-                icon: "error",
-                title: "Error al ingresar",
-                // text: error.message,
-                text: "Usuario / Contraseña no son correctos",
-
-            });
-
-            btnSubmit.removeAttribute("disabled");
-            return;
-
-        }
-
-        window.location.replace("/");
-    });
-
+            // No manejamos nada aquí porque redirige automáticamente.
+        });
+    });
 </script>
