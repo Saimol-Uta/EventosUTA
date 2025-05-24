@@ -1,0 +1,6 @@
+---
+const { src = '/default-avatar.png', alt = 'Usuario', size = 'w-50 h-50' } = Astro.props;
+---
+<div class={`rounded-full bg-black flex items-center justify-center ${size}`}>
+  <img src={src} alt={alt} class="w-3/4 h-3/4 object-cover rounded-full" />
+</div>
