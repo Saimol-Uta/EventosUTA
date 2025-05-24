@@ -1,0 +1,42 @@
+---
+import Header from "../components/HeaderUsuario.astro";
+import NavBar from "../components/Navbar.astro";
+import MenuAdmin from "../components/MenuAdministrador.astro"
+import InfoCard from "../components/ContenedorSimple.astro"
+import QuickAccess from "../components/QuickAccess.astro"
+
+const links = [
+  { label: 'Eventos', href: '/' },
+  { label: 'Usuarios', href: '/perfil' },
+  { label: 'Organizadores', href: '/historial' },
+   { label: 'Inscripciones', href: '/historial' },
+    { label: 'Categorías', href: '/historial' },
+     { label: 'Carreras', href: '/historial' },
+];
+
+---<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+    </head>
+    <body>
+        <Header />
+        <NavBar />
+        <MenuAdmin links={links}/>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <InfoCard title="Usuarios Registrados" value="1240" icon="👥" />
+      <InfoCard title="Eventos Creados" value="48" icon="🗓️" />
+      <InfoCard title="Notificaciones Pendientes" value="5" icon="🔔" />
+      <InfoCard title="Reportes de Sistema" value="3" icon="📊" />
+    </div>
+    <div class="mt-6">
+      <QuickAccess
+        links={[
+          { name: 'Gestión de Usuarios', href: '/admin/usuarios' },
+          { name: 'Configuración', href: '/admin/configuracion' },
+          { name: 'Crear Evento', href: '/admin/eventos/nuevo' },
+        ]}
+      />
+    </div>
+
+    </body>
+</html>
