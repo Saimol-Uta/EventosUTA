@@ -1,5 +1,7 @@
 ---
 const { userName, userImage } = Astro.props;
+import { actions } from 'astro:actions';
+const handleLogout = actions.logout;
 ---
 
 <div class="relative inline-block text-left">
@@ -18,7 +20,36 @@ const { userName, userImage } = Astro.props;
     <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
       <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver perfil</a>
       <a href="/eventos" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver eventos</a>
-      <a href="/" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">Cerrar sesión</a>
+      <a href="/" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100" id="logout-link">Cerrar sesión</a>
     </div>
   </details>
 </div>
+<script>
+  // Este script corre en el navegador
+  async function logoutFetch() {
+    try {
+      const response = await fetch(window.location.pathname + '?_action=logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: ''
+      });
+
+      if (response.redirected) {
+        window.location.href = response.url;
+      } else {
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      console.error('Error al hacer logout:', error);
+    }
+  }
+
+  const logOut = document.getElementById('logout-link') as HTMLAreaElement;
+  // Capturamos el click del enlace de logout y llamamos la función
+  logOut.addEventListener('click', (e) => {
+    e.preventDefault();
+    logoutFetch();
+  });
+</script>
