@@ -4,11 +4,12 @@ import prisma from './src/db';
 import type { AdapterUser } from '@auth/core/adapters';
 import bcrypt from 'bcryptjs';
 
-interface CustomUser {
+export interface CustomUser {
     id: string;
     email: string;
     rol: string;
-    ci_pas: string
+    ci_pas: string;
+    name: string;
 }
 
 export default defineConfig({
@@ -26,7 +27,10 @@ export default defineConfig({
                 }
 
                 const user = await prisma.cuentas.findFirst({
-                    where: { cor_cue: credentials.email }
+                    where: { cor_cue: credentials.email },
+                      include: {
+                        usuarios: true, // incluir relación con la tabla usuarios
+                    },
                 });
 
                 if (!user || typeof user.cont_cuenta !== 'string') {
@@ -46,6 +50,7 @@ export default defineConfig({
                     email: user.cor_cue,
                     rol: user.rol_cue,
                     ci_pas: user.enl_ced_cue,
+                    name: `${user.usuarios.nom_usu1} ${user.usuarios.nom_usu2 ?? ''} ${user.usuarios.ape_usu1} ${user.usuarios.ape_usu2 ?? ''}`.trim(),
                 };
             } catch (error) {
                 console.error('Error en autorización:', error);
@@ -62,24 +67,26 @@ export default defineConfig({
 
     callbacks: {
         async signIn({ user, account }) {
-        if (!user || !account) return false;
+            if (!user || !account) return false;
 
-        if (account.provider === "credentials") {
-            const rol = (user as any).rol;
+            if (account.provider === 'credentials') {
+                const rol = (user as any).rol;
+                const id = user.id;
 
-            if (rol === 'USUARIO' || rol === 'ESTUDIANTE') {
-            return '/homeUser';
+                // Redirigir con el id del usuario en la query
+                if (rol === 'USUARIO' || rol === 'ESTUDIANTE') {
+                    return `/homeUser`;
+                }
+
+                if (rol === 'ADMINISTRADOR' || rol === 'MASTER') {
+                    return `/homeAdmin`;
+                }
+
+                // Por defecto, a home genérico
+                return '/';
             }
 
-            if (rol === 'ADMINISTRADOR' || rol === 'MASTER') {
-            return '/homeAdmin';
-            }
-
-            // Redirección por defecto si el rol no coincide
-            return '/';
-        }
-
-        return true;
+            return true;
         },
 
         async jwt({ token, user, account }) {

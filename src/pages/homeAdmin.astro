@@ -6,6 +6,9 @@ import Avatar from '../components/Avatar.astro';
 import Button from '../components/Button.astro';
 import DocumentButton from '../components/DocumentButton.astro';
 import Card from '../components/Card.astro';
+import { actions } from 'astro:actions';
+import type { CustomUser } from '../../auth.config';
+import { getSession } from 'auth-astro/server';
 
 const links = [
   { label: 'Eventos', href: '/' },
@@ -18,6 +21,30 @@ const links = [
 
 const upcomingEvents = ["Evento 1", "Evento 2", "Evento 3", "Evento 4", "Evento 5"];
 const inscripcionesPendientes = ["Inscripción 1", "Inscripción 2", "Incripción 3", "Incripción 4", "Inscripción 5"];
+
+const session = await getSession(Astro.request);
+
+// Si no hay sesión, redirigir al login
+if (!session || !session.user) {
+  return Astro.redirect('/login');
+}
+
+const user = session.user as CustomUser;
+const idUsuario = user.id;
+const nombre = user.name || "";
+const rol = user.rol;
+
+// Consultar eventos si hay id válido
+let eventos = [];
+let success = false;
+
+if (idUsuario) {
+  const result = await Astro.callAction(actions.getEventosPorUsuario, { idUsuario });
+  if (result && result.data) {
+    success = result.data.success;
+    eventos = result.data.eventos || [];
+  }
+}
 ---
 <html lang="es">
   <head>
