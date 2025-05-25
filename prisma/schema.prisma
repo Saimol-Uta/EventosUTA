@@ -44,6 +44,7 @@ model cuentas {
   enl_mat_cue String?
   enl_ext_cue String?
   id_usu_per  String   @db.Uuid
+  cont_cuenta String?
   usuarios    usuarios @relation(fields: [id_usu_per], references: [id_usu], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([cor_cue], map: "idx_cuentas_correo")
@@ -141,7 +142,6 @@ model usuarios {
   ape_usu2      String          @db.VarChar(20)
   fec_nac_usu   DateTime        @db.Date
   num_tel_usu   String?         @db.VarChar(20)
-  contrasena    String
   id_car_per    String?         @db.Uuid
   cuentas       cuentas[]
   inscripciones inscripciones[]
