@@ -12,6 +12,11 @@ interface Props {
 }
 
 const { camposFormulario } = Astro.props as Props;
+
+// Consideramos que si hay algún campo (excepto contraseña) con valor, el usuario existe.
+const usuarioExiste = camposFormulario.some(
+  campo => campo.name !== 'contrasena' && campo.valor.trim() !== ''
+);
 ---
 
 <section class="formulario-container">
@@ -27,7 +32,17 @@ const { camposFormulario } = Astro.props as Props;
     ))}
 
     <div class="formulario-boton">
-      <button type="submit">Editar</button>
+      {usuarioExiste ? (
+        <>
+          <button type="submit">Guardar Informacion</button>
+          <button type="button" onclick="location.reload()">Mas Tarde</button>
+        </>
+      ) : (
+        <>
+          <button type="button">Guardar Informacion</button>
+          <button type="submit">Mas tarde</button>
+        </>
+      )}
     </div>
   </form>
 </section>
@@ -71,6 +86,7 @@ const { camposFormulario } = Astro.props as Props;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  margin: 0 10px;
 }
 
 .formulario-boton button:hover {

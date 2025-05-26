@@ -1,0 +1,31 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Navbar from "../components/Navbar.astro";
+import InformacionUsuario from "../components/InformacionUsuario.astro";
+
+const camposFormulario = [
+  { titulo: "Cédula", valor: "0101010101", name: "ced_usu" },
+  { titulo: "Primer nombre", valor: "Juan", name: "nom_usu1" },
+  { titulo: "Segundo nombre", valor: "Carlos", name: "nom_usu2" },
+  { titulo: "Primer apellido", valor: "Pérez", name: "ape_usu1" },
+  { titulo: "Segundo apellido", valor: "García", name: "ape_usu2" },
+  { titulo: "Fecha de nacimiento", valor: "1998-04-20", name: "fec_nac_usu" },
+  { titulo: "Teléfono", valor: "0987654321", name: "num_tel_usu" },
+  { titulo: "Contraseña", valor: "", name: "contrasena" },
+  { titulo: "Carrera", valor: "carrera-id-123", name: "id_car_per" }
+];
+---
+
+<Layout>
+  <Header />
+  <Navbar />
+
+  <div class="bg-gray-100 min-h-screen py-10">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+      <h1 class="text-3xl font-bold text-[#650000] mb-8"></h1>
+
+      <InformacionUsuario camposFormulario={camposFormulario} />
+    </div>
+  </div>
+</Layout>
