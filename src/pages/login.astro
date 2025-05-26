@@ -1,5 +1,22 @@
 ---
-// No necesitas script aquí, es solo estático
+import type { CustomUser } from '../../auth.config';
+import { getSession } from 'auth-astro/server';
+
+const session = await getSession(Astro.request);
+
+// Si hay sesión y usuario, redirigir según rol
+if (session && session.user) {
+  const user = session.user as CustomUser;
+  const rol = user.rol?.toUpperCase();
+
+  if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+    return Astro.redirect("/homeAdmin");
+  } else if (rol === "USUARIO" || rol === "ESTUDIANTE") {
+    return Astro.redirect("/homeUser");
+  }
+}
+
+// Si no hay sesión o usuario, mostrar login normalmente
 ---
 
 <html lang="es">
@@ -31,7 +48,7 @@
                 margin-bottom: 20px;
             }
 
-            .login-container input[type="text"],
+            .login-container input[type="email"],
             .login-container input[type="password"] {
                 width: 100%;
                 padding: 10px;
@@ -85,12 +102,53 @@
         <div class="login-container">
             <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
             <form>
-                <input type="text" placeholder="Usuario" required />
-                <input type="password" placeholder="Contraseña" required />
-                <button type="submit">Acceder</button>
+                <input type="email" name="email" placeholder="Usuario" required />
+                <input type="password" name="password" placeholder="Contraseña" required />
+                <button type="submit" id="btn-submit">Acceder</button>
                 <p>¿No tiene una cuenta?</p>
                 <a href="/register">Regístrese aquí</a>
             </form>
         </div>
     </body>
 </html>
+<script>
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get("error");
+
+        // Limpiar URL inmediatamente, antes de mostrar algo
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
+        if (error) {
+        const { default: Swal } = await import("sweetalert2");
+        await Swal.fire({
+            icon: "error",
+            title: "Error al ingresar",
+            text: "Usuario / Contraseña no son correctos",
+            confirmButtonColor: '#a00',
+            heightAuto: false,
+        });
+        }
+    });
+
+    
+    window.addEventListener("DOMContentLoaded", async () => {
+        const { signIn } = await import("auth-astro/client");
+        const form = document.querySelector("form") as HTMLFormElement;
+        const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            btnSubmit.setAttribute("disabled", "disabled");
+
+            const formData = new FormData(form);
+
+            await signIn("credentials", {
+                email: formData.get("email"),
+                password: formData.get("password"),
+            });
+        });
+    });
+</script>

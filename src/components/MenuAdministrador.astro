@@ -3,7 +3,7 @@ interface NavLink {
   label: string;
   href: string;
 }
-const { links }: { links: NavLink[] } = Astro.props;
+const { links = [] }: { links?: NavLink[] } = Astro.props;
 ---
 <nav class="border-b border-gray-300">
   <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">

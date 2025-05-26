@@ -81,70 +81,224 @@
 
     <div class="login-container">
       <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
-      <form>
-        <input type="text" placeholder="Nombre" required />
-        <input type="text" placeholder="Apellido" required />
-        <input type="text" placeholder="Correo" required />
-        <input type="password" placeholder="Contraseña" required />
-        <input type="date" id="fechNac" required />
+      <form id="registroForm">
+        <input type="text" name="nombre" placeholder="Nombre" required />
+        <input type="text" name="apellido" placeholder="Apellido" required />
+        <input type="email" name="correo" placeholder="Correo" required />
+        <input type="password" name="contrasena" placeholder="Contraseña" required />
+        <input type="date" id="fechNac" name="fechNac" required />
         <p id="edadResultado"></p>
         <button type="submit">Registrarse</button>
         <p>¿Ya tiene una cuenta?</p>
         <a href="/login">Inicia sesión aquí</a>
       </form>
     </div>
+    <script>
+      import { actions } from 'astro:actions';
+      import Swal from 'sweetalert2';
+      import 'sweetalert2/dist/sweetalert2.min.css';
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const fechaInput = document.getElementById("fechNac");
-    const edadResultado = document.getElementById("edadResultado");
+      document.addEventListener("DOMContentLoaded", () => {
+        const fechaInput = document.getElementById("fechNac") as HTMLInputElement;
+        const form = document.getElementById("registroForm") as HTMLFormElement;
+        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 
-    if (!fechaInput || !edadResultado) return;
+        if (!fechaInput || !form || !submitButton) {
+            console.error("No se encontraron elementos esenciales del formulario.");
+            return;
+        }
 
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = (hoy.getMonth() + 1).toString().padStart(2, "0");
-    const dia = hoy.getDate().toString().padStart(2, "0");
-    const fechaMin = `${año - 100}-${mes}-${dia}`;
-    const fechaMax = `${año - 18}-12-31`; ;
+        const hoy = new Date();
+        const añoActual = hoy.getFullYear();
+        const mesActual = (hoy.getMonth() + 1).toString().padStart(2, "0");
+        const diaActual = hoy.getDate().toString().padStart(2, "0");
 
-    fechaInput.setAttribute("min", fechaMin);
-    fechaInput.setAttribute("max", fechaMax);
+        const fechaMax = `${añoActual - 18}-${mesActual}-${diaActual}`;
+        const fechaMin = `${añoActual - 100}-${mesActual}-${diaActual}`;
 
-fechaInput.addEventListener("change", (e) => {
-  const input = e.target as HTMLInputElement;
-  const valorFecha = input.value;
+        fechaInput.setAttribute("max", fechaMax);
+        fechaInput.setAttribute("min", fechaMin);
 
-      if (!valorFecha) {
-        edadResultado.textContent = "";
-        return;
-      }
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          submitButton.disabled = true;
 
-      const nacimiento = new Date(valorFecha);
-      if (isNaN(nacimiento.getTime())) {
-        edadResultado.textContent = "Fecha inválida.";
-        edadResultado.style.color = "red";
-        return;
-      }
+          const formData = new FormData(form);
+          const nombre = formData.get('nombre') as string;
+          const apellido = formData.get('apellido') as string;
+          const correo = formData.get('correo') as string;
+          const contrasena = formData.get('contrasena') as string;
+          const fechNac = formData.get('fechNac') as string;
 
-      const hoy = new Date();
-      let edad = hoy.getFullYear() - nacimiento.getFullYear();
-      const m = hoy.getMonth() - nacimiento.getMonth();
-      if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-        edad--;
-      }
+          if (!nombre || !apellido || !correo || !contrasena || !fechNac) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Campos incompletos',
+              text: 'Por favor, rellena todos los campos obligatorios.',
+              confirmButtonColor: '#a00',
+              heightAuto: false // <-- AÑADIDO
+            }).then(() => {
+                submitButton.disabled = false; 
+            });
+            return;
+          }
 
-      if (edad < 18) {
-        edadResultado.textContent = "Debe tener al menos 18 años.";
-        edadResultado.style.color = "red";
-      } else {
-        //si la edad es valida luego que se haya ingresado una edad invalida la edad el texto con el mensaje de error se desaparece
-        edadResultado.textContent = "";
-        
-      }
-    });
-  });
-</script>
+          const nacimiento = new Date(fechNac);
+          if (isNaN(nacimiento.getTime())) {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Fecha inválida',
+                  text: 'Por favor, ingresa una fecha de nacimiento válida.',
+                  confirmButtonColor: '#a00',
+                  heightAuto: false // <-- AÑADIDO
+              }).then(() => {
+                submitButton.disabled = false; 
+            });
+              return;
+          }
 
+          let edad = hoy.getFullYear() - nacimiento.getFullYear();
+          const m = hoy.getMonth() - nacimiento.getMonth();
+          if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+            edad--;
+          }
+
+          if (edad < 18) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Menor de edad',
+              text: 'Debes tener al menos 18 años para registrarte.',
+              confirmButtonColor: '#a00',
+              heightAuto: false // <-- AÑADIDO
+            }).then(() => {
+                submitButton.disabled = false; 
+            });
+            return;
+          }
+          
+          Swal.fire({
+            title: 'Registrando...',
+            text: 'Por favor espera.',
+            didOpen: () => { Swal.showLoading(); },
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            heightAuto: false // <-- AÑADIDO
+          });
+
+          try {
+            const { data: response, error: directActionError } = await actions.SignIn({
+              nombre, apellido, correo, contrasena, fechNac,
+            });
+
+            if (directActionError) {
+              let swalTitle = 'Error de Acción';
+              let errorMessagesToShow = [directActionError.message || 'No se pudo procesar la acción.'];
+              
+              // @ts-ignore
+              const validationErrorObject = directActionError.validationError; 
+              if (validationErrorObject) {
+                swalTitle = 'Por favor, corrige lo siguiente:';
+                let collectedMessages: string[] = [];
+                
+                if (validationErrorObject.formErrors && validationErrorObject.formErrors.length > 0) {
+                  collectedMessages.push(...validationErrorObject.formErrors);
+                }
+                if (validationErrorObject.fieldErrors) {
+                  for (const field in validationErrorObject.fieldErrors) {
+                    // @ts-ignore
+                    if (validationErrorObject.fieldErrors[field] && validationErrorObject.fieldErrors[field].length > 0) {
+                      // @ts-ignore
+                      collectedMessages.push(...validationErrorObject.fieldErrors[field]);
+                    }
+                  }
+                }
+                if (collectedMessages.length > 0) {
+                  errorMessagesToShow = collectedMessages;
+                } else if (directActionError.message) {
+                    errorMessagesToShow = [directActionError.message];
+                }
+
+              } else if (directActionError.message && directActionError.message.startsWith("Failed to validate: ")) {
+                swalTitle = 'Por favor, corrige lo siguiente:';
+                const zodErrorPrefix = "Failed to validate: ";
+                try {
+                  const jsonString = directActionError.message.substring(zodErrorPrefix.length);
+                  const errors = JSON.parse(jsonString);
+                  if (Array.isArray(errors) && errors.length > 0) {
+                    const parsedMessages = errors.map(err => err.message).filter(msg => msg);
+                    if (parsedMessages.length > 0) {
+                      errorMessagesToShow = parsedMessages;
+                    } else {
+                      errorMessagesToShow = ['Error de validación. Revisa los datos ingresados.'];
+                    }
+                  } else {
+                    errorMessagesToShow = ['Error de validación. Revisa los datos ingresados.'];
+                  }
+                } catch (parseError) {
+                  console.error("Failed to parse Zod error JSON string:", parseError);
+                }
+              }
+
+              Swal.fire({
+                icon: 'error',
+                title: swalTitle,
+                html: errorMessagesToShow.join('<br/>'),
+                confirmButtonColor: '#a00',
+                heightAuto: false
+              }).then(() => {
+                submitButton.disabled = false;
+              });
+
+            } else if (response && response.success === false && response.error && response.error.message) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error en el registro',
+                text: response.error.message,
+                confirmButtonColor: '#a00',
+                heightAuto: false
+              }).then(() => {
+                submitButton.disabled = false;
+              });
+            } else if (response && response.success) {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Registro exitoso!',
+                text: 'Ahora serás redirigido.',
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                heightAuto: false,
+                willClose: () => {
+                  window.location.href = '/login'; 
+                }
+              });
+            } else {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Respuesta del servidor no reconocida',
+                text: 'La estructura de la respuesta no fue la esperada.',
+                confirmButtonColor: '#a00',
+                heightAuto: false
+              }).then(() => {
+                submitButton.disabled = false;
+              });
+              console.log('Respuesta inesperada del servidor:', response);
+            }
+          } catch (e: any) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error de conexión',
+              text: e.message || 'No se pudo conectar con el servidor. Inténtalo de nuevo.',
+              confirmButtonColor: '#a00',
+              heightAuto: false
+            }).then(() => {
+                submitButton.disabled = false;
+            });
+            console.error("Error en el submit (catch general):", e);
+          }
+        });
+      });
+    </script>
   </body>
 </html>
