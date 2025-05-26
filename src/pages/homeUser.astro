@@ -20,27 +20,25 @@ import { getSession } from 'auth-astro/server';
 const session = await getSession(Astro.request);
 
 // Si no hay sesión, redirigir al login
-if (!session || !session.user) {
-  return Astro.redirect('/login');
-}
+if (session && session.user) {
+  const user = session.user as CustomUser;
+  const idUsuario = user.id;
+  const nombre = user.name || "";
+  const rol = user.rol;
 
-const user = session.user as CustomUser;
-const idUsuario = user.id;
-const nombre = user.name || "";
-const rol = user.rol;
+  let eventos = [];
+  let success = false;
 
-// Consultar eventos si hay id válido
-let eventos = [];
-let success = false;
-
-if (idUsuario) {
-  const result = await Astro.callAction(actions.getEventosPorUsuario, { idUsuario });
-  if (result && result.data) {
-    success = result.data.success;
-    eventos = result.data.eventos || [];
+  if (idUsuario) {
+    const result = await Astro.callAction(actions.getEventosPorUsuario, {
+      idUsuario,
+    });
+    if (result && result.data) {
+      success = result.data.success;
+      eventos = result.data.eventos || [];
+    }
   }
 }
-
 ---
 <html lang="es">
     <head>

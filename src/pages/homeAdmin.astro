@@ -2,50 +2,65 @@
 import Header from "../components/HeaderUsuario.astro";
 import NavBar from "../components/Navbar.astro";
 import MenuAdmin from "../components/MenuAdministrador.astro";
-import Avatar from '../components/Avatar.astro';
-import Button from '../components/Button.astro';
-import DocumentButton from '../components/DocumentButton.astro';
-import Card from '../components/Card.astro';
-import { actions } from 'astro:actions';
-import type { CustomUser } from '../../auth.config';
-import { getSession } from 'auth-astro/server';
+import Avatar from "../components/Avatar.astro";
+import Button from "../components/Button.astro";
+import DocumentButton from "../components/DocumentButton.astro";
+import Card from "../components/Card.astro";
+import { actions } from "astro:actions";
+import type { CustomUser } from "../../auth.config";
+import { getSession } from "auth-astro/server";
 
 const links = [
-  { label: 'Eventos', href: '/' },
-  { label: 'Usuarios', href: '/perfil' },
-  { label: 'Organizadores', href: '/historial' },
-  { label: 'Inscripciones', href: '/historial' },
-  { label: 'Categorías', href: '/historial' },
-  { label: 'Carreras', href: '/historial' },
+  { label: "Eventos", href: "/" },
+  { label: "Usuarios", href: "/perfil" },
+  { label: "Organizadores", href: "/historial" },
+  { label: "Inscripciones", href: "/historial" },
+  { label: "Categorías", href: "/historial" },
+  { label: "Carreras", href: "/historial" },
 ];
 
-const upcomingEvents = ["Evento 1", "Evento 2", "Evento 3", "Evento 4", "Evento 5"];
-const inscripcionesPendientes = ["Inscripción 1", "Inscripción 2", "Incripción 3", "Incripción 4", "Inscripción 5"];
+const upcomingEvents = [
+  "Evento 1",
+  "Evento 2",
+  "Evento 3",
+  "Evento 4",
+  "Evento 5",
+];
+const inscripcionesPendientes = [
+  "Inscripción 1",
+  "Inscripción 2",
+  "Incripción 3",
+  "Incripción 4",
+  "Inscripción 5",
+];
 
 const session = await getSession(Astro.request);
 
 // Si no hay sesión, redirigir al login
-if (!session || !session.user) {
-  return Astro.redirect('/login');
-}
 
-const user = session.user as CustomUser;
-const idUsuario = user.id;
-const nombre = user.name || "";
-const rol = user.rol;
+if (session && session.user) {
+  const user = session.user as CustomUser;
+  const idUsuario = user.id;
+  const nombre = user.name || "";
+  const rol = user.rol;
 
-// Consultar eventos si hay id válido
-let eventos = [];
-let success = false;
+  let eventos = [];
+  let success = false;
 
-if (idUsuario) {
-  const result = await Astro.callAction(actions.getEventosPorUsuario, { idUsuario });
-  if (result && result.data) {
-    success = result.data.success;
-    eventos = result.data.eventos || [];
+  if (idUsuario) {
+    const result = await Astro.callAction(actions.getEventosPorUsuario, {
+      idUsuario,
+    });
+    if (result && result.data) {
+      success = result.data.success;
+      eventos = result.data.eventos || [];
+    }
   }
 }
+
+// Consultar eventos si hay id válido
 ---
+
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -70,31 +85,55 @@ if (idUsuario) {
 
       <div class="w-full md:w-3/4 flex flex-col gap-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
-
           <!-- Inscripciones Pendientes -->
           <Card title="Inscripciones Pendientes">
             <div class="flex flex-col gap-y-4">
-              {inscripcionesPendientes.slice(0, 4).map(c => (
-                <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">{c}</div>
-              ))}
-              {inscripcionesPendientes.length > 4 && (
-                <a href="/inscripciones" class="text-red-800 underline text-sm mt-2">Ver más...</a>
-              )}
+              {
+                inscripcionesPendientes
+                  .slice(0, 4)
+                  .map((c) => (
+                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
+                      {c}
+                    </div>
+                  ))
+              }
+              {
+                inscripcionesPendientes.length > 4 && (
+                  <a
+                    href="/inscripciones"
+                    class="text-red-800 underline text-sm mt-2"
+                  >
+                    Ver más...
+                  </a>
+                )
+              }
             </div>
           </Card>
 
           <!-- Eventos Próximos -->
           <Card title="Eventos Próximos">
             <div class="flex flex-col gap-y-4">
-              {upcomingEvents.slice(0, 4).map(e => (
-                <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">{e}</div>
-              ))}
-              {upcomingEvents.length > 4 && (
-                <a href="/eventos" class="text-red-800 underline text-sm mt-2">Ver más...</a>
-              )}
+              {
+                upcomingEvents
+                  .slice(0, 4)
+                  .map((e) => (
+                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
+                      {e}
+                    </div>
+                  ))
+              }
+              {
+                upcomingEvents.length > 4 && (
+                  <a
+                    href="/eventos"
+                    class="text-red-800 underline text-sm mt-2"
+                  >
+                    Ver más...
+                  </a>
+                )
+              }
             </div>
           </Card>
-
         </div>
       </div>
     </div>

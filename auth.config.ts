@@ -43,7 +43,6 @@ export default defineConfig({
                     console.log('[authorize] Contraseña incorrecta');
                     return null;
                 }
-                console.log('[authorize] Usuario autorizado:', user);
 
                 //Devolver usuario válido
                 return {
@@ -61,9 +60,30 @@ export default defineConfig({
         }
         }),
     ],
+      session: {
+    strategy: "jwt", // <- Esto es lo que faltaba
+  },
         pages: {
         signIn: '/login',
+        signOut: "/", 
         error: '/login',
+    },
+        cookies: {
+        sessionToken: {
+            // USA EL NOMBRE EXACTO QUE VISTE EN TU NAVEGADOR
+            // Ejemplo, si viste 'authjs.session-token':
+            name: `authjs.session-token`,
+            // Si viste '__Secure-authjs.session-token', usa ese.
+            // Es crucial que este nombre coincida.
+            options: {
+                httpOnly: true,
+                sameSite: 'lax', // 'lax' es un buen default, 'none' requiere Secure=true
+                path: '/',     // Usualmente es '/'
+                // 'secure' debe ser true en producción (HTTPS)
+                // import.meta.env.PROD es una forma común de manejarlo en Astro/Vite
+                secure: import.meta.env.PROD,
+            }
+        },
     },
 
     callbacks: {
@@ -83,8 +103,6 @@ export default defineConfig({
 
         session: ({ session, token }) => {
             session.user = token?.user as AdapterUser;
-
-            console.log('[session] Sesión actualizada:', session);
             return session;
         },
     },

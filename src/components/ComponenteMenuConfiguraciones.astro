@@ -1,7 +1,5 @@
 ---
 const { userName, userImage } = Astro.props;
-import { actions } from 'astro:actions';
-const handleLogout = actions.logout;
 ---
 
 <div class="relative inline-block text-left">
@@ -20,29 +18,16 @@ const handleLogout = actions.logout;
     <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
       <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver perfil</a>
       <a href="/eventos" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver eventos</a>
-      <a href="/" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100" id="logout-link">Cerrar sesión</a>
+      <a href="/" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100" id="logout">Cerrar sesión</a>
     </div>
   </details>
 </div>
 <script>
- const { signOut } = await import("auth-astro/client");
-    const logoutElem = document.querySelector("#logout-link") as HTMLAnchorElement;
-    let isLoggingOut = false; // Variable para prevenir múltiples clicks
-
+const logoutElem = document.querySelector("#logout") as HTMLAnchorElement;
     logoutElem?.addEventListener("click", async (e) => {
         e.preventDefault();
 
-        if (isLoggingOut) return; // Prevenir múltiples clicks
-        isLoggingOut = true;
-
-        try {
-            await signOut();
-            sessionStorage.clear();
-            localStorage.clear();
-            window.location.href = "/";
-        } catch (error) {
-            console.error("Error al cerrar sesión:", error);
-            isLoggingOut = false; // Resetear el flag en caso de error
-        }
+        alert("Se cerró la sesión");
+        console.log("Se cerró la sesión");
     });
 </script>
