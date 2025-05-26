@@ -1,4 +1,22 @@
 ---
+import type { CustomUser } from '../../auth.config';
+import { getSession } from 'auth-astro/server';
+
+const session = await getSession(Astro.request);
+
+// Si hay sesión y usuario, redirigir según rol
+if (session && session.user) {
+  const user = session.user as CustomUser;
+  const rol = user.rol?.toUpperCase();
+
+  if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+    return Astro.redirect("/homeAdmin");
+  } else if (rol === "USUARIO" || rol === "ESTUDIANTE") {
+    return Astro.redirect("/homeUser");
+  }
+}
+
+// Si no hay sesión o usuario, mostrar login normalmente
 ---
 
 <html lang="es">

@@ -25,31 +25,24 @@ const handleLogout = actions.logout;
   </details>
 </div>
 <script>
-  // Este script corre en el navegador
-  async function logoutFetch() {
-    try {
-      const response = await fetch(window.location.pathname + '?_action=logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: ''
-      });
+ const { signOut } = await import("auth-astro/client");
+    const logoutElem = document.querySelector("#logout-link") as HTMLAnchorElement;
+    let isLoggingOut = false; // Variable para prevenir múltiples clicks
 
-      if (response.redirected) {
-        window.location.href = response.url;
-      } else {
-        window.location.href = '/login';
-      }
-    } catch (error) {
-      console.error('Error al hacer logout:', error);
-    }
-  }
+    logoutElem?.addEventListener("click", async (e) => {
+        e.preventDefault();
 
-  const logOut = document.getElementById('logout-link') as HTMLAreaElement;
-  // Capturamos el click del enlace de logout y llamamos la función
-  logOut.addEventListener('click', (e) => {
-    e.preventDefault();
-    logoutFetch();
-  });
+        if (isLoggingOut) return; // Prevenir múltiples clicks
+        isLoggingOut = true;
+
+        try {
+            await signOut();
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.href = "/";
+        } catch (error) {
+            console.error("Error al cerrar sesión:", error);
+            isLoggingOut = false; // Resetear el flag en caso de error
+        }
+    });
 </script>

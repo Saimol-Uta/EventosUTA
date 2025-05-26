@@ -40,9 +40,10 @@ export default defineConfig({
 
                 const isValid = await bcrypt.compare(credentials.password, user.cont_cuenta);
                 if (!isValid) {
-                    console.log('Contraseña incorrecta');
+                    console.log('[authorize] Contraseña incorrecta');
                     return null;
                 }
+                console.log('[authorize] Usuario autorizado:', user);
 
                 //Devolver usuario válido
                 return {
@@ -52,6 +53,7 @@ export default defineConfig({
                     ci_pas: user.enl_ced_cue,
                     name: `${user.usuarios.nom_usu1} ${user.usuarios.nom_usu2 ?? ''} ${user.usuarios.ape_usu1} ${user.usuarios.ape_usu2 ?? ''}`.trim(),
                 };
+
             } catch (error) {
                 console.error('Error en autorización:', error);
                 return null;
@@ -59,59 +61,31 @@ export default defineConfig({
         }
         }),
     ],
-    // Páginas de inicio de sesión y error
-    pages: {
+        pages: {
         signIn: '/login',
         error: '/login',
     },
 
     callbacks: {
-        async signIn({ user, account }) {
-            if (!user || !account) return false;
+        
 
-            if (account.provider === 'credentials') {
-                const rol = (user as any).rol;
-                const id = user.id;
+                jwt: ({ token, user }) => {
 
-                // Redirigir con el id del usuario en la query
-                if (rol === 'USUARIO' || rol === 'ESTUDIANTE') {
-                    return `/homeUser`;
-                }
+            if (user) {
 
-                if (rol === 'ADMINISTRADOR' || rol === 'MASTER') {
-                    return `/homeAdmin`;
-                }
-
-                // Por defecto, a home genérico
-                return '/';
+                token.user = user;
             }
 
-            return true;
-        },
 
-        async jwt({ token, user, account }) {
-            if (user && account?.provider === 'credentials') {
-                token.user = {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    rol: (user as any).rol,
-                };
-                token.userId = user.id;
-                token.rol = (user as any).rol;
-            }
             return token;
+
         },
-        async session({ session, token }) {
-            if (token?.user) {
-                session.user = {
-                    ...session.user,
-                    ...(token.user as any),
-                    rol: token.rol as string,
-                    id: token.userId as string,
-                } as any;
-            }
+
+        session: ({ session, token }) => {
+            session.user = token?.user as AdapterUser;
+
+            console.log('[session] Sesión actualizada:', session);
             return session;
-        }
-    }
+        },
+    },
 });
