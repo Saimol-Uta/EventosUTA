@@ -19,6 +19,7 @@ const listaEventos = (data?.eventos || []) as Eventos[];
           titulo={evento.nom_eve}
           estado={evento.asignaciones?.length?.toString() || "0"}
           horas={evento.dur_eve ?? 0}
+            slug={evento.id_eve}
         />
       ))
     ) : (

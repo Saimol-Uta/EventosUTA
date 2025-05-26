@@ -1,0 +1,79 @@
+---
+import InformacionUsuarioItem from './InformacionUsuarioItem.astro';
+
+interface Campo {
+  titulo: string;
+  valor: string;
+  name: string;
+}
+
+interface Props {
+  camposFormulario: Campo[];
+}
+
+const { camposFormulario } = Astro.props as Props;
+---
+
+<section class="formulario-container">
+  <h2 class="formulario-titulo">Información del Usuario</h2>
+
+  <form class="formulario-grid" method="POST">
+    {camposFormulario.map((campo) => (
+      <InformacionUsuarioItem
+        titulo={campo.titulo}
+        valor={campo.valor}
+        name={campo.name}
+      />
+    ))}
+
+    <div class="formulario-boton">
+      <button type="submit">Editar</button>
+    </div>
+  </form>
+</section>
+
+<style>
+.formulario-container {
+  background-color: #eee;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 2rem auto;
+  font-family: 'Segoe UI', sans-serif;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+}
+
+.formulario-titulo {
+  color: #8B0000;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+
+.formulario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.formulario-boton {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.formulario-boton button {
+  background-color: #8B0000;
+  color: white;
+  font-size: 16px;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.formulario-boton button:hover {
+  background-color: #a00;
+}
+</style>

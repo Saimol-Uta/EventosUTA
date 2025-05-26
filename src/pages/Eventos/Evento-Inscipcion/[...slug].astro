@@ -1,0 +1,23 @@
+---
+const { slug } = Astro.params;
+import FormularioInscripcion from "@/components/Eventos/FormularioInscripcion.astro";
+import "@styles/global.css";
+const {
+    campoTexto1 = "Cédula",
+    campoTexto2 = "Nombres",
+    campoTexto3 = "Apellidos",
+    campoTexto4 = "Correo electrónico",
+    campoTexto5 = "Teléfono",
+    campoArchivo = "Suba su documento",
+} = Astro.props;
+---
+
+<FormularioInscripcion
+    campoTitle={slug}
+    campoTexto1={campoTexto1}
+    campoTexto2={campoTexto2}
+    campoTexto3={campoTexto3}
+    campoTexto4={campoTexto4}
+    campoTexto5={campoTexto5}
+    campoArchivo={campoArchivo}
+/>

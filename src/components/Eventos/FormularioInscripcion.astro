@@ -1,0 +1,98 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Contenedor from "@components/ContenedorFormulario.astro";
+import "@styles/global.css";
+
+const {
+    campoTitle = "Campo 1",
+    campoTexto1 = "Cédula",
+    campoTexto2 = "Nombres",
+    campoTexto3 = "Apellidos",
+    campoTexto4 = "Correo electrónico",
+    campoTexto5 = "Teléfono",
+    campoArchivo = "Suba su documento",
+} = Astro.props;
+---
+
+<Layout>
+    <div
+        class="min-h-screen flex flex-col items-center justify-center py-8 px-2 bg-gradient-to-br from-gray-100 to-white"
+    >
+        <form
+            class="bg-gray-100 rounded-3xl shadow-2xl p-8 w-full max-w-3xl mx-auto flex flex-col items-center"
+        >
+            <h1 class="text-3xl font-bold text-center text-red-900 mb-8">
+                {campoTitle}
+            </h1>
+
+            <!-- Layout responsive horizontal/vertical -->
+            <div
+                class="flex flex-col md:flex-row md:flex-wrap gap-6 w-full justify-between"
+            >
+                <Contenedor
+                    id="campo1"
+                    nombre="campo1"
+                    titulo={campoTexto1}
+                    campo={campoTexto1}
+                />
+                <Contenedor
+                    id="campo2"
+                    nombre="campo2"
+                    titulo={campoTexto2}
+                    campo={campoTexto2}
+                />
+                <Contenedor
+                    id="campo3"
+                    nombre="campo3"
+                    titulo={campoTexto3}
+                    campo={campoTexto3}
+                />
+                <Contenedor
+                    id="campo4"
+                    nombre="campo4"
+                    titulo={campoTexto4}
+                    campo={campoTexto4}
+                />
+                <Contenedor
+                    id="campo5"
+                    nombre="campo5"
+                    titulo={campoTexto5}
+                    campo={campoTexto5}
+                />
+            </div>
+
+            <!-- Contenedor del input centrado -->
+            <div class="mt-6 flex justify-center w-full">
+                <div class="w-full md:w-2/3">
+                    <div
+                        class="bg-white p-4 rounded-2xl shadow-md w-full transition hover:shadow-xl"
+                    >
+                        <label
+                            for="archivo"
+                            class="block text-lg font-medium text-gray-800 mb-2 text-center"
+                            >{campoArchivo}</label
+                        >
+                        <input
+                            id="archivo"
+                            name="archivo"
+                            type="file"
+                            accept=".pdf"
+                            required
+                            class="w-full file:px-4 file:py-2 file:rounded-xl file:border-0 file:font-semibold file:bg-red-800 file:text-white hover:file:bg-red-900 transition"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón centrado y más pequeño -->
+            <div class="flex justify-center mt-8 w-full">
+                <button
+                    type="submit"
+                    class="w-full md:w-1/3 lg:w-1/4 bg-red-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-xl transition duration-300 shadow-md"
+                >
+                    Enviar
+                </button>
+            </div>
+        </form>
+    </div>
+</Layout>

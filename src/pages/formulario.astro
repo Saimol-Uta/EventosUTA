@@ -1,68 +1,12 @@
 ---
-import Contenedor from '../components/ContenedorFormulario.astro';
-import "../styles/global.css";
-
-const {
-  campoTexto1 = "Cédula",
-  campoTexto2 = "Nombres",
-  campoTexto3 = "Apellidos",
-  campoTexto4 = "Correo electrónico",
-  campoTexto5 = "Teléfono",
-  campoArchivo = "Suba su documento",
-} = Astro.props;
+import FormularioInscripcion from "@/components/Eventos/FormularioInscripcion.astro";
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Formulario CTT-FISEI</title>
-  </head>
-  <body class="bg-gradient-to-br from-neutral-200 to-slate-300 min-h-screen flex items-center justify-center p-6">
-    <form class="bg-gray-100 rounded-3xl shadow-2xl p-8 w-full max-w-6xl">
-      <h1 class="text-3xl font-bold text-center text-red-900 mb-8">
-        Inscripción Eventos CTT-FISEI
-      </h1>
-
-      <!-- Layout responsive horizontal/vertical -->
-      <div class="flex flex-col lg:flex-row lg:flex-wrap gap-6 justify-between">
-        
-          <Contenedor id="campo1" nombre="campo1" titulo={campoTexto1} campo={campoTexto1} />
-          <Contenedor id="campo2" nombre="campo2" titulo={campoTexto2} campo={campoTexto2} />
-          <Contenedor id="campo3" nombre="campo3" titulo={campoTexto3} campo={campoTexto3} />
-          <Contenedor id="campo4" nombre="campo4" titulo={campoTexto4} campo={campoTexto4} />
-          <Contenedor id="campo5" nombre="campo5" titulo={campoTexto5} campo={campoTexto5} />
-		  </div>
-
-      </div>
-
-      <!-- Contenedor del input centrado -->
-<div class="mt-6 flex justify-center">
-  <div class="w-full lg:w-[48%]">
-    <div class="bg-white p-4 rounded-2xl shadow-md w-full transition hover:shadow-xl">
-      <label for="archivo" class="block text-lg font-medium text-gray-800 mb-2">{campoArchivo}</label>
-      <input
-        id="archivo"
-        name="archivo"
-        type="file"
-        accept=".pdf"
-        required
-        class="w-full file:px-4 file:py-2 file:rounded-xl file:border-0 file:font-semibold file:bg-red-800 file:text-white hover:file:bg-red-900 transition"
-      />
-    </div>
-  </div>
-</div>
-
-<!-- Botón centrado y más pequeño -->
-<div class="flex justify-center mt-8">
-  <button
-    type="submit"
-    class="w-2/3 md:w-1/6 bg-red-800 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-xl transition duration-300 shadow-md"
-  >
-    Enviar
-  </button>
-</div>
-
-    </form>
-  </body>
-</html>
+<FormularioInscripcion
+    campoTexto1="Cédula"
+    campoTexto2="Nombres"
+    campoTexto3="Apellidos"
+    campoTexto4="Correo electrónico"
+    campoTexto5="Teléfono"
+    campoArchivo="Suba su documento"
+/>

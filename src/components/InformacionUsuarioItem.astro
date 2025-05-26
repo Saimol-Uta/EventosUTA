@@ -1,0 +1,46 @@
+---
+interface Props {
+  titulo: string;
+  valor: string;
+  name: string;
+}
+
+const { titulo, valor, name } = Astro.props as Props;
+---
+
+<div class="campo-item">
+  <label for={name}>{titulo}</label>
+  <input
+    id={name}
+    name={name}
+    type={name === 'contrasena' ? 'password' : name.includes('fec') ? 'date' : 'text'}
+    value={valor}
+  />
+</div>
+
+<style>
+.campo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-item label {
+  font-weight: bold;
+  color: #8B0000;
+  font-size: 14px;
+}
+
+.campo-item input {
+  padding: 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+}
+
+.campo-item input:focus {
+  border-color: #8B0000;
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+}
+</style>
