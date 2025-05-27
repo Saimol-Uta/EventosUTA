@@ -25,7 +25,7 @@ const usuarioExiste = camposFormulario.some(
   campo => campo.name !== 'contrasena' && campo.valor.trim() !== ''
 );
 ---
-
+// src/components/InformacionUsuario.astro
 <section class="formulario-container">
   <h2 class="formulario-titulo">Información del Usuario</h2>
 
@@ -55,6 +55,7 @@ const usuarioExiste = camposFormulario.some(
     )}
   </form>
 </section>
+// src/components/InformacionUsuario.astro estilos de los componentes
 <style>
 .formulario-container {
   background-color: #eee;
