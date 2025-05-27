@@ -9,11 +9,18 @@ interface Campo {
 
 interface Props {
   camposFormulario: Campo[];
+  mostrarBotones?: boolean;
+  textoBotonPrincipal?: string;
+  textoBotonSecundario?: string;
 }
 
-const { camposFormulario } = Astro.props as Props;
+const {
+  camposFormulario,
+  mostrarBotones = true,
+  textoBotonPrincipal = "Guardar Información",
+  textoBotonSecundario = "Más Tarde"
+} = Astro.props as Props;
 
-// Consideramos que si hay algún campo (excepto contraseña) con valor, el usuario existe.
 const usuarioExiste = camposFormulario.some(
   campo => campo.name !== 'contrasena' && campo.valor.trim() !== ''
 );
@@ -31,22 +38,23 @@ const usuarioExiste = camposFormulario.some(
       />
     ))}
 
-    <div class="formulario-boton">
-      {usuarioExiste ? (
-        <>
-          <button type="submit">Guardar Informacion</button>
-          <button type="button" onclick="location.reload()">Mas Tarde</button>
-        </>
-      ) : (
-        <>
-          <button type="button">Guardar Informacion</button>
-          <button type="submit">Mas tarde</button>
-        </>
-      )}
-    </div>
+    {mostrarBotones && (
+      <div class="formulario-boton">
+        {usuarioExiste ? (
+          <>
+            <button type="submit">{textoBotonPrincipal}</button>
+            <button type="button" onclick="location.reload()">{textoBotonSecundario}</button>
+          </>
+        ) : (
+          <>
+            <button type="button">{textoBotonPrincipal}</button>
+            <button type="submit">{textoBotonSecundario}</button>
+          </>
+        )}
+      </div>
+    )}
   </form>
 </section>
-
 <style>
 .formulario-container {
   background-color: #eee;

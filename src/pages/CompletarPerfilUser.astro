@@ -21,6 +21,7 @@ if (method === "POST") {
   }
 }
 
+
 const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
   { titulo: "Primer nombre", valor: "Juan", name: "nom_usu1" },
@@ -42,7 +43,12 @@ const camposFormulario = [
     <div class="max-w-3xl mx-auto px-4 text-center">
 
       {mostrarFormulario ? (
-        <InformacionUsuario camposFormulario={camposFormulario} />
+        <InformacionUsuario
+          camposFormulario={camposFormulario}
+          mostrarBotones={true}
+          textoBotonPrincipal="Guardar Información"
+          textoBotonSecundario="Más Tarde"
+        />
       ) : (
         <form method="POST" class="formulario-container formulario-grid">
           <div class="campo-item">
