@@ -12,13 +12,20 @@ let mostrarError = false;
 let usuarioExistente = false;
 
 if (method === "POST") {
-  const formData = await Astro.request.formData();
+const formData = await Astro.request.formData();
+const resetForm = formData.get("reset") === "true";
+
+if (resetForm) {
+  // No mostrar nada, volver al paso inicial con campos limpios
+  cedulaIngresada = "";
+  mostrarFormulario = false;
+  mostrarError = false;
+  usuarioExistente = false;
+} else {
   cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
 
   if (/^\d{10}$/.test(cedulaIngresada)) {
     mostrarFormulario = true;
-
-     //Simulamos que si es esta cédula, el usuario existe
     if (cedulaIngresada === "1851014348") {
       usuarioExistente = true;
     }
@@ -26,6 +33,8 @@ if (method === "POST") {
     mostrarError = true;
   }
 }
+}
+
 
 const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
@@ -87,11 +96,23 @@ const eventoSecundario = usuarioExistente ? "cancelarFormulario()" : "location.r
   </div>
 </Layout>
 
+
 <script is:inline>
-  function cancelarFormulario() {
-    window.location.href = window.location.pathname;
+  function vaciarCampos() {
+    const form = document.createElement('form');
+    form.method = 'POST';
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'reset';
+    input.value = 'true';
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
   }
 </script>
+
 
 
 <style>
