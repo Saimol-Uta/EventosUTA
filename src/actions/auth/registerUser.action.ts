@@ -2,6 +2,7 @@ import { defineAction } from 'astro:actions';
 import prisma from '../../db';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { validateEmail } from './verificacionCorreo.ts';
 
 export const SignIn = defineAction({
   input: z.object({
@@ -36,6 +37,15 @@ export const SignIn = defineAction({
 
       if (cuentaExistente) {
         throw new Error('El correo electrónico ya está registrado.');
+      }
+      if (!correo.endsWith('@uta.edu.ec')) {
+        const isEmailValid = await validateEmail(correo);
+        if (!isEmailValid) {
+          return {
+            success: false,
+            error: 'El correo no parece ser válido o no existe.',
+          };
+        }
       }
 
       const [nom_usu1, ...nom_usu2Rest] = nombre.split(' ');
@@ -81,7 +91,7 @@ export const SignIn = defineAction({
 
     } catch (error: any) {
       console.error('Error en registro (action):', error);
-      return { 
+      return {
         success: false,
         error: { message: error.message || 'Error interno del servidor.' }
       };
