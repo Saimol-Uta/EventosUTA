@@ -250,7 +250,7 @@
                 submitButton.disabled = false;
               });
 
-            } else if (response && response.success === false && response.error && response.error.message) {
+            } else if (response && response.success === false && response.error && typeof response.error === 'object' && 'message' in response.error) {
               Swal.fire({
                 icon: 'error',
                 title: 'Error en el registro',
