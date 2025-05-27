@@ -9,6 +9,7 @@ const method = Astro.request.method;
 let cedulaIngresada = "";
 let mostrarFormulario = false;
 let mostrarError = false;
+let usuarioExistente = false;
 
 if (method === "POST") {
   const formData = await Astro.request.formData();
@@ -16,23 +17,31 @@ if (method === "POST") {
 
   if (/^\d{10}$/.test(cedulaIngresada)) {
     mostrarFormulario = true;
+
+    // Simulamos que si es esta cédula, el usuario existe
+    if (cedulaIngresada === "1851014348") {
+      usuarioExistente = true;
+    }
   } else {
     mostrarError = true;
   }
 }
 
-
 const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
-  { titulo: "Primer nombre", valor: "Juan", name: "nom_usu1" },
-  { titulo: "Segundo nombre", valor: "Carlos", name: "nom_usu2" },
-  { titulo: "Primer apellido", valor: "Pérez", name: "ape_usu1" },
-  { titulo: "Segundo apellido", valor: "García", name: "ape_usu2" },
-  { titulo: "Fecha de nacimiento", valor: "1998-04-20", name: "fec_nac_usu" },
-  { titulo: "Teléfono", valor: "0987654321", name: "num_tel_usu" },
+  { titulo: "Primer nombre", valor: usuarioExistente ? "María" : "", name: "nom_usu1" },
+  { titulo: "Segundo nombre", valor: usuarioExistente ? "Fernanda" : "", name: "nom_usu2" },
+  { titulo: "Primer apellido", valor: usuarioExistente ? "Vera" : "", name: "ape_usu1" },
+  { titulo: "Segundo apellido", valor: usuarioExistente ? "López" : "", name: "ape_usu2" },
+  { titulo: "Fecha de nacimiento", valor: usuarioExistente ? "1995-08-15" : "", name: "fec_nac_usu" },
+  { titulo: "Teléfono", valor: usuarioExistente ? "0999988776" : "", name: "num_tel_usu" },
   { titulo: "Contraseña", valor: "", name: "contrasena" },
-  { titulo: "Carrera", valor: "carrera-id-123", name: "id_car_per" }
+  { titulo: "Carrera", valor: usuarioExistente ? "carrera-id-abc" : "", name: "id_car_per" }
 ];
+
+const textoPrincipal = usuarioExistente ? "¿Asociar este usuario a la cuenta?" : "Guardar Información";
+const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
+const eventoSecundario = usuarioExistente ? "cancelarFormulario()" : "location.reload()";
 ---
 
 <Layout>
@@ -46,13 +55,13 @@ const camposFormulario = [
         <InformacionUsuario
           camposFormulario={camposFormulario}
           mostrarBotones={true}
-          textoBotonPrincipal="Guardar Información"
-          textoBotonSecundario="Más Tarde"
+          textoBotonPrincipal={textoPrincipal}
+          textoBotonSecundario={textoSecundario}
         />
       ) : (
         <form method="POST" class="formulario-container formulario-grid">
           <div class="campo-item">
-            <label for="ced_usu">Ingrese su numero de Cédula</label>
+            <label for="ced_usu">Ingrese su número de Cédula</label>
             <input
               type="text"
               id="ced_usu"
@@ -77,6 +86,13 @@ const camposFormulario = [
     </div>
   </div>
 </Layout>
+
+<script is:inline>
+  function cancelarFormulario() {
+    window.location.href = window.location.pathname;
+  }
+</script>
+
 
 <style>
 .formulario-container {
