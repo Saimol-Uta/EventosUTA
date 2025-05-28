@@ -1,0 +1,103 @@
+---
+import EventoCard from "./EventoCard.astro";
+import { getEventosPorUsuario } from "../actions/Eventos/getEventosPorUsuario";
+import type { Eventos } from "../interface/eventosSimple";
+
+
+let idUsuario = '';
+let eventos = [];
+let success = false;
+
+  if (idUsuario) {
+    const result = await Astro.callAction(getEventosPorUsuario, {
+      idUsuario,
+    });
+    if (result && result.data) {
+      success = result.data.success;
+      eventos = result.data.eventos || [];
+    }
+}
+---
+
+<div class="contenedor">
+  {
+    eventos.length > 0 ? (
+      eventos.map((evento) => (
+        <EventoCard
+          imagen={evento.img_eve}
+          titulo={evento.nom_eve}
+          estado={evento.asignaciones?.length?.toString() || "0"}
+          horas={evento.dur_eve ?? 0}
+            slug={evento.id_eve}
+        />
+      ))
+    ) : (
+  <div class="sin-resultados">
+  <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+    <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
+    <circle cx="22" cy="24" r="4" fill="#8A1538"/>
+    <circle cx="42" cy="24" r="4" fill="#8A1538"/>
+    <path d="M22 44c2.5-4 9.5-4 12 0" stroke="#8A1538" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>
+  <p class="titulo-vacio">¡Ups! No se encontraron resultados</p>
+  <p class="texto-vacio">Prueba cambiando los filtros o ajustando tu búsqueda</p>
+</div>
+    )
+  }
+</div>
+
+<style>
+.contenedor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 300px); /* reemplaza auto-fit + minmax */
+  place-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+
+.card {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+
+
+.sin-resultados {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #444;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #fff7f7;
+  border: 1px solid #f3dada;
+  border-radius: 12px;
+}
+
+.icono-vacio {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  opacity: 0.85;
+}
+
+.titulo-vacio {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #8A1538;
+  margin-bottom: 8px;
+}
+
+.texto-vacio {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0;
+}
+
+
+</style>
+
+
