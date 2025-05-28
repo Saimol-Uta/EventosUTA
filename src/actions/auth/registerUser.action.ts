@@ -2,6 +2,7 @@ import { defineAction } from 'astro:actions';
 import prisma from '../../db';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { validateEmail } from './verificacionCorreo.ts';
 
 export const SignIn = defineAction({
   input: z.object({
@@ -26,16 +27,27 @@ export const SignIn = defineAction({
 
     const { nombre, apellido, correo, contrasena, fechNac } = input;
 
+      const correoLimpio = correo.trim().toLowerCase();
     try {
       // Verificar si el correo ya existe antes de crear.
       const cuentaExistente = await prisma.cuentas.findUnique({
         where: {
-          cor_cue: correo,
+          cor_cue: correoLimpio,
         },
       });
 
       if (cuentaExistente) {
         throw new Error('El correo electrónico ya está registrado.');
+      }
+      
+      if (!correoLimpio.endsWith('@uta.edu.ec')) {
+        const isEmailValid = await validateEmail(correoLimpio);
+        if (!isEmailValid) {
+          return {
+            success: false,
+            error: 'El correo no parece ser válido o no existe.',
+          };
+        }
       }
 
       const [nom_usu1, ...nom_usu2Rest] = nombre.split(' ');
@@ -44,7 +56,7 @@ export const SignIn = defineAction({
       const ape_usu2 = ape_usu2Rest.join(' ');
 
       const hashedPassword = await bcrypt.hash(contrasena, 10);
-      const rolAsignado = correo.endsWith('@uta.edu.ec') ? 'ESTUDIANTE' : 'USUARIO';
+      const rolAsignado = correoLimpio.endsWith('@uta.edu.ec') ? 'ESTUDIANTE' : 'USUARIO';
 
       // Transacción para crear usuario y cuenta asegurando atomicidad.
       const result = await prisma.$transaction(async (tx) => {
@@ -64,7 +76,7 @@ export const SignIn = defineAction({
 
         await tx.cuentas.create({
           data: {
-            cor_cue: correo,
+            cor_cue: correoLimpio,
             cont_cuenta: hashedPassword,
             rol_cue: rolAsignado,
             id_usu_per: usuario.id_usu,
@@ -81,7 +93,7 @@ export const SignIn = defineAction({
 
     } catch (error: any) {
       console.error('Error en registro (action):', error);
-      return { 
+      return {
         success: false,
         error: { message: error.message || 'Error interno del servidor.' }
       };

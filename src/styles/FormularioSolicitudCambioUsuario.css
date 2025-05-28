@@ -1,0 +1,211 @@
+  /* Estilos base */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  body {
+    background: #f6f7f9;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: #f3f4f6;
+    padding: 2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.125);
+    border-radius: 20px;
+    font-family: Arial, sans-serif;
+  }
+
+  .header {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+
+  .custom-header {
+    font-size: 2rem;
+    color: black;
+    background-color: transparent;
+  }
+
+  .center-text {
+    text-align: center;
+  }
+
+  .section-title {
+    background-color: rgb(210, 54, 54);
+    color: white;
+    text-align: center;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    border-radius: 10px;
+  }
+
+  .info-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: box-shadow 0.3s ease;
+  }
+
+  #descripcion:hover,
+  #motivo:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .checkbox-group label,
+  .radio-group label {
+    flex: 1 1 30%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 120px;
+  }
+
+  .radio-group.tipo-cambio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .radio-group.prioridad {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 1rem;
+  }
+
+  .upload-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .upload-section.center {
+    justify-content: center;
+  }
+
+  .form-buttons {
+    text-align: center;
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-primary {
+    background-color: rgb(210, 54, 54);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: rgb(160, 30, 30);
+  }
+
+  .btn-secondary {
+    background-color: #bdc3c7;
+    color: black;
+  }
+
+  .btn-secondary:hover {
+    background-color: #a5a9ad;
+  }
+
+  /* Diseño responsivo */
+  @media (max-width: 600px) {
+    .info-top {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .checkbox-group, .radio-group {
+      flex-direction: column;
+      align-items: center;
+    }
+    .radio-group.tipo-cambio {
+      grid-template-columns: 1fr;
+    }
+    .radio-group.prioridad {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+    .upload-card {
+    background: #f1f3f5;
+    border-radius: 16px;
+    padding: 1rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .upload-card p {
+    font-weight: bold;
+    color: #212529;
+    margin: 0;
+  }
+
+  .upload-card input[type="file"]::-webkit-file-upload-button {
+    background: rgb(210, 54, 54);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+
+  .upload-card input[type="file"]::-webkit-file-upload-button:hover {
+    background-color: rgb(160, 30, 30);
+  }
+
+  .upload-card input[type="file"] {
+    font-family: inherit;
+    color: #212529;
+  }
