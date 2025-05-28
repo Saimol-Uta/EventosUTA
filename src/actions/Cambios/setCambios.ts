@@ -3,11 +3,12 @@ import prisma from '../../db';
 import { z } from 'zod';
 
 const CambioSchema = z.object({
-  des_cam: z.string().min(1),
-  mot_cam: z.string().min(1),
-  pri_cam: z.string().optional(),
-  tip_cam: z.string().optional(),
-  ori_cam: z.string().optional(),
+  rol_sol_cam: z.enum(['ESTUDIANTE', 'DOCENTE', 'GENERAL']),
+  des_cam: z.string().min(1, 'La descripción es obligatoria'),
+  mot_cam: z.string().min(1, 'El motivo es obligatorio'),
+  pri_cam: z.string().min(1, 'La prioridad es obligatoria'),
+  tip_cam: z.string().min(1, 'El tipo de cambio es obligatorio'),
+  ori_cam: z.string().min(1, 'El origen del cambio es obligatorio'),
 });
 
 export const createCambio = defineAction({
@@ -16,6 +17,7 @@ export const createCambio = defineAction({
     try {
       // ⚠️ Extraer los valores y validarlos manualmente
       const parsed = CambioSchema.safeParse({
+        rol_sol_cam: formData.get('rol_sol_cam'),
         des_cam: formData.get('des_cam'),
         mot_cam: formData.get('mot_cam'),
         pri_cam: formData.get('pri_cam'),
@@ -32,13 +34,13 @@ export const createCambio = defineAction({
       }
 
       const archivo = formData.get('archivo') as File | null;
-      const buffer = archivo ? Buffer.from(await archivo.arrayBuffer()) : null;
 
       // ⚠️ ID temporal, reemplaza con ID real del usuario si es necesario
       const id_cue_sol = '00000000-0000-0000-0000-000000000000';
 
       await prisma.cambios.create({
         data: {
+          rol_sol_cam: parsed.data.rol_sol_cam,
           des_cam: parsed.data.des_cam,
           mot_cam: parsed.data.mot_cam,
           pri_cam: parsed.data.pri_cam ?? null,
