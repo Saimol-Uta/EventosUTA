@@ -37,15 +37,16 @@ model categorias_eventos {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model cuentas {
-  id_cue      String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  cor_cue     String   @unique @db.VarChar(150)
-  rol_cue     String   @db.VarChar(15)
+  id_cue      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  cor_cue     String    @unique @db.VarChar(150)
+  rol_cue     String    @db.VarChar(15)
   enl_ced_cue String?
   enl_mat_cue String?
   enl_ext_cue String?
-  id_usu_per  String   @db.Uuid
+  id_usu_per  String    @db.Uuid
   cont_cuenta String?
-  usuarios    usuarios @relation(fields: [id_usu_per], references: [id_usu], onDelete: Cascade, onUpdate: NoAction)
+  cambios     cambios[]
+  usuarios    usuarios  @relation(fields: [id_usu_per], references: [id_usu], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([cor_cue], map: "idx_cuentas_correo")
   @@index([id_usu_per], map: "idx_cuentas_usuario")
@@ -53,23 +54,24 @@ model cuentas {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model eventos {
-  id_eve             String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_eve            String             @db.VarChar(250)
-  des_eve            String             @db.VarChar(500)
-  id_cat_eve         String             @db.Uuid
-  fec_ini_eve        DateTime           @db.Date
-  fec_fin_eve        DateTime?          @db.Date
-  hor_ini_eve        DateTime           @db.Time(6)
-  hor_fin_eve        DateTime?          @db.Time(6)
-  dur_eve            Int?               @db.SmallInt
-  are_eve            String?            @db.VarChar(50)
-  ubi_eve            String             @db.VarChar(150)
-  ced_org_eve        String             @db.VarChar(10)
-  img_eve            String?
-  asignaciones       asignaciones[]
-  organizadores      organizadores      @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
-  categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
-  inscripciones      inscripciones[]
+  id_eve              String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_eve             String                @db.VarChar(250)
+  des_eve             String                @db.VarChar(500)
+  id_cat_eve          String                @db.Uuid
+  fec_ini_eve         DateTime              @db.Date
+  fec_fin_eve         DateTime?             @db.Date
+  hor_ini_eve         DateTime              @db.Time(6)
+  hor_fin_eve         DateTime?             @db.Time(6)
+  dur_eve             Int?                  @db.SmallInt
+  are_eve             String?               @db.VarChar(50)
+  ubi_eve             String                @db.VarChar(150)
+  ced_org_eve         String                @db.VarChar(10)
+  img_eve             String?
+  asignaciones        asignaciones[]
+  organizadores       organizadores         @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
+  categorias_eventos  categorias_eventos    @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
+  inscripciones       inscripciones[]
+  inscripciones_nueva inscripciones_nueva[]
 
   @@index([id_cat_eve], map: "idx_eventos_categoria")
   @@index([fec_ini_eve], map: "idx_eventos_fecha_ini")
@@ -134,18 +136,55 @@ model requisitos {
 }
 
 model usuarios {
-  id_usu        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  ced_usu       String?         @unique @db.VarChar(20)
-  nom_usu1      String          @db.VarChar(20)
-  nom_usu2      String?         @db.VarChar(20)
-  ape_usu1      String          @db.VarChar(20)
-  ape_usu2      String          @db.VarChar(20)
-  fec_nac_usu   DateTime        @db.Date
-  num_tel_usu   String?         @db.VarChar(20)
-  id_car_per    String?         @db.Uuid
-  cuentas       cuentas[]
-  inscripciones inscripciones[]
-  carreras      carreras?       @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
+  id_usu              String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ced_usu             String?               @unique @db.VarChar(20)
+  nom_usu1            String                @db.VarChar(20)
+  nom_usu2            String?               @db.VarChar(20)
+  ape_usu1            String                @db.VarChar(20)
+  ape_usu2            String                @db.VarChar(20)
+  fec_nac_usu         DateTime              @db.Date
+  num_tel_usu         String?               @db.VarChar(20)
+  id_car_per          String?               @db.Uuid
+  cuentas             cuentas[]
+  inscripciones       inscripciones[]
+  inscripciones_nueva inscripciones_nueva[]
+  carreras            carreras?             @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([ced_usu], map: "idx_usuarios_cedula")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model cambios {
+  num_cam     Int      @id @default(autoincrement())
+  fec_cam     DateTime @default(now()) @db.Timestamp(6)
+  rol_sol_cam String?  @db.VarChar(15)
+  des_cam     String
+  mot_cam     String
+  pri_cam     String?  @db.VarChar(15)
+  tip_cam     String?  @db.VarChar(30)
+  ori_cam     String?  @db.VarChar(10)
+  enl_doc_cam String?
+  est_cam     String?  @default("PENDIENTE") @db.VarChar(12)
+  id_cue_sol  String   @db.Uuid
+  cuentas     cuentas  @relation(fields: [id_cue_sol], references: [id_cue], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model inscripciones_nueva {
+  id_ins          String    @id @db.Uuid
+  fec_ins         DateTime  @db.Timestamptz(6)
+  val_ins         Decimal   @db.Decimal(6, 2)
+  met_pag_ins     String?   @db.VarChar(15)
+  enl_ord_pag_ins String?
+  id_usu_ins      String    @db.Uuid
+  id_eve_ins      String    @db.Uuid
+  est_par         String?   @default("PENDIENTE") @db.VarChar(10)
+  asi_par         Int?      @db.SmallInt
+  not_par         Decimal?  @db.Decimal(4, 1)
+  enl_cer         String?
+  fec_cer         DateTime? @db.Date
+  eventos         eventos   @relation(fields: [id_eve_ins], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
+  usuarios        usuarios  @relation(fields: [id_usu_ins], references: [id_usu], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([id_usu_ins, id_eve_ins], map: "uq_usuario_evento_nuevo")
 }
