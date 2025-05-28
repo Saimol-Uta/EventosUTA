@@ -1,0 +1,119 @@
+---
+import "../../styles/FormularioSolicitudCambioUsuario.css";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout>
+  <script>
+    function handleDragOver(event: DragEvent) {
+      event.preventDefault();
+      (event.currentTarget as HTMLElement).classList.add("dragover");
+    }
+
+    function handleDragLeave(event: DragEvent) {
+      (event.currentTarget as HTMLElement).classList.remove("dragover");
+    }
+
+    function handleDrop(event: DragEvent) {
+      event.preventDefault();
+      const fileInput = document.getElementById("archivo") as HTMLInputElement;
+      if (event.dataTransfer) {
+        fileInput.files = event.dataTransfer.files;
+      }
+      (event.currentTarget as HTMLElement).classList.remove("dragover");
+    }
+  </script>
+
+  <!-- Contenedor principal -->
+  <div class="container">
+    <!-- Título principal del formulario centrado -->
+    <div class="header custom-header center-text">SOLICITUD DE CAMBIO</div>
+
+    <!-- Encabezado con datos del solicitante y número -->
+    <div class="info-top">
+      <div><strong>Carol Cañizares</strong></div>
+      <div>21/05/2025</div>
+      <div><strong>Nº 1</strong></div>
+    </div>
+
+    <!-- Sección para seleccionar el rol del solicitante -->
+    <div class="section-title">ROL DEL SOLICITANTE</div>
+    <div class="radio-group center">
+      <label
+        ><input type="radio" name="rol" value="Estudiante" />Estudiante</label
+      >
+      <label><input type="radio" name="rol" value="Docente" />Docente</label>
+      <label
+        ><input type="radio" name="rol" value="Público" />Público General</label
+      >
+    </div>
+
+    <!-- Sección de descripción del cambio solicitado -->
+    <div class="section-title">DETALLES DEL CAMBIO</div>
+    <label for="descripcion">DESCRIPCIÓN DEL CAMBIO</label>
+    <textarea id="descripcion" rows="3"></textarea>
+
+    <!-- Sección del motivo por el cual se solicita el cambio -->
+    <label for="motivo">MOTIVO DEL CAMBIO</label>
+    <textarea id="motivo" rows="3"></textarea>
+
+    <!-- Prioridad del cambio a solicitar -->
+    <label>PRIORIDAD DEL CAMBIO</label>
+    <div class="radio-group prioridad">
+      <label
+        ><input type="radio" name="prioridad" value="Urgente" />Urgente</label
+      >
+      <label><input type="radio" name="prioridad" value="Alta" />Alta</label>
+      <label><input type="radio" name="prioridad" value="Media" />Media</label>
+      <label><input type="radio" name="prioridad" value="Baja" />Baja</label>
+    </div>
+
+    <!-- Tipos de cambio posibles ahora como radio-group con distribución uniforme -->
+    <div class="section-title">TIPO DE CAMBIO</div>
+    <div class="radio-group tipo-cambio">
+      <label
+        ><input type="radio" name="tipo" value="Permisos" />Permisos o acceso</label
+      >
+      <label><input type="radio" name="tipo" value="Gráfico" />Gráfico</label>
+      <label
+        ><input
+          type="radio"
+          name="tipo"
+          value="Configuraciones"
+        />Configuraciones</label
+      >
+      <label
+        ><input type="radio" name="tipo" value="Seguridad" />Seguridad y
+        privacidad</label
+      >
+      <label><input type="radio" name="tipo" value="Técnicos" />Técnicos</label>
+      <label><input type="radio" name="tipo" value="Otros" />Otros</label>
+    </div>
+
+    <!-- Origen del cambio solicitado -->
+    <div class="section-title">ORIGEN DE LA SOLICITUD DE CAMBIO</div>
+    <div class="radio-group center">
+      <label><input type="radio" name="origen" value="Fallas" />Fallas</label>
+      <label
+        ><input type="radio" name="origen" value="Mejora" />Solicitud de mejora</label
+      >
+    </div>
+
+    <!-- Adjuntar archivos o imágenes adicionales -->
+    <div class="section-title">DOCUMENTOS O INFORMACIÓN ADICIONAL</div>
+    <div class="upload-card">
+      <p>Suba su documento</p>
+      <input type="file" id="archivo" />
+    </div>
+
+    <!-- Botones de acción del formulario -->
+    <div class="form-buttons">
+      <a href="/">
+        <button type="button" class="btn-secondary">
+          Regresar
+        </button>
+      </a>
+      <button type="submit" class="btn-primary"> Enviar Solicitud </button>
+    </div>
+  </div>
+</Layout>
