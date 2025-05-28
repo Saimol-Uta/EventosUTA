@@ -1,128 +1,267 @@
 ---
-
+const { isLoggedIn } = Astro.locals;
 ---
-<footer style="background-color: #3B3751; color: white; padding: 40px 60px; font-family: 'Segoe UI', sans-serif;">
-  <style>
-    footer a {
-      transition: color 0.3s ease;
-    }
 
-    footer a:hover {
-      color: #C62828;
-    }
+<footer
+    style="background-color: #3B3751; color: white; padding: 40px 60px; font-family: 'Segoe UI', sans-serif;"
+>
+    <style>
+        footer a {
+            transition: color 0.3s ease;
+        }
 
-    footer svg {
-      transition: transform 0.3s ease, fill 0.3s ease;
-    }
+        footer a:hover {
+            color: #c62828;
+        }
 
-    footer a:hover svg {
-      transform: scale(1.1);
-      fill: #C62828;
-    }
+        footer svg {
+            transition:
+                transform 0.3s ease,
+                fill 0.3s ease;
+        }
 
-    .footer-cursos li {
-      margin: 6px 0;
-    }
+        footer a:hover svg {
+            transform: scale(1.1);
+            fill: #c62828;
+        }
 
-    .footer-cursos a {
-      position: relative;
-    }
+        .footer-cursos li {
+            margin: 6px 0;
+        }
 
-    .footer-cursos a::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -2px;
-      width: 0%;
-      height: 2px;
-      background-color: #C62828;
-      transition: width 0.3s ease;
-    }
+        .footer-cursos a {
+            position: relative;
+        }
 
-    .footer-cursos a:hover::after {
-      width: 100%;
-    }
-  </style>
+        .footer-cursos a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0%;
+            height: 2px;
+            background-color: #c62828;
+            transition: width 0.3s ease;
+        }
 
-  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px;">
-    
-    <!-- CONTACTO -->
-    <div>
-      <h3 style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;">CONTACTO</h3>
-      <p style="margin: 10px 0;"><span style="margin-right: 10px;">📍</span>Av. Los Chasquis y Río Guayllabamba</p>
-      <p style="margin: 10px 0;"><span style="margin-right: 10px;">✉️</span>talleresfisei@uta.edu.ec</p>
-      <p style="margin: 10px 0;"><span style="margin-right: 10px;">✉️</span>ctt.fisei@uta.edu.ec</p>
-      <p style="margin: 10px 0;"><span style="margin-right: 10px;">💻</span><a href="#" style="color: #C62828; text-decoration: none;">Plataforma Educativa</a></p>
+        .footer-cursos a:hover::after {
+            width: 100%;
+        }
+    </style>
 
-      <div style="margin-top: 20px; display: flex; gap: 12px;">
-        <!-- Twitter -->
-        <a href="https://twitter.com/tu_usuario" target="_blank" rel="noopener noreferrer">
-          <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
-            <path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.27 4.27 0 001.88-2.36 8.48 8.48 0 01-2.7 1.03 4.22 4.22 0 00-7.2 3.85A12 12 0 013 4.79a4.23 4.23 0 001.3 5.63 4.2 4.2 0 01-1.91-.53v.05a4.23 4.23 0 003.39 4.13 4.3 4.3 0 01-1.9.07 4.24 4.24 0 003.95 2.93A8.48 8.48 0 012 19.54a12 12 0 006.29 1.84c7.55 0 11.68-6.26 11.68-11.68 0-.18 0-.36-.01-.54A8.35 8.35 0 0022.46 6z"/>
-          </svg>
-        </a>
+    <div
+        style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px;"
+    >
+        <!-- CONTACTO -->
+        <div>
+            <h3
+                style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;"
+            >
+                CONTACTO
+            </h3>
+            <p style="margin: 10px 0;">
+                <span style="margin-right: 10px;">📍</span>Av. Los Chasquis y
+                Río Guayllabamba
+            </p>
+            <p style="margin: 10px 0;">
+                <span style="margin-right: 10px;">✉️</span
+                >talleresfisei@uta.edu.ec
+            </p>
+            <p style="margin: 10px 0;">
+                <span style="margin-right: 10px;">✉️</span>ctt.fisei@uta.edu.ec
+            </p>
+            <p style="margin: 10px 0;">
+                <span style="margin-right: 10px;">💻</span><a
+                    href="#"
+                    style="color: #C62828; text-decoration: none;"
+                    >Plataforma Educativa</a
+                >
+            </p>
 
-        <!-- Facebook -->
-        <a href="https://facebook.com/tu_usuario" target="_blank" rel="noopener noreferrer">
-          <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
-            <path d="M22 12a10 10 0 10-11.63 9.87v-6.99h-2.6v-2.88h2.6V9.41c0-2.58 1.54-4.01 3.9-4.01 1.13 0 2.3.2 2.3.2v2.53h-1.3c-1.28 0-1.68.79-1.68 1.6v1.92h2.85l-.46 2.88h-2.39v6.99A10 10 0 0022 12z"/>
-          </svg>
-        </a>
+            <div style="margin-top: 20px; display: flex; gap: 12px;">
+                <!-- Twitter -->
+                <a
+                    href="https://twitter.com/tu_usuario"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <svg
+                        width="24"
+                        height="24"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M22.46 6c-.77.35-1.6.58-2.46.69a4.27 4.27 0 001.88-2.36 8.48 8.48 0 01-2.7 1.03 4.22 4.22 0 00-7.2 3.85A12 12 0 013 4.79a4.23 4.23 0 001.3 5.63 4.2 4.2 0 01-1.91-.53v.05a4.23 4.23 0 003.39 4.13 4.3 4.3 0 01-1.9.07 4.24 4.24 0 003.95 2.93A8.48 8.48 0 012 19.54a12 12 0 006.29 1.84c7.55 0 11.68-6.26 11.68-11.68 0-.18 0-.36-.01-.54A8.35 8.35 0 0022.46 6z"
+                        ></path>
+                    </svg>
+                </a>
 
-        <!-- LinkedIn -->
-        <a href="https://linkedin.com/in/tu_usuario" target="_blank" rel="noopener noreferrer">
-          <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
-            <path d="M19 0h-14C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM7.1 20H4V9h3.1v11zM5.5 7.7c-.99 0-1.8-.81-1.8-1.8S4.51 4.1 5.5 4.1s1.8.81 1.8 1.8-.81 1.8-1.8 1.8zM20 20h-3v-5.6c0-1.34-.03-3.07-1.87-3.07-1.88 0-2.17 1.46-2.17 2.97V20h-3V9h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.03 0 3.59 1.99 3.59 4.58V20z"/>
-          </svg>
-        </a>
+                <!-- Facebook -->
+                <a
+                    href="https://facebook.com/tu_usuario"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <svg
+                        width="24"
+                        height="24"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M22 12a10 10 0 10-11.63 9.87v-6.99h-2.6v-2.88h2.6V9.41c0-2.58 1.54-4.01 3.9-4.01 1.13 0 2.3.2 2.3.2v2.53h-1.3c-1.28 0-1.68.79-1.68 1.6v1.92h2.85l-.46 2.88h-2.39v6.99A10 10 0 0022 12z"
+                        ></path>
+                    </svg>
+                </a>
 
-        <!-- Instagram -->
-        <a href="https://instagram.com/tu_usuario" target="_blank" rel="noopener noreferrer">
-          <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
-            <path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.97.24 2.43.41.6.23 1.03.5 1.48.95.45.45.72.88.95 1.48.17.46.36 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.97-.41 2.43a3.66 3.66 0 01-.95 1.48 3.66 3.66 0 01-1.48.95c-.46.17-1.26.36-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.97-.24-2.43-.41a3.66 3.66 0 01-1.48-.95 3.66 3.66 0 01-.95-1.48c-.17-.46-.36-1.26-.41-2.43C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.97.41-2.43.23-.6.5-1.03.95-1.48.45-.45.88-.72 1.48-.95.46-.17 1.26-.36 2.43-.41C8.42 2.21 8.8 2.2 12 2.2zm0 1.8c-3.13 0-3.48.01-4.71.07-.97.05-1.5.22-1.85.37-.47.18-.81.39-1.16.74-.35.35-.56.69-.74 1.16-.15.35-.32.88-.37 1.85-.06 1.23-.07 1.58-.07 4.71s.01 3.48.07 4.71c.05.97.22 1.5.37 1.85.18.47.39.81.74 1.16.35.35.69.56 1.16.74.35.15.88.32 1.85.37 1.23.06 1.58.07 4.71.07s3.48-.01 4.71-.07c.97-.05 1.5-.22 1.85-.37.47-.18.81-.39 1.16-.74.35-.35.56-.69.74-1.16.15-.35.32-.88.37-1.85.06-1.23.07-1.58.07-4.71s-.01-3.48-.07-4.71c-.05-.97-.22-1.5-.37-1.85a2.87 2.87 0 00-.74-1.16 2.87 2.87 0 00-1.16-.74c-.35-.15-.88-.32-1.85-.37-1.23-.06-1.58-.07-4.71-.07zM12 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8zm5.2-10.84a1.44 1.44 0 110 2.88 1.44 1.44 0 010-2.88z"/>
-          </svg>
-        </a>
-      </div>
+                <!-- LinkedIn -->
+                <a
+                    href="https://linkedin.com/in/tu_usuario"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <svg
+                        width="24"
+                        height="24"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M19 0h-14C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM7.1 20H4V9h3.1v11zM5.5 7.7c-.99 0-1.8-.81-1.8-1.8S4.51 4.1 5.5 4.1s1.8.81 1.8 1.8-.81 1.8-1.8 1.8zM20 20h-3v-5.6c0-1.34-.03-3.07-1.87-3.07-1.88 0-2.17 1.46-2.17 2.97V20h-3V9h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.03 0 3.59 1.99 3.59 4.58V20z"
+                        ></path>
+                    </svg>
+                </a>
+
+                <!-- Instagram -->
+                <a
+                    href="https://instagram.com/tu_usuario"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <svg
+                        width="24"
+                        height="24"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.97.24 2.43.41.6.23 1.03.5 1.48.95.45.45.72.88.95 1.48.17.46.36 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.97-.41 2.43a3.66 3.66 0 01-.95 1.48 3.66 3.66 0 01-1.48.95c-.46.17-1.26.36-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.97-.24-2.43-.41a3.66 3.66 0 01-1.48-.95 3.66 3.66 0 01-.95-1.48c-.17-.46-.36-1.26-.41-2.43C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.97.41-2.43.23-.6.5-1.03.95-1.48.45-.45.88-.72 1.48-.95.46-.17 1.26-.36 2.43-.41C8.42 2.21 8.8 2.2 12 2.2zm0 1.8c-3.13 0-3.48.01-4.71.07-.97.05-1.5.22-1.85.37-.47.18-.81.39-1.16.74-.35.35-.56.69-.74 1.16-.15.35-.32.88-.37 1.85-.06 1.23-.07 1.58-.07 4.71s.01 3.48.07 4.71c.05.97.22 1.5.37 1.85.18.47.39.81.74 1.16.35.35.69.56 1.16.74.35.15.88.32 1.85.37 1.23.06 1.58.07 4.71.07s3.48-.01 4.71-.07c.97-.05 1.5-.22 1.85-.37.47-.18.81-.39 1.16-.74.35-.35.56-.69.74-1.16.15-.35.32-.88.37-1.85.06-1.23.07-1.58.07-4.71s-.01-3.48-.07-4.71c-.05-.97-.22-1.5-.37-1.85a2.87 2.87 0 00-.74-1.16 2.87 2.87 0 00-1.16-.74c-.35-.15-.88-.32-1.85-.37-1.23-.06-1.58-.07-4.71-.07zM12 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8zm5.2-10.84a1.44 1.44 0 110 2.88 1.44 1.44 0 010-2.88z"
+                        ></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- CURSOS -->
+        <div class="footer-cursos">
+            <h3
+                style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;"
+            >
+                CURSOS
+            </h3>
+            <ul style="list-style: none; padding: 0;">
+                <li>
+                    <a
+                        href="/cursos/fundamentos-python-1"
+                        style="color: white; text-decoration: none;"
+                        >› FUNDAMENTOS DE PYTHON 1</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="/cursos/fundamentos-python-2"
+                        style="color: white; text-decoration: none;"
+                        >› FUNDAMENTOS DE PYTHON 2</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="/cursos/js-essentials-1"
+                        style="color: white; text-decoration: none;"
+                        >› JAVASCRIPT ESSENTIALS 1</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="/cursos/js-essentials-2"
+                        style="color: white; text-decoration: none;"
+                        >› JAVASCRIPT ESSENTIALS 2</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="/cursos/analitica-datos"
+                        style="color: white; text-decoration: none;"
+                        >› CIENCIA Y ANALÍTICA DE DATOS</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="/cursos/ethical-hacker"
+                        style="color: white; text-decoration: none;"
+                        >› ETHICAL HACKER</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="/cursos/redes-basicas"
+                        style="color: white; text-decoration: none;"
+                        >› CONCEPTOS BÁSICOS DE REDES</a
+                    >
+                </li>
+                <li>
+                    <a
+                        href="/cursos/ciberseguridad-dispositivos"
+                        style="color: white; text-decoration: none;"
+                        >› CIBERSEGURIDAD EN DISPOSITIVOS FINALES</a
+                    >
+                </li>
+            </ul>
+        </div>
+
+        <!-- INFORMACIÓN -->
+        <div>
+            <h3
+                style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;"
+            >
+                INFORMACIÓN
+            </h3>
+            <p style="margin-bottom: 20px;">Danos tus recomendaciones</p>
+            {
+                !isLoggedIn ? (
+                    <a
+                        href="/"
+                        style="background-color: #C62828; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease;"
+                    >
+                        RECOMENDAR
+                    </a>
+                ) : (
+                    <a
+                        href="/Formularios/FormularioSolicitudCambioUsuario"
+                        style="background-color: #C62828; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease;"
+                    >
+                        SOLICITAR CAMBIOS
+                    </a>
+                )
+            }
+        </div>
     </div>
 
-    <!-- CURSOS -->
-    <div class="footer-cursos">
-      <h3 style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;">CURSOS</h3>
-      <ul style="list-style: none; padding: 0;">
-        <li><a href="/cursos/fundamentos-python-1" style="color: white; text-decoration: none;">› FUNDAMENTOS DE PYTHON 1</a></li>
-        <li><a href="/cursos/fundamentos-python-2" style="color: white; text-decoration: none;">› FUNDAMENTOS DE PYTHON 2</a></li>
-        <li><a href="/cursos/js-essentials-1" style="color: white; text-decoration: none;">› JAVASCRIPT ESSENTIALS 1</a></li>
-        <li><a href="/cursos/js-essentials-2" style="color: white; text-decoration: none;">› JAVASCRIPT ESSENTIALS 2</a></li>
-        <li><a href="/cursos/analitica-datos" style="color: white; text-decoration: none;">› CIENCIA Y ANALÍTICA DE DATOS</a></li>
-        <li><a href="/cursos/ethical-hacker" style="color: white; text-decoration: none;">› ETHICAL HACKER</a></li>
-        <li><a href="/cursos/redes-basicas" style="color: white; text-decoration: none;">› CONCEPTOS BÁSICOS DE REDES</a></li>
-        <li><a href="/cursos/ciberseguridad-dispositivos" style="color: white; text-decoration: none;">› CIBERSEGURIDAD EN DISPOSITIVOS FINALES</a></li>
-      </ul>
-    </div>
-
-    <!-- INFORMACIÓN -->
-    <div>
-      <h3 style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;">INFORMACIÓN</h3>
-      <p style="margin-bottom: 20px;">Danos tus recomendaciones</p>
-      <a href="/Formularios/FormularioSolicitudCambioUsuario" style="background-color: #C62828; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease;">SOLICITAR CAMBIOS</a>
-    </div>
-  </div>
-
-  <!-- Línea roja -->
-<hr style="
+    <!-- Línea roja -->
+    <hr
+        style="
   margin: 40px auto;
   border: none;
   height: 3px;
   max-width: 400px;
   background: linear-gradient(to right, transparent, #C62828, transparent);
   border-radius: 3px;
-" aria-hidden="true" />
+"
+        aria-hidden="true"
+    />
 
-
-
-  <div style="text-align: center; font-size: 14px;">
-    © Copyright © Universidad Técnica de Ambato
-  </div>
+    <div style="text-align: center; font-size: 14px;">
+        © Copyright © Universidad Técnica de Ambato
+    </div>
 </footer>
-
-
