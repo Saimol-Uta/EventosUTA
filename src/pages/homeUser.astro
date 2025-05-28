@@ -20,13 +20,10 @@ let eventos = [];
 let success = false;
 
 if (session && session.user) {
-    const user = session.user as CustomUser;
-    const idUsuario = user.id;
-    const nombre = user.name || "";
-    const rol = user.rol;
-
-    let eventos = [];
-    let success = false;
+  const user = session.user as CustomUser;
+  idUsuario = user.id;
+  nombreUsuario = user.name || "";
+  rol = user.rol;
 
     if (idUsuario) {
         const result = await Astro.callAction(actions.getEventosPorUsuario, {
