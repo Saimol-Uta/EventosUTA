@@ -27,150 +27,185 @@ const usuario = userData?.user
 const fecha = new Date().toLocaleDateString("es-ES");
 ---
 
-<form id="cambioForm">
-    <div class="container">
-        <div class="header custom-header center-text">SOLICITUD DE CAMBIO</div>
+<Layout>
+    <form id="cambioForm">
+        <div class="container">
+            <div class="header custom-header center-text">
+                SOLICITUD DE CAMBIO
+            </div>
 
-        <div class="info-top">
-            <div><strong>{usuario}</strong></div>
-            <div>{fecha}</div>
-            <div><strong>Nº Auto</strong></div>
-        </div>
+            <div class="info-top">
+                <div><strong>{usuario}</strong></div>
+                <div>{fecha}</div>
+                <div><strong>Nº Auto</strong></div>
+            </div>
 
-        <!-- Campo oculto para el ID del usuario -->
-        <input
-            type="hidden"
-            name="id_usuario"
-            value={userData?.user?.id_cue || ""}
-        />
-
-        <div class="section-title">ROL DEL SOLICITANTE</div>
-        <div class="radio-group center">
-            <label>
-                <input
-                    type="radio"
-                    name="rol_sol_cam"
-                    value="ESTUDIANTE"
-                    required
-                />
-                Estudiante
-            </label>
-            <label>
-                <input
-                    type="radio"
-                    name="rol_sol_cam"
-                    value="DOCENTE"
-                    required
-                />
-                Docente
-            </label>
-            <label>
-                <input
-                    type="radio"
-                    name="rol_sol_cam"
-                    value="GENERAL"
-                    required
-                />
-                Público General
-            </label>
-        </div>
-
-        <div class="section-title">DETALLES DEL CAMBIO</div>
-        <label for="des_cam">DESCRIPCIÓN DEL CAMBIO</label>
-        <textarea id="des_cam" name="des_cam" rows="3" required></textarea>
-
-        <label for="mot_cam">MOTIVO DEL CAMBIO</label>
-        <textarea id="mot_cam" name="mot_cam" rows="3" required></textarea>
-
-        <label>PRIORIDAD DEL CAMBIO</label>
-        <div class="radio-group prioridad">
-            <label>
-                <input type="radio" name="pri_cam" value="URGENTE" required />
-                Urgente
-            </label>
-            <label>
-                <input type="radio" name="pri_cam" value="ALTA" required />
-                Alta
-            </label>
-            <label>
-                <input type="radio" name="pri_cam" value="MEDIA" required />
-                Media
-            </label>
-            <label>
-                <input type="radio" name="pri_cam" value="BAJA" required />
-                Baja
-            </label>
-        </div>
-
-        <div class="section-title">TIPO DE CAMBIO</div>
-        <div class="radio-group tipo-cambio">
-            <label>
-                <input type="radio" name="tip_cam" value="PERMISO" required />
-                Permisos o acceso
-            </label>
-            <label>
-                <input type="radio" name="tip_cam" value="GRAFICO" required />
-                Gráfico
-            </label>
-            <label>
-                <input
-                    type="radio"
-                    name="tip_cam"
-                    value="CONFIGURACION"
-                    required
-                />
-                Configuraciones
-            </label>
-            <label>
-                <input type="radio" name="tip_cam" value="SEGURIDAD" required />
-                Seguridad y privacidad
-            </label>
-            <label>
-                <input type="radio" name="tip_cam" value="TECNICO" required />
-                Técnicos
-            </label>
-            <label>
-                <input type="radio" name="tip_cam" value="OTRO" required />
-                Otros
-            </label>
-        </div>
-
-        <div class="section-title">ORIGEN DE LA SOLICITUD DE CAMBIO</div>
-        <div class="radio-group center">
-            <label>
-                <input type="radio" name="ori_cam" value="FALLA" required />
-                Fallas
-            </label>
-            <label>
-                <input type="radio" name="ori_cam" value="MEJORA" required />
-                Solicitud de mejora
-            </label>
-        </div>
-
-        <div class="section-title">DOCUMENTOS O INFORMACIÓN ADICIONAL</div>
-        <div class="upload-card" id="uploadCard">
-            <p>Suba su documento</p>
+            <!-- Campo oculto para el ID del usuario -->
             <input
-                type="text"
-                name="archivo"
-                id="archivo"
-                placeholder="Ingrese el nombre del archivo o URL"
+                type="hidden"
+                name="id_usuario"
+                value={userData?.user?.id_cue || ""}
             />
+
+            <div class="section-title">ROL DEL SOLICITANTE</div>
+            <div class="radio-group center">
+                <label>
+                    <input
+                        type="radio"
+                        name="rol_sol_cam"
+                        value="ESTUDIANTE"
+                        required
+                    />
+                    Estudiante
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="rol_sol_cam"
+                        value="DOCENTE"
+                        required
+                    />
+                    Docente
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="rol_sol_cam"
+                        value="GENERAL"
+                        required
+                    />
+                    Público General
+                </label>
+            </div>
+
+            <div class="section-title">DETALLES DEL CAMBIO</div>
+            <label for="des_cam">DESCRIPCIÓN DEL CAMBIO</label>
+            <textarea id="des_cam" name="des_cam" rows="3" required></textarea>
+
+            <label for="mot_cam">MOTIVO DEL CAMBIO</label>
+            <textarea id="mot_cam" name="mot_cam" rows="3" required></textarea>
+
+            <label>PRIORIDAD DEL CAMBIO</label>
+            <div class="radio-group prioridad">
+                <label>
+                    <input
+                        type="radio"
+                        name="pri_cam"
+                        value="URGENTE"
+                        required
+                    />
+                    Urgente
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="ALTA" required />
+                    Alta
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="MEDIA" required />
+                    Media
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="BAJA" required />
+                    Baja
+                </label>
+            </div>
+
+            <div class="section-title">TIPO DE CAMBIO</div>
+            <div class="radio-group tipo-cambio">
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="PERMISO"
+                        required
+                    />
+                    Permisos o acceso
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="GRAFICO"
+                        required
+                    />
+                    Gráfico
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="CONFIGURACION"
+                        required
+                    />
+                    Configuraciones
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="SEGURIDAD"
+                        required
+                    />
+                    Seguridad y privacidad
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="TECNICO"
+                        required
+                    />
+                    Técnicos
+                </label>
+                <label>
+                    <input type="radio" name="tip_cam" value="OTRO" required />
+                    Otros
+                </label>
+            </div>
+
+            <div class="section-title">ORIGEN DE LA SOLICITUD DE CAMBIO</div>
+            <div class="radio-group center">
+                <label>
+                    <input type="radio" name="ori_cam" value="FALLA" required />
+                    Fallas
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="ori_cam"
+                        value="MEJORA"
+                        required
+                    />
+                    Solicitud de mejora
+                </label>
+            </div>
+
+            <div class="section-title">DOCUMENTOS O INFORMACIÓN ADICIONAL</div>
+            <div class="upload-card" id="uploadCard">
+                <p>Suba su documento</p>
+                <input
+                    type="text"
+                    name="archivo"
+                    id="archivo"
+                    placeholder="Ingrese el nombre del archivo o URL"
+                />
+            </div>
+
+            <div id="message" class="message" style="display: none;"></div>
+
+            <div class="form-buttons">
+                <a href="/">
+                    <button type="button" class="btn-secondary">
+                        Regresar
+                    </button>
+                </a>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    Enviar Solicitud
+                </button>
+            </div>
         </div>
-
-        <div id="message" class="message" style="display: none;"></div>
-
-        <div class="form-buttons">
-            <a href="/">
-                <button type="button" class="btn-secondary"> Regresar </button>
-            </a>
-            <button type="submit" class="btn-primary" id="submitBtn">
-                Enviar Solicitud
-            </button>
-        </div>
-    </div>
-</form>
-
+    </form>
+</Layout>
 <script>
     import { actions } from "astro:actions";
     import Swal from "sweetalert2";
