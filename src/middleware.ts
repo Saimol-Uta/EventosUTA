@@ -35,7 +35,13 @@ function isRouteAllowed(pathname: string, allowedRoutes: string[]): boolean {
 
 export const onRequest = defineMiddleware(async ({ url, request, locals, redirect }, next) => {
 
+    // Permitir rutas de autenticación
     if (url.pathname.startsWith('/api/auth/')) {
+        return next();
+    }
+
+    // ✅ AGREGAR ESTA LÍNEA - Permitir acciones de Astro
+    if (url.pathname.startsWith('/_actions/')) {
         return next();
     }
 
