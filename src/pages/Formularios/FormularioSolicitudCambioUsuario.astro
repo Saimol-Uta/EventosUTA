@@ -2,202 +2,313 @@
 import "../../styles/FormularioSolicitudCambioUsuario.css";
 import Layout from "../../layouts/Layout.astro";
 import { createCambio } from "../../actions/Cambios/set-Cambios-formulario.action";
+
+// Obtener información del usuario (esto debería venir de la sesión)
+const usuario = "Carol Cañizares"; // Reemplazar con datos reales de la sesión
+const fecha = new Date().toLocaleDateString("es-ES");
 ---
 
 <Layout>
-    <form method="POST" enctype="multipart/form-data" action={createCambio}>
-        <!-- Contenedor principal -->
+    <form
+        id="cambioForm"
+        method="POST"
+        enctype="multipart/form-data"
+        action={createCambio}
+    >
         <div class="container">
-            <!-- Título principal del formulario centrado -->
             <div class="header custom-header center-text">
                 SOLICITUD DE CAMBIO
             </div>
 
-            <!-- Encabezado con datos del solicitante y número -->
             <div class="info-top">
-                <div><strong>Carol Cañizares</strong></div>
-                <div>21/05/2025</div>
-                <div><strong>Nº 1</strong></div>
+                <div><strong>{usuario}</strong></div>
+                <div>{fecha}</div>
+                <div><strong>Nº Auto</strong></div>
             </div>
 
-            <!-- Sección para seleccionar el rol del solicitante -->
             <div class="section-title">ROL DEL SOLICITANTE</div>
             <div class="radio-group center">
-                <label
-                    ><input
+                <label>
+                    <input
                         type="radio"
                         name="rol_sol_cam"
                         value="ESTUDIANTE"
-                    />Estudiante</label
-                >
-                <label
-                    ><input
+                        required
+                    />
+                    Estudiante
+                </label>
+                <label>
+                    <input
                         type="radio"
                         name="rol_sol_cam"
                         value="DOCENTE"
-                    />Docente</label
-                >
-                <label
-                    ><input
+                        required
+                    />
+                    Docente
+                </label>
+                <label>
+                    <input
                         type="radio"
                         name="rol_sol_cam"
                         value="GENERAL"
-                    />Público General</label
-                >
+                        required
+                    />
+                    Público General
+                </label>
             </div>
 
-            <!-- Sección de descripción del cambio solicitado -->
             <div class="section-title">DETALLES DEL CAMBIO</div>
             <label for="des_cam">DESCRIPCIÓN DEL CAMBIO</label>
-            <textarea id="des_cam" name="des_cam" rows="3"></textarea>
+            <textarea id="des_cam" name="des_cam" rows="3" required></textarea>
 
-            <!-- Sección del motivo por el cual se solicita el cambio -->
             <label for="mot_cam">MOTIVO DEL CAMBIO</label>
-            <textarea id="mot_cam" name="mot_cam" rows="3"></textarea>
+            <textarea id="mot_cam" name="mot_cam" rows="3" required></textarea>
 
-            <!-- Prioridad del cambio a solicitar -->
             <label>PRIORIDAD DEL CAMBIO</label>
             <div class="radio-group prioridad">
-                <label
-                    ><input
+                <label>
+                    <input
                         type="radio"
                         name="pri_cam"
                         value="Urgente"
-                    />Urgente</label
-                >
-                <label
-                    ><input
-                        type="radio"
-                        name="pri_cam"
-                        value="Alta"
-                    />Alta</label
-                >
-                <label
-                    ><input
-                        type="radio"
-                        name="pri_cam"
-                        value="Media"
-                    />Media</label
-                >
-                <label
-                    ><input
-                        type="radio"
-                        name="pri_cam"
-                        value="Baja"
-                    />Baja</label
-                >
+                        required
+                    />
+                    Urgente
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="Alta" required />
+                    Alta
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="Media" required />
+                    Media
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="Baja" required />
+                    Baja
+                </label>
             </div>
 
-            <!-- Tipos de cambio posibles ahora como radio-group con distribución uniforme -->
             <div class="section-title">TIPO DE CAMBIO</div>
             <div class="radio-group tipo-cambio">
-                <label
-                    ><input
+                <label>
+                    <input
                         type="radio"
                         name="tip_cam"
                         value="Permisos"
-                    />Permisos o acceso</label
-                >
-                <label
-                    ><input
+                        required
+                    />
+                    Permisos o acceso
+                </label>
+                <label>
+                    <input
                         type="radio"
                         name="tip_cam"
                         value="Gráfico"
-                    />Gráfico</label
-                >
-                <label
-                    ><input
+                        required
+                    />
+                    Gráfico
+                </label>
+                <label>
+                    <input
                         type="radio"
                         name="tip_cam"
                         value="Configuraciones"
-                    />Configuraciones</label
-                >
-                <label
-                    ><input
+                        required
+                    />
+                    Configuraciones
+                </label>
+                <label>
+                    <input
                         type="radio"
                         name="tip_cam"
                         value="Seguridad"
-                    />Seguridad y privacidad</label
-                >
-                <label
-                    ><input
+                        required
+                    />
+                    Seguridad y privacidad
+                </label>
+                <label>
+                    <input
                         type="radio"
                         name="tip_cam"
                         value="Técnicos"
-                    />Técnicos</label
-                >
-                <label
-                    ><input
-                        type="radio"
-                        name="tip_cam"
-                        value="Otros"
-                    />Otros</label
-                >
+                        required
+                    />
+                    Técnicos
+                </label>
+                <label>
+                    <input type="radio" name="tip_cam" value="Otros" required />
+                    Otros
+                </label>
             </div>
 
-            <!-- Origen del cambio solicitado -->
             <div class="section-title">ORIGEN DE LA SOLICITUD DE CAMBIO</div>
             <div class="radio-group center">
-                <label
-                    ><input
+                <label>
+                    <input
                         type="radio"
                         name="ori_cam"
                         value="Fallas"
-                    />Fallas</label
-                >
-                <label
-                    ><input
+                        required
+                    />
+                    Fallas
+                </label>
+                <label>
+                    <input
                         type="radio"
                         name="ori_cam"
                         value="Mejora"
-                    />Solicitud de mejora</label
-                >
+                        required
+                    />
+                    Solicitud de mejora
+                </label>
             </div>
 
-            <!-- Adjuntar archivos o imágenes adicionales -->
             <div class="section-title">DOCUMENTOS O INFORMACIÓN ADICIONAL</div>
-            <div
-                class="upload-card"
-                ondragover="handleDragOver(event)"
-                ondragleave="handleDragLeave(event)"
-                ondrop="handleDrop(event)"
-            >
+            <div class="upload-card" id="uploadCard">
                 <p>Suba su documento</p>
-                <input type="file" name="archivo" />
+                <input
+                    type="file"
+                    name="archivo"
+                    id="archivo"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
             </div>
 
-            <!-- Botones de acción del formulario -->
+            <div id="message" class="message" style="display: none;"></div>
+
             <div class="form-buttons">
                 <a href="/">
                     <button type="button" class="btn-secondary">
                         Regresar
                     </button>
                 </a>
-                <button type="submit" class="btn-primary">
+                <button type="submit" class="btn-primary" id="submitBtn">
                     Enviar Solicitud
                 </button>
             </div>
         </div>
     </form>
 </Layout>
+
 <script>
+    import { actions } from "astro:actions";
+
+    // Elementos del DOM
+    const form = document.getElementById("cambioForm") as HTMLFormElement;
+    const uploadCard = document.getElementById("uploadCard") as HTMLElement;
+    const fileInput = document.getElementById("archivo") as HTMLInputElement;
+    const messageDiv = document.getElementById("message") as HTMLElement;
+    const submitBtn = document.getElementById("submitBtn") as HTMLButtonElement;
+
+    // Manejo del envío del formulario
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Deshabilitar botón de envío
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Enviando...";
+
+        try {
+            // Obtener datos del formulario
+            const formData = new FormData(form);
+
+            // Validar campos requeridos
+            const requiredFields = [
+                "rol_sol_cam",
+                "des_cam",
+                "mot_cam",
+                "pri_cam",
+                "tip_cam",
+                "ori_cam",
+            ];
+            for (const field of requiredFields) {
+                if (!formData.get(field)) {
+                    throw new Error(`El campo ${field} es requerido`);
+                }
+            }
+
+            // Llamar a la acción
+            const { data, error } = await actions.createCambio(formData);
+
+            if (error) {
+                showMessage(
+                    "Error al enviar la solicitud: " + error.message,
+                    "error",
+                );
+            }
+        } catch (error) {
+            showMessage("Error: " + (error as Error).message, "error");
+        } finally {
+            // Rehabilitar botón
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Enviar Solicitud";
+        }
+    });
+
+    // Función para mostrar mensajes
+    function showMessage(message: string, type: "success" | "error") {
+        messageDiv.textContent = message;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = "block";
+
+        // Ocultar mensaje después de 5 segundos
+        setTimeout(() => {
+            messageDiv.style.display = "none";
+        }, 5000);
+    }
+
+    // Manejo de drag and drop para archivos
     function handleDragOver(event: DragEvent) {
         event.preventDefault();
-        (event.currentTarget as HTMLElement).classList.add("dragover");
+        uploadCard.classList.add("dragover");
     }
 
     function handleDragLeave(event: DragEvent) {
-        (event.currentTarget as HTMLElement).classList.remove("dragover");
+        uploadCard.classList.remove("dragover");
     }
 
     function handleDrop(event: DragEvent) {
         event.preventDefault();
-        const fileInput = document.querySelector(
-            "input[name='archivo']",
-        ) as HTMLInputElement | null;
         if (event.dataTransfer && fileInput) {
             fileInput.files = event.dataTransfer.files;
         }
-        (event.currentTarget as HTMLElement).classList.remove("dragover");
+        uploadCard.classList.remove("dragover");
     }
+
+    // Agregar event listeners para drag and drop
+    uploadCard.addEventListener("dragover", handleDragOver);
+    uploadCard.addEventListener("dragleave", handleDragLeave);
+    uploadCard.addEventListener("drop", handleDrop);
 </script>
+
+<style>
+    .message {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .message.success {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    .message.error {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .dragover {
+        border: 2px dashed #007bff;
+        background-color: #f8f9fa;
+    }
+</style>
