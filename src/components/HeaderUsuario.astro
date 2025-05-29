@@ -1,8 +1,22 @@
 ---
 import Menu from '../components/ComponenteMenuConfiguraciones.astro';
-const userName = 'Usuario ';
-const userImage = '/img/usuario.png';
+let nombreUsuario = '';
+let userImage = '/img/usuario.png';
 import "../styles/global.css";
+import { getSession } from 'auth-astro/server';
+import type { CustomUser } from '../../auth.config';
+
+const session = await getSession(Astro.request);
+let idUsuario = '';
+
+let rol = '';
+
+if (session && session.user) {
+  const user = session.user as CustomUser;
+  idUsuario = user.id;
+  nombreUsuario = user.name || "";
+  rol = user.rol;
+   }
 ---
 <head>
 </head>
@@ -23,7 +37,7 @@ import "../styles/global.css";
       </svg>
       <span class="text">Verifica tu certificado</span>
     </a>
-        <Menu userName={userName} userImage={userImage} />
+        <Menu userName={nombreUsuario} userImage={userImage} />
   </div>
 </header>
 
