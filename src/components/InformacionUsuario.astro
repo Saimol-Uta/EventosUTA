@@ -9,9 +9,21 @@ interface Campo {
 
 interface Props {
   camposFormulario: Campo[];
+  mostrarBotones?: boolean;
+  textoBotonPrincipal?: string;
+  textoBotonSecundario?: string;
 }
 
-const { camposFormulario } = Astro.props as Props;
+const {
+  camposFormulario,
+  mostrarBotones = true,
+  textoBotonPrincipal = "Guardar Información",
+  textoBotonSecundario = "Más Tarde"
+} = Astro.props as Props;
+
+const usuarioExiste = camposFormulario.some(
+  campo => campo.name !== 'contrasena' && campo.valor.trim() !== ''
+);
 ---
 
 <section class="formulario-container">
@@ -26,9 +38,21 @@ const { camposFormulario } = Astro.props as Props;
       />
     ))}
 
-    <div class="formulario-boton">
-      <button type="submit">Editar</button>
-    </div>
+    {mostrarBotones && (
+      <div class="formulario-boton">
+        {usuarioExiste ? (
+          <>
+            <button type="submit">{textoBotonPrincipal}</button>
+            <button type="button" onclick="location.reload()">{textoBotonSecundario}</button>
+          </>
+        ) : (
+          <>
+            <button type="button">{textoBotonPrincipal}</button>
+            <button type="submit">{textoBotonSecundario}</button>
+          </>
+        )}
+      </div>
+    )}
   </form>
 </section>
 
@@ -71,6 +95,7 @@ const { camposFormulario } = Astro.props as Props;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  margin: 0 10px;
 }
 
 .formulario-boton button:hover {
