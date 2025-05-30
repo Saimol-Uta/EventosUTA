@@ -1,62 +1,82 @@
 ---
-import InformacionUsuarioItem from "../components/InformacionUsuarioItem.astro";
 import InformacionUsuario from "../components/InformacionUsuario.astro";
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
-
 import Navbar from "../components/Navbar.astro";
+import { actions, type SafeResult } from 'astro:actions';
+import type { ResultadoGetUser, Usuario } from '../actions/Users/getUserByCedula.action';
 
 const method = Astro.request.method;
+
 let cedulaIngresada = "";
 let mostrarFormulario = false;
 let mostrarError = false;
 let usuarioExistente = false;
+let usuario: Usuario | null = null;
+
+function formatDate(date: string | Date | null): string {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toISOString().substring(0, 10);
+}
 
 if (method === "POST") {
-const formData = await Astro.request.formData();
-const resetForm = formData.get("reset") === "true";
+  const formData = await Astro.request.formData();
+  const resetForm = formData.get("reset") === "true";
 
-if (resetForm) {
-  // No mostrar nada, volver al paso inicial con campos limpios
-  cedulaIngresada = "";
-  mostrarFormulario = false;
-  mostrarError = false;
-  usuarioExistente = false;
-} else {
-  cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-
-  if (/^\d{10}$/.test(cedulaIngresada)) {
-    mostrarFormulario = true;
-    if (cedulaIngresada === "1851014348") {
-      usuarioExistente = true;
-    }
+  if (resetForm) {
+    cedulaIngresada = "";
+    mostrarFormulario = false;
+    mostrarError = false;
+    usuarioExistente = false;
+    usuario = null;
   } else {
-    mostrarError = true;
+    cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
+
+    if (/^\d{10}$/.test(cedulaIngresada)) {
+      mostrarFormulario = true;
+
+      // Aquí está la corrección importante:
+      const resultado = await Astro.callAction(actions.getUserByCedula, { ced_usu: cedulaIngresada });
+
+      const data = resultado.data;
+      if (data?.encontrado) {
+        usuarioExistente = true;
+        usuario = data.usuario ?? null;
+      } else {
+        usuarioExistente = false;
+        usuario = null;
+      }
+
+      mostrarError = false;
+    } else {
+      mostrarError = true;
+      mostrarFormulario = false;
+      usuarioExistente = false;
+      usuario = null;
+    }
   }
 }
-}
-
 
 const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
-  { titulo: "Primer nombre", valor: usuarioExistente ? "Marlon" : "", name: "nom_usu1" },
-  { titulo: "Segundo nombre", valor: usuarioExistente ? "Steven" : "", name: "nom_usu2" },
-  { titulo: "Primer apellido", valor: usuarioExistente ? "Guevara" : "", name: "ape_usu1" },
-  { titulo: "Segundo apellido", valor: usuarioExistente ? "Panimboza" : "", name: "ape_usu2" },
-  { titulo: "Fecha de nacimiento", valor: usuarioExistente ? "2004-02-18" : "", name: "fec_nac_usu" },
-  { titulo: "Teléfono", valor: usuarioExistente ? "0999988776" : "", name: "num_tel_usu" },
+  { titulo: "Primer nombre", valor: usuarioExistente ? usuario?.nom_usu1 ?? "" : "", name: "nom_usu1" },
+  { titulo: "Segundo nombre", valor: usuarioExistente ? usuario?.nom_usu2 ?? "" : "", name: "nom_usu2" },
+  { titulo: "Primer apellido", valor: usuarioExistente ? usuario?.ape_usu1 ?? "" : "", name: "ape_usu1" },
+  { titulo: "Segundo apellido", valor: usuarioExistente ? usuario?.ape_usu2 ?? "" : "", name: "ape_usu2" },
+  { titulo: "Fecha de nacimiento", valor: usuarioExistente ? formatDate(usuario?.fec_nac_usu ?? null) : "", name: "fec_nac_usu" },
+  { titulo: "Teléfono", valor: usuarioExistente ? usuario?.num_tel_usu ?? "" : "", name: "num_tel_usu" },
   { titulo: "Contraseña", valor: "", name: "contrasena" },
-  { titulo: "Carrera", valor: usuarioExistente ? "Software" : "", name: "id_car_per" }
+  { titulo: "Carrera", valor: usuarioExistente ? usuario?.id_car_per ?? "" : "", name: "id_car_per" }
 ];
 
 const textoPrincipal = usuarioExistente ? "Asociar este usuario a la cuenta" : "Guardar Información";
 const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
-const eventoSecundario = usuarioExistente ? "cancelarFormulario()" : "location.reload()";
+const eventoSecundario = usuarioExistente ? "vaciarCampos()" : "location.reload()";
 ---
 
 <Layout>
   <Header />
-
   <Navbar />
 
   <div class="bg-gray-100 min-h-screen py-10">
@@ -94,11 +114,11 @@ const eventoSecundario = usuarioExistente ? "cancelarFormulario()" : "location.r
           )}
         </form>
       )}
+
     </div>
   </div>
 </Layout>
 
-// Script para manejar el evento de cancelar el formulario
 <script is:inline>
   function vaciarCampos() {
     const form = document.createElement('form');
@@ -114,8 +134,6 @@ const eventoSecundario = usuarioExistente ? "cancelarFormulario()" : "location.r
     form.submit();
   }
 </script>
-
-
 
 <style>
 .formulario-container {
@@ -177,4 +195,3 @@ const eventoSecundario = usuarioExistente ? "cancelarFormulario()" : "location.r
   background-color: #a00;
 }
 </style>
-
