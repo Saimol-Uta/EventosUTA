@@ -1,0 +1,27 @@
+---
+import Header from "../components/HeaderUsuario.astro";
+import NavBar from "../components/Navbar.astro";
+import MenuAdmin from "../components/MenuAdministrador.astro";
+import Layout from "../layouts/Layout.astro";
+import Contenedor from "../components/ContenedorCambios.astro";
+const links = [
+  { label: "Eventos", href: "/" },
+  { label: "Usuarios", href: "/perfil" },
+  { label: "Organizadores", href: "/historial" },
+  { label: "Inscripciones", href: "/historial" },
+  { label: "Categorías", href: "/historial" },
+  { label: "Carreras", href: "/historial" },
+  { label: "Solicitudes", href: "/RevisionSolicitudCambios" },
+];
+---
+
+<Layout>
+  <body>
+    <Header />
+    <NavBar />
+    <MenuAdmin links={links} />
+    <Contenedor />
+
+
+  </body>
+</Layout>
