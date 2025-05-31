@@ -65,32 +65,53 @@ if (method === "POST") {
 
     if (formData.has("nom_usu1")) {
       const resultadoGuardar = await Astro.callAction(actions.setUser, formData);
+      console.log("Resultado guardar usuario:", resultadoGuardar);
+
       const resultadoGuardarAny = resultadoGuardar as any;
 
       if ("success" in resultadoGuardarAny && resultadoGuardarAny.success) {
-        mostrarFormulario = false;
-        usuarioExistente = false;
-        usuario = null;
-        cedulaIngresada = "";
-        mostrarError = false;
+        mostrarFormulario = true;
         mensajeGuardado = "Se guardó con éxito.";
+
+        usuarioExistente = true;
+
+        const fechaString = formData.get("fec_nac_usu")?.toString() ?? "";
+        const fecha = new Date(fechaString);
+        const fechaValida = !isNaN(fecha.getTime()) ? fecha : new Date("1900-01-01");
+
+        usuario = {
+          id_usu: "",
+          nom_usu1: formData.get("nom_usu1")?.toString() ?? "",
+          nom_usu2: formData.get("nom_usu2")?.toString() ?? "",
+          ape_usu1: formData.get("ape_usu1")?.toString() ?? "",
+          ape_usu2: formData.get("ape_usu2")?.toString() ?? "",
+          fec_nac_usu: fechaValida,
+          num_tel_usu: formData.get("num_tel_usu")?.toString() ?? "",
+          id_car_per: formData.get("id_car_per")?.toString() ?? "",
+          ced_usu: cedulaIngresada,
+        };
+
       } else {
         mostrarError = true;
         mostrarFormulario = true;
 
-        if (typeof resultadoGuardarAny.error === "string") {
-          mensajeGuardado = resultadoGuardarAny.error;
-        } else if (
-          resultadoGuardarAny.error &&
-          typeof resultadoGuardarAny.error === "object" &&
-          Array.isArray(resultadoGuardarAny.error.errors) &&
-          resultadoGuardarAny.error.errors.length > 0
-        ) {
-          mensajeGuardado = resultadoGuardarAny.error.errors[0];
-        } else {
-          mensajeGuardado = "No se pudo guardar. Intente de nuevo.";
-        }
-      }
+         
+       if (resultadoGuardarAny.error) {
+    if (typeof resultadoGuardarAny.error === "string") {
+      mensajeGuardado = resultadoGuardarAny.error;
+    } else if (
+      typeof resultadoGuardarAny.error === "object" &&
+      Array.isArray(resultadoGuardarAny.error.errors) &&
+      resultadoGuardarAny.error.errors.length > 0
+    ) {
+      mensajeGuardado = resultadoGuardarAny.error.errors[0];
+    } else {
+      mensajeGuardado = "No se pudo guardar. Intente de nuevo.";
+    }
+  } else {
+    mensajeGuardado = null; // No mostrar mensaje si no hay error
+  }
+}
     } else {
       if (validarCedula(cedulaIngresada)) {
         mostrarFormulario = true;
@@ -98,8 +119,10 @@ if (method === "POST") {
         const resultado = await Astro.callAction(actions.getUserByCedula, {
           ced_usu: cedulaIngresada,
         });
+        console.log("Resultado getUserByCedula al ingresar cédula:", resultado);
 
         const data = resultado.data;
+
         if (data?.encontrado) {
           usuarioExistente = true;
           usuario = data.usuario ?? null;
@@ -125,37 +148,37 @@ const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
   {
     titulo: "Primer nombre",
-    valor: usuarioExistente ? usuario?.nom_usu1 ?? "" : "",
+    valor: usuario?.nom_usu1 ?? "",
     name: "nom_usu1",
   },
   {
     titulo: "Segundo nombre",
-    valor: usuarioExistente ? usuario?.nom_usu2 ?? "" : "",
+    valor: usuario?.nom_usu2 ?? "",
     name: "nom_usu2",
   },
   {
     titulo: "Primer apellido",
-    valor: usuarioExistente ? usuario?.ape_usu1 ?? "" : "",
+    valor: usuario?.ape_usu1 ?? "",
     name: "ape_usu1",
   },
   {
     titulo: "Segundo apellido",
-    valor: usuarioExistente ? usuario?.ape_usu2 ?? "" : "",
+    valor: usuario?.ape_usu2 ?? "",
     name: "ape_usu2",
   },
   {
     titulo: "Fecha de nacimiento",
-    valor: usuarioExistente ? formatDate(usuario?.fec_nac_usu ?? null) : "",
+    valor: formatDate(usuario?.fec_nac_usu ?? null),
     name: "fec_nac_usu",
   },
   {
     titulo: "Teléfono",
-    valor: usuarioExistente ? usuario?.num_tel_usu ?? "" : "",
+    valor: usuario?.num_tel_usu ?? "",
     name: "num_tel_usu",
   },
   {
     titulo: "Carrera",
-    valor: usuarioExistente ? usuario?.id_car_per ?? "" : "",
+    valor: usuario?.id_car_per ?? "",
     name: "id_car_per",
   },
 ];
@@ -180,7 +203,6 @@ const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
               ? "mensaje-exito"
               : "mensaje-error"
           }`}
-          style="max-width: 500px; margin: 0 auto 1rem auto; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 16px;"
         >
           {mensajeGuardado}
         </p>
@@ -224,28 +246,6 @@ const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
     </div>
   </div>
 </Layout>
-
-<script is:inline>
-  function vaciarCampos() {
-    const form = document.createElement("form");
-    form.method = "POST";
-
-    const inputReset = document.createElement("input");
-    inputReset.type = "hidden";
-    inputReset.name = "reset";
-    inputReset.value = "true";
-
-    const inputCedula = document.createElement("input");
-    inputCedula.type = "hidden";
-    inputCedula.name = "ced_usu";
-    inputCedula.value = document.getElementById("ced_usu").value || "";
-
-    form.appendChild(inputReset);
-    form.appendChild(inputCedula);
-    document.body.appendChild(form);
-    form.submit();
-  }
-</script>
 
 <style>
   .formulario-container {
@@ -307,7 +307,6 @@ const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
     background-color: #a00;
   }
 
-  /* Mensajes guardado */
   .mensaje-guardado {
     max-width: 500px;
     margin: 0 auto 1rem auto;
@@ -319,14 +318,14 @@ const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
   }
 
   .mensaje-exito {
-    background-color: #d1fae5; /* verde claro */
-    color: #065f46; /* verde oscuro */
+    background-color: #d1fae5;
+    color: #065f46;
     border: 1px solid #10b981;
   }
 
   .mensaje-error {
-    background-color: #fee2e2; /* rojo claro */
-    color: #991b1b; /* rojo oscuro */
+    background-color: #fee2e2;
+    color: #991b1b;
     border: 1px solid #ef4444;
   }
 </style>
