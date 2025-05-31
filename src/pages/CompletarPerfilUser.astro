@@ -3,11 +3,8 @@ import InformacionUsuario from "../components/InformacionUsuario.astro";
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Navbar from "../components/Navbar.astro";
-import { actions, type SafeResult } from "astro:actions";
-import type {
-  ResultadoGetUser,
-  Usuario,
-} from "../actions/Users/getUserByCedula.action";
+import { actions } from "astro:actions";
+import type { Usuario } from "../actions/Users/getUserByCedula.action";
 
 const method = Astro.request.method;
 
@@ -56,37 +53,52 @@ if (method === "POST") {
   const resetForm = formData.get("reset") === "true";
 
   if (resetForm) {
-    cedulaIngresada = "";
-    mostrarFormulario = false;
+    cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
+    mostrarFormulario = true;
     mostrarError = false;
     usuarioExistente = false;
     usuario = null;
   } else {
     cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
 
-    if (validarCedula(cedulaIngresada)) {
-      mostrarFormulario = true;
+    if (formData.has("nom_usu1")) {
+      // Guardar datos con setUser action, pasando FormData directo
+      const resultadoGuardar = await Astro.callAction(actions.setUser, formData);
 
-      // Aquí está la corrección importante:
-      const resultado = await Astro.callAction(actions.getUserByCedula, {
-        ced_usu: cedulaIngresada,
-      });
-
-      const data = resultado.data;
-      if (data?.encontrado) {
-        usuarioExistente = true;
-        usuario = data.usuario ?? null;
+      if ("success" in resultadoGuardar && resultadoGuardar.success) {
+        mostrarFormulario = false;
+        usuarioExistente = false;
+        usuario = null;
+        cedulaIngresada = "";
+        mostrarError = false;
       } else {
+        mostrarError = true;
+        mostrarFormulario = true;
+      }
+    } else {
+      if (validarCedula(cedulaIngresada)) {
+        mostrarFormulario = true;
+
+        const resultado = await Astro.callAction(actions.getUserByCedula, {
+          ced_usu: cedulaIngresada,
+        });
+
+        const data = resultado.data;
+        if (data?.encontrado) {
+          usuarioExistente = true;
+          usuario = data.usuario ?? null;
+        } else {
+          usuarioExistente = false;
+          usuario = null;
+        }
+
+        mostrarError = false;
+      } else {
+        mostrarError = true;
+        mostrarFormulario = false;
         usuarioExistente = false;
         usuario = null;
       }
-
-      mostrarError = false;
-    } else {
-      mostrarError = true;
-      mostrarFormulario = false;
-      usuarioExistente = false;
-      usuario = null;
     }
   }
 }
@@ -95,22 +107,22 @@ const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
   {
     titulo: "Primer nombre",
-    valor: usuarioExistente ? (usuario?.nom_usu1 ?? "") : "",
+    valor: usuarioExistente ? usuario?.nom_usu1 ?? "" : "",
     name: "nom_usu1",
   },
   {
     titulo: "Segundo nombre",
-    valor: usuarioExistente ? (usuario?.nom_usu2 ?? "") : "",
+    valor: usuarioExistente ? usuario?.nom_usu2 ?? "" : "",
     name: "nom_usu2",
   },
   {
     titulo: "Primer apellido",
-    valor: usuarioExistente ? (usuario?.ape_usu1 ?? "") : "",
+    valor: usuarioExistente ? usuario?.ape_usu1 ?? "" : "",
     name: "ape_usu1",
   },
   {
     titulo: "Segundo apellido",
-    valor: usuarioExistente ? (usuario?.ape_usu2 ?? "") : "",
+    valor: usuarioExistente ? usuario?.ape_usu2 ?? "" : "",
     name: "ape_usu2",
   },
   {
@@ -120,13 +132,12 @@ const camposFormulario = [
   },
   {
     titulo: "Teléfono",
-    valor: usuarioExistente ? (usuario?.num_tel_usu ?? "") : "",
+    valor: usuarioExistente ? usuario?.num_tel_usu ?? "" : "",
     name: "num_tel_usu",
   },
-  // { titulo: "Contraseña", valor: "", name: "contrasena" },
   {
     titulo: "Carrera",
-    valor: usuarioExistente ? (usuario?.id_car_per ?? "") : "",
+    valor: usuarioExistente ? usuario?.id_car_per ?? "" : "",
     name: "id_car_per",
   },
 ];
@@ -135,9 +146,8 @@ const textoPrincipal = usuarioExistente
   ? "Asociar este usuario a la cuenta"
   : "Guardar Información";
 const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
-const eventoSecundario = usuarioExistente
-  ? "vaciarCampos()"
-  : "location.reload()";
+//const eventoSecundario = usuarioExistente ? vaciarCampos : () => location.reload();
+
 ---
 
 <Layout>
@@ -146,43 +156,41 @@ const eventoSecundario = usuarioExistente
 
   <div class="bg-gray-100 min-h-screen py-10">
     <div class="max-w-3xl mx-auto px-4 text-center">
-      {
-        mostrarFormulario ? (
-          <InformacionUsuario
-            camposFormulario={camposFormulario}
-            mostrarBotones={true}
-            textoBotonPrincipal={textoPrincipal}
-            textoBotonSecundario={textoSecundario}
-          />
-        ) : (
-          <form method="POST" class="formulario-container formulario-grid">
-            <div class="campo-item">
-              <label for="ced_usu">Ingrese su número de Cédula</label>
-              <input
-                type="text"
-                id="ced_usu"
-                name="ced_usu"
-                value={cedulaIngresada}
-                placeholder="Ej. 0101010101"
-                required
-                maxlength="10"
-                inputmode="numeric"
-                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-              />
-            </div>
+      {mostrarFormulario ? (
+        <InformacionUsuario
+          camposFormulario={camposFormulario}
+          mostrarBotones={true}
+          textoBotonPrincipal={textoPrincipal}
+          textoBotonSecundario={textoSecundario}
+        />
+      ) : (
+        <form method="POST" class="formulario-container formulario-grid">
+          <div class="campo-item">
+            <label for="ced_usu">Ingrese su número de Cédula</label>
+            <input
+              type="text"
+              id="ced_usu"
+              name="ced_usu"
+              value={cedulaIngresada}
+              placeholder="Ej. 0101010101"
+              required
+              maxlength="10"
+              inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+            />
+          </div>
 
-            <div class="formulario-boton">
-              <button type="submit">Continuar</button>
-            </div>
+          <div class="formulario-boton">
+            <button type="submit">Continuar</button>
+          </div>
 
-            {mostrarError && (
-              <p class="text-red-600 text-sm mt-2" style="grid-column: 1 / -1;">
-                Cédula inválida.
-              </p>
-            )}
-          </form>
-        )
-      }
+          {mostrarError && (
+            <p class="text-red-600 text-sm mt-2" style="grid-column: 1 / -1;">
+              Cédula inválida.
+            </p>
+          )}
+        </form>
+      )}
     </div>
   </div>
 </Layout>
@@ -192,12 +200,18 @@ const eventoSecundario = usuarioExistente
     const form = document.createElement("form");
     form.method = "POST";
 
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "reset";
-    input.value = "true";
+    const inputReset = document.createElement("input");
+    inputReset.type = "hidden";
+    inputReset.name = "reset";
+    inputReset.value = "true";
 
-    form.appendChild(input);
+    const inputCedula = document.createElement("input");
+    inputCedula.type = "hidden";
+    inputCedula.name = "ced_usu";
+    inputCedula.value = document.getElementById("ced_usu").value || "";
+
+    form.appendChild(inputReset);
+    form.appendChild(inputCedula);
     document.body.appendChild(form);
     form.submit();
   }

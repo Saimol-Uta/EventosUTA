@@ -21,7 +21,6 @@ export const getUser = defineAction({
           fec_nac_usu: true,
           num_tel_usu: true,
           id_car_per: true,
-          // Incluye más campos que necesites
         }
       });
 

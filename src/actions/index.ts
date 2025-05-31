@@ -4,6 +4,7 @@ import { getEventosPorUsuario } from './Eventos/getEventosPorUsuario'
 import { createCambio } from './Cambios';
 import { getUseById } from './auth';
 import { getUserByCedula } from './Users/getUserByCedula.action';
+import {setUser} from './Users/setUsers.action';
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -12,4 +13,5 @@ export const server = {
     createCambio,
     getUseById,
     getUserByCedula,
+    setUser
 };
