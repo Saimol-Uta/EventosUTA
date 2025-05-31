@@ -3,8 +3,11 @@ import InformacionUsuario from "../components/InformacionUsuario.astro";
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Navbar from "../components/Navbar.astro";
-import { actions, type SafeResult } from 'astro:actions';
-import type { ResultadoGetUser, Usuario } from '../actions/Users/getUserByCedula.action';
+import { actions, type SafeResult } from "astro:actions";
+import type {
+  ResultadoGetUser,
+  Usuario,
+} from "../actions/Users/getUserByCedula.action";
 
 const method = Astro.request.method;
 
@@ -20,6 +23,34 @@ function formatDate(date: string | Date | null): string {
   return d.toISOString().substring(0, 10);
 }
 
+function validarCedula(cedula: string): boolean {
+  if (!/^\d{10}$/.test(cedula)) return false;
+
+  const provincia = parseInt(cedula.substring(0, 2), 10);
+  if (provincia < 1 || provincia > 24) return false;
+
+  const digitos = cedula.split("").map(Number);
+  const digitoVerificador = digitos[9];
+
+  let suma = 0;
+  for (let i = 0; i < 9; i++) {
+    let val = digitos[i];
+    if (i % 2 === 0) {
+      val *= 2;
+      if (val > 9) val -= 9;
+    }
+    suma += val;
+  }
+  const decenaSuperior = Math.ceil(suma / 10) * 10;
+  const digitoCalculado = decenaSuperior - suma;
+
+  if (digitoCalculado === 10) {
+    return digitoVerificador === 0;
+  } else {
+    return digitoVerificador === digitoCalculado;
+  }
+}
+
 if (method === "POST") {
   const formData = await Astro.request.formData();
   const resetForm = formData.get("reset") === "true";
@@ -33,11 +64,13 @@ if (method === "POST") {
   } else {
     cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
 
-    if (/^\d{10}$/.test(cedulaIngresada)) {
+    if (validarCedula(cedulaIngresada)) {
       mostrarFormulario = true;
 
       // Aquí está la corrección importante:
-      const resultado = await Astro.callAction(actions.getUserByCedula, { ced_usu: cedulaIngresada });
+      const resultado = await Astro.callAction(actions.getUserByCedula, {
+        ced_usu: cedulaIngresada,
+      });
 
       const data = resultado.data;
       if (data?.encontrado) {
@@ -60,19 +93,51 @@ if (method === "POST") {
 
 const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
-  { titulo: "Primer nombre", valor: usuarioExistente ? usuario?.nom_usu1 ?? "" : "", name: "nom_usu1" },
-  { titulo: "Segundo nombre", valor: usuarioExistente ? usuario?.nom_usu2 ?? "" : "", name: "nom_usu2" },
-  { titulo: "Primer apellido", valor: usuarioExistente ? usuario?.ape_usu1 ?? "" : "", name: "ape_usu1" },
-  { titulo: "Segundo apellido", valor: usuarioExistente ? usuario?.ape_usu2 ?? "" : "", name: "ape_usu2" },
-  { titulo: "Fecha de nacimiento", valor: usuarioExistente ? formatDate(usuario?.fec_nac_usu ?? null) : "", name: "fec_nac_usu" },
-  { titulo: "Teléfono", valor: usuarioExistente ? usuario?.num_tel_usu ?? "" : "", name: "num_tel_usu" },
-  { titulo: "Contraseña", valor: "", name: "contrasena" },
-  { titulo: "Carrera", valor: usuarioExistente ? usuario?.id_car_per ?? "" : "", name: "id_car_per" }
+  {
+    titulo: "Primer nombre",
+    valor: usuarioExistente ? (usuario?.nom_usu1 ?? "") : "",
+    name: "nom_usu1",
+  },
+  {
+    titulo: "Segundo nombre",
+    valor: usuarioExistente ? (usuario?.nom_usu2 ?? "") : "",
+    name: "nom_usu2",
+  },
+  {
+    titulo: "Primer apellido",
+    valor: usuarioExistente ? (usuario?.ape_usu1 ?? "") : "",
+    name: "ape_usu1",
+  },
+  {
+    titulo: "Segundo apellido",
+    valor: usuarioExistente ? (usuario?.ape_usu2 ?? "") : "",
+    name: "ape_usu2",
+  },
+  {
+    titulo: "Fecha de nacimiento",
+    valor: usuarioExistente ? formatDate(usuario?.fec_nac_usu ?? null) : "",
+    name: "fec_nac_usu",
+  },
+  {
+    titulo: "Teléfono",
+    valor: usuarioExistente ? (usuario?.num_tel_usu ?? "") : "",
+    name: "num_tel_usu",
+  },
+  // { titulo: "Contraseña", valor: "", name: "contrasena" },
+  {
+    titulo: "Carrera",
+    valor: usuarioExistente ? (usuario?.id_car_per ?? "") : "",
+    name: "id_car_per",
+  },
 ];
 
-const textoPrincipal = usuarioExistente ? "Asociar este usuario a la cuenta" : "Guardar Información";
+const textoPrincipal = usuarioExistente
+  ? "Asociar este usuario a la cuenta"
+  : "Guardar Información";
 const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
-const eventoSecundario = usuarioExistente ? "vaciarCampos()" : "location.reload()";
+const eventoSecundario = usuarioExistente
+  ? "vaciarCampos()"
+  : "location.reload()";
 ---
 
 <Layout>
@@ -81,53 +146,56 @@ const eventoSecundario = usuarioExistente ? "vaciarCampos()" : "location.reload(
 
   <div class="bg-gray-100 min-h-screen py-10">
     <div class="max-w-3xl mx-auto px-4 text-center">
+      {
+        mostrarFormulario ? (
+          <InformacionUsuario
+            camposFormulario={camposFormulario}
+            mostrarBotones={true}
+            textoBotonPrincipal={textoPrincipal}
+            textoBotonSecundario={textoSecundario}
+          />
+        ) : (
+          <form method="POST" class="formulario-container formulario-grid">
+            <div class="campo-item">
+              <label for="ced_usu">Ingrese su número de Cédula</label>
+              <input
+                type="text"
+                id="ced_usu"
+                name="ced_usu"
+                value={cedulaIngresada}
+                placeholder="Ej. 0101010101"
+                required
+                maxlength="10"
+                inputmode="numeric"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+              />
+            </div>
 
-      {mostrarFormulario ? (
-        <InformacionUsuario
-          camposFormulario={camposFormulario}
-          mostrarBotones={true}
-          textoBotonPrincipal={textoPrincipal}
-          textoBotonSecundario={textoSecundario}
-        />
-      ) : (
-        <form method="POST" class="formulario-container formulario-grid">
-          <div class="campo-item">
-            <label for="ced_usu">Ingrese su número de Cédula</label>
-            <input
-              type="text"
-              id="ced_usu"
-              name="ced_usu"
-              value={cedulaIngresada}
-              placeholder="Ej. 0101010101"
-              required
-            />
-          </div>
+            <div class="formulario-boton">
+              <button type="submit">Continuar</button>
+            </div>
 
-          <div class="formulario-boton">
-            <button type="submit">Continuar</button>
-          </div>
-
-          {mostrarError && (
-            <p class="text-red-600 text-sm mt-2" style="grid-column: 1 / -1;">
-              Cédula inválida o no encontrada.
-            </p>
-          )}
-        </form>
-      )}
-
+            {mostrarError && (
+              <p class="text-red-600 text-sm mt-2" style="grid-column: 1 / -1;">
+                Cédula inválida.
+              </p>
+            )}
+          </form>
+        )
+      }
     </div>
   </div>
 </Layout>
 
 <script is:inline>
   function vaciarCampos() {
-    const form = document.createElement('form');
-    form.method = 'POST';
+    const form = document.createElement("form");
+    form.method = "POST";
 
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'reset';
-    input.value = 'true';
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "reset";
+    input.value = "true";
 
     form.appendChild(input);
     document.body.appendChild(form);
@@ -136,62 +204,62 @@ const eventoSecundario = usuarioExistente ? "vaciarCampos()" : "location.reload(
 </script>
 
 <style>
-.formulario-container {
-  background-color: #eee;
-  border-radius: 8px;
-  padding: 2rem;
-  max-width: 500px;
-  margin: 2rem auto;
-  font-family: 'Segoe UI', sans-serif;
-  box-shadow: 0 0 4px rgba(0,0,0,0.1);
-}
+  .formulario-container {
+    background-color: #eee;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 500px;
+    margin: 2rem auto;
+    font-family: "Segoe UI", sans-serif;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  }
 
-.formulario-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
+  .formulario-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 
-.campo-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+  .campo-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
 
-.campo-item label {
-  font-weight: bold;
-  color: #8B0000;
-  font-size: 14px;
-}
+  .campo-item label {
+    font-weight: bold;
+    color: #8b0000;
+    font-size: 14px;
+  }
 
-.campo-item input {
-  padding: 10px;
-  font-size: 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  outline: none;
-}
+  .campo-item input {
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+  }
 
-.campo-item input:focus {
-  border-color: #8B0000;
-  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
-}
+  .campo-item input:focus {
+    border-color: #8b0000;
+    box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+  }
 
-.formulario-boton {
-  text-align: center;
-}
+  .formulario-boton {
+    text-align: center;
+  }
 
-.formulario-boton button {
-  background-color: #8B0000;
-  color: white;
-  font-size: 16px;
-  padding: 10px 30px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
+  .formulario-boton button {
+    background-color: #8b0000;
+    color: white;
+    font-size: 16px;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
 
-.formulario-boton button:hover {
-  background-color: #a00;
-}
+  .formulario-boton button:hover {
+    background-color: #a00;
+  }
 </style>
