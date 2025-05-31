@@ -13,6 +13,7 @@ let mostrarFormulario = false;
 let mostrarError = false;
 let usuarioExistente = false;
 let usuario: Usuario | null = null;
+let mensajeGuardado: string | null = null;
 
 function formatDate(date: string | Date | null): string {
   if (!date) return "";
@@ -58,22 +59,37 @@ if (method === "POST") {
     mostrarError = false;
     usuarioExistente = false;
     usuario = null;
+    mensajeGuardado = null;
   } else {
     cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
 
     if (formData.has("nom_usu1")) {
-      // Guardar datos con setUser action, pasando FormData directo
       const resultadoGuardar = await Astro.callAction(actions.setUser, formData);
+      const resultadoGuardarAny = resultadoGuardar as any;
 
-      if ("success" in resultadoGuardar && resultadoGuardar.success) {
+      if ("success" in resultadoGuardarAny && resultadoGuardarAny.success) {
         mostrarFormulario = false;
         usuarioExistente = false;
         usuario = null;
         cedulaIngresada = "";
         mostrarError = false;
+        mensajeGuardado = "Se guardó con éxito.";
       } else {
         mostrarError = true;
         mostrarFormulario = true;
+
+        if (typeof resultadoGuardarAny.error === "string") {
+          mensajeGuardado = resultadoGuardarAny.error;
+        } else if (
+          resultadoGuardarAny.error &&
+          typeof resultadoGuardarAny.error === "object" &&
+          Array.isArray(resultadoGuardarAny.error.errors) &&
+          resultadoGuardarAny.error.errors.length > 0
+        ) {
+          mensajeGuardado = resultadoGuardarAny.error.errors[0];
+        } else {
+          mensajeGuardado = "No se pudo guardar. Intente de nuevo.";
+        }
       }
     } else {
       if (validarCedula(cedulaIngresada)) {
@@ -93,11 +109,13 @@ if (method === "POST") {
         }
 
         mostrarError = false;
+        mensajeGuardado = null;
       } else {
         mostrarError = true;
         mostrarFormulario = false;
         usuarioExistente = false;
         usuario = null;
+        mensajeGuardado = null;
       }
     }
   }
@@ -146,8 +164,6 @@ const textoPrincipal = usuarioExistente
   ? "Asociar este usuario a la cuenta"
   : "Guardar Información";
 const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
-//const eventoSecundario = usuarioExistente ? vaciarCampos : () => location.reload();
-
 ---
 
 <Layout>
@@ -156,6 +172,20 @@ const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
 
   <div class="bg-gray-100 min-h-screen py-10">
     <div class="max-w-3xl mx-auto px-4 text-center">
+
+      {mensajeGuardado && (
+        <p
+          class={`mensaje-guardado ${
+            mensajeGuardado === "Se guardó con éxito."
+              ? "mensaje-exito"
+              : "mensaje-error"
+          }`}
+          style="max-width: 500px; margin: 0 auto 1rem auto; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 16px;"
+        >
+          {mensajeGuardado}
+        </p>
+      )}
+
       {mostrarFormulario ? (
         <InformacionUsuario
           camposFormulario={camposFormulario}
@@ -275,5 +305,28 @@ const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
 
   .formulario-boton button:hover {
     background-color: #a00;
+  }
+
+  /* Mensajes guardado */
+  .mensaje-guardado {
+    max-width: 500px;
+    margin: 0 auto 1rem auto;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .mensaje-exito {
+    background-color: #d1fae5; /* verde claro */
+    color: #065f46; /* verde oscuro */
+    border: 1px solid #10b981;
+  }
+
+  .mensaje-error {
+    background-color: #fee2e2; /* rojo claro */
+    color: #991b1b; /* rojo oscuro */
+    border: 1px solid #ef4444;
   }
 </style>
