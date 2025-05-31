@@ -6,13 +6,25 @@ import Navbar from "../components/Navbar.astro";
 import { actions } from "astro:actions";
 import type { Usuario } from "../actions/Users/getUserByCedula.action";
 
+type SafeResult<T> = {
+  success: boolean;
+  value?: T | null;
+  error?: string;
+};
+
+type ResultadoSetUser = {
+  created?: boolean;
+};
+
+type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string };
+let usuario: UsuarioParcial | null = null;
+
 const method = Astro.request.method;
 
 let cedulaIngresada = "";
 let mostrarFormulario = false;
 let mostrarError = false;
 let usuarioExistente = false;
-let usuario: Usuario | null = null;
 let mensajeGuardado: string | null = null;
 
 function formatDate(date: string | Date | null): string {
@@ -51,7 +63,10 @@ function validarCedula(cedula: string): boolean {
 
 if (method === "POST") {
   const formData = await Astro.request.formData();
+  console.log("POST recibido con formData:", Object.fromEntries(formData.entries()));
+
   const resetForm = formData.get("reset") === "true";
+  console.log("resetForm:", resetForm);
 
   if (resetForm) {
     cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
@@ -64,23 +79,33 @@ if (method === "POST") {
     cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
 
     if (formData.has("nom_usu1")) {
-      const resultadoGuardar = await Astro.callAction(actions.setUser, formData);
+      console.log("Guardando usuario con datos:", {
+        ced_usu: formData.get("ced_usu"),
+        nom_usu1: formData.get("nom_usu1"),
+        ape_usu1: formData.get("ape_usu1"),
+      });
+
+      const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
+      const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
       console.log("Resultado guardar usuario:", resultadoGuardar);
 
-      const resultadoGuardarAny = resultadoGuardar as any;
-
-      if ("success" in resultadoGuardarAny && resultadoGuardarAny.success) {
+      if (resultadoGuardar.success) {
         mostrarFormulario = true;
-        mensajeGuardado = "Se guardó con éxito.";
-
         usuarioExistente = true;
+        mostrarError = false; // CORRECTO: Error desactivado si guardó bien
+
+        if (resultadoGuardar.value?.created) {
+          mensajeGuardado = "Se guardó con éxito.";
+        } else {
+          mensajeGuardado = "Usuario actualizado correctamente.";
+        }
 
         const fechaString = formData.get("fec_nac_usu")?.toString() ?? "";
         const fecha = new Date(fechaString);
         const fechaValida = !isNaN(fecha.getTime()) ? fecha : new Date("1900-01-01");
 
         usuario = {
-          id_usu: "",
+          // id_usu: "", // opcional
           nom_usu1: formData.get("nom_usu1")?.toString() ?? "",
           nom_usu2: formData.get("nom_usu2")?.toString() ?? "",
           ape_usu1: formData.get("ape_usu1")?.toString() ?? "",
@@ -90,32 +115,18 @@ if (method === "POST") {
           id_car_per: formData.get("id_car_per")?.toString() ?? "",
           ced_usu: cedulaIngresada,
         };
-
       } else {
-        mostrarError = true;
+        mostrarError = true; // ERROR activo si falla
         mostrarFormulario = true;
+        mensajeGuardado = resultadoGuardar.error || "No se pudo guardar. Intente de nuevo.";
+      }
+    } else {
+      if (!validarCedula(cedulaIngresada)) {
+        console.log("Cédula inválida:", cedulaIngresada);
+      }
 
-         
-       if (resultadoGuardarAny.error) {
-    if (typeof resultadoGuardarAny.error === "string") {
-      mensajeGuardado = resultadoGuardarAny.error;
-    } else if (
-      typeof resultadoGuardarAny.error === "object" &&
-      Array.isArray(resultadoGuardarAny.error.errors) &&
-      resultadoGuardarAny.error.errors.length > 0
-    ) {
-      mensajeGuardado = resultadoGuardarAny.error.errors[0];
-    } else {
-      mensajeGuardado = "No se pudo guardar. Intente de nuevo.";
-    }
-  } else {
-    mensajeGuardado = null; // No mostrar mensaje si no hay error
-  }
-}
-    } else {
       if (validarCedula(cedulaIngresada)) {
         mostrarFormulario = true;
-
         const resultado = await Astro.callAction(actions.getUserByCedula, {
           ced_usu: cedulaIngresada,
         });
@@ -138,7 +149,7 @@ if (method === "POST") {
         mostrarFormulario = false;
         usuarioExistente = false;
         usuario = null;
-        mensajeGuardado = null;
+        mensajeGuardado = "Cédula inválida.";
       }
     }
   }
@@ -187,6 +198,8 @@ const textoPrincipal = usuarioExistente
   ? "Asociar este usuario a la cuenta"
   : "Guardar Información";
 const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
+
+console.log("mensajeGuardado (antes render):", mensajeGuardado);
 ---
 
 <Layout>
@@ -199,9 +212,7 @@ const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
       {mensajeGuardado && (
         <p
           class={`mensaje-guardado ${
-            mensajeGuardado === "Se guardó con éxito."
-              ? "mensaje-exito"
-              : "mensaje-error"
+            mostrarError ? "mensaje-error" : "mensaje-exito"
           }`}
         >
           {mensajeGuardado}

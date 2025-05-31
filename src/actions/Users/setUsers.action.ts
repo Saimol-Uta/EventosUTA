@@ -10,7 +10,7 @@ export const setUser = defineAction({
     nom_usu2: z.string().optional().nullable(),
     ape_usu1: z.string(),
     ape_usu2: z.string(),
-    fec_nac_usu: z.string().nullable().optional(), // Cambiado para aceptar null/undefined
+    fec_nac_usu: z.string().nullable().optional(),
     num_tel_usu: z.string().optional().nullable(),
     id_car_per: z.string().optional().nullable(),
   }),
@@ -21,7 +21,7 @@ export const setUser = defineAction({
         const fecha = new Date(input.fec_nac_usu);
         fechaValida = !isNaN(fecha.getTime()) ? fecha : new Date("1900-01-01");
       } else {
-        fechaValida = new Date("1900-01-01"); // o null si tu modelo lo acepta
+        fechaValida = new Date("1900-01-01");
       }
 
       const existingUser = await prisma.usuarios.findUnique({
@@ -44,13 +44,13 @@ export const setUser = defineAction({
           where: { ced_usu: input.ced_usu },
           data: dataToSave,
         });
+        return { success: true, created: false };
       } else {
         await prisma.usuarios.create({
           data: dataToSave,
         });
+        return { success: true, created: true };
       }
-
-      return { success: true };
     } catch (error) {
       console.error("Error en setUser:", error);
       return {
