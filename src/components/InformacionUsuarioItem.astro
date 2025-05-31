@@ -3,9 +3,13 @@ interface Props {
   titulo: string;
   valor: string;
   name: string;
+  pattern?: string;
+  title?: string;
+  oninput?: string;
+  maxlength?: string;
 }
 
-const { titulo, valor, name } = Astro.props as Props;
+const { titulo, valor, name, pattern, title, oninput, maxlength } = Astro.props as Props;
 ---
 
 <div class="campo-item">
@@ -15,6 +19,10 @@ const { titulo, valor, name } = Astro.props as Props;
     name={name}
     type={name === 'contrasena' ? 'password' : name.includes('fec') ? 'date' : 'text'}
     value={valor}
+    pattern={pattern ?? undefined}
+    title={title ?? undefined}
+    oninput={oninput ?? undefined}
+    maxlength={maxlength ?? undefined}
   />
 </div>
 

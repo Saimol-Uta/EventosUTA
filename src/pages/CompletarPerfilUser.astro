@@ -161,38 +161,55 @@ const camposFormulario = [
     titulo: "Primer nombre",
     valor: usuario?.nom_usu1 ?? "",
     name: "nom_usu1",
+    pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]+$",
+    title: "Solo letras y espacios permitidos",
+    oninput: "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g, '')"
   },
   {
     titulo: "Segundo nombre",
     valor: usuario?.nom_usu2 ?? "",
     name: "nom_usu2",
+    pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]*$",
+    title: "Solo letras y espacios permitidos",
+    oninput: "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g, '')"
   },
   {
     titulo: "Primer apellido",
     valor: usuario?.ape_usu1 ?? "",
     name: "ape_usu1",
+    pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]+$",
+    title: "Solo letras y espacios permitidos",
+    oninput: "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g, '')"
   },
   {
     titulo: "Segundo apellido",
     valor: usuario?.ape_usu2 ?? "",
     name: "ape_usu2",
+    pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]*$",
+    title: "Solo letras y espacios permitidos",
+    oninput: "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g, '')"
   },
   {
     titulo: "Fecha de nacimiento",
     valor: formatDate(usuario?.fec_nac_usu ?? null),
-    name: "fec_nac_usu",
+    name: "fec_nac_usu"
   },
   {
     titulo: "Teléfono",
     valor: usuario?.num_tel_usu ?? "",
     name: "num_tel_usu",
+    pattern: "^\\d{10}$",
+    title: "Número de teléfono de 10 dígitos",
+    oninput: "this.value = this.value.replace(/[^0-9]/g, '')",
+    maxlength: "10"
   },
   {
     titulo: "Carrera",
     valor: usuario?.id_car_per ?? "",
-    name: "id_car_per",
-  },
+    name: "id_car_per"
+  }
 ];
+
 
 const textoPrincipal = usuarioExistente
   ? "Asociar este usuario a la cuenta"

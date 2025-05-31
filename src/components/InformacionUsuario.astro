@@ -5,6 +5,10 @@ interface Campo {
   titulo: string;
   valor: string;
   name: string;
+  pattern?: string;
+  title?: string;
+  oninput?: string;
+  maxlength?: string;
 }
 
 interface Props {
@@ -35,6 +39,10 @@ const usuarioExiste = camposFormulario.some(
         titulo={campo.titulo}
         valor={campo.valor}
         name={campo.name}
+        pattern={campo.pattern}
+        title={campo.title}
+        oninput={campo.oninput}
+        maxlength={campo.maxlength}
       />
     ))}
 
@@ -42,8 +50,8 @@ const usuarioExiste = camposFormulario.some(
       <div class="formulario-boton">
         {usuarioExiste ? (
           <>
-            <button type="submit">{textoBotonPrincipal}</button>
-            <button type="button" onclick="location.reload()">{textoBotonSecundario}</button>
+            <button type="submit" name="action" value="guardar">{textoBotonPrincipal}</button>
+            <button type="submit" name="reset" value="true">{textoBotonSecundario}</button>
           </>
         ) : (
           <>
