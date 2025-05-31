@@ -63,65 +63,107 @@ function validarCedula(cedula: string): boolean {
 
 if (method === "POST") {
   const formData = await Astro.request.formData();
+  const accion = formData.get("action")?.toString();
 
-  const accion = formData.get("action"); // "guardar" o null
-  const reset = formData.get("reset");   // "true" o null
+  switch (accion) {
+    case "guardarInfo":
+  if (formData.has("nom_usu1")) {
+    const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
+    const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
 
-  if (reset === "true") {
-    // Redirigir a /homeUser sin guardar nada
-    return Astro.redirect("/homeUser");
-  }
-
-  if (accion === "guardar") {
-    // Procesar guardado
-    cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-
-    if (formData.has("nom_usu1")) {
-      const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
-      const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
-
-      if (resultadoGuardar.success) {
-        // Guardado exitoso, redirigir a homeUser
-        return Astro.redirect("/homeUser");
-      } else {
-        // Mostrar error
-        mostrarFormulario = true;
-        mostrarError = true;
-        mensajeGuardado = resultadoGuardar.error || "No se pudo guardar. Intente de nuevo.";
-      }
-    }
-  } else {
-    // Aquí puede ir la lógica original para continuar con la búsqueda o mostrar formulario
-    cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-
-    if (validarCedula(cedulaIngresada)) {
+    if (resultadoGuardar.success) {
       mostrarFormulario = true;
-      const resultado = await Astro.callAction(actions.getUserByCedula, {
-        ced_usu: cedulaIngresada,
-      });
-
-      const data = resultado.data;
-
-      if (data?.encontrado) {
-        usuarioExistente = true;
-        usuario = data.usuario ?? null;
-      } else {
-        usuarioExistente = false;
-        usuario = null;
-      }
-
+      usuarioExistente = true;
       mostrarError = false;
-      mensajeGuardado = null;
+      mensajeGuardado = resultadoGuardar.value?.created
+        ? "Se guardó con éxito."
+        : "Usuario actualizado correctamente.";
+
+      const fechaString = formData.get("fec_nac_usu")?.toString() ?? "";
+      const fecha = new Date(fechaString);
+      const fechaValida = !isNaN(fecha.getTime()) ? fecha : new Date("1900-01-01");
+
+      usuario = {
+        nom_usu1: formData.get("nom_usu1")?.toString() ?? "",
+        nom_usu2: formData.get("nom_usu2")?.toString() ?? "",
+        ape_usu1: formData.get("ape_usu1")?.toString() ?? "",
+        ape_usu2: formData.get("ape_usu2")?.toString() ?? "",
+        fec_nac_usu: fechaValida,
+        num_tel_usu: formData.get("num_tel_usu")?.toString() ?? "",
+        id_car_per: formData.get("id_car_per")?.toString() ?? "",
+        ced_usu: formData.get("ced_usu")?.toString() ?? "",
+      };
+
+      // Aquí actualizas la variable global para mantener la cédula visible
+      cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
     } else {
       mostrarError = true;
-      mostrarFormulario = false;
-      usuarioExistente = false;
-      usuario = null;
-      mensajeGuardado = "Cédula inválida.";
+      mostrarFormulario = true;
+      mensajeGuardado = resultadoGuardar.error || "No se pudo guardar. Intente de nuevo.";
     }
   }
-}
+  break;
 
+
+    case "cancelar":
+      // Mantener la cédula, limpiar demás campos para nuevo ingreso
+      cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
+      mostrarFormulario = true;
+      mostrarError = false;
+      usuarioExistente = false;
+      usuario = null;
+      mensajeGuardado = null;
+      break;
+
+    case "asociar":
+      if (formData.has("nom_usu1")) {
+        const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
+        const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
+
+        if (resultadoGuardar.success) {
+          return Astro.redirect("/homeUser");
+        } else {
+          mostrarError = true;
+          mostrarFormulario = true;
+          mensajeGuardado = resultadoGuardar.error || "No se pudo guardar. Intente de nuevo.";
+        }
+      }
+      break;
+
+    case "masTarde":
+      return Astro.redirect("/homeUser");
+
+    default:
+      cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
+
+      if (!validarCedula(cedulaIngresada)) {
+        mostrarError = true;
+        mostrarFormulario = false;
+        usuarioExistente = false;
+        usuario = null;
+        mensajeGuardado = "Cédula inválida.";
+      } else {
+        mostrarFormulario = true;
+        const resultado = await Astro.callAction(actions.getUserByCedula, {
+          ced_usu: cedulaIngresada,
+        });
+
+        const data = resultado.data;
+
+        if (data?.encontrado) {
+          usuarioExistente = true;
+          usuario = data.usuario ?? null;
+        } else {
+          usuarioExistente = false;
+          usuario = null;
+        }
+
+        mostrarError = false;
+        mensajeGuardado = null;
+      }
+      break;
+  }
+}
 
 const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
@@ -178,12 +220,10 @@ const camposFormulario = [
   }
 ];
 
-
-const textoPrincipal = usuarioExistente
-  ? "Asociar este usuario a la cuenta"
-  : "Guardar Información";
-const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
-
+const textoGuardarInfo = "Guardar Información";
+const textoCancelar = "Cancelar";
+const textoAsociar = "Asociar este usuario a la cuenta";
+const textoMasTarde = "Más Tarde";
 ---
 
 <Layout>
@@ -206,9 +246,12 @@ const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
       {mostrarFormulario ? (
         <InformacionUsuario
           camposFormulario={camposFormulario}
+          cedula={cedulaIngresada}
           mostrarBotones={true}
-          textoBotonPrincipal={textoPrincipal}
-          textoBotonSecundario={textoSecundario}
+          textoBotonGuardarInfo={textoGuardarInfo}
+          textoBotonCancelar={textoCancelar}
+          textoBotonAsociar={textoAsociar}
+          textoBotonMasTarde={textoMasTarde}
         />
       ) : (
         <form method="POST" class="formulario-container formulario-grid">

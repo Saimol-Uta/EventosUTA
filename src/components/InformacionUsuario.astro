@@ -13,20 +13,26 @@ interface Campo {
 
 interface Props {
   camposFormulario: Campo[];
+  cedula: string;
   mostrarBotones?: boolean;
-  textoBotonPrincipal?: string;
-  textoBotonSecundario?: string;
+  textoBotonGuardarInfo?: string;
+  textoBotonCancelar?: string;
+  textoBotonAsociar?: string;
+  textoBotonMasTarde?: string;
 }
 
 const {
   camposFormulario,
+  cedula,
   mostrarBotones = true,
-  textoBotonPrincipal = "Guardar Información",
-  textoBotonSecundario = "Más Tarde"
+  textoBotonGuardarInfo = "Guardar Información",
+  textoBotonCancelar = "Cancelar",
+  textoBotonAsociar = "Asociar este usuario a la cuenta",
+  textoBotonMasTarde = "Más Tarde",
 } = Astro.props as Props;
 
 const usuarioExiste = camposFormulario.some(
-  campo => campo.name !== 'contrasena' && campo.valor.trim() !== ''
+  campo => campo.name !== 'ced_usu' && campo.valor.trim() !== ''
 );
 ---
 
@@ -50,13 +56,14 @@ const usuarioExiste = camposFormulario.some(
       <div class="formulario-boton">
         {usuarioExiste ? (
           <>
-            <button type="submit" name="action" value="guardar">{textoBotonPrincipal}</button>
-            <button type="submit" name="reset" value="true">{textoBotonSecundario}</button>
+            <button type="submit" name="action" value="asociar">{textoBotonAsociar}</button>
+            <button type="submit" name="action" value="cancelar">{textoBotonCancelar}</button>
+            <input type="hidden" name="ced_usu" value={cedula} />
           </>
         ) : (
           <>
-            <button type="button">{textoBotonPrincipal}</button>
-            <button type="submit">{textoBotonSecundario}</button>
+            <button type="submit" name="action" value="guardarInfo">{textoBotonGuardarInfo}</button>
+            <button type="submit" name="action" value="masTarde">{textoBotonMasTarde}</button>
           </>
         )}
       </div>
