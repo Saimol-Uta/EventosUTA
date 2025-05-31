@@ -1,6 +1,49 @@
 ---
-const { label } = Astro.props;
+const { label = "Subir", apiEndpoint = "/api/upload" } = Astro.props;
 ---
-<div class="bg-red-800 text-white w-20 h-20 rounded-full flex items-center justify-center text-xs text-center p-2">
-  {label}
+<div class="relative">
+  <div id="upload-container" class="bg-red-800 text-white w-20 h-20 rounded-full flex items-center justify-center text-xs text-center p-2 cursor-pointer">
+    <span id="upload-label">{label}</span>
+  </div>
+  <input
+    type="file"
+    accept=".pdf,.doc,.docx,.txt"
+    class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+    onchange="handleDocumentUpload(event)"
+  />
 </div>
+
+<script>
+  async function handleDocumentUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const label = document.getElementById("upload-label");
+    label.textContent = "Subiendo...";
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("{apiEndpoint}", {
+        method: "POST",
+        body: formData
+      });
+
+      if (!response.ok) throw new Error("Error al subir el archivo");
+
+      const result = await response.json();
+      const fileUrl = result.url;
+
+      // Aquí podrías emitir un evento personalizado o usar alguna forma de notificar al componente padre
+      console.log("Documento subido:", fileUrl);
+
+      // Muestra el nombre del archivo en el botón
+      label.textContent = file.name;
+    } catch (error) {
+      console.error("Error al subir documento:", error);
+      label.textContent = "Error";
+    }
+  }
+</script>
+

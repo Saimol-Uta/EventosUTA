@@ -1,6 +1,31 @@
 ---
-const { src = '/default-avatar.png', alt = 'Usuario', size = 'w-50 h-50' } = Astro.props;
+// Astro no maneja estado por sí solo, así que usamos un poco de JavaScript con un componente interactivo.
+// Este componente usará una imagen por defecto hasta que el usuario cargue una nueva.
+const { defaultSrc = '/default-avatar.png', alt = 'Usuario', size = 'w-50 h-50' } = Astro.props;
 ---
-<div class={`rounded-full bg-black flex items-center justify-center ${size}`}>
-  <img src={src} alt={alt} class="w-3/4 h-3/4 object-cover rounded-full" />
+<div class={`relative ${size}`}>
+  <div id="profile-container" class="rounded-full bg-black flex items-center justify-center w-full h-full overflow-hidden">
+    <img id="profile-image" src={defaultSrc} alt={alt} class="w-full h-full object-cover rounded-full transition-all" />
+  </div>
+  <input
+    type="file"
+    accept="image/*"
+    id="upload"
+    class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+    onchange="handleImageChange(event)"
+  />
 </div>
+
+<script>
+  function handleImageChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const image = document.getElementById('profile-image');
+      image.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+</script>

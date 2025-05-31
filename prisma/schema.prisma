@@ -141,7 +141,7 @@ model usuarios {
   nom_usu1            String                @db.VarChar(20)
   nom_usu2            String?               @db.VarChar(20)
   ape_usu1            String                @db.VarChar(20)
-  ape_usu2            String                @db.VarChar(20)
+  ape_usu2            String?               @db.VarChar(20)
   fec_nac_usu         DateTime              @db.Date
   num_tel_usu         String?               @db.VarChar(20)
   id_car_per          String?               @db.Uuid
