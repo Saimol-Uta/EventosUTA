@@ -63,84 +63,65 @@ function validarCedula(cedula: string): boolean {
 
 if (method === "POST") {
   const formData = await Astro.request.formData();
-  const resetForm = formData.get("reset") === "true";
 
-  if (resetForm) {
+  const accion = formData.get("action"); // "guardar" o null
+  const reset = formData.get("reset");   // "true" o null
+
+  if (reset === "true") {
+    // Redirigir a /homeUser sin guardar nada
+    return Astro.redirect("/homeUser");
+  }
+
+  if (accion === "guardar") {
+    // Procesar guardado
     cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-    mostrarFormulario = true;
-    mostrarError = false;
-    usuarioExistente = false;
-    usuario = null;
-    mensajeGuardado = null;
-  } else {
-    cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-if (formData.has("nom_usu1")) {
+
+    if (formData.has("nom_usu1")) {
       const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
       const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
 
       if (resultadoGuardar.success) {
-        mostrarFormulario = true;
-        usuarioExistente = true;
-        mostrarError = false; 
-
-        if (resultadoGuardar.value?.created) {
-          mensajeGuardado = "Se guardó con éxito.";
-        } else {
-          mensajeGuardado = "Usuario actualizado correctamente.";
-        }
-
-        const fechaString = formData.get("fec_nac_usu")?.toString() ?? "";
-        const fecha = new Date(fechaString);
-        const fechaValida = !isNaN(fecha.getTime()) ? fecha : new Date("1900-01-01");
-
-        usuario = {
-          // id_usu: "", // opcional
-          nom_usu1: formData.get("nom_usu1")?.toString() ?? "",
-          nom_usu2: formData.get("nom_usu2")?.toString() ?? "",
-          ape_usu1: formData.get("ape_usu1")?.toString() ?? "",
-          ape_usu2: formData.get("ape_usu2")?.toString() ?? "",
-          fec_nac_usu: fechaValida,
-          num_tel_usu: formData.get("num_tel_usu")?.toString() ?? "",
-          id_car_per: formData.get("id_car_per")?.toString() ?? "",
-          ced_usu: cedulaIngresada,
-        };
+        // Guardado exitoso, redirigir a homeUser
+        return Astro.redirect("/homeUser");
       } else {
-        mostrarError = true; 
+        // Mostrar error
         mostrarFormulario = true;
+        mostrarError = true;
         mensajeGuardado = resultadoGuardar.error || "No se pudo guardar. Intente de nuevo.";
       }
-    } else {
-      if (!validarCedula(cedulaIngresada)) {
-      }
+    }
+  } else {
+    // Aquí puede ir la lógica original para continuar con la búsqueda o mostrar formulario
+    cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
 
-      if (validarCedula(cedulaIngresada)) {
-        mostrarFormulario = true;
-        const resultado = await Astro.callAction(actions.getUserByCedula, {
-          ced_usu: cedulaIngresada,
-        });
+    if (validarCedula(cedulaIngresada)) {
+      mostrarFormulario = true;
+      const resultado = await Astro.callAction(actions.getUserByCedula, {
+        ced_usu: cedulaIngresada,
+      });
 
-        const data = resultado.data;
+      const data = resultado.data;
 
-        if (data?.encontrado) {
-          usuarioExistente = true;
-          usuario = data.usuario ?? null;
-        } else {
-          usuarioExistente = false;
-          usuario = null;
-        }
-
-        mostrarError = false;
-        mensajeGuardado = null;
+      if (data?.encontrado) {
+        usuarioExistente = true;
+        usuario = data.usuario ?? null;
       } else {
-        mostrarError = true;
-        mostrarFormulario = false;
         usuarioExistente = false;
         usuario = null;
-        mensajeGuardado = "Cédula inválida.";
       }
+
+      mostrarError = false;
+      mensajeGuardado = null;
+    } else {
+      mostrarError = true;
+      mostrarFormulario = false;
+      usuarioExistente = false;
+      usuario = null;
+      mensajeGuardado = "Cédula inválida.";
     }
   }
 }
+
 
 const camposFormulario = [
   { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
