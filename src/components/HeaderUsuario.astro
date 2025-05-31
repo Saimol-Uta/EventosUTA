@@ -1,22 +1,14 @@
 ---
 import Menu from '../components/ComponenteMenuConfiguraciones.astro';
-let nombreUsuario = '';
-let userImage = '/img/usuario.png';
 import "../styles/global.css";
-import { getSession } from 'auth-astro/server';
-import type { CustomUser } from '../../auth.config';
 
-const session = await getSession(Astro.request);
-let idUsuario = '';
 
-let rol = '';
+export interface Props {
+  nombreUsuario: string;
+  userImage: string;
+}
 
-if (session && session.user) {
-  const user = session.user as CustomUser;
-  idUsuario = user.id;
-  nombreUsuario = user.name || "";
-  rol = user.rol;
-   }
+const {nombreUsuario, userImage} = Astro.props;
 ---
 <head>
 </head>
