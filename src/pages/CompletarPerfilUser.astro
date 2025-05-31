@@ -63,10 +63,7 @@ function validarCedula(cedula: string): boolean {
 
 if (method === "POST") {
   const formData = await Astro.request.formData();
-  console.log("POST recibido con formData:", Object.fromEntries(formData.entries()));
-
   const resetForm = formData.get("reset") === "true";
-  console.log("resetForm:", resetForm);
 
   if (resetForm) {
     cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
@@ -77,22 +74,14 @@ if (method === "POST") {
     mensajeGuardado = null;
   } else {
     cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-
-    if (formData.has("nom_usu1")) {
-      console.log("Guardando usuario con datos:", {
-        ced_usu: formData.get("ced_usu"),
-        nom_usu1: formData.get("nom_usu1"),
-        ape_usu1: formData.get("ape_usu1"),
-      });
-
+if (formData.has("nom_usu1")) {
       const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
       const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
-      console.log("Resultado guardar usuario:", resultadoGuardar);
 
       if (resultadoGuardar.success) {
         mostrarFormulario = true;
         usuarioExistente = true;
-        mostrarError = false; // CORRECTO: Error desactivado si guardó bien
+        mostrarError = false; 
 
         if (resultadoGuardar.value?.created) {
           mensajeGuardado = "Se guardó con éxito.";
@@ -116,13 +105,12 @@ if (method === "POST") {
           ced_usu: cedulaIngresada,
         };
       } else {
-        mostrarError = true; // ERROR activo si falla
+        mostrarError = true; 
         mostrarFormulario = true;
         mensajeGuardado = resultadoGuardar.error || "No se pudo guardar. Intente de nuevo.";
       }
     } else {
       if (!validarCedula(cedulaIngresada)) {
-        console.log("Cédula inválida:", cedulaIngresada);
       }
 
       if (validarCedula(cedulaIngresada)) {
@@ -130,7 +118,6 @@ if (method === "POST") {
         const resultado = await Astro.callAction(actions.getUserByCedula, {
           ced_usu: cedulaIngresada,
         });
-        console.log("Resultado getUserByCedula al ingresar cédula:", resultado);
 
         const data = resultado.data;
 
@@ -216,7 +203,6 @@ const textoPrincipal = usuarioExistente
   : "Guardar Información";
 const textoSecundario = usuarioExistente ? "Cancelar" : "Más Tarde";
 
-console.log("mensajeGuardado (antes render):", mensajeGuardado);
 ---
 
 <Layout>
@@ -263,12 +249,6 @@ console.log("mensajeGuardado (antes render):", mensajeGuardado);
           <div class="formulario-boton">
             <button type="submit">Continuar</button>
           </div>
-
-          {mostrarError && (
-            <p class="text-red-600 text-sm mt-2" style="grid-column: 1 / -1;">
-              Cédula inválida.
-            </p>
-          )}
         </form>
       )}
     </div>
