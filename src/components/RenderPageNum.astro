@@ -1,0 +1,10 @@
+---
+// Props del componente
+const { num, paginaActual, construirUrl } = Astro.props;
+---
+
+{num === paginaActual ? (
+  <span class="activo" aria-current="page">{num}</span>
+) : (
+  <a href={construirUrl(num)}>{num}</a>
+)}

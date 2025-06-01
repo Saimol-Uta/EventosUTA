@@ -1,58 +1,91 @@
 ---
 import EventoCard from "./EventoCard.astro";
+import RenderPageNum from "./RenderPageNum.astro"; // ruta relativa según estructura
 import { getEventosFiltrados } from "../actions/Eventos/getFiltros";
 import type { Eventos } from "../interface/eventosSimple";
 
-const { filtros = {} } = Astro.props;
+const { filtros = {}, page = 1, cursosPorPagina = 6 } = Astro.props;
 
-const { data, error } = await Astro.callAction(getEventosFiltrados, filtros);
+const { data } = await Astro.callAction(getEventosFiltrados, filtros);
 
 const listaEventos = (data?.eventos || []) as Eventos[];
+
+const totalEventos = listaEventos.length;
+const totalPaginas = Math.ceil(totalEventos / cursosPorPagina);
+
+const paginaActual = Math.min(Math.max(page, 1), totalPaginas || 1);
+
+const inicio = (paginaActual - 1) * cursosPorPagina;
+const fin = inicio + cursosPorPagina;
+
+const eventosPagina = listaEventos.slice(inicio, fin);
+
+function construirUrl(pagina: number) {
+  const url = new URL("/cursosCompleto", "http://dummybase");
+  if (filtros.categoria) url.searchParams.set("categoria", filtros.categoria);
+  if (filtros.duracion) url.searchParams.set("duracion", filtros.duracion);
+  url.searchParams.set("page", pagina.toString());
+  return url.pathname + url.search;
+}
 ---
 
 <div class="contenedor">
-  {
-    listaEventos.length > 0 ? (
-      listaEventos.map((evento) => (
-        <EventoCard
-          imagen={evento.img_eve}
-          titulo={evento.nom_eve}
-          estado={evento.asignaciones?.length?.toString() || "0"}
-          horas={evento.dur_eve ?? 0}
-            slug={evento.id_eve}
-        />
-      ))
+  {eventosPagina.length > 0 ? (
+    eventosPagina.map((evento) => (
+      <EventoCard
+        imagen={evento.img_eve}
+        titulo={evento.nom_eve}
+        estado={evento.asignaciones?.length?.toString() || "0"}
+        horas={evento.dur_eve ?? 0}
+        slug={evento.id_eve}
+      />
+    ))
+  ) : (
+    <div class="sin-resultados">
+      <!-- ... mensaje sin resultados ... -->
+    </div>
+  )}
+</div>
+
+{totalPaginas > 1 && (
+  <nav class="paginacion" role="navigation" aria-label="Paginación de cursos">
+    {paginaActual > 1 ? (
+      <a href={construirUrl(paginaActual - 1)} aria-label="Página anterior">Anterior</a>
     ) : (
-  <div class="sin-resultados">
-  <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-    <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
-    <circle cx="22" cy="24" r="4" fill="#8A1538"/>
-    <circle cx="42" cy="24" r="4" fill="#8A1538"/>
-    <path d="M22 44c2.5-4 9.5-4 12 0" stroke="#8A1538" stroke-width="2.5" stroke-linecap="round"/>
-  </svg>
-  <p class="titulo-vacio">¡Ups! No se encontraron resultados</p>
-  <p class="texto-vacio">Prueba cambiando los filtros o ajustando tu búsqueda</p>
-</div>
-    )
-  }
-</div>
+      <span aria-disabled="true" style="opacity: 0.5; cursor: default;">Anterior</span>
+    )}
+
+    {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
+      <RenderPageNum
+        key={num}
+        num={num}
+        paginaActual={paginaActual}
+        construirUrl={construirUrl}
+      />
+    ))}
+
+    {paginaActual < totalPaginas ? (
+      <a href={construirUrl(paginaActual + 1)} aria-label="Página siguiente">Siguiente</a>
+    ) : (
+      <span aria-disabled="true" style="opacity: 0.5; cursor: default;">Siguiente</span>
+    )}
+  </nav>
+)}
+
 
 <style>
 .contenedor {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 300px); /* reemplaza auto-fit + minmax */
+  grid-template-columns: repeat(auto-fill, 300px);
   place-items: center;
   justify-content: center;
   gap: 20px;
 }
 
-
 .card {
   max-width: 320px;
   margin: 0 auto;
 }
-
-
 
 .sin-resultados {
   grid-column: 1 / -1;
@@ -88,7 +121,27 @@ const listaEventos = (data?.eventos || []) as Eventos[];
   margin: 0;
 }
 
-
+.paginacion {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 30px;
+}
+.paginacion a, .paginacion span {
+  padding: 8px 14px;
+  border: 1px solid #8a1538;
+  color: #8a1538;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.paginacion .activo {
+  background-color: #8a1538;
+  color: white;
+  cursor: default;
+}
+.paginacion a:hover {
+  background-color: #c03434;
+  color: white;
+}
 </style>
-
-
