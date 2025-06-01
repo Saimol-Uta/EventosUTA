@@ -91,6 +91,7 @@ if (method === "POST") {
                         : new Date("1900-01-01");
 
                     usuario = {
+                        id_usu: formData.get("id_usu")?.toString() ?? "",
                         nom_usu1: formData.get("nom_usu1")?.toString() ?? "",
                         nom_usu2: formData.get("nom_usu2")?.toString() ?? "",
                         ape_usu1: formData.get("ape_usu1")?.toString() ?? "",
@@ -127,6 +128,8 @@ if (method === "POST") {
 
         case "asociar":
             if (formData.has("nom_usu1")) {
+                console.log("Datos a guardar:", formData);
+
                 const resultadoGuardarRaw = await Astro.callAction(
                     actions.setUser,
                     formData,
@@ -135,7 +138,7 @@ if (method === "POST") {
                     resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
 
                 if (resultadoGuardar.success) {
-                    return Astro.redirect("/homeUser");
+                    return Astro.redirect("/");
                 } else {
                     mostrarError = true;
                     mostrarFormulario = true;
@@ -185,6 +188,7 @@ if (method === "POST") {
 }
 
 const camposFormulario = [
+
     { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
     {
         titulo: "Primer nombre",
@@ -294,11 +298,13 @@ const textoMasTarde = "Más Tarde";
                         textoBotonAsociar={textoAsociar}
                         textoBotonMasTarde={textoMasTarde}
                     />
+                    <input type="hidden" name="id_usu" id="id_usu" value={session.user.id} />
                 ) : (
                     <form
                         method="POST"
                         class="formulario-container formulario-grid"
                     >
+
                         <div class="campo-item">
                             <label for="ced_usu">
                                 Ingrese su número de Cédula
