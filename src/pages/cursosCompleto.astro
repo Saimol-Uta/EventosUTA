@@ -1,87 +1,213 @@
 ---
-import EventoCard from "./EventoCard.astro";
-import { getEventosFiltrados } from "../actions/Eventos/getFiltros";
-import type { Eventos } from "../interface/eventosSimple";
+import Header from "../components/Header.astro";
+import Navbar from "../components/Navbar.astro";
+import Layout from "../layouts/Layout.astro";
+import Filtros from "../components/filtros.astro";
+import ContenedorEventos from "../components/ContenedorEvento.astro";
 
-const { filtros = {}, page = 1, cursosPorPagina = 6 } = Astro.props;
+// Extraer filtros desde la URL
+const url = new URL(Astro.request.url);
+const filtros = {
+  categoria: url.searchParams.get("categoria") || "",
+  duracion: url.searchParams.get("duracion") || ""
+};
 
-const { data, error } = await Astro.callAction(getEventosFiltrados, filtros);
+// Extraer número de página, por defecto 1
+const page = parseInt(url.searchParams.get("page") || "1", 10);
 
-const listaEventos = (data?.eventos || []) as Eventos[];
-
-// Total de eventos y páginas
-const totalEventos = listaEventos.length;
-const totalPaginas = Math.ceil(totalEventos / cursosPorPagina);
-
-// Limitar page dentro del rango válido
-const paginaActual = Math.min(Math.max(page, 1), totalPaginas || 1);
-
-// Obtener eventos para la página actual
-const inicio = (paginaActual - 1) * cursosPorPagina;
-const fin = inicio + cursosPorPagina;
-const eventosPagina = listaEventos.slice(inicio, fin);
-
-// Función para construir url manteniendo filtros y página
-function construirUrl(pagina: number) {
-  const url = new URL("/cursosCompleto", "http://dummybase"); // base dummy para usar URL
-  if (filtros.categoria) url.searchParams.set("categoria", filtros.categoria);
-  if (filtros.duracion) url.searchParams.set("duracion", filtros.duracion);
-  url.searchParams.set("page", pagina.toString());
-  return url.pathname + url.search;
-}
+// Número de cursos por página (configurable)
+const cursosPorPagina = 6;
 ---
 
-<div class="contenedor">
-  {
-    eventosPagina.length > 0 ? (
-      eventosPagina.map((evento) => (
-        <EventoCard
-          imagen={evento.img_eve}
-          titulo={evento.nom_eve}
-          estado={evento.asignaciones?.length?.toString() || "0"}
-          horas={evento.dur_eve ?? 0}
-          slug={evento.id_eve}
-        />
-      ))
-    ) : (
-      <div class="sin-resultados">
-        <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
-          <circle cx="22" cy="24" r="4" fill="#8A1538"/>
-          <circle cx="42" cy="24" r="4" fill="#8A1538"/>
-          <path d="M22 44c2.5-4 9.5-4 12 0" stroke="#8A1538" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-        <p class="titulo-vacio">¡Ups! No se encontraron resultados</p>
-        <p class="texto-vacio">Prueba cambiando los filtros o ajustando tu búsqueda</p>
+<Layout>
+  <Header />
+  <Navbar />
+  <Filtros />
+
+  <section class="seccion-principal">
+    <h2 class="titulo-seccion">EVENTOS</h2>
+
+    {(filtros.categoria || filtros.duracion) && (
+      <div class="filtros-activos">
+        <span class="titulo-filtros"> Filtros aplicados:</span>
+
+        {filtros.categoria && (
+          <span class="filtro-tag">
+            Categoría: <strong>{filtros.categoria}</strong>
+            <button class="cerrar-filtro" onclick="quitarFiltro('categoria')">×</button>
+          </span>
+        )}
+
+        {filtros.duracion && (
+          <span class="filtro-tag">
+            Duración: <strong>{filtros.duracion}</strong>
+            <button class="cerrar-filtro" onclick="quitarFiltro('duracion')">×</button>
+          </span>
+        )}
+
+        <a href="/cursosCompleto" class="btn-limpiar-filtros">Ver todos los cursos</a>
       </div>
-    )
+    )}
+
+    <!-- Buscador -->
+    <div class="buscador">
+      <input type="text" placeholder="Buscar evento" class="input-busqueda" />
+      <button class="btn-buscar">🔍</button>
+    </div>
+
+    <!-- Eventos filtrados con paginación -->
+    <ContenedorEventos filtros={filtros} page={page} cursosPorPagina={cursosPorPagina} />
+
+    <!-- Sin resultados (por si quieres mostrarlo manualmente) -->
+    <div class="cursos-sin-resultados" style="display: none;">
+      <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
+        <circle cx="22" cy="24" r="4" fill="#8A1538"/>
+        <circle cx="42" cy="24" r="4" fill="#8A1538"/>
+        <path d="M22 44c2.5-4 9.5-4 12 0" stroke="#8A1538" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <p class="titulo-vacio">¡Ups! No se encontraron resultados</p>
+      <p class="texto-vacio">Prueba buscando otro evento </p>
+    </div>
+  </section>
+</Layout>
+
+<!-- ✅ Estilos -->
+<style>
+  .seccion-principal {
+    padding: 20px 40px;
   }
-</div>
 
-<!-- Paginación -->
-{totalPaginas > 1 && (
-  <nav class="paginacion" role="navigation" aria-label="Paginación de cursos">
-    {/* Botón Anterior */}
-    {paginaActual > 1 ? (
-      <a href={construirUrl(paginaActual - 1)} aria-label="Página anterior">Anterior</a>
-    ) : (
-      <span aria-disabled="true" style="opacity: 0.5; cursor: default;">Anterior</span>
-    )}
+  .titulo-seccion {
+    font-size: 22px;
+    color: #a10000;
+    margin-bottom: 20px;
+  }
 
-    {/* Números de página */}
-    {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) =>
-      num === paginaActual ? (
-        <span key={num} class="activo" aria-current="page">{num}</span>
-      ) : (
-        <a key={num} href={construirUrl(num)}>{num}</a>
-      )
-    )}
+  .filtros-activos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    background-color: #f9f9f9;
+    padding: 12px 18px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    color: #333;
+  }
 
-    {/* Botón Siguiente */}
-    {paginaActual < totalPaginas ? (
-      <a href={construirUrl(paginaActual + 1)} aria-label="Página siguiente">Siguiente</a>
-    ) : (
-      <span aria-disabled="true" style="opacity: 0.5; cursor: default;">Siguiente</span>
-    )}
-  </nav>
-)}
+  .filtro-tag {
+    background-color: #fff;
+    border: 1px solid #8a1538;
+    border-radius: 20px;
+    padding: 6px 14px;
+    color: #8a1538;
+    font-size: 0.85rem;
+  }
+
+  .titulo-filtros {
+    font-weight: 600;
+    color: #5a1e1e;
+  }
+
+  .btn-limpiar-filtros {
+    margin-left: auto;
+    color: #8a1538;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    transition: background 0.2s ease;
+  }
+
+  .btn-limpiar-filtros:hover {
+    background-color: #e4e4e4;
+  }
+
+  .cerrar-filtro {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #8a1538;
+    margin-left: 8px;
+    cursor: pointer;
+    padding: 0;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .cerrar-filtro:hover {
+    color: #c30000;
+  }
+
+  .buscador {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    gap: 8px;
+  }
+
+  .input-busqueda {
+    padding: 8px 12px;
+    width: 220px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  .btn-buscar {
+    padding: 8px 14px;
+    background-color: #a10000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .btn-buscar:hover {
+    background-color: #880000;
+  }
+
+  .sin-resultados {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #333;
+  max-width: 100%;
+  margin: 0 auto;
+  background-color: #fff6f6; 
+  border: 1px solid #f3caca;
+  border-radius: 12px;
+}
+
+
+  .sin-resultados svg {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 20px;
+  }
+
+ .titulo-vacio {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #8a1538;
+  margin-bottom: 8px;
+}
+
+.texto-vacio {
+  font-size: 0.95rem;
+  color: #444;
+}
+
+</style>
+
+<!-- ✅ Script -->
+<script src="/js/filtros.js" defer></script>
