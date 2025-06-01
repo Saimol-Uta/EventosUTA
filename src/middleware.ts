@@ -2,10 +2,10 @@ import { defineMiddleware } from 'astro:middleware';
 import { getSession } from "auth-astro/server";
 
 // Rutas específicas por rol
-const adminRoutes = ['/homeAdmin', '/admin/*', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto']; // Añadir más rutas de admin aquí
-const studentRoutes = ['/homeUser', '/student/*', '/Formularios/FormularioSolicitudCambioUsuario']; // Añadir más rutas de estudiante aquí
-const userRoutes = ['/homeUser', '/user/*', '/Formularios/FormularioSolicitudCambioUsuario']; // Añadir más rutas de usuario aquí
-const masterRoutes = ['/homeAdmin', '/master/*', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto']; // Añadir más rutas de master aquí
+const adminRoutes = ['/homeAdmin', '/admin/*', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de admin aquí
+const studentRoutes = ['/homeUser', '/student/*', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de estudiante aquí
+const userRoutes = ['/homeUser', '/user/*', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de usuario aquí
+const masterRoutes = ['/homeAdmin', '/master/*', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de master aquí
 
 // Rutas que no requieren autenticación
 const noAuthRoutes = ['/login', '/register', '/'];
