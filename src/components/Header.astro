@@ -11,40 +11,42 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
     (isMaster && (
         <HeaderUsuario
             nombreUsuario={session?.user?.name || "Administrador"}
-            userImage={session?.user?.image || "/img/default-avatar.png"}
+            userImage={session?.user?.image || "/PerfilDefault.png"}
         />
     )) ||
         (isStudent && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Estudiante"}
-                userImage={session?.user?.image || "/img/default-avatar.png"}
+                userImage={session?.user?.image || "/PerfilDefault.png"}
             />
         )) ||
         (isUser && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
-                userImage={session?.user?.image || "/img/default-avatar.png"}
+                userImage={session?.user?.image || "/PerfilDefault.png"}
             />
         )) ||
         (isAdmin && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Administrador"}
-                userImage={session?.user?.image || "/img/default-avatar.png"}
+                userImage={session?.user?.image || "/PerfilDefault.png"}
             />
         )) ||
         (isLoggedIn && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
-                userImage={session?.user?.image || "/img/default-avatar.png"}
+                userImage={session?.user?.image || "/PerfilDefault.png"}
             />
         )) || (
         <header class="header">
     <div class="left-section">
-        <img
-            src="/img/logoFisei.png"
-            alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
-            class="logo-full"
-        />
+        <a href="/">
+            <img
+                src="/img/logoFisei.png"
+                alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
+                class="logo-full"
+            />
+        </a>
     </div>
 
     <div class="right-section">
