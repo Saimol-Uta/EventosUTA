@@ -1,19 +1,29 @@
 ---
-import type { CustomUser } from '../../auth.config';
-import { getSession } from 'auth-astro/server';
+import type { CustomUser } from "../../auth.config";
+import { getSession } from "auth-astro/server";
 
 const session = await getSession(Astro.request);
 
 // Si hay sesión y usuario, redirigir según rol
 if (session && session.user) {
-  const user = session.user as CustomUser;
-  const rol = user.rol?.toUpperCase();
+    const user = session.user as CustomUser;
+    const rol = user.rol?.toUpperCase();
 
-  if (rol === "ADMINISTRADOR" || rol === "MASTER") {
-    return Astro.redirect("/homeAdmin");
-  } else if (rol === "USUARIO" || rol === "ESTUDIANTE") {
-    return Astro.redirect("/homeUser");
-  }
+    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+        return Astro.redirect("/homeAdmin");
+    } else if (rol === "USUARIO" || rol === "ESTUDIANTE") {
+        return Astro.redirect("/homeUser");
+    }
+}
+
+// NUEVO: Obtener mensaje de la URL
+const url = new URL(Astro.request.url);
+const message = url.searchParams.get("message");
+
+let mensajeExito = "";
+if (message === "perfil-actualizado") {
+    mensajeExito =
+        "Perfil actualizado correctamente. Por favor, inicia sesión nuevamente para continuar.";
 }
 
 // Si no hay sesión o usuario, mostrar login normalmente
@@ -94,16 +104,45 @@ if (session && session.user) {
             .volver:hover {
                 text-decoration: underline;
             }
+
+            /* NUEVO: Estilos para el mensaje de éxito */
+            .mensaje-exito {
+                background-color: #d1fae5;
+                color: #065f46;
+                border: 1px solid #10b981;
+                padding: 12px 20px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                text-align: center;
+                font-weight: 600;
+                font-size: 14px;
+                max-width: 400px;
+                margin-left: auto;
+                margin-right: auto;
+            }
         </style>
     </head>
     <body>
         <a class="volver" href="/">Regresar</a>
 
         <div class="login-container">
+            <!-- NUEVO: Mostrar mensaje de éxito si existe -->
+            {mensajeExito && <div class="mensaje-exito">{mensajeExito}</div>}
+
             <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
             <form>
-                <input type="email" name="email" placeholder="Usuario" required />
-                <input type="password" name="password" placeholder="Contraseña" required />
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Usuario"
+                    required
+                />
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Contraseña"
+                    required
+                />
                 <button type="submit" id="btn-submit">Acceder</button>
                 <p>¿No tiene una cuenta?</p>
                 <a href="/register">Regístrese aquí</a>
@@ -112,32 +151,45 @@ if (session && session.user) {
     </body>
 </html>
 <script>
-
     window.addEventListener("DOMContentLoaded", async () => {
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get("error");
+        // NUEVO: También verificar si hay mensaje de éxito
+        const message = urlParams.get("message");
 
         // Limpiar URL inmediatamente, antes de mostrar algo
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
         if (error) {
-        const { default: Swal } = await import("sweetalert2");
-        await Swal.fire({
-            icon: "error",
-            title: "Error al ingresar",
-            text: "Usuario / Contraseña no son correctos",
-            confirmButtonColor: '#a00',
-            heightAuto: false,
-        });
+            const { default: Swal } = await import("sweetalert2");
+            await Swal.fire({
+                icon: "error",
+                title: "Error al ingresar",
+                text: "Usuario / Contraseña no son correctos",
+                confirmButtonColor: "#a00",
+                heightAuto: false,
+            });
+        }
+        // NUEVO: Opcional - También mostrar SweetAlert para perfil actualizado
+        else if (message === "perfil-actualizado") {
+            const { default: Swal } = await import("sweetalert2");
+            await Swal.fire({
+                icon: "success",
+                title: "Perfil Actualizado",
+                text: "Tu perfil se actualizó correctamente. Inicia sesión nuevamente para continuar.",
+                confirmButtonColor: "#a00",
+                heightAuto: false,
+            });
         }
     });
 
-    
     window.addEventListener("DOMContentLoaded", async () => {
         const { signIn } = await import("auth-astro/client");
         const form = document.querySelector("form") as HTMLFormElement;
-        const btnSubmit = document.querySelector("#btn-submit") as HTMLButtonElement;
+        const btnSubmit = document.querySelector(
+            "#btn-submit",
+        ) as HTMLButtonElement;
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();

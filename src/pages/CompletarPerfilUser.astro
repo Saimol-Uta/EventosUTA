@@ -13,7 +13,10 @@ type SafeResult<T> = {
 };
 
 type ResultadoSetUser = {
+    success?: boolean;
     created?: boolean;
+    requireReauth?: boolean;
+    error?: string;
 };
 
 type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string };
@@ -130,22 +133,48 @@ if (method === "POST") {
             if (formData.has("nom_usu1")) {
                 console.log("Datos a guardar:", formData);
 
-                const resultadoGuardarRaw = await Astro.callAction(
+                const {data , error } = await Astro.callAction(
                     actions.setUser,
                     formData,
                 );
-                const resultadoGuardar =
-                    resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
 
-                if (resultadoGuardar.success) {
-                    return Astro.redirect("/");
+                console.log("Resultado crudo del action:", {data , error });
+
+                // CAMBIO AQUÍ: Los datos están directamente en .data, no en .data.value
+                const resultadoGuardar = data as ResultadoSetUser;
+
+                console.log("Resultado parseado:", resultadoGuardar);
+                console.log("¿Es exitoso?", resultadoGuardar?.success);
+                console.log("¿Requiere reauth?", resultadoGuardar?.requireReauth);
+
+                if (resultadoGuardar?.success) {
+                    console.log("Entrando al bloque de éxito");
+                    
+                    // CAMBIO AQUÍ: Acceder directamente a requireReauth
+                    if (resultadoGuardar.requireReauth) {
+                        console.log("Reautenticación requerida - eliminando cookie");
+                        
+                        Astro.cookies.delete('authjs.session-token', {
+                            path: '/',
+                            httpOnly: true,
+                        });
+                        
+                        console.log("Cookie eliminada, redirigiendo a login");
+                        return Astro.redirect('/login?message=perfil-actualizado');
+                    } else {
+                        console.log("No requiere reauth, redirigiendo a home");
+                        return Astro.redirect("/");
+                    }
                 } else {
+                    console.log("Error en el resultado:", resultadoGuardar?.error);
                     mostrarError = true;
                     mostrarFormulario = true;
                     mensajeGuardado =
-                        resultadoGuardar.error ||
+                        resultadoGuardar?.error ||
                         "No se pudo guardar. Intente de nuevo.";
                 }
+            } else {
+                console.log("No se encontró nom_usu1 en formData");
             }
             break;
 
@@ -188,7 +217,6 @@ if (method === "POST") {
 }
 
 const camposFormulario = [
-
     { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
     {
         titulo: "Primer nombre",
@@ -298,7 +326,7 @@ const textoMasTarde = "Más Tarde";
                         textoBotonAsociar={textoAsociar}
                         textoBotonMasTarde={textoMasTarde}
                     />
-                    <input type="hidden" name="id_usu" id="id_usu" value={session.user.id} />
+                    <input type="hidden" name="id_usu" id="id_usu" value={session?.user.id} />
                 ) : (
                     <form
                         method="POST"

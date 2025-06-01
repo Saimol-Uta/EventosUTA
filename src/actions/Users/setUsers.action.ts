@@ -58,7 +58,15 @@ export const setUser = defineAction({
                     console.log("Cuenta actualizada con ID del usuario:", updatedUser.id_usu);
                 }
 
-                return { success: true, created: false };
+                const requireReauth = true;
+
+                const response = {
+                    success: true,
+                    created: false,
+                    requireReauth
+                };
+                console.log("Retornando desde setUser (usuario existente):", response);
+                return response;
             } else {
                 // Crear nuevo usuario
                 const newUser = await prisma.usuarios.create({
@@ -74,7 +82,13 @@ export const setUser = defineAction({
                     console.log("Cuenta actualizada con nuevo usuario ID:", newUser.id_usu);
                 }
 
-                return { success: true, created: true };
+                const response = {
+                    success: true,
+                    created: true,
+                    requireReauth: true
+                };
+                console.log("Retornando desde setUser (usuario nuevo):", response);
+                return response;
             }
         } catch (error) {
             console.error("Error en setUser:", error);
