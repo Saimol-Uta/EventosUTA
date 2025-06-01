@@ -1,10 +1,18 @@
 ---
-// Props del componente
 const { num, paginaActual, construirUrl } = Astro.props;
+
+const estiloActivo = {
+  backgroundColor: "#8a1538",
+  color: "white",
+  cursor: "default",
+  padding: "8px 14px",
+  borderRadius: "6px",
+  border: "1px solid #8a1538",
+};
 ---
 
 {num === paginaActual ? (
-  <span class="activo" aria-current="page">{num}</span>
+  <span style={estiloActivo} aria-current="page">{num}</span>
 ) : (
   <a href={construirUrl(num)}>{num}</a>
 )}
