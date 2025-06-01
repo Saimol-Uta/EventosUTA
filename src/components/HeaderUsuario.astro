@@ -1,8 +1,14 @@
 ---
 import Menu from '../components/ComponenteMenuConfiguraciones.astro';
-const userName = 'Usuario ';
-const userImage = '/img/usuario.png';
 import "../styles/global.css";
+
+
+export interface Props {
+  nombreUsuario: string;
+  userImage: string;
+}
+
+const {nombreUsuario, userImage} = Astro.props;
 ---
 <head>
 </head>
@@ -23,7 +29,7 @@ import "../styles/global.css";
       </svg>
       <span class="text">Verifica tu certificado</span>
     </a>
-        <Menu userName={userName} userImage={userImage} />
+        <Menu userName={nombreUsuario} userImage={userImage} />
   </div>
 </header>
 
