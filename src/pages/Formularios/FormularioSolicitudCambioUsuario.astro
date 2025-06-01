@@ -4,6 +4,9 @@ import { actions } from "astro:actions";
 import Layout from "../../layouts/Layout.astro";
 import { getSession } from "auth-astro/server";
 
+// Número aleatorio de 3 dígitos, tipo 001 a 999
+const randomNumber = Math.floor(Math.random() * 999 + 1).toString().padStart(3, "0");
+
 // Sección del usuario
 const session = await getSession(Astro.request);
 const { user } = session ?? {};
@@ -22,7 +25,7 @@ const { data: userData, error: userError } = await Astro.callAction(
 
 // Obtener información del usuario
 const usuario = userData?.user
-    ? `${userData.user.cor_cue} ${userData.user.cor_cue}`
+    ? `${userData.user.cor_cue}`
     : "Usuario";
 const fecha = new Date().toLocaleDateString("es-ES");
 ---
@@ -37,7 +40,8 @@ const fecha = new Date().toLocaleDateString("es-ES");
             <div class="info-top">
                 <div><strong>{usuario}</strong></div>
                 <div>{fecha}</div>
-                <div><strong>Nº Auto</strong></div>
+                <div><strong>Nº {randomNumber}</strong></div>
+
             </div>
 
             <!-- Campo oculto para el ID del usuario -->
