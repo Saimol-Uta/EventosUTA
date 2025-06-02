@@ -16,6 +16,7 @@
     "astro": "^5.7.13",
     "auth-astro": "^4.2.0",
     "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.6.1",
     "cookie": "^1.0.2",
     "next-auth": "^5.0.0-beta.28",
     "sweetalert2": "^11.21.2",
