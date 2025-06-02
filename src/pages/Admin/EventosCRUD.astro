@@ -1,5 +1,5 @@
 ---
-import Header from "../../components/HeaderUsuario.astro";
+import Header from "@components/Header.astro";
 import NavBar from "../../components/Navbar.astro";
 import MenuAdmin from "../../components/MenuAdministrador.astro";
 import Layout from "../../layouts/Layout.astro";
@@ -9,84 +9,107 @@ import ModalNuevoEvento from "../../components/ModalNuevoEvento.astro";
 import "../../styles/EventosCRUD.css";
 
 const links = [
-  { label: "Eventos", href: "/" },
-  { label: "Usuarios", href: "/perfil" },
-  { label: "Organizadores", href: "/historial" },
-  { label: "Inscripciones", href: "/historial" },
-  { label: "Categorías", href: "/historial" },
-  { label: "Carreras", href: "/historial" },
+    { label: "Eventos", href: "/" },
+    { label: "Usuarios", href: "/perfil" },
+    { label: "Organizadores", href: "/historial" },
+    { label: "Inscripciones", href: "/historial" },
+    { label: "Categorías", href: "/historial" },
+    { label: "Carreras", href: "/historial" },
 ];
 ---
 
 <Layout>
-  <body>
-    <Header />
-    <NavBar />
-    <MenuAdmin links={links} />
-    <ModalDetallesEvento />
-    <ModalModificarEvento />
-    <ModalNuevoEvento />
+    <body>
+        <Header />
+        <MenuAdmin links={links} />
+        <ModalDetallesEvento />
+        <ModalModificarEvento />
+        <ModalNuevoEvento />
 
-    <main class="registros">
-      <div class="registros-grid">
-        <div class="registros-superior">
-          <div class="registros-superior-izquierdo">Eventos</div>
-          <div class="registros-superior-derecho">
-            <a
-              onclick="window.abrirModalNuevo()"
-              class="contenedor-boton-nuevo-registro"
-            >
-              <button class="boton-nuevo-registro" title="Nuevo"
-                >Nuevo Evento</button
-              >
-              <p class="anadir-icon">+</p>
-            </a>
-          </div>
-        </div>
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">Eventos</div>
+                    <div class="registros-superior-derecho">
+                        <a
+                            onclick="window.abrirModalNuevo()"
+                            class="contenedor-boton-nuevo-registro"
+                        >
+                            <button class="boton-nuevo-registro" title="Nuevo"
+                                >Nuevo Evento</button
+                            >
+                            <p class="anadir-icon">+</p>
+                        </a>
+                    </div>
+                </div>
 
-        <div class="registros-inferior-titulos">
-          <div class="registro-fila">
-            <div class="parte-izquierda-registro-encabezado">Nombre</div>
-            <div class="parte-izquierda-registro-encabezado">Categoría</div>
-            <div class="parte-izquierda-registro-encabezado">Area</div>
-            <div class="parte-izquierda-registro-encabezado">Fecha Inicio</div>
-            <div class="parte-izquierda-registro-encabezado">Ubicación</div>
-            <div class="parte-derecha-registro-encabezado">Opciones</div>
-          </div>
-        </div>
-        <div class="registros-inferior">
-          <div class="registro-fila">
-            <div class="parte-izquierda-registro-fila">Evento 1</div>
-            <div class="parte-izquierda-registro-fila">Público</div>
-            <div class="parte-izquierda-registro-fila">IA</div>
-            <div class="parte-izquierda-registro-fila">12/01/23</div>
-            <div class="parte-izquierda-registro-fila">Agora FISEI</div>
-            <div class="registro-opciones">
-              <button title="Detalles" onclick="window.abrirModalDetalles()">
-                <img
-                  src="/img/CRUD/mostrar-detalles.svg"
-                  alt="boton mostrar detalles"
-                  class="imagen-boton-registro"
-                />
-              </button>
-              <button title="Eliminar">
-                <img
-                  src="/img/CRUD/eliminar-registro.svg"
-                  alt="boton eliminar registro"
-                  class="imagen-boton-registro"
-                />
-              </button>
-              <button title="Modificar" onclick="window.abrirModal()">
-                <img
-                  src="/img/CRUD/modificar-registro.svg"
-                  alt="boton modificar"
-                  class="imagen-boton-modificar"
-                />
-              </button>
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombre
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Categoría
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Area
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Fecha Inicio
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Ubicación
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>
+                <div class="registros-inferior">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-fila">
+                            Evento 1
+                        </div>
+                        <div class="parte-izquierda-registro-fila">Público</div>
+                        <div class="parte-izquierda-registro-fila">IA</div>
+                        <div class="parte-izquierda-registro-fila">
+                            12/01/23
+                        </div>
+                        <div class="parte-izquierda-registro-fila">
+                            Agora FISEI
+                        </div>
+                        <div class="registro-opciones">
+                            <button
+                                title="Detalles"
+                                onclick="window.abrirModalDetalles()"
+                            >
+                                <img
+                                    src="/img/CRUD/mostrar-detalles.svg"
+                                    alt="boton mostrar detalles"
+                                    class="imagen-boton-registro"
+                                />
+                            </button>
+                            <button title="Eliminar">
+                                <img
+                                    src="/img/CRUD/eliminar-registro.svg"
+                                    alt="boton eliminar registro"
+                                    class="imagen-boton-registro"
+                                />
+                            </button>
+                            <button
+                                title="Modificar"
+                                onclick="window.abrirModal()"
+                            >
+                                <img
+                                    src="/img/CRUD/modificar-registro.svg"
+                                    alt="boton modificar"
+                                    class="imagen-boton-modificar"
+                                />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </body>
+        </main>
+    </body>
 </Layout>

@@ -1,8 +1,14 @@
 ---
 import HeaderUsuario from "@components/HeaderUsuario.astro";
+import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
 
 const session = await getSession(Astro.request);
+const { data: cuenta } = await Astro.callAction(
+    actions.getCuentaById,
+    session?.user?.id || "",
+);
+
 
 const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
 ---
@@ -11,31 +17,31 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
     (isMaster && (
         <HeaderUsuario
             nombreUsuario={session?.user?.name || "Administrador"}
-            userImage={session?.user?.image || "/PerfilDefault.png"}
+            userImage={cuenta?.img_user || "/PerfilDefault.png"}
         />
     )) ||
         (isStudent && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Estudiante"}
-                userImage={session?.user?.image || "/PerfilDefault.png"}
+                userImage={cuenta?.img_user || "/PerfilDefault.png"}
             />
         )) ||
         (isUser && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
-                userImage={session?.user?.image || "/PerfilDefault.png"}
+                userImage={cuenta?.img_user || "/PerfilDefault.png"}
             />
         )) ||
         (isAdmin && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Administrador"}
-                userImage={session?.user?.image || "/PerfilDefault.png"}
+                userImage={cuenta?.img_user || "/PerfilDefault.png"}
             />
         )) ||
         (isLoggedIn && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
-                userImage={session?.user?.image || "/PerfilDefault.png"}
+                userImage={cuenta?.img_user || "/PerfilDefault.png"}
             />
         )) || (
         <header class="header">

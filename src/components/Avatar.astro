@@ -1,6 +1,9 @@
 ---
-// Astro no maneja estado por sí solo, así que usamos un poco de JavaScript con un componente interactivo.
-// Este componente usará una imagen por defecto hasta que el usuario cargue una nueva.
+import { getSession } from "auth-astro/server";
+const session = await getSession(Astro.request);
+
+const idCuenta = session?.user.id || "";
+
 const {
     defaultSrc = "/PerfilDefault.png",
     alt = "Usuario",
@@ -25,24 +28,163 @@ const {
         accept="image/*"
         id="upload"
         class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-        onchange="handleImageChange(event)"
     />
+
+    <!-- Indicador de carga -->
+    <div
+        id="loading-indicator"
+        class="absolute inset-0 bg-black bg-opacity-50 rounded-full items-center justify-center hidden"
+    >
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white">
+        </div>
+    </div>
+</div>
+
+<!-- Toast para mensajes -->
+<div
+    id="toast"
+    class="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg hidden transition-all"
+>
+    <span id="toast-message"></span>
 </div>
 
 <script>
-    function handleImageChange(event: Event) {
+    import { actions } from "astro:actions";
+
+    const uploadInput = document.getElementById("upload") as HTMLInputElement;
+    const profileImage = document.getElementById(
+        "profile-image",
+    ) as HTMLImageElement;
+    const loadingIndicator = document.getElementById(
+        "loading-indicator",
+    ) as HTMLElement;
+    const toast = document.getElementById("toast") as HTMLElement;
+    const toastMessage = document.getElementById(
+        "toast-message",
+    ) as HTMLElement;
+
+    // ID de la cuenta desde el servidor
+    const cuentaId =
+        document
+            .querySelector("[data-cuenta-id]")
+            ?.getAttribute("data-cuenta-id") || "";
+
+    uploadInput.addEventListener("change", async (event: Event) => {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (!file) return;
 
+        // Validaciones del lado del cliente
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/jpg",
+            "image/webp",
+        ];
+
+        if (file.size > maxSize) {
+            showToast("El archivo es demasiado grande. Máximo 5MB.", "error");
+            return;
+        }
+
+        if (!allowedTypes.includes(file.type)) {
+            showToast(
+                "Tipo de archivo no permitido. Solo JPEG, PNG, JPG y WebP.",
+                "error",
+            );
+            return;
+        }
+
+        // Mostrar preview inmediato
         const reader = new FileReader();
         reader.onload = function (e) {
-            const image = document.getElementById(
-                "profile-image",
-            ) as HTMLImageElement;
-            if (!image || !e.target) return;
-            // Cambia la imagen del perfil al archivo cargado
-            image.src = (e.target.result as string) || "/PerfilDefault.png";
+            if (e.target?.result) {
+                profileImage.src = e.target.result as string;
+            }
         };
         reader.readAsDataURL(file);
+
+        // Mostrar indicador de carga
+        showLoading(true);
+
+        try {
+            // Crear FormData para la action
+            const formData = new FormData();
+            formData.append("cuentaId", cuentaId);
+            formData.append("imagen", file);
+
+            // Llamar a la action
+            const result = await actions.uploadImageUser(formData);
+
+            if (result.data?.success) {
+                // Actualizar la imagen con la URL de Cloudinary
+                profileImage.src =
+                    result.data.data?.imagen_url || "/PerfilDefault.png";
+                showToast(
+                    "Imagen de perfil actualizada exitosamente",
+                    "success",
+                );
+            } else {
+                // Revertir a la imagen anterior en caso de error
+                profileImage.src =
+                    profileImage.getAttribute("data-original-src") ||
+                    "/PerfilDefault.png";
+                showToast(
+                    result.data?.message || "Error al subir la imagen",
+                    "error",
+                );
+            }
+        } catch (error) {
+            console.error("Error al subir imagen:", error);
+            // Revertir a la imagen anterior
+            profileImage.src =
+                profileImage.getAttribute("data-original-src") ||
+                "/PerfilDefault.png";
+            showToast("Error inesperado al subir la imagen", "error");
+        } finally {
+            showLoading(false);
+            // Limpiar el input para permitir subir el mismo archivo nuevamente
+            uploadInput.value = "";
+        }
+    });
+
+    function showLoading(show: boolean) {
+        if (show) {
+            loadingIndicator.classList.remove("hidden");
+            loadingIndicator.classList.add("flex");
+        } else {
+            loadingIndicator.classList.add("hidden");
+            loadingIndicator.classList.remove("flex");
+        }
+    }
+
+    function showToast(message: string, type: "success" | "error") {
+        toastMessage.textContent = message;
+
+        // Remover clases previas
+        toast.classList.remove("bg-green-500", "bg-red-500", "text-white");
+
+        // Añadir clases según el tipo
+        if (type === "success") {
+            toast.classList.add("bg-green-500", "text-white");
+        } else {
+            toast.classList.add("bg-red-500", "text-white");
+        }
+
+        // Mostrar toast
+        toast.classList.remove("hidden");
+
+        // Ocultar después de 3 segundos
+        setTimeout(() => {
+            toast.classList.add("hidden");
+        }, 3000);
+    }
+
+    // Guardar la imagen original como referencia
+    if (profileImage.src) {
+        profileImage.setAttribute("data-original-src", profileImage.src);
     }
 </script>
+
+<!-- Añadir el ID de cuenta como data attribute -->
+<div data-cuenta-id={idCuenta} style="display: none;"></div>
