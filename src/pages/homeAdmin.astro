@@ -41,7 +41,14 @@ const { data: cuenta } = await Astro.callAction(
     session?.user?.id || "",
 );
 
-// Si no hay sesión, redirigir al login
+// ✅ Debug: Verificar los datos
+console.log("🔍 Debug homeAdmin:");
+console.log("Session user ID:", session?.user?.id);
+console.log("Cuenta data:", cuenta);
+console.log("enl_ced_cue:", cuenta?.enl_ced_cue);
+console.log("enl_mat_cue:", cuenta?.enl_mat_cue);
+console.log("enl_ext_cue:", cuenta?.enl_ext_cue);
+
 let nombreAdmin = "";
 
 if (session && session.user) {
@@ -83,9 +90,29 @@ if (session && session.user) {
                 <Button text="Editar Perfil" />
                 <div class="text-center mt-4 text-red-800">Documentos</div>
                 <div class="flex gap-2 mt-2">
-                    <DocumentButton label="pdf cedula" />
-                    <DocumentButton label="pdf matric" />
-                    <DocumentButton label="pdf extra" />
+                    <DocumentButton
+                        label="Cédula"
+                        cuentaId={session?.user?.id}
+                        currentImage={cuenta?.enl_ced_cue}
+                        fieldName="enl_ced_cue"
+                        size="w-24 h-24"
+                    />
+
+                    <DocumentButton
+                        label="Matrícula"
+                        cuentaId={session?.user?.id}
+                        currentImage={cuenta?.enl_mat_cue}
+                        fieldName="enl_mat_cue"
+                        size="w-24 h-24"
+                    />
+
+                    <DocumentButton
+                        label="Extensión"
+                        cuentaId={session?.user?.id}
+                        currentImage={cuenta?.enl_ext_cue}
+                        fieldName="enl_ext_cue"
+                        size="w-24 h-24"
+                    />
                 </div>
             </div>
 
