@@ -11,7 +11,7 @@ import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
 
 const links = [
-    { label: "Eventos", href: "/" },
+    { label: "Eventos", href: "/Admin/EventosCRUD" },
     { label: "Usuarios", href: "/perfil" },
     { label: "Organizadores", href: "/historial" },
     { label: "Inscripciones", href: "/historial" },
@@ -58,7 +58,6 @@ if (session && session.user) {
         }
     }
 }
-console.log("Session:", session);
 ---
 
 <html lang="es">
