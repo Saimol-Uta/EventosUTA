@@ -1,0 +1,104 @@
+.formulario-completo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    gap: 30px;
+}
+
+.contenedor-vehiculo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    height: 300px;
+    background-color: rgb(234, 234, 234);
+    padding: 0 20px;
+    border-radius: 8px;
+}
+
+.imagen-vehiculo {
+    min-width: 200px;
+    width: 100%;
+}
+
+.formulario-modificar-reserva {
+    padding: 20px 30px;
+    flex: 1;
+    background-color: rgb(236, 236, 236);
+    border-radius: 8px;
+}
+
+.contenedor-superior,
+.contenedor-inferior {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contenedor-superior {
+    border-bottom: 3px solid black;
+    padding-bottom: 24px;
+}
+
+.contenedor-inferior {
+    margin-top: 18px;
+}
+
+.contenedor-nombre {
+    display: flex;
+    gap: 10px;
+}
+
+.texto-centrado {
+    font-weight: bold;
+    text-align: center;
+    font-size: 20px;
+}
+
+.contenedor-dato {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.texto-dato {
+    font-weight: 500;
+}
+
+.contenedor-input {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.input-dato {
+    flex: 1;
+    border: 1px solid rgb(158, 157, 157);
+    border-radius: 8px;
+    padding: 4px 8px;
+    min-width: 50px;
+}
+
+.imagen-edit {
+    width: 20px;
+}
+
+.contenedor-boton-modificar {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.boton-modificar {
+    background-color: rgb(255, 200, 0);
+    padding: 6px 14px;
+    width: 100px;
+    font-weight: bold;
+    border-radius: 8px;
+    margin-top: 8px;
+
+}
