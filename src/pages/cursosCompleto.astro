@@ -5,12 +5,18 @@ import Layout from "../layouts/Layout.astro";
 import Filtros from "../components/filtros.astro";
 import ContenedorEventos from "../components/ContenedorEvento.astro";
 
-// 🔧 Extraer filtros desde la URL
+// Extraer filtros desde la URL
 const url = new URL(Astro.request.url);
 const filtros = {
   categoria: url.searchParams.get("categoria") || "",
   duracion: url.searchParams.get("duracion") || ""
 };
+
+// Extraer número de página, por defecto 1
+const page = parseInt(url.searchParams.get("page") || "1", 10);
+
+// Número de cursos por página (configurable)
+const cursosPorPagina = 6;
 ---
 
 <Layout>
@@ -43,16 +49,16 @@ const filtros = {
       </div>
     )}
 
-    <!-- 🔍 Buscador -->
+    <!-- Buscador -->
     <div class="buscador">
       <input type="text" placeholder="Buscar evento" class="input-busqueda" />
       <button class="btn-buscar">🔍</button>
     </div>
 
-    <!-- 🎯 Eventos filtrados -->
-    <ContenedorEventos filtros={filtros} />
+    <!-- Eventos filtrados con paginación -->
+    <ContenedorEventos filtros={filtros} page={page} cursosPorPagina={cursosPorPagina} />
 
-    <!-- 🚫 Sin resultados -->
+    <!-- Sin resultados (por si quieres mostrarlo manualmente) -->
     <div class="cursos-sin-resultados" style="display: none;">
       <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
         <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
