@@ -13,6 +13,13 @@ import { effect } from "astro:schema";
 import { getSession } from "auth-astro/server";
 const session = await getSession(Astro.request);
 
+const { data: cuenta } = await Astro.callAction(
+    actions.getCuentaById,
+    session?.user?.id || "",
+);
+
+console.log(cuenta);
+
 const result = await Astro.callAction(actions.getEventosPorUsuario, {
     idUsuario: session?.user?.id || "",
 });
@@ -31,7 +38,10 @@ const certificates = ["Certificado A", "Certificado B"]; // si tienes una tabla 
 
         <div class="flex flex-col md:flex-row gap-6 p-6">
             <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
-                <Avatar />
+                <Avatar
+                    defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
+                    size="w-50 h-50"
+                />
                 <p class="text-red-800 font-semibold text-lg">
                     {session?.user?.name || "Usuario Anónimo"}
                 </p>
