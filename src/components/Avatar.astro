@@ -1,31 +1,48 @@
 ---
 // Astro no maneja estado por sí solo, así que usamos un poco de JavaScript con un componente interactivo.
 // Este componente usará una imagen por defecto hasta que el usuario cargue una nueva.
-const { defaultSrc = '/default-avatar.png', alt = 'Usuario', size = 'w-50 h-50' } = Astro.props;
+const {
+    defaultSrc = "/PerfilDefault.png",
+    alt = "Usuario",
+    size = "w-50 h-50",
+} = Astro.props;
 ---
+
 <div class={`relative ${size}`}>
-  <div id="profile-container" class="rounded-full bg-black flex items-center justify-center w-full h-full overflow-hidden">
-    <img id="profile-image" src={defaultSrc} alt={alt} class="w-full h-full object-cover rounded-full transition-all" />
-  </div>
-  <input
-    type="file"
-    accept="image/*"
-    id="upload"
-    class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-    onchange="handleImageChange(event)"
-  />
+    <div
+        id="profile-container"
+        class="rounded-full bg-black flex items-center justify-center w-full h-full overflow-hidden"
+    >
+        <img
+            id="profile-image"
+            src={defaultSrc}
+            alt={alt}
+            class="w-full h-full object-cover rounded-full transition-all"
+        />
+    </div>
+    <input
+        type="file"
+        accept="image/*"
+        id="upload"
+        class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+        onchange="handleImageChange(event)"
+    />
 </div>
 
 <script>
-  function handleImageChange(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    function handleImageChange(event: Event) {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const image = document.getElementById('profile-image');
-      image.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const image = document.getElementById(
+                "profile-image",
+            ) as HTMLImageElement;
+            if (!image || !e.target) return;
+            // Cambia la imagen del perfil al archivo cargado
+            image.src = (e.target.result as string) || "/PerfilDefault.png";
+        };
+        reader.readAsDataURL(file);
+    }
 </script>

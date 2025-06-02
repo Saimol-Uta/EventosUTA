@@ -1,3 +1,7 @@
+---
+const { isAdmin, isMaster } = Astro.locals;
+---
+
 <style>
     nav {
         display: flex;
@@ -10,7 +14,7 @@
         font-family: sans-serif;
     }
 
-    a {
+    .NavGlobal {
         text-decoration: none;
         margin-right: 20px;
         color: darkred;
@@ -23,13 +27,33 @@
             align-items: flex-start;
         }
 
-        a {
+        .NavGlobal {
             margin-bottom: 10px;
         }
     }
 </style>
 
 <nav>
-    <a href="/">Inicio</a>
-    <a href="/cursosCompleto">Cursos</a>
+    <a class="NavGlobal" href="/">Inicio</a>
+    <a class="NavGlobal" href="/cursosCompleto">Cursos</a>
+    {
+        isAdmin && (
+            <a
+                href="/homeAdmin"
+                class="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 animate-pulse"
+            >
+                Panel Admin
+            </a>
+        )
+    }
+    {
+        isMaster && (
+            <a
+                href="/homeAdmin"
+                class="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 animate-pulse"
+            >
+                Panel Master
+            </a>
+        )
+    }
 </nav>
