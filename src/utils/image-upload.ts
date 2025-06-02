@@ -70,8 +70,17 @@ export class ImageUpload {
             throw error;
         }
     }
-    static async delete(publicId: string) {
+
+    static async delete(imageUrl: string) {
         try {
+            // Extraer publicId de la URL de Cloudinary
+            const publicId = this.extractPublicId(imageUrl);
+
+            if (!publicId) {
+                console.warn('No se pudo extraer publicId de la URL:', imageUrl);
+                return;
+            }
+
             // Validar y obtener variables de entorno
             const config = validateEnvVariables();
 
@@ -82,23 +91,46 @@ export class ImageUpload {
                 api_secret: config.CLOUDINARY_API_SECRET
             });
 
-            console.log('Intentando eliminar imagen de Cloudinary...');
+            console.log(`Intentando eliminar imagen de Cloudinary: ${publicId}`);
 
-            const rep = await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' });
+            const rep = await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
 
-            if (rep.result !== 'ok') {
+            if (rep.result !== 'ok' && rep.result !== 'not found') {
                 throw new Error(`Error al eliminar la imagen: ${rep.result}`);
             }
 
+            console.log(`Imagen eliminada exitosamente: ${publicId}`);
             return rep;
 
         } catch (error: any) {
-            console.error('Error detallado de Cloudinary:', {
+            console.error('Error detallado al eliminar imagen:', {
                 message: error.message,
                 code: error.http_code,
                 error: error
             });
             throw error;
+        }
+    }
+
+    // Método privado para extraer publicId de URL de Cloudinary
+    private static extractPublicId(url: string): string | null {
+        try {
+            // Ejemplo de URL: https://res.cloudinary.com/tu-cloud/image/upload/v1234567890/folder/imagen.jpg
+            const parts = url.split('/');
+            const uploadIndex = parts.indexOf('upload');
+
+            if (uploadIndex !== -1 && uploadIndex + 2 < parts.length) {
+                // Obtener todo después de upload/v1234567890/
+                const pathParts = parts.slice(uploadIndex + 2);
+                const filename = pathParts.join('/');
+                // Remover extensión del archivo
+                return filename.replace(/\.[^/.]+$/, '');
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error extrayendo publicId de URL:', error);
+            return null;
         }
     }
 }

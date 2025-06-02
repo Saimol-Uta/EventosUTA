@@ -19,10 +19,11 @@ export const uploadImageUser = defineAction({
     }),
     handler: async (form) => {
         try {
-            // Verificar que la cuenta existe
+            // Verificar que la cuenta existe y obtener imagen anterior
             const cuenta = await prisma.cuentas.findUnique({
                 where: { id_cue: form.cuentaId },
-                include: {
+                select: {
+                    img_user: true,
                     usuarios: {
                         select: {
                             nom_usu1: true,
@@ -39,10 +40,10 @@ export const uploadImageUser = defineAction({
                 };
             }
 
-            // Subir imagen a Cloudinary
-            let imagen_url = '';
+            // Subir nueva imagen a Cloudinary
+            let nueva_imagen_url = '';
             try {
-                imagen_url = await ImageUpload.upload(form.imagen);
+                nueva_imagen_url = await ImageUpload.upload(form.imagen);
             } catch (cloudinaryError: any) {
                 console.error('Error de Cloudinary:', cloudinaryError);
                 return {
@@ -51,10 +52,21 @@ export const uploadImageUser = defineAction({
                 };
             }
 
+            // Eliminar imagen anterior si existe
+            if (cuenta.img_user) {
+                try {
+                    await ImageUpload.delete(cuenta.img_user);
+                    console.log('Imagen anterior eliminada:', cuenta.img_user);
+                } catch (deleteError: any) {
+                    console.warn('No se pudo eliminar la imagen anterior:', deleteError);
+                    // No fallar la operación si no se puede eliminar la imagen anterior
+                }
+            }
+
             // Actualizar la imagen del usuario en la cuenta
             const cuentaActualizada = await prisma.cuentas.update({
                 where: { id_cue: form.cuentaId },
-                data: { img_user: imagen_url },
+                data: { img_user: nueva_imagen_url },
                 select: {
                     id_cue: true,
                     cor_cue: true,
