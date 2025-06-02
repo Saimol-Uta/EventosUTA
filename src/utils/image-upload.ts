@@ -70,4 +70,35 @@ export class ImageUpload {
             throw error;
         }
     }
+    static async delete(publicId: string) {
+        try {
+            // Validar y obtener variables de entorno
+            const config = validateEnvVariables();
+
+            // Configurar Cloudinary con los valores validados
+            cloudinary.config({
+                cloud_name: config.CLOUDINARY_CLOUD_NAME,
+                api_key: config.CLOUDINARY_API_KEY,
+                api_secret: config.CLOUDINARY_API_SECRET
+            });
+
+            console.log('Intentando eliminar imagen de Cloudinary...');
+
+            const rep = await cloudinary.uploader.destroy(publicId, { resource_type: 'auto' });
+
+            if (rep.result !== 'ok') {
+                throw new Error(`Error al eliminar la imagen: ${rep.result}`);
+            }
+
+            return rep;
+
+        } catch (error: any) {
+            console.error('Error detallado de Cloudinary:', {
+                message: error.message,
+                code: error.http_code,
+                error: error
+            });
+            throw error;
+        }
+    }
 }

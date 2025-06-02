@@ -45,6 +45,7 @@ model cuentas {
   enl_ext_cue String?
   id_usu_per  String    @db.Uuid
   cont_cuenta String?
+  img_user    String?
   cambios     cambios[]
   usuarios    usuarios  @relation(fields: [id_usu_per], references: [id_usu], onDelete: Cascade, onUpdate: NoAction)
 
