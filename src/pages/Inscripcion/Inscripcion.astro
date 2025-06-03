@@ -1,0 +1,81 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import "../../styles/Inscripcion.css";
+---
+
+<Layout>
+
+  <body>
+    <div class="container">
+      <div class="form-card">
+        <h2>Inscripción</h2>
+        <p>Fecha en la que se está realizando la inscripción</p>
+
+        <h3>Datos del Usuario</h3>
+
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" />
+          </div>
+          <div class="form-group">
+            <label>Apellido</label>
+            <input type="text" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo de Documento</label>
+            <select>
+              <option>Cédula</option>
+              <option>Pasaporte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Número de Documento</label>
+            <input type="text" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" />
+        </div>
+
+        <h3>Requisitos</h3>
+        <div class="form-group">
+          <label>Cédula y Papeleta de Votación</label>
+          <div class="contenedor-file">
+            <label for="file-upload" class="custom-file-upload">
+              <img
+                src="/img/CRUD/upload.png"
+                alt="Subir imagen"
+                class="upload-icon"
+              />
+              <span>Seleccionar documento</span>
+            </label>
+            <input id="file-upload" type="file" class="input-file" />
+            <p class="file-name">No se ha seleccionado ningún archivo</p>
+          </div>
+        </div>
+
+        <button class="submit-button">Inscribirse</button>
+      </div>
+
+      <div class="vehicle-card">
+        <h3>JavaScript desde Cero</h3>
+        <img
+          src="https://i.ytimg.com/vi/z95mZVUcJ-E/maxresdefault.jpg"
+          alt="Toyota RAV4"
+        />
+        <p><strong>USD 80 (o gratis)</strong></p>
+      </div>
+    </div>
+  </body>
+</Layout>
