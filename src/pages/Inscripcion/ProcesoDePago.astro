@@ -1,0 +1,135 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import "../../styles/ProcesoDePago.css";
+---
+
+<Layout>
+  <body>
+    <div class="container">
+      <div class="form-card">
+        <div class="return-button-container">
+          <h2>Proceso de Pago</h2>
+          <a class="return-button" href="Inscripcion"
+            ><img class="return-img" src="/public/img/regresar.png" alt="" />
+          </a>
+        </div>
+        <p>12/05/2025</p>
+
+        <div class="form-group">
+          <label for="metodoPago">Forma de pago</label>
+          <select id="metodoPago" name="metodo_pago">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia Bancaria</option>
+          </select>
+        </div>
+
+        <div class="from-group">
+          <div id="formEfectivo" class="formulario-pago">
+            <h4>Información para Pago Efectivo</h4>
+            <p><strong>Lugar de Pago:</strong> Secretaría de la FISEI</p>
+            <input type="hidden" name="banco" value="Banco Pichincha" />
+
+            <div class="instrucciones-transferencia">
+              <p>
+                <strong>Instrucciones:</strong><br />
+                1. Realice el pago con el monto indicado.<br />
+                2. Guarde la factura.<br />
+                3. Suba la factura con la opción de subir documento.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="from-group">
+          <div id="formTransferencia" class="formulario-pago">
+            <h4>Información para Transferencia</h4>
+            <p><strong>Banco:</strong> Banco Pichincha</p>
+            <input type="hidden" name="banco" value="Banco Pichincha" />
+            <p><strong>Tipo de Cuenta:</strong> Corriente</p>
+            <input type="hidden" name="tipo_cuenta" value="Corriente" />
+            <p><strong>Número de Cuenta:</strong> 2206674884</p>
+            <input type="hidden" name="numero_cuenta" value="2206674884" />
+
+            <div class="instrucciones-transferencia">
+              <p>
+                <strong>Instrucciones:</strong><br />
+                1. Realice la transferencia por el monto indicado.<br />
+                2. Guarde el comprobante de transferencia.<br />
+                3. Suba el comprobante con la opción de subir documento.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="contenedor-file">
+          <label for="file-upload" class="custom-file-upload">
+            <img
+              src="/img/CRUD/upload.png"
+              alt="Subir imagen"
+              class="upload-icon"
+            />
+            <span>Subir documento</span>
+          </label>
+          <input id="file-upload" type="file" class="input-file" />
+          <p class="file-name">No se ha seleccionado ningún archivo</p>
+        </div>
+        <div class="form-row">
+          <button class="submit-button">Cancelar</button>
+          <button class="submit-button">Finalizar Pago</button>
+        </div>
+      </div>
+
+      <div class="vehicle-card">
+        <h3>JavaScript desde Cero</h3>
+        <img
+          src="https://i.ytimg.com/vi/z95mZVUcJ-E/maxresdefault.jpg"
+          alt="Curso de JavaScript"
+          class="curso-imagen"
+        />
+        <p><strong>Asignación:</strong> Público General</p>
+        <p><strong>Categoría:</strong> Curso</p>
+        <p><strong>Precio:</strong> $80</p>
+        <p><strong>Área:</strong> IA</p>
+        <p><strong>Fecha Inicio:</strong> 18/05/2025</p>
+        <p><strong>Duración:</strong> 20 horas</p>
+      </div>
+    </div>
+
+    <script type="module" is:inline>
+      document.addEventListener("DOMContentLoaded", () => {
+        const metodoPago = document.getElementById("metodoPago");
+        const forms = {
+          efectivo: document.getElementById("formEfectivo"),
+          transferencia: document.getElementById("formTransferencia"),
+        };
+
+        function actualizarForms() {
+          Object.values(forms).forEach((form) =>
+            form?.classList.remove("active")
+          );
+          forms[metodoPago.value]?.classList.add("active");
+        }
+
+        if (metodoPago) {
+          actualizarForms();
+          metodoPago.addEventListener("change", actualizarForms);
+        }
+
+        const fileInput = document.getElementById("file-upload");
+        const fileNameDisplay = document.querySelector(".file-name");
+
+        if (fileInput && fileNameDisplay) {
+          fileInput.addEventListener("change", function (e) {
+            const target = e.target;
+            if (target instanceof HTMLInputElement && target.files?.length) {
+              fileNameDisplay.textContent = target.files[0].name;
+            } else {
+              fileNameDisplay.textContent =
+                "No se ha seleccionado ningún archivo";
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</Layout>
