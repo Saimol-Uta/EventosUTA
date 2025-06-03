@@ -1,0 +1,119 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import "../../styles/Inscripcion.css";
+---
+
+<Layout>
+  <body>
+    <div class="container">
+      <div class="form-card">
+        <h2>Inscripción</h2>
+        <p>12/05/2025</p>
+
+        <h3>Datos del Usuario</h3>
+
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" />
+          </div>
+          <div class="form-group">
+            <label>Apellido</label>
+            <input type="text" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo de Documento</label>
+            <select>
+              <option>Cédula</option>
+              <option>Pasaporte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Número de Documento</label>
+            <input type="text" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" />
+        </div>
+
+        <h3>Requisitos</h3>
+        <div class="requisitos-container">
+          <!-- Requisito 1 -->
+          <div class="requisito-item">
+            <div class="requisito-info">
+              <span class="requisito-texto">Cédula y Papeleta de Votación</span>
+              <div class="requisito-estado">
+                <input
+                  type="checkbox"
+                  id="requisito1"
+                  class="requisito-checkbox"
+                />
+                <label for="requisito1" class="custom-checkbox"></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requisito 2 -->
+          <div class="requisito-item">
+            <div class="requisito-info">
+              <span class="requisito-texto">Certificado de Matriculación</span>
+              <div class="requisito-estado">
+                <input
+                  type="checkbox"
+                  id="requisito2"
+                  class="requisito-checkbox"
+                />
+                <label for="requisito2" class="custom-checkbox"></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requisito 3 -->
+          <div class="requisito-item">
+            <div class="requisito-info">
+              <span class="requisito-texto">Carta de Motivación</span>
+              <div class="requisito-estado">
+                <input
+                  type="checkbox"
+                  id="requisito3"
+                  class="requisito-checkbox"
+                />
+                <label for="requisito3" class="custom-checkbox"></label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <button class="submit-button">Cancelar</button>
+          <button class="submit-button">Inscribirse</button>
+        </div>
+      </div>
+
+      <div class="vehicle-card">
+        <h3>JavaScript desde Cero</h3>
+        <img
+          src="https://i.ytimg.com/vi/z95mZVUcJ-E/maxresdefault.jpg"
+          alt="Curso de JavaScript"
+          class="curso-imagen"
+        />
+        <p><strong>Asignación:</strong> Público General</p>
+        <p><strong>Categoría:</strong> Curso</p>
+        <p><strong>Precio:</strong> $80</p>
+        <p><strong>Área:</strong> IA</p>
+        <p><strong>Fecha Inicio:</strong> 18/05/2025</p>
+        <p><strong>Duración:</strong> 20 horas</p>
+      </div>
+    </div>
+  </body>
+</Layout>
