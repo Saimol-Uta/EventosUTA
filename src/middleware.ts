@@ -17,6 +17,7 @@ const publicRoutes = [
     '/default-avatar.png',
     '/favicon.ico',
     '/about',
+    '/Eventos/historial',
     '/contact',
     // Añadir aquí todas las rutas que deben ser accesibles por usuarios autenticados
 ];
