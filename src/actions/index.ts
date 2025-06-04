@@ -1,4 +1,4 @@
-import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento } from './Eventos';
+import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras, getAsignacionesByEvento, crearAsignacion, eliminarAsignacion, modificarAsignacion, getAllAsignaciones, crearAsignacionCompleta, modificarAsignacionCompleta, eliminarAsignacionCompleta, getAsignacionesPlantilla, duplicarAsignacionAEvento } from './Eventos';
 import { SignIn } from './auth/registerUser.action';
 import { getEventosPorUsuario } from './Eventos/getEventosPorUsuario'
 import { createCambio } from './Cambios';
@@ -24,5 +24,16 @@ export const server = {
     getCategorias,
     crearEvento,
     modificarEvento,
-    eliminarEvento
+    eliminarEvento,    // Nuevas acciones para asignaciones
+    getCarreras,
+    getAsignacionesByEvento,
+    crearAsignacion,
+    eliminarAsignacion,
+    modificarAsignacion,    // Nuevas acciones para CRUD independiente de asignaciones
+    getAllAsignaciones,
+    crearAsignacionCompleta,
+    modificarAsignacionCompleta,
+    eliminarAsignacionCompleta,
+    getAsignacionesPlantilla,
+    duplicarAsignacionAEvento
 };
