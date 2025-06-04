@@ -3,96 +3,224 @@ import "../styles/ModalDetallesEvento.css";
 ---
 
 <div id="modalDetallesReserva" class="modal">
-  <div class="modal-contenido">
-    <span class="cerrar" onclick="cerrarModalDetalles()">&times;</span>
-    <div class="detalles-reserva">
-      <h2>Nombre del Evento</h2>
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalDetalles()">&times;</span>
+        <div class="detalles-reserva">
+            <h2 id="evento-nombre">Nombre del Evento</h2>
 
-      <div class="seccion-detalles centrar">
-        <img
-          class="imagen-curso"
-          src="https://i0.wp.com/niaxus.com/wp-content/uploads/2025/02/vrchyzq6javascript_1705438000.png"
-          alt="imagen curso"
-        />
-        <div class="descripcion-completa-container">
-          <p class="descripcion-completa"><strong>Descripción:</strong> <span id="cliente-cedula"></span></p>
-        </div>
-      </div>
+            <div class="seccion-detalles centrar">
+                <img
+                    id="evento-imagen-detalle"
+                    class="imagen-curso"
+                    src="https://i0.wp.com/niaxus.com/wp-content/uploads/2025/02/vrchyzq6javascript_1705438000.png"
+                    alt="imagen evento"
+                />
+                <div class="descripcion-completa-container">
+                    <p class="descripcion-completa">
+                        <strong>Descripción:</strong>
+                        <span id="evento-descripcion"></span>
+                    </p>
+                </div>
+            </div>
 
-      <div class="seccion-detalles">
-        <h3>Información General</h3>
-        <div class="info-grid">
-          <p><strong>Categoría:</strong> <span id="cliente-telefono"></span></p>
-          <p><strong>Área:</strong> <span id="cliente-telefono"></span></p>
-          <p>
-            <strong>Asignación:</strong>
-            <span id="cliente-telefono"></span>
-          </p>
-        </div>
-      </div>
+            <div class="seccion-detalles">
+                <h3>Información General</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Categoría:</strong>
+                        <span id="evento-categoria"></span>
+                    </p>
+                    <p><strong>Área:</strong> <span id="evento-area"></span></p>
+                    <p>
+                        <strong>Precio:</strong>
+                        <span id="evento-precio"></span>
+                    </p>
+                </div>
+            </div>
 
-      <div class="seccion-detalles">
-        <h3>Programación</h3>
-        <div class="info-grid">
-          <p>
-            <strong>Fecha de Inicio:</strong>
-            <span id="vehiculo-info"></span>
-          </p>
-          <p>
-            <strong>Hora de Inicio:</strong>
-            <span id="vehiculo-info"></span>
-          </p>
-          <p><strong>Fecha de Fin:</strong> <span id="vehiculo-tipo"></span></p>
-          <p><strong>Hora de Fin:</strong> <span id="vehiculo-info"></span></p>
-          <p>
-            <strong>Duración:</strong>
-            <span id="vehiculo-transmision"></span>
-          </p>
-          <p>
-            <strong>Ubicación:</strong>
-            <span id="vehiculo-combustible"></span>
-          </p>
-        </div>
-      </div>
+            <div class="seccion-detalles">
+                <h3>Programación</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Fecha de Inicio:</strong>
+                        <span id="evento-fecha-inicio"></span>
+                    </p>
+                    <p>
+                        <strong>Hora de Inicio:</strong>
+                        <span id="evento-hora-inicio"></span>
+                    </p>
+                    <p>
+                        <strong>Fecha de Fin:</strong>
+                        <span id="evento-fecha-fin"></span>
+                    </p>
+                    <p>
+                        <strong>Hora de Fin:</strong>
+                        <span id="evento-hora-fin"></span>
+                    </p>
+                    <p>
+                        <strong>Duración:</strong>
+                        <span id="evento-duracion"></span>
+                    </p>
+                    <p>
+                        <strong>Ubicación:</strong>
+                        <span id="evento-ubicacion"></span>
+                    </p>
+                </div>
+            </div>
 
-      <div class="seccion-detalles">
-        <h3>Organizador</h3>
-        <div class="info-grid">
-          <p><strong>Cédula:</strong> <span id="reserva-inicio"></span></p>
-          <p><strong>Nombre:</strong> <span id="reserva-fin"></span></p>
-          <p>
-            <strong>Título Académico:</strong>
-            <span id="reserva-estado"></span>
-          </p>
+            <div class="seccion-detalles">
+                <h3>Organizador</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Cédula:</strong>
+                        <span id="organizador-cedula"></span>
+                    </p>
+                    <p>
+                        <strong>Nombre:</strong>
+                        <span id="organizador-nombre"></span>
+                    </p>
+                    <p>
+                        <strong>Título Académico:</strong>
+                        <span id="organizador-titulo"></span>
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <script>
-  declare global {
-    interface Window {
-      cerrarModalDetalles: () => void;
-      abrirModalDetalles: () => void;
+    declare global {
+        interface Window {
+            cerrarModalDetalles: () => void;
+            abrirModalDetalles: (evento: any) => void;
+        }
     }
-  }
 
-  function cerrarModalDetalles() {
-    const modal = document.getElementById("modalDetallesReserva");
-    if (modal) modal.style.display = "none";
-  }
+    function cerrarModalDetalles() {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (modal) modal.style.display = "none";
+    }
 
-  function abrirModalDetalles() {
-    const modal = document.getElementById("modalDetallesReserva");
-    if (modal) modal.style.display = "block";
-  }
+    function abrirModalDetalles(evento: any) {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (!modal) return;
 
-  window.onclick = function (event) {
-    const modal = document.getElementById("modalDetallesReserva");
-    if (event.target === modal) cerrarModalDetalles();
-  };
+        // Poblar el modal con los datos del evento
+        poblarModalConDatos(evento);
 
-  window.cerrarModalDetalles = cerrarModalDetalles;
-  window.abrirModalDetalles = abrirModalDetalles;
+        modal.style.display = "block";
+    }
+
+    function poblarModalConDatos(evento: any) {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (!modal) return;
+
+        // Actualizar título del modal
+        const titulo = modal.querySelector("#evento-nombre");
+        if (titulo) titulo.textContent = evento.nom_eve || "Sin nombre";
+
+        // Actualizar descripción
+        const descripcion = modal.querySelector("#evento-descripcion");
+        if (descripcion)
+            descripcion.textContent = evento.des_eve || "Sin descripción";
+
+        // Actualizar imagen
+        const imagen = modal.querySelector(
+            "#evento-imagen-detalle",
+        ) as HTMLImageElement;
+        if (imagen) {
+            imagen.src =
+                evento.img_eve ||
+                "https://via.placeholder.com/300x200?text=Sin+Imagen";
+            imagen.alt = `Imagen de ${evento.nom_eve}`;
+        }
+
+        // Información General
+        const categoria = modal.querySelector("#evento-categoria");
+        if (categoria) {
+            // Manejar tanto evento.categoria.data como evento.categoria directamente
+            const categoriaData = evento.categoria?.data || evento.categoria;
+            categoria.textContent = categoriaData?.nom_cat || "Sin categoría";
+        }
+
+        const area = modal.querySelector("#evento-area");
+        if (area) area.textContent = evento.are_eve || "No especificada";
+
+        const precio = modal.querySelector("#evento-precio");
+        if (precio) precio.textContent = `$${evento.precio || 0}`;
+
+        // Programación
+        const fechaInicio = modal.querySelector("#evento-fecha-inicio");
+        if (fechaInicio) {
+            const fecha = new Date(evento.fec_ini_eve);
+            fechaInicio.textContent = fecha.toLocaleDateString("es-ES");
+        }
+
+        const horaInicio = modal.querySelector("#evento-hora-inicio");
+        if (horaInicio)
+            horaInicio.textContent = evento.hor_ini_eve || "No especificada";
+
+        const fechaFin = modal.querySelector("#evento-fecha-fin");
+        if (fechaFin) {
+            if (evento.fec_fin_eve) {
+                const fecha = new Date(evento.fec_fin_eve);
+                fechaFin.textContent = fecha.toLocaleDateString("es-ES");
+            } else {
+                fechaFin.textContent = "No especificada";
+            }
+        }
+
+        const horaFin = modal.querySelector("#evento-hora-fin");
+        if (horaFin)
+            horaFin.textContent = evento.hor_fin_eve || "No especificada";
+
+        const duracion = modal.querySelector("#evento-duracion");
+        if (duracion) {
+            duracion.textContent = evento.dur_eve
+                ? `${evento.dur_eve} horas`
+                : "No especificada";
+        }
+
+        const ubicacion = modal.querySelector("#evento-ubicacion");
+        if (ubicacion)
+            ubicacion.textContent = evento.ubi_eve || "No especificada";
+
+        // Organizador - Cédula
+        const organizadorCedula = modal.querySelector("#organizador-cedula");
+        if (organizadorCedula) {
+            const orgData = evento.organizador?.data || evento.organizador;
+            organizadorCedula.textContent =
+                orgData?.ced_org || "No especificada";
+        }
+
+        // Organizador - Nombre
+        const organizadorNombre = modal.querySelector("#organizador-nombre");
+        if (organizadorNombre) {
+            const orgData = evento.organizador?.data || evento.organizador;
+            if (orgData) {
+                const nombreCompleto =
+                    `${orgData.nom_org1} ${orgData.nom_org2 || ""} ${orgData.ape_org1} ${orgData.ape_org2 || ""}`.trim();
+                organizadorNombre.textContent = nombreCompleto;
+            } else {
+                organizadorNombre.textContent = "No especificado";
+            }
+        }
+
+        // Organizador - Título
+        const organizadorTitulo = modal.querySelector("#organizador-titulo");
+        if (organizadorTitulo) {
+            const orgData = evento.organizador?.data || evento.organizador;
+            organizadorTitulo.textContent =
+                orgData?.tit_aca_org || "No especificado";
+        }
+    } // Cerrar modal al hacer clic fuera de él
+    window.onclick = function (event) {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (event.target === modal) {
+            cerrarModalDetalles();
+        }
+    }; // Exponer funciones globalmente
+    window.cerrarModalDetalles = cerrarModalDetalles;
+    window.abrirModalDetalles = abrirModalDetalles;
 </script>

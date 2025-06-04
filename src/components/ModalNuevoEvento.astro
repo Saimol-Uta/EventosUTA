@@ -1,5 +1,12 @@
 ---
 import "../styles/ModalModificarEvento.css";
+
+interface Props {
+    categorias?: any[];
+    organizadores?: any[];
+}
+
+const { categorias = [], organizadores = [] } = Astro.props;
 ---
 
 <div id="modalNuevoEvento" class="modal">
@@ -49,15 +56,13 @@ import "../styles/ModalModificarEvento.css";
                                 >
                                     <option value="">Elija una Categoría</option
                                     >
-                                    <option value="curso">Curso</option>
-                                    <option value="congreso">Congreso</option>
-                                    <option value="webinar">Webinar</option>
-                                    <option value="conferencia"
-                                        >Conferencia</option
-                                    >
-                                    <option value="socializacion"
-                                        >Socialización</option
-                                    >
+                                    {
+                                        categorias.map((categoria) => (
+                                            <option value={categoria.id_cat}>
+                                                {categoria.nom_cat}
+                                            </option>
+                                        ))
+                                    }
                                 </select>
                             </div>
                         </div>
@@ -181,15 +186,28 @@ import "../styles/ModalModificarEvento.css";
                 <div class="contenedor-inferior">
                     <p class="texto-centrado texto-rojo">Organizador</p>
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Cédula del Organizador</p>
+                        <p class="texto-dato">Organizador</p>
                         <div class="contenedor-input">
-                            <input
-                                type="text"
-                                class="input-dato"
+                            <select
                                 name="cedula-organizador"
-                                pattern="[0-9]{10}"
+                                class="input-dato"
                                 required
-                            />
+                            >
+                                <option value=""
+                                    >Seleccione un Organizador</option
+                                >
+                                {
+                                    organizadores.map((organizador) => (
+                                        <option value={organizador.ced_org}>
+                                            {organizador.nom_org1}{" "}
+                                            {organizador.nom_org2 || ""}{" "}
+                                            {organizador.ape_org1}{" "}
+                                            {organizador.ape_org2} -{" "}
+                                            {organizador.ced_org}
+                                        </option>
+                                    ))
+                                }
+                            </select>
                         </div>
                     </div>
 
@@ -343,11 +361,10 @@ import "../styles/ModalModificarEvento.css";
                     areaValue && areasPermitidas.includes(areaValue)
                         ? areaValue
                         : undefined;
-
                 const eventoData = {
                     nombre: formData.get("nombre") as string,
                     descripcion: formData.get("descripcion") as string,
-                    categoria: formData.get("categoria") as string,
+                    categoria: formData.get("categoria") as string, // Este es el ID de la categoría
                     precio: parseFloat(formData.get("precio") as string) || 0,
                     fecha_inicio: formData.get("fecha-inicio") as string,
                     hora_inicio: formData.get("hora-inicio") as string,

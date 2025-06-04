@@ -120,11 +120,10 @@ export const getCategoriaById = defineAction({
 });
 
 export const crearEvento = defineAction({
-    accept: 'json',
-    input: z.object({
+    accept: 'json', input: z.object({
         nombre: z.string().min(1),
         descripcion: z.string().min(1),
-        categoria: z.string().min(1),
+        categoria: z.string().uuid(), // Ahora esperamos un UUID de categoría
         area: z.enum(['PRACTICA', 'INVESTIGACION', 'ACADEMICA', 'TECNICA', 'INDUSTRIAL', 'EMPRESARIAL', 'IA', 'REDES']).optional(),
         precio: z.number().min(0),
         fecha_inicio: z.string().transform(str => new Date(str)),
@@ -149,26 +148,16 @@ export const crearEvento = defineAction({
                         success: false,
                         error: 'El organizador no existe en el sistema'
                     };
-                }
-
-                // 2. Buscar o crear la categoría
-                let categoria = await tx.categorias_eventos.findFirst({
-                    where: {
-                        nom_cat: {
-                            equals: input.categoria,
-                            mode: 'insensitive'
-                        }
-                    }
+                }                // 2. Verificar que la categoría existe
+                const categoria = await tx.categorias_eventos.findUnique({
+                    where: { id_cat: input.categoria }
                 });
 
                 if (!categoria) {
-                    categoria = await tx.categorias_eventos.create({
-                        data: {
-                            nom_cat: input.categoria,
-                            des_cat: `Categoría ${input.categoria}`,
-                            asi_cat: 1
-                        }
-                    });
+                    return {
+                        success: false,
+                        error: 'La categoría especificada no existe'
+                    };
                 }
 
                 // 3. Crear el evento
@@ -176,7 +165,7 @@ export const crearEvento = defineAction({
                     data: {
                         nom_eve: input.nombre,
                         des_eve: input.descripcion,
-                        id_cat_eve: categoria.id_cat,
+                        id_cat_eve: input.categoria, // Usar directamente el ID
                         fec_ini_eve: input.fecha_inicio,
                         fec_fin_eve: input.fecha_fin,
                         hor_ini_eve: new Date(`1970-01-01T${input.hora_inicio}:00`),
@@ -215,7 +204,7 @@ export const modificarEvento = defineAction({
         evento_id: z.string().uuid(),
         nombre: z.string().min(1),
         descripcion: z.string().min(1),
-        categoria: z.string().min(1),
+        categoria: z.string().uuid(), // Ahora esperamos un UUID de categoría
         area: z.enum(['PRACTICA', 'INVESTIGACION', 'ACADEMICA', 'TECNICA', 'INDUSTRIAL', 'EMPRESARIAL', 'IA', 'REDES']).optional(),
         precio: z.number().min(0),
         fecha_inicio: z.string().transform(str => new Date(str)),
@@ -254,33 +243,23 @@ export const modificarEvento = defineAction({
                     };
                 }
 
-                // 3. Buscar o crear la categoría
-                let categoria = await tx.categorias_eventos.findFirst({
-                    where: {
-                        nom_cat: {
-                            equals: input.categoria,
-                            mode: 'insensitive'
-                        }
-                    }
+                // 3. Verificar que la categoría existe
+                const categoria = await tx.categorias_eventos.findUnique({
+                    where: { id_cat: input.categoria }
                 });
 
                 if (!categoria) {
-                    categoria = await tx.categorias_eventos.create({
-                        data: {
-                            nom_cat: input.categoria,
-                            des_cat: `Categoría ${input.categoria}`,
-                            asi_cat: 1
-                        }
-                    });
-                }
-
-                // 4. Actualizar el evento
+                    return {
+                        success: false,
+                        error: 'La categoría especificada no existe'
+                    };
+                }                // 4. Actualizar el evento
                 const eventoActualizado = await tx.eventos.update({
                     where: { id_eve: input.evento_id },
                     data: {
                         nom_eve: input.nombre,
                         des_eve: input.descripcion,
-                        id_cat_eve: categoria.id_cat,
+                        id_cat_eve: input.categoria, // Usar directamente el UUID
                         fec_ini_eve: input.fecha_inicio,
                         fec_fin_eve: input.fecha_fin,
                         hor_ini_eve: new Date(`1970-01-01T${input.hora_inicio}:00`),
@@ -308,6 +287,33 @@ export const modificarEvento = defineAction({
             return {
                 success: false,
                 error: 'Error al modificar el evento'
+            };
+        }
+    }
+});
+
+export const getOrganizadores = defineAction({
+    accept: 'json',
+    input: z.object({}),
+    async handler() {
+        try {
+            const organizadores = await prisma.organizadores.findMany({
+                orderBy: {
+                    nom_org1: 'asc'
+                }
+            });
+
+            const organizadoresPlanos = JSON.parse(JSON.stringify(organizadores));
+
+            return {
+                success: true,
+                organizadores: organizadoresPlanos
+            };
+        } catch (error) {
+            console.error('Error al obtener organizadores:', error);
+            return {
+                success: false,
+                error: 'Error al obtener los organizadores'
             };
         }
     }
@@ -360,6 +366,33 @@ export const eliminarEvento = defineAction({
             return {
                 success: false,
                 error: 'Error al eliminar el evento'
+            };
+        }
+    }
+});
+
+export const getCategorias = defineAction({
+    accept: 'json',
+    input: z.object({}),
+    async handler() {
+        try {
+            const categorias = await prisma.categorias_eventos.findMany({
+                orderBy: {
+                    nom_cat: 'asc'
+                }
+            });
+
+            const categoriasPlanas = JSON.parse(JSON.stringify(categorias));
+
+            return {
+                success: true,
+                categorias: categoriasPlanas
+            };
+        } catch (error) {
+            console.error('Error al obtener categorías:', error);
+            return {
+                success: false,
+                error: 'Error al obtener las categorías'
             };
         }
     }

@@ -1,4 +1,4 @@
-import { crearEvento, eliminarEvento, getCategoriaById, getEventoBySlug, getEventos, getEventosAdmin, getOrganizadorByEvento, modificarEvento } from './Eventos';
+import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento } from './Eventos';
 import { SignIn } from './auth/registerUser.action';
 import { getEventosPorUsuario } from './Eventos/getEventosPorUsuario'
 import { createCambio } from './Cambios';
@@ -18,9 +18,10 @@ export const server = {
     uploadImageUser,
     getCuentaById,
     uploadDocumentImage,
-    getEventosAdmin,
     getOrganizadorByEvento,
+    getOrganizadores,
     getCategoriaById,
+    getCategorias,
     crearEvento,
     modificarEvento,
     eliminarEvento

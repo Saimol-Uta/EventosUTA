@@ -17,11 +17,17 @@ const { data, error } = await Astro.callAction(actions.getEventos, {
     categoria: categoriaFiltro || undefined,
 });
 
+// Obtener categorías para el filtro
+const { data: categoriasData } = await Astro.callAction(actions.getCategorias, {});
+const { data: organizadoresData } = await Astro.callAction(actions.getOrganizadores, {});
+
 if (error) {
     console.error("Error al obtener eventos:", error);
 }
 
 const eventos = data?.eventos || [];
+const categorias = categoriasData?.categorias || [];
+const organizadores = organizadoresData?.organizadores || [];
 
 // Obtener información completa de cada evento
 const eventosCompletos = await Promise.all(
@@ -57,17 +63,15 @@ const links = [
 <Layout>
     <body>
         <Header />
-        <MenuAdmin links={links} />
-        <ModalDetallesEvento />
-        <ModalModificarEvento />
-        <ModalNuevoEvento />
+        <MenuAdmin links={links} />        <ModalDetallesEvento />
+        <ModalModificarEvento categorias={categorias} organizadores={organizadores} />
+        <ModalNuevoEvento categorias={categorias} organizadores={organizadores} />
 
         <main class="registros">
             <div class="registros-grid">
                 <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Eventos
-                        <select
+                        Eventos                        <select
                             id="filtroCategoria"
                             class="select-estado"
                             onchange="window.location.href = `?categoria=${this.value}`"
@@ -75,30 +79,14 @@ const links = [
                             <option value="" selected={!categoriaFiltro}>
                                 Todos los eventos
                             </option>
-                            <option
-                                value="curso"
-                                selected={categoriaFiltro === "curso"}
-                            >
-                                Cursos
-                            </option>
-                            <option
-                                value="congreso"
-                                selected={categoriaFiltro === "congreso"}
-                            >
-                                Congresos
-                            </option>
-                            <option
-                                value="webinar"
-                                selected={categoriaFiltro === "webinar"}
-                            >
-                                Webinars
-                            </option>
-                            <option
-                                value="conferencia"
-                                selected={categoriaFiltro === "conferencia"}
-                            >
-                                Conferencias
-                            </option>
+                            {categorias.map((categoria: any) => (
+                                <option
+                                    value={categoria.nom_cat}
+                                    selected={categoriaFiltro === categoria.nom_cat}
+                                >
+                                    {categoria.nom_cat}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div class="registros-superior-derecho">
@@ -283,79 +271,28 @@ const links = [
                         confirmButtonColor: "#dc2626",
                     });
                 }
-            }
-
-            async function mostrarDetallesEvento(eventoId: string) {
-                const modal = document.getElementById("modalDetallesReserva");
-                if (!modal) return;
-
-                // Obtener el evento del input hidden
-                const eventoInput = document.querySelector('input[name="evento"]') as HTMLInputElement;
-                if (!eventoInput) return;
-
+            }            function mostrarDetallesEvento(eventoId: string) {
                 const eventos = Array.from(document.querySelectorAll('input[name="evento"]'))
                     .map(input => JSON.parse((input as HTMLInputElement).value));
                 
                 const evento = eventos.find((e: Evento) => e.id_eve === eventoId);
                 
                 if (!evento) {
-                    console.error('Evento no encontrado');
+                    console.error('Evento no encontrado:', eventoId);
                     return;
                 }
 
-                // Actualizar título del modal
-                const titulo = modal.querySelector('h2');
-                if (titulo) {
-                    titulo.textContent = evento.nom_eve;
+                // Llamar directamente a la función de abrirModalDetalles del modal
+                if (window.abrirModalDetalles) {
+                    window.abrirModalDetalles(evento);
+                } else {
+                    console.error('La función abrirModalDetalles no está disponible');
                 }
-
-                // Actualizar imagen
-                const imagen = modal.querySelector('.imagen-curso') as HTMLImageElement;
-                if (imagen) {
-                    imagen.src = evento.img_eve || 'https://via.placeholder.com/300x200?text=Sin+Imagen';
-                }
-
-                // Actualizar descripción
-                const descripcion = modal.querySelector('#cliente-cedula');
-                if (descripcion) {
-                    descripcion.textContent = evento.des_eve;
-                }
-
-                // Actualizar información general
-                const infoElements = modal.querySelectorAll('#cliente-telefono');
-                if (infoElements.length >= 3) {
-                    infoElements[0].textContent = evento.categoria?.nom_cat || 'N/A';
-                    infoElements[1].textContent = evento.are_eve || 'N/A';
-                    infoElements[2].textContent = 'General'; // Asignación por defecto
-                }
-
-                // Actualizar programación
-                const progElements = modal.querySelectorAll('#vehiculo-info, #vehiculo-tipo, #vehiculo-transmision, #vehiculo-combustible');
-                if (progElements.length >= 6) {
-                    progElements[0].textContent = new Date(evento.fec_ini_eve).toLocaleDateString();
-                    progElements[1].textContent = evento.hor_ini_eve ? new Date(`1970-01-01T${evento.hor_ini_eve}`).toLocaleTimeString() : 'N/A';
-                    progElements[2].textContent = evento.fec_fin_eve ? new Date(evento.fec_fin_eve).toLocaleDateString() : 'N/A';
-                    progElements[3].textContent = evento.hor_fin_eve ? new Date(`1970-01-01T${evento.hor_fin_eve}`).toLocaleTimeString() : 'N/A';
-                    progElements[4].textContent = evento.dur_eve ? `${evento.dur_eve} horas` : 'N/A';
-                    progElements[5].textContent = evento.ubi_eve;
-                }
-
-                // Actualizar organizador
-                const orgElements = modal.querySelectorAll('#reserva-inicio, #reserva-fin, #reserva-estado');
-                if (orgElements.length >= 3 && evento.organizador) {
-                    orgElements[0].textContent = evento.organizador.ced_org;
-                    orgElements[1].textContent = `${evento.organizador.nom_org1} ${evento.organizador.ape_org1} ${evento.organizador.ape_org2}`;
-                    orgElements[2].textContent = evento.organizador.tit_aca_org;
-                }
-
-                modal.style.display = "block";
-            }
-
-            // Hacer funciones disponibles globalmente
+            }// Hacer funciones disponibles globalmente
             declare global {
                 interface Window {
                     eliminarEvento: (eventoId: string) => Promise<void>;
-                    mostrarDetallesEvento: (eventoId: string) => Promise<void>;
+                    mostrarDetallesEvento: (eventoId: string) => void;
                 }
             }
 
