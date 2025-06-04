@@ -1,0 +1,731 @@
+---
+// Modal para gestionar asignaciones de un evento
+---
+
+<div id="modalAsignaciones" class="modal" style="display: none;">
+    <div class="modal-contenido" style="max-width: 900px; width: 90%;">
+        <span class="cerrar" onclick="cerrarModalAsignaciones()">&times;</span>
+
+        <div class="modal-header">
+            <h2>Gestionar Asignaciones del Evento</h2>
+            <p id="evento-nombre-asignaciones" class="evento-nombre"></p>
+        </div>
+
+        <div class="contenido-asignaciones">
+            <!-- Formulario para nueva asignación -->
+            <div class="seccion-nueva-asignacion">
+                <h3>Nueva Asignación</h3>
+                <form id="formNuevaAsignacion" class="form-asignacion">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombreAsignacion"
+                                >Nombre de la Asignación:</label
+                            >
+                            <input
+                                type="text"
+                                id="nombreAsignacion"
+                                name="nombreAsignacion"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="descripcionAsignacion"
+                                >Descripción:</label
+                            >
+                            <textarea
+                                id="descripcionAsignacion"
+                                name="descripcionAsignacion"
+                                rows="3"
+                                required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="carreraAsignacion"
+                                >Carrera (opcional):</label
+                            >
+                            <select
+                                id="carreraAsignacion"
+                                name="carreraAsignacion"
+                            >
+                                <option value=""
+                                    >Seleccionar carrera específica</option
+                                >
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row opciones-checkbox">
+                        <div class="form-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    id="esPublicoGeneral"
+                                    name="esPublicoGeneral"
+                                />
+                                Dirigido al público en general
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    id="esGratuito"
+                                    name="esGratuito"
+                                />
+                                Es gratuito para esta asignación
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    id="requiereValidacion"
+                                    name="requiereValidacion"
+                                />
+                                Requiere validación manual
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sección de requisitos -->
+                    <div class="seccion-requisitos">
+                        <h4>Requisitos</h4>
+                        <div id="listaRequisitos">
+                            <!-- Los requisitos se añadirán dinámicamente aquí -->
+                        </div>
+                        <button
+                            type="button"
+                            id="btnAgregarRequisito"
+                            class="btn-secundario"
+                        >
+                            + Agregar Requisito
+                        </button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-principal"
+                            >Crear Asignación</button
+                        >
+                        <button
+                            type="button"
+                            onclick="limpiarFormularioAsignacion()"
+                            class="btn-secundario"
+                        >
+                            Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de asignaciones existentes -->
+            <div class="seccion-asignaciones-existentes">
+                <h3>Asignaciones Existentes</h3>
+                <div
+                    id="listaAsignacionesExistentes"
+                    class="lista-asignaciones"
+                >
+                    <!-- Las asignaciones se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-contenido {
+        background-color: #fefefe;
+        margin: 2% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        border-radius: 10px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+
+    .evento-nombre {
+        color: #666;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .contenido-asignaciones {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .seccion-nueva-asignacion,
+    .seccion-asignaciones-existentes {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .form-asignacion {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
+    }
+
+    .form-group {
+        flex: 1;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .opciones-checkbox {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .opciones-checkbox .form-group label {
+        display: flex;
+        align-items: center;
+        font-weight: normal;
+    }
+
+    .opciones-checkbox input[type="checkbox"] {
+        width: auto;
+        margin-right: 8px;
+    }
+
+    .seccion-requisitos {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 15px;
+        background: white;
+    }
+
+    .requisito-item {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 4px;
+        align-items: center;
+    }
+
+    .requisito-item input {
+        flex: 1;
+    }
+
+    .btn-eliminar-requisito {
+        background: #dc2626;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    .btn-principal,
+    .btn-secundario {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-principal {
+        background: #059669;
+        color: white;
+    }
+
+    .btn-secundario {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-principal:hover {
+        background: #047857;
+    }
+
+    .btn-secundario:hover {
+        background: #4b5563;
+    }
+
+    .lista-asignaciones {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .asignacion-item {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+
+    .asignacion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .asignacion-titulo {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .asignacion-acciones {
+        display: flex;
+        gap: 5px;
+    }
+
+    .btn-editar,
+    .btn-eliminar {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .btn-editar {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-eliminar {
+        background: #dc2626;
+        color: white;
+    }
+
+    .asignacion-info {
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .requisitos-lista {
+        margin-top: 10px;
+    }
+
+    .requisito-simple {
+        background: #f0f0f0;
+        padding: 5px 8px;
+        margin: 2px 0;
+        border-radius: 3px;
+        font-size: 12px;
+    }
+
+    .cerrar {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .cerrar:hover {
+        color: #000;
+    }
+
+    @media (max-width: 768px) {
+        .contenido-asignaciones {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-contenido {
+            width: 95%;
+            margin: 5% auto;
+        }
+    }
+</style>
+
+<script>
+    declare global {
+        interface Window {
+            abrirModalAsignaciones: (
+                eventoId: string,
+                eventoNombre: string,
+            ) => Promise<void>;
+            cerrarModalAsignaciones: () => void;
+            limpiarFormularioAsignacion: () => void;
+        }
+    }
+
+    let eventoIdActual: string = "";
+    let carrerasDisponibles: any[] = [];
+
+    async function abrirModalAsignaciones(
+        eventoId: string,
+        eventoNombre: string,
+    ) {
+        eventoIdActual = eventoId;
+
+        const modal = document.getElementById("modalAsignaciones");
+        const nombreEvento = document.getElementById(
+            "evento-nombre-asignaciones",
+        );
+
+        if (nombreEvento) {
+            nombreEvento.textContent = `Evento: ${eventoNombre}`;
+        }
+
+        // Cargar carreras disponibles
+        await cargarCarreras();
+
+        // Cargar asignaciones existentes
+        await cargarAsignacionesExistentes();
+
+        if (modal) {
+            modal.style.display = "block";
+        }
+    }
+
+    function cerrarModalAsignaciones() {
+        const modal = document.getElementById("modalAsignaciones");
+        if (modal) {
+            modal.style.display = "none";
+        }
+        limpiarFormularioAsignacion();
+    }
+
+    function limpiarFormularioAsignacion() {
+        const form = document.getElementById(
+            "formNuevaAsignacion",
+        ) as HTMLFormElement;
+        if (form) {
+            form.reset();
+        }
+
+        // Limpiar requisitos
+        const listaRequisitos = document.getElementById("listaRequisitos");
+        if (listaRequisitos) {
+            listaRequisitos.innerHTML = "";
+        }
+    }
+
+    async function cargarCarreras() {
+        try {
+            const { data, error } = await (window as any).actions.getCarreras(
+                {},
+            );
+
+            if (!error && data?.carreras) {
+                carrerasDisponibles = data.carreras;
+                const select = document.getElementById(
+                    "carreraAsignacion",
+                ) as HTMLSelectElement;
+
+                if (select) {
+                    // Limpiar opciones existentes excepto la primera
+                    select.innerHTML =
+                        '<option value="">Seleccionar carrera específica</option>';
+
+                    // Añadir carreras
+                    carrerasDisponibles.forEach((carrera) => {
+                        const option = document.createElement("option");
+                        option.value = carrera.id_car;
+                        option.textContent = `${carrera.nom_car} (${carrera.cod_car})`;
+                        select.appendChild(option);
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error al cargar carreras:", error);
+        }
+    }
+
+    async function cargarAsignacionesExistentes() {
+        try {
+            const { data, error } = await (
+                window as any
+            ).actions.getAsignacionesByEvento({
+                id_evento: eventoIdActual,
+            });
+
+            const contenedor = document.getElementById(
+                "listaAsignacionesExistentes",
+            );
+            if (!contenedor) return;
+
+            if (error || !data?.asignaciones) {
+                contenedor.innerHTML =
+                    "<p>No hay asignaciones para este evento.</p>";
+                return;
+            }
+
+            const asignaciones = data.asignaciones;
+
+            if (asignaciones.length === 0) {
+                contenedor.innerHTML =
+                    "<p>No hay asignaciones para este evento.</p>";
+                return;
+            }
+
+            contenedor.innerHTML = asignaciones
+                .map(
+                    (asignacion: any) => `
+                <div class="asignacion-item">
+                    <div class="asignacion-header">
+                        <div class="asignacion-titulo">${asignacion.nom_asi}</div>
+                        <div class="asignacion-acciones">
+                            <button class="btn-editar" onclick="editarAsignacion('${asignacion.id_asi}')">
+                                Editar
+                            </button>
+                            <button class="btn-eliminar" onclick="eliminarAsignacion('${asignacion.id_asi}')">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="asignacion-info">${asignacion.des_asi}</div>
+                    <div class="asignacion-info">
+                        <strong>Carrera:</strong> ${asignacion.carreras ? asignacion.carreras.nom_car : "Público general"}
+                    </div>
+                    <div class="asignacion-info">
+                        <strong>Opciones:</strong>
+                        ${asignacion.es_publico_general ? "✓ Público general" : ""}
+                        ${asignacion.es_gratuito ? "✓ Gratuito" : ""}
+                        ${asignacion.requiere_validacion ? "✓ Requiere validación" : ""}
+                    </div>
+                    ${
+                        asignacion.requisitos &&
+                        asignacion.requisitos.length > 0
+                            ? `
+                        <div class="requisitos-lista">
+                            <strong>Requisitos:</strong>
+                            ${asignacion.requisitos
+                                .map(
+                                    (req: any) => `
+                                <div class="requisito-simple">
+                                    ${req.nom_req} ${req.obligatorio ? "(Obligatorio)" : "(Opcional)"}
+                                </div>
+                            `,
+                                )
+                                .join("")}
+                        </div>
+                    `
+                            : ""
+                    }
+                </div>
+            `,
+                )
+                .join("");
+        } catch (error) {
+            console.error("Error al cargar asignaciones:", error);
+        }
+    }
+
+    // Agregar requisito
+    function agregarRequisito() {
+        const listaRequisitos = document.getElementById("listaRequisitos");
+        if (!listaRequisitos) return;
+
+        const requisitoDiv = document.createElement("div");
+        requisitoDiv.className = "requisito-item";
+        requisitoDiv.innerHTML = `
+            <input type="text" placeholder="Nombre del requisito" required>
+            <input type="text" placeholder="Descripción del requisito" required>
+            <select>
+                <option value="DOCUMENTO">Documento</option>
+                <option value="CERTIFICADO">Certificado</option>
+                <option value="OTRO">Otro</option>
+            </select>
+            <label>
+                <input type="checkbox" checked> Obligatorio
+            </label>
+            <button type="button" class="btn-eliminar-requisito" onclick="eliminarRequisito(this)">
+                Eliminar
+            </button>
+        `;
+
+        listaRequisitos.appendChild(requisitoDiv);
+    }
+
+    function eliminarRequisito(button: HTMLButtonElement) {
+        const requisito = button.closest(".requisito-item");
+        if (requisito) {
+            requisito.remove();
+        }
+    }
+
+    // Event listeners
+    document.addEventListener("DOMContentLoaded", () => {
+        const btnAgregarRequisito = document.getElementById(
+            "btnAgregarRequisito",
+        );
+        if (btnAgregarRequisito) {
+            btnAgregarRequisito.addEventListener("click", agregarRequisito);
+        }
+
+        const formNuevaAsignacion = document.getElementById(
+            "formNuevaAsignacion",
+        );
+        if (formNuevaAsignacion) {
+            formNuevaAsignacion.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                await crearAsignacion();
+            });
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.addEventListener("click", (event) => {
+            const modal = document.getElementById("modalAsignaciones");
+            if (event.target === modal) {
+                cerrarModalAsignaciones();
+            }
+        });
+    });
+
+    async function crearAsignacion() {
+        try {
+            const form = document.getElementById(
+                "formNuevaAsignacion",
+            ) as HTMLFormElement;
+            const formData = new FormData(form);
+
+            // Recopilar requisitos
+            const requisitos: any[] = [];
+            const listaRequisitos = document.getElementById("listaRequisitos");
+            if (listaRequisitos) {
+                const requisitosItems =
+                    listaRequisitos.querySelectorAll(".requisito-item");
+                requisitosItems.forEach((item) => {
+                    const inputs = item.querySelectorAll('input[type="text"]');
+                    const select = item.querySelector("select");
+                    const checkbox = item.querySelector(
+                        'input[type="checkbox"]',
+                    );
+
+                    if (inputs.length >= 2) {
+                        requisitos.push({
+                            nom_req: (inputs[0] as HTMLInputElement).value,
+                            des_req: (inputs[1] as HTMLInputElement).value,
+                            tipo_req: select
+                                ? (select as HTMLSelectElement).value
+                                : "DOCUMENTO",
+                            obligatorio: checkbox
+                                ? (checkbox as HTMLInputElement).checked
+                                : true,
+                        });
+                    }
+                });
+            }
+
+            const asignacionData = {
+                nom_asi: formData.get("nombreAsignacion") as string,
+                des_asi: formData.get("descripcionAsignacion") as string,
+                id_car_asi:
+                    (formData.get("carreraAsignacion") as string) || null,
+                es_publico_general: formData.has("esPublicoGeneral"),
+                es_gratuito: formData.has("esGratuito"),
+                requiere_validacion: formData.has("requiereValidacion"),
+                id_eve_per: eventoIdActual,
+                requisitos: requisitos,
+            };
+
+            const { data, error } = await (
+                window as any
+            ).actions.crearAsignacion(asignacionData);
+
+            if (error || !data?.success) {
+                alert(
+                    `Error al crear asignación: ${data?.error || "Error desconocido"}`,
+                );
+                return;
+            }
+
+            // Éxito
+            alert("Asignación creada correctamente");
+            limpiarFormularioAsignacion();
+            await cargarAsignacionesExistentes();
+        } catch (error) {
+            console.error("Error al crear asignación:", error);
+            alert("Error al crear la asignación");
+        }
+    }
+
+    async function eliminarAsignacion(idAsignacion: string) {
+        if (!confirm("¿Estás seguro de que deseas eliminar esta asignación?")) {
+            return;
+        }
+
+        try {
+            const { data, error } = await (
+                window as any
+            ).actions.eliminarAsignacion({
+                id_asignacion: idAsignacion,
+            });
+
+            if (error || !data?.success) {
+                alert(
+                    `Error al eliminar asignación: ${data?.error || "Error desconocido"}`,
+                );
+                return;
+            }
+
+            alert("Asignación eliminada correctamente");
+            await cargarAsignacionesExistentes();
+        } catch (error) {
+            console.error("Error al eliminar asignación:", error);
+            alert("Error al eliminar la asignación");
+        }
+    }
+
+    function editarAsignacion(idAsignacion: string) {
+        // TODO: Implementar edición de asignaciones
+        alert("Función de edición en desarrollo");
+    }
+
+    // Exponer funciones globalmente
+    window.abrirModalAsignaciones = abrirModalAsignaciones;
+    window.cerrarModalAsignaciones = cerrarModalAsignaciones;
+    window.limpiarFormularioAsignacion = limpiarFormularioAsignacion;
+</script>
