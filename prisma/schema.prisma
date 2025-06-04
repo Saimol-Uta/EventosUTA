@@ -68,6 +68,7 @@ model eventos {
   ubi_eve             String                @db.VarChar(150)
   ced_org_eve         String                @db.VarChar(10)
   img_eve             String?
+  precio              Decimal               @default(0.00) @db.Decimal(8, 2)
   asignaciones        asignaciones[]
   organizadores       organizadores         @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
   categorias_eventos  categorias_eventos    @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
