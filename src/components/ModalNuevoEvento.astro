@@ -2,246 +2,412 @@
 import "../styles/ModalModificarEvento.css";
 ---
 
-<div id="modalNuevaReserva" class="modal">
-  <div class="modal-contenido">
-    <span class="cerrar" onclick="cerrarModal()">&times;</span>
-    <div class="formulario-completo">
-      <form
-        class="formulario-modificar-registro"
-        action="/modificar-evento"
-        method="POST"
-        id="formulario-modificar-reserva"
-      >
-        <div class="contenedor-superior">
-          <p class="texto-centrado texto-rojo">Información General</p>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Nombre</p>
-            <div class="contenedor-input">
-              <input type="text" class="input-dato" name="cedulaConductor" />
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Descripción</p>
-            <div class="contenedor-input">
-              <input type="text" class="input-dato" name="telefonoConductor" />
-            </div>
-          </div>
-
-          <div class="contenedor-nombre">
-            <div class="contenedor-dato">
-              <p class="texto-dato">Categoría:</p>
-              <div class="contenedor-input">
-                <select name="categoria" class="input-dato">
-                  <option value="Actual">Elija una Categoría</option>
-                  <option value="curso">Curso</option>
-                  <option value="congreso">Congreso</option>
-                  <option value="webinar">Webinar</option>
-                  <option value="conferencia">Conferencia</option>
-                  <option value="socializacion">Socialización</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="contenedor-dato">
-              <p class="texto-dato">Área:</p>
-              <div class="contenedor-input">
-                <select name="area" class="input-dato">
-                  <option value="Actual">Elija una Área</option>
-                  <option value="activa">Práctica</option>
-                  <option value="investigacion">Investigación</option>
-                  <option value="academica">Academica</option>
-                  <option value="tecnica">Técnica</option>
-                  <option value="industrial">Industrial</option>
-                  <option value="empresarial">Empresarial</option>
-                  <option value="ia">IA</option>
-                  <option value="redes">Redes</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Asignación:</p>
-            <div class="contenedor-input">
-              <select name="estado" class="input-dato">
-                <option value="Actual">Elija una Asignación</option>
-                <option value="General">Publico general</option>
-                <option value="Especifica">Carrera específica</option>
-                <option value="Facultad">Facultad</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="contenedor-superior">
-          <p class="texto-centrado texto-rojo">Programación</p>
-          <div class="contenedor-nombre">
-            <div class="contenedor-dato">
-              <p class="texto-dato">Fecha de Inicio:</p>
-              <div class="contenedor-input">
-                <input type="date" class="input-dato" name="fecha-inicio" />
-              </div>
-            </div>
-
-            <div class="contenedor-dato">
-              <p class="texto-dato">Hora de Inicio:</p>
-              <div class="contenedor-input">
-                <input type="time" class="input-dato" name="hora-inicio" />
-              </div>
-            </div>
-          </div>
-
-          <div class="contenedor-nombre">
-            <div class="contenedor-dato">
-              <p class="texto-dato">Fecha de Finalización:</p>
-              <div class="contenedor-input">
-                <input type="date" class="input-dato" name="fecha-fin" />
-              </div>
-            </div>
-
-            <div class="contenedor-dato">
-              <p class="texto-dato">Hora de Finalización:</p>
-              <div class="contenedor-input">
-                <input type="time" class="input-dato" name="hora-fin" />
-              </div>
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Duración</p>
-            <div class="contenedor-input">
-              <input type="number" class="input-dato" name="duracion" />
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Ubicación</p>
-            <div class="contenedor-input">
-              <input type="text" class="input-dato" name="telefonoConductor" />
-            </div>
-          </div>
-        </div>
-
-        <div class="contenedor-inferior">
-          <p class="texto-centrado texto-rojo">Organizador</p>
-          <div class="contenedor-dato">
-            <p class="texto-dato">Cédula</p>
-            <div class="contenedor-input">
-              <input type="text" class="input-dato" name="cedulaConductor" />
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Nombre</p>
-            <p>
-              Aquí va el nombre completo del organizador con su cargo si se
-              desea
-            </p>
-          </div>
-
-          <div class="contenedor-boton-modificar">
-            <button
-              type="button"
-              class="boton-modificar"
-              onclick="cerrarModal()">Cancelar</button
+<div id="modalNuevoEvento" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalNuevo()">&times;</span>
+        <div class="formulario-completo">
+            <form
+                class="formulario-modificar-registro"
+                action="/crear-evento"
+                method="POST"
+                id="formulario-nuevo-evento"
             >
-            <button type="submit" class="boton-modificar">Guardar</button>
-          </div>
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-rojo">Información General</p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Nombre</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="nombre"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Descripción</p>
+                        <div class="contenedor-input">
+                            <textarea
+                                class="input-dato"
+                                name="descripcion"
+                                rows="3"
+                                required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Categoría:</p>
+                            <div class="contenedor-input">
+                                <select
+                                    name="categoria"
+                                    class="input-dato"
+                                    required
+                                >
+                                    <option value="">Elija una Categoría</option
+                                    >
+                                    <option value="curso">Curso</option>
+                                    <option value="congreso">Congreso</option>
+                                    <option value="webinar">Webinar</option>
+                                    <option value="conferencia"
+                                        >Conferencia</option
+                                    >
+                                    <option value="socializacion"
+                                        >Socialización</option
+                                    >
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Área:</p>
+                            <div class="contenedor-input">
+                                <select name="area" class="input-dato">
+                                    <option value="">Elija una Área</option>
+                                    <option value="PRACTICA">Práctica</option>
+                                    <option value="INVESTIGACION"
+                                        >Investigación</option
+                                    >
+                                    <option value="ACADEMICA">Académica</option>
+                                    <option value="TECNICA">Técnica</option>
+                                    <option value="INDUSTRIAL"
+                                        >Industrial</option
+                                    >
+                                    <option value="EMPRESARIAL"
+                                        >Empresarial</option
+                                    >
+                                    <option value="IA">IA</option>
+                                    <option value="REDES">Redes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Precio (USD):</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="input-dato"
+                                name="precio"
+                                value="0"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-rojo">Programación</p>
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Fecha de Inicio:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="date"
+                                    class="input-dato"
+                                    name="fecha-inicio"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Hora de Inicio:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="time"
+                                    class="input-dato"
+                                    name="hora-inicio"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Fecha de Finalización:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="date"
+                                    class="input-dato"
+                                    name="fecha-fin"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Hora de Finalización:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="time"
+                                    class="input-dato"
+                                    name="hora-fin"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Duración (horas)</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="number"
+                                min="1"
+                                class="input-dato"
+                                name="duracion"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Ubicación</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="ubicacion"
+                                required
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contenedor-inferior">
+                    <p class="texto-centrado texto-rojo">Organizador</p>
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Cédula del Organizador</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="cedula-organizador"
+                                pattern="[0-9]{10}"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-boton-modificar">
+                        <button
+                            type="button"
+                            class="boton-modificar"
+                            onclick="cerrarModalNuevo()">Cancelar</button
+                        >
+                        <button type="submit" class="boton-modificar"
+                            >Crear Evento</button
+                        >
+                    </div>
+                </div>
+            </form>
+
+            <div class="contenedor-imagen">
+                <img
+                    id="nueva-evento-imagen"
+                    class="imagen-evento"
+                    style="display: none;"
+                    alt="Imagen del nuevo evento"
+                />
+                <div class="contenedor-file">
+                    <label for="file-upload-nuevo" class="custom-file-upload">
+                        <img
+                            src="/img/CRUD/upload.png"
+                            alt="Subir imagen"
+                            class="upload-icon"
+                        />
+                        <span>Seleccionar imagen</span>
+                    </label>
+                    <input
+                        id="file-upload-nuevo"
+                        type="file"
+                        class="input-file"
+                        accept="image/*"
+                    />
+                    <p class="file-name">
+                        No se ha seleccionado ningún archivo
+                    </p>
+                </div>
+            </div>
         </div>
-      </form>
-      <div class="contenedor-imagen">
-        <img
-          id="nueva-evento-imagen"
-          class="imagen-evento"
-          style="display: none;"
-          alt="Imagen del nuevo evento"
-        />
-        <div class="contenedor-file">
-          <label for="file-upload" class="custom-file-upload">
-            <img
-              src="/img/CRUD/upload.png"
-              alt="Subir imagen"
-              class="upload-icon"
-            />
-            <span>Seleccionar imagen</span>
-          </label>
-          <input id="file-upload" type="file" class="input-file" />
-          <p class="file-name">No se ha seleccionado ningún archivo</p>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
     declare global {
-      interface Window {
-        abrirModalNuevo: (id: string) => void;
-        cerrarModal: () => void;
-      }
+        interface Window {
+            abrirModalNuevo: () => void;
+            cerrarModalNuevo: () => void;
+        }
     }
 
-    function abrirModalNuevo() {
-      const modal = document.getElementById("modalNuevaReserva");
-      if (modal) modal.style.display = "block";
+    function abrirModalNuevo(): void {
+        const modal = document.getElementById("modalNuevoEvento");
+        if (modal) modal.style.display = "block";
     }
 
-    function cerrarModal() {
-      const modal = document.getElementById("modalNuevaReserva");
-      const form = document.getElementById(
-        "formulario-modificar-reserva"
-      ) as HTMLFormElement | null;
-      if (modal && form) {
-        modal.style.display = "none";
-        form.reset();
-      }
+    function cerrarModalNuevo(): void {
+        const modal = document.getElementById("modalNuevoEvento");
+        const form = document.getElementById(
+            "formulario-nuevo-evento",
+        ) as HTMLFormElement;
+
+        if (modal && form) {
+            modal.style.display = "none";
+            form.reset();
+
+            // Resetear imagen
+            const imagen = document.getElementById(
+                "nueva-evento-imagen",
+            ) as HTMLImageElement;
+            const fileName = document.querySelector(
+                "#modalNuevoEvento .file-name",
+            ) as HTMLElement;
+            if (imagen) imagen.style.display = "none";
+            if (fileName)
+                fileName.textContent = "No se ha seleccionado ningún archivo";
+        }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const cerrar = document.querySelector("#modalNuevaReserva .cerrar");
-      if (cerrar) cerrar.addEventListener("click", cerrarModal);
-      window.abrirModalNuevo = abrirModalNuevo;
-      window.cerrarModal = cerrarModal;
-    });
+        const form = document.getElementById(
+            "formulario-nuevo-evento",
+        ) as HTMLFormElement;
+        const fileInput = document.getElementById(
+            "file-upload-nuevo",
+        ) as HTMLInputElement;
+        const fileNameDisplay = document.querySelector(
+            "#modalNuevoEvento .file-name",
+        ) as HTMLElement;
+        const nuevaEventoImagen = document.getElementById(
+            "nueva-evento-imagen",
+        ) as HTMLImageElement;
 
-    const fileInput = document.getElementById(
-      "file-upload"
-    ) as HTMLInputElement | null;
-    const fileNameDisplay = document.querySelector(
-      ".file-name"
-    ) as HTMLElement | null;
-    const nuevaEventoImagen = document.getElementById(
-      "nueva-evento-imagen"
-    ) as HTMLImageElement | null;
+        // Manejar cambio de archivo
+        if (fileInput && fileNameDisplay && nuevaEventoImagen) {
+            fileInput.addEventListener("change", (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                const file = target.files?.[0];
 
-    if (fileInput && fileNameDisplay && nuevaEventoImagen) {
-      fileInput.addEventListener("change", (e: Event) => {
-        const target = e.target as HTMLInputElement;
-        const file = target.files?.[0];
-
-        if (file && file.type.match("image.*")) {
-          // Mostrar el nombre del archivo
-          fileNameDisplay.textContent = file.name;
-
-          // Crear una URL temporal para la imagen
-          const reader = new FileReader();
-
-          reader.onload = (event) => {
-            if (event.target?.result) {
-              // Mostrar y configurar la imagen subida
-              nuevaEventoImagen.src = event.target.result as string;
-              nuevaEventoImagen.style.display = "block";
-            }
-          };
-
-          reader.readAsDataURL(file);
-        } else {
-          fileNameDisplay.textContent =
-            "No se ha seleccionado ningún archivo válido";
-          nuevaEventoImagen.style.display = "none";
+                if (file && file.type.match("image.*")) {
+                    fileNameDisplay.textContent = file.name;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        if (event.target?.result) {
+                            nuevaEventoImagen.src = event.target
+                                .result as string;
+                            nuevaEventoImagen.style.display = "block";
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    fileNameDisplay.textContent =
+                        "No se ha seleccionado ningún archivo válido";
+                    nuevaEventoImagen.style.display = "none";
+                }
+            });
         }
-      });
-    }
-  </script>
-</div>
+
+        // Manejar envío del formulario
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                // Obtener valores y validar área
+                const areaValue = formData.get("area") as string;
+                const fechaFin = formData.get("fecha-fin") as string;
+                const horaFin = formData.get("hora-fin") as string;
+                const duracionStr = formData.get("duracion") as string;
+
+                // Validar que el área sea uno de los valores permitidos
+                const areasPermitidas = [
+                    "PRACTICA",
+                    "INVESTIGACION",
+                    "ACADEMICA",
+                    "TECNICA",
+                    "INDUSTRIAL",
+                    "EMPRESARIAL",
+                    "IA",
+                    "REDES",
+                ];
+                const areaValida =
+                    areaValue && areasPermitidas.includes(areaValue)
+                        ? areaValue
+                        : undefined;
+
+                const eventoData = {
+                    nombre: formData.get("nombre") as string,
+                    descripcion: formData.get("descripcion") as string,
+                    categoria: formData.get("categoria") as string,
+                    precio: parseFloat(formData.get("precio") as string) || 0,
+                    fecha_inicio: formData.get("fecha-inicio") as string,
+                    hora_inicio: formData.get("hora-inicio") as string,
+                    ubicacion: formData.get("ubicacion") as string,
+                    cedula_organizador: formData.get(
+                        "cedula-organizador",
+                    ) as string,
+                    // Campos opcionales - solo incluir si tienen valor válido
+                    ...(areaValida && {
+                        area: areaValida as
+                            | "PRACTICA"
+                            | "INVESTIGACION"
+                            | "ACADEMICA"
+                            | "TECNICA"
+                            | "INDUSTRIAL"
+                            | "EMPRESARIAL"
+                            | "IA"
+                            | "REDES",
+                    }),
+                    ...(fechaFin && { fecha_fin: fechaFin }),
+                    ...(horaFin && { hora_fin: horaFin }),
+                    ...(duracionStr && { duracion: parseInt(duracionStr) }),
+                };
+
+                try {
+                    const { data, error } =
+                        await actions.crearEvento(eventoData);
+
+                    if (data?.success) {
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text: "Evento creado correctamente.",
+                            confirmButtonColor: "#059669",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                error?.message || "No se pudo crear el evento.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            });
+        }
+
+        // Asignar funciones al objeto window
+        window.abrirModalNuevo = abrirModalNuevo;
+        window.cerrarModalNuevo = cerrarModalNuevo;
+    });
+</script>
