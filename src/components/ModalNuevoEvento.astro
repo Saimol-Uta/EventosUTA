@@ -210,6 +210,30 @@ const { categorias = [], organizadores = [] } = Astro.props;
                             </select>
                         </div>
                     </div>
+                    <!-- Sección de Asignaciones -->
+                    <div class="contenedor-superior">
+                        <p class="texto-centrado texto-rojo">Asignaciones</p>
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Seleccionar Asignaciones:</p>
+                            <div class="contenedor-input">
+                                <select
+                                    id="asignaciones-evento"
+                                    name="asignaciones[]"
+                                    class="input-dato"
+                                    multiple
+                                    size="6"
+                                >
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                            <p class="texto-info-asignaciones">
+                                Mantén presionado Ctrl/Cmd para seleccionar
+                                múltiples asignaciones. Si no seleccionas
+                                ninguna, el evento no tendrá restricciones de
+                                inscripción.
+                            </p>
+                        </div>
+                    </div>
 
                     <div class="contenedor-boton-modificar">
                         <button
@@ -255,10 +279,39 @@ const { categorias = [], organizadores = [] } = Astro.props;
     </div>
 </div>
 
+<style>
+    .texto-info-asignaciones {
+        margin-top: 5px;
+        color: #6b7280;
+        font-size: 12px;
+        font-style: italic;
+    }
+
+    .contenedor-dato select[multiple] {
+        height: auto;
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .contenedor-dato select[multiple] option {
+        padding: 8px;
+        margin: 2px 0;
+        border-radius: 4px;
+    }
+
+    .contenedor-dato select[multiple] option:hover {
+        background-color: #f0f8ff;
+    }
+
+    .contenedor-dato select[multiple] option:checked {
+        background-color: #4169e1;
+        color: white;
+    }
+</style>
+
 <script>
     import { actions } from "astro:actions";
     import Swal from "sweetalert2";
-
     declare global {
         interface Window {
             abrirModalNuevo: () => void;
@@ -266,11 +319,64 @@ const { categorias = [], organizadores = [] } = Astro.props;
         }
     }
 
-    function abrirModalNuevo(): void {
-        const modal = document.getElementById("modalNuevoEvento");
-        if (modal) modal.style.display = "block";
+    let asignacionesDisponibles: any[] = [];
+
+    async function cargarAsignacionesPlantilla() {
+        try {
+            const { data, error } = await actions.getAsignacionesPlantilla({});
+
+            if (!error && data?.asignaciones) {
+                asignacionesDisponibles = data.asignaciones;
+                const select = document.getElementById(
+                    "asignaciones-evento",
+                ) as HTMLSelectElement;
+
+                if (select) {
+                    select.innerHTML = "";
+
+                    // Agregar opción por defecto
+                    const defaultOption = document.createElement("option");
+                    defaultOption.value = "";
+                    defaultOption.textContent =
+                        "Ninguna asignación (evento sin restricciones)";
+                    defaultOption.disabled = true;
+                    select.appendChild(defaultOption);
+
+                    // Agregar asignaciones disponibles
+                    asignacionesDisponibles.forEach((asignacion) => {
+                        const option = document.createElement("option");
+                        option.value = asignacion.id_asi;
+
+                        const carreraTexto = asignacion.carreras
+                            ? ` (${asignacion.carreras.nom_car})`
+                            : " (Público general)";
+
+                        const badges = [];
+                        if (asignacion.es_gratuito) badges.push("Gratuito");
+                        if (asignacion.requiere_validacion)
+                            badges.push("Validación");
+
+                        const badgeTexto =
+                            badges.length > 0 ? ` [${badges.join(", ")}]` : "";
+
+                        option.textContent = `${asignacion.nom_asi}${carreraTexto}${badgeTexto}`;
+                        select.appendChild(option);
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error al cargar asignaciones plantilla:", error);
+        }
     }
 
+    function abrirModalNuevo(): void {
+        const modal = document.getElementById("modalNuevoEvento");
+        if (modal) {
+            modal.style.display = "block";
+            // Cargar asignaciones cuando se abre el modal
+            cargarAsignacionesPlantilla();
+        }
+    }
     function cerrarModalNuevo(): void {
         const modal = document.getElementById("modalNuevoEvento");
         const form = document.getElementById(
@@ -291,6 +397,14 @@ const { categorias = [], organizadores = [] } = Astro.props;
             if (imagen) imagen.style.display = "none";
             if (fileName)
                 fileName.textContent = "No se ha seleccionado ningún archivo";
+
+            // Resetear selector de asignaciones
+            const selectAsignaciones = document.getElementById(
+                "asignaciones-evento",
+            ) as HTMLSelectElement;
+            if (selectAsignaciones) {
+                selectAsignaciones.selectedIndex = -1;
+            }
         }
     }
 
@@ -364,7 +478,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                 const eventoData = {
                     nombre: formData.get("nombre") as string,
                     descripcion: formData.get("descripcion") as string,
-                    categoria: formData.get("categoria") as string, // Este es el ID de la categoría
+                    categoria: formData.get("categoria") as string,
                     precio: parseFloat(formData.get("precio") as string) || 0,
                     fecha_inicio: formData.get("fecha-inicio") as string,
                     hora_inicio: formData.get("hora-inicio") as string,
@@ -394,10 +508,51 @@ const { categorias = [], organizadores = [] } = Astro.props;
                         await actions.crearEvento(eventoData);
 
                     if (data?.success) {
+                        // Obtener asignaciones seleccionadas
+                        const selectAsignaciones = document.getElementById(
+                            "asignaciones-evento",
+                        ) as HTMLSelectElement;
+                        const asignacionesSeleccionadas = Array.from(
+                            selectAsignaciones.selectedOptions,
+                        )
+                            .map((option) => option.value)
+                            .filter((value) => value !== ""); // Filtrar opciones vacías
+
+                        // Si hay asignaciones seleccionadas, duplicarlas al evento
+                        if (
+                            asignacionesSeleccionadas.length > 0 &&
+                            data.evento?.id_eve
+                        ) {
+                            await Promise.all(
+                                asignacionesSeleccionadas.map(
+                                    async (idAsignacion) => {
+                                        try {
+                                            await actions.duplicarAsignacionAEvento(
+                                                {
+                                                    id_asignacion_plantilla:
+                                                        idAsignacion,
+                                                    id_evento_destino:
+                                                        data.evento.id_eve,
+                                                },
+                                            );
+                                        } catch (error) {
+                                            console.error(
+                                                "Error al duplicar asignación:",
+                                                error,
+                                            );
+                                        }
+                                    },
+                                ),
+                            );
+                        }
+
                         await Swal.fire({
                             icon: "success",
                             title: "Éxito",
-                            text: "Evento creado correctamente.",
+                            text:
+                                asignacionesSeleccionadas.length > 0
+                                    ? `Evento creado correctamente con ${asignacionesSeleccionadas.length} asignación(es).`
+                                    : "Evento creado correctamente sin restricciones de inscripción.",
                             confirmButtonColor: "#059669",
                         }).then(() => {
                             window.location.reload();
@@ -421,9 +576,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                     });
                 }
             });
-        }
-
-        // Asignar funciones al objeto window
+        } // Asignar funciones al objeto window
         window.abrirModalNuevo = abrirModalNuevo;
         window.cerrarModalNuevo = cerrarModalNuevo;
     });

@@ -188,6 +188,57 @@ import "../styles/ModalModificarEvento.css";
                             </select>
                         </div>
                     </div>
+
+                    <!-- Sección de Asignaciones -->
+                    <div class="contenedor-superior">
+                        <p class="texto-centrado texto-rojo">Asignaciones</p>
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Asignaciones Actuales:</p>
+                            <div
+                                id="asignaciones-actuales"
+                                class="asignaciones-display"
+                            >
+                                <!-- Se mostrará la lista de asignaciones actuales -->
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Gestionar Asignaciones:</p>
+                            <div class="contenedor-input">
+                                <select
+                                    id="asignaciones-disponibles"
+                                    class="input-dato"
+                                    multiple
+                                    size="6"
+                                >
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                            <p class="texto-info-asignaciones">
+                                Selecciona las asignaciones que quieres agregar
+                                al evento. Las asignaciones actuales se
+                                mostrarán arriba.
+                            </p>
+                        </div>
+
+                        <div class="contenedor-botones-asignaciones">
+                            <button
+                                type="button"
+                                id="btn-agregar-asignaciones"
+                                class="boton-asignacion btn-agregar"
+                            >
+                                ➕ Agregar Seleccionadas
+                            </button>
+                            <button
+                                type="button"
+                                id="btn-gestionar-asignaciones"
+                                class="boton-asignacion btn-gestionar"
+                            >
+                                🔧 Gestionar Asignaciones
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="contenedor-boton-modificar">
                         <button
                             type="button"
@@ -254,6 +305,7 @@ import "../styles/ModalModificarEvento.css";
             interface Window {
                 abrirModal: (eventoId: string) => void;
                 cerrarModal: () => void;
+                abrirAsignacionesModal: (eventoId: string) => void;
             }
         }
         async function cargarCategoriasYOrganizadores() {
@@ -309,16 +361,190 @@ import "../styles/ModalModificarEvento.css";
                 );
             }
         }
+        async function cargarAsignacionesActuales(eventoId: string) {
+            try {
+                const { data: asignacionesData } =
+                    await actions.getAsignacionesByEvento({
+                        id_evento: eventoId,
+                    });
+
+                const contenedorAsignaciones = document.getElementById(
+                    "asignaciones-actuales",
+                );
+                if (!contenedorAsignaciones) return;
+                if (
+                    asignacionesData?.success &&
+                    asignacionesData.asignaciones.length > 0
+                ) {
+                    contenedorAsignaciones.innerHTML =
+                        asignacionesData.asignaciones
+                            .map(
+                                (asignacion: any) => `
+                            <div class="asignacion-item" data-asignacion-id="${asignacion.id_asi}">
+                                <span class="asignacion-nombre">${asignacion.nom_asi}</span>
+                                <span class="asignacion-detalle">${asignacion.des_asi}</span>
+                                <button type="button" class="btn-eliminar-asignacion" onclick="eliminarAsignacion('${asignacion.id_asi}', '${eventoId}')">
+                                    ❌
+                                </button>
+                            </div>
+                        `,
+                            )
+                            .join("");
+                } else {
+                    contenedorAsignaciones.innerHTML =
+                        '<p class="no-asignaciones">No hay asignaciones asignadas a este evento.</p>';
+                }
+            } catch (error) {
+                console.error("Error al cargar asignaciones actuales:", error);
+            }
+        }
+
+        async function cargarAsignacionesDisponibles() {
+            try {
+                const { data: plantillasData } =
+                    await actions.getAsignacionesPlantilla({});
+
+                const selectAsignaciones = document.getElementById(
+                    "asignaciones-disponibles",
+                ) as HTMLSelectElement;
+                if (!selectAsignaciones) return;
+                if (plantillasData?.success) {
+                    selectAsignaciones.innerHTML = "";
+                    plantillasData.asignaciones.forEach((asignacion: any) => {
+                        const option = document.createElement("option");
+                        option.value = asignacion.id_asi;
+                        option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
+                        selectAsignaciones.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error(
+                    "Error al cargar asignaciones disponibles:",
+                    error,
+                );
+            }
+        }
+
+        async function agregarAsignacionesSeleccionadas(eventoId: string) {
+            const selectAsignaciones = document.getElementById(
+                "asignaciones-disponibles",
+            ) as HTMLSelectElement;
+            if (!selectAsignaciones) return;
+
+            const asignacionesSeleccionadas = Array.from(
+                selectAsignaciones.selectedOptions,
+            ).map((option) => option.value);
+
+            if (asignacionesSeleccionadas.length === 0) {
+                await Swal.fire({
+                    icon: "warning",
+                    title: "Atención",
+                    text: "Por favor selecciona al menos una asignación.",
+                    confirmButtonColor: "#dc2626",
+                });
+                return;
+            }
+            try {
+                for (const asignacionId of asignacionesSeleccionadas) {
+                    const { data, error } =
+                        await actions.duplicarAsignacionAEvento({
+                            id_asignacion_plantilla: asignacionId,
+                            id_evento_destino: eventoId,
+                        });
+
+                    if (!data?.success) {
+                        throw new Error(
+                            error?.message || "Error al agregar asignación",
+                        );
+                    }
+                }
+
+                await Swal.fire({
+                    icon: "success",
+                    title: "Éxito",
+                    text: `Se agregaron ${asignacionesSeleccionadas.length} asignación(es) al evento.`,
+                    confirmButtonColor: "#059669",
+                });
+
+                // Recargar asignaciones actuales y limpiar selección
+                await cargarAsignacionesActuales(eventoId);
+                selectAsignaciones.selectedIndex = -1;
+            } catch (error) {
+                console.error("Error al agregar asignaciones:", error);
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se pudieron agregar las asignaciones seleccionadas.",
+                    confirmButtonColor: "#dc2626",
+                });
+            }
+        }
+
+        async function eliminarAsignacion(
+            asignacionId: string,
+            eventoId: string,
+        ) {
+            const resultado = await Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción eliminará la asignación del evento.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc2626",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (resultado.isConfirmed) {
+                try {
+                    const { data, error } = await actions.eliminarAsignacion({
+                        id_asignacion: asignacionId,
+                    });
+
+                    if (data?.success) {
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Eliminado",
+                            text: "Asignación eliminada correctamente.",
+                            confirmButtonColor: "#059669",
+                        });
+
+                        // Recargar asignaciones actuales
+                        await cargarAsignacionesActuales(eventoId);
+                    } else {
+                        throw new Error(
+                            error?.message || "Error al eliminar asignación",
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error al eliminar asignación:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pudo eliminar la asignación.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }
+        }
+        function abrirAsignacionesModal(eventoId: string) {
+            // Esta función abrirá el modal de gestión de asignaciones existente
+            if (window.abrirModalAsignaciones) {
+                window.abrirModalAsignaciones(eventoId, "Evento");
+            }
+        }
         async function abrirModal(eventoId: string): Promise<void> {
             const modal = document.getElementById("modalModificarEvento");
             const form = document.getElementById(
                 "formulario-modificar-evento",
             ) as HTMLFormElement;
 
-            if (!modal || !form) return;
-
-            // Cargar categorías y organizadores dinámicamente
+            if (!modal || !form) return; // Cargar categorías y organizadores dinámicamente
             await cargarCategoriasYOrganizadores();
+
+            // Cargar asignaciones
+            await cargarAsignacionesActuales(eventoId);
+            await cargarAsignacionesDisponibles();
 
             // Obtener todos los eventos del DOM
             const eventosInputs = document.querySelectorAll(
@@ -547,11 +773,42 @@ import "../styles/ModalModificarEvento.css";
                         });
                     }
                 });
-            }
-
-            // Asignar funciones al objeto window
+            } // Asignar funciones al objeto window
             window.abrirModal = abrirModal;
             window.cerrarModal = cerrarModal;
+            window.abrirAsignacionesModal = abrirAsignacionesModal;
+
+            // Event listeners para botones de asignaciones
+            const btnAgregarAsignaciones = document.getElementById(
+                "btn-agregar-asignaciones",
+            );
+            const btnGestionarAsignaciones = document.getElementById(
+                "btn-gestionar-asignaciones",
+            );
+
+            if (btnAgregarAsignaciones) {
+                btnAgregarAsignaciones.addEventListener("click", async () => {
+                    const eventoIdInput = document.querySelector(
+                        'input[name="evento_id"]',
+                    ) as HTMLInputElement;
+                    if (eventoIdInput && eventoIdInput.value) {
+                        await agregarAsignacionesSeleccionadas(
+                            eventoIdInput.value,
+                        );
+                    }
+                });
+            }
+
+            if (btnGestionarAsignaciones) {
+                btnGestionarAsignaciones.addEventListener("click", () => {
+                    const eventoIdInput = document.querySelector(
+                        'input[name="evento_id"]',
+                    ) as HTMLInputElement;
+                    if (eventoIdInput && eventoIdInput.value) {
+                        abrirAsignacionesModal(eventoIdInput.value);
+                    }
+                });
+            }
         });
     </script>
 </div>
