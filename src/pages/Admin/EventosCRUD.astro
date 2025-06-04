@@ -25,7 +25,7 @@ const eventos = data?.eventos || [];
 
 // Obtener información completa de cada evento
 const eventosCompletos = await Promise.all(
-    eventos.map(async (evento) => {
+    eventos.map(async (evento: any) => {
         const organizador = await Astro.callAction(
             actions.getOrganizadorByEvento,
             { id_evento: evento.id_eve }
