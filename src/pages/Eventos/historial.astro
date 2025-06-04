@@ -1,166 +1,119 @@
 ---
-import Header from "../../components/Header.astro";
-import Navbar from "../../components/Navbar.astro";
-import Layout from "../../layouts/Layout.astro";
-import TarjetaEvento from "../../components/TarjetaEvento.astro";
+// src/components/TarjetaEvento.astro
+const { nombre, fecha, calificacion, asistencia, estado, certificadoDisponible } = Astro.props;
 ---
 
-<Layout>
-  <Header />
-  <Navbar />
+<style>
+  .evento-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+  }
 
-  <main class="historial-container">
-    <h2 class="titulo">Historial de Eventos</h2>
+  .evento-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-fuerte-uta);
+  }
 
-    <div class="cards-grid">
-      <TarjetaEvento 
-        nombre="Curso de Introducción a la IA"
-        fecha="10 marzo 2025"
-        calificacion="8.5"
-        asistencia="90"
-        estado="completo"
-        certificadoDisponible={true}
-      />
-      <TarjetaEvento 
-        nombre="Taller de Desarrollo Web"
-        fecha="15 febrero 2025"
-        calificacion="6.5"
-        asistencia="75"
-        estado="incompleto"
-        certificadoDisponible={false}
-      />
-      <TarjetaEvento 
-        nombre="Seminario de Ciberseguridad"
-        fecha="25 enero 2025"
-        calificacion="9.0"
-        asistencia="95"
-        estado="completo"
-        certificadoDisponible={true}
-      />
-    </div>
-  </main>
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
 
-  <style>
-    :root {
-      --color-fuerte-uta: #b01025;
-      --color-oscuro-uta: #880f1f;
-    }
+  .card-header h3 {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 700;
+    color: #333;
+  }
 
-    .historial-container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 1rem 2rem;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    }
+  .badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
 
-    .titulo {
-      font-size: 2rem;
-      text-align: center;
-      margin-bottom: 2rem;
-      background: linear-gradient(90deg, var(--color-oscuro-uta), var(--color-fuerte-uta));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: 800;
-    }
+  .completo {
+    background-color: #dff5e1;
+    color: #2e7d32;
+  }
 
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
+  .incompleto {
+    background-color: #ffe4e1;
+    color: #c62828;
+  }
 
-    .evento-card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border: 2px solid transparent;
-    }
+  .fecha {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+  }
 
-    .evento-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
-      border-color: var(--color-fuerte-uta);
-    }
+  .card-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    color: #444;
+  }
 
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.8rem;
-    }
+  .btn-certificado {
+    text-align: center;
+    background-color: var(--color-fuerte-uta);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
 
-    .card-header h3 {
-      font-size: 1.1rem;
-      margin: 0;
-      font-weight: 700;
-      color: #333;
-    }
+  .btn-certificado:hover {
+    background-color: #a00000;
+    transform: scale(1.03);
+  }
 
-    .badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
+  .texto-inactivo {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
+  }
 
-    .completo {
-      background-color: #dff5e1;
-      color: #2e7d32;
-    }
-
-    .incompleto {
-      background-color: #ffe4e1;
-      color: #c62828;
-    }
-
-    .fecha {
-      color: #666;
-      font-size: 0.9rem;
-      margin-bottom: 0.8rem;
-    }
-
+  @media (max-width: 500px) {
     .card-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.95rem;
-      margin-bottom: 1rem;
-      color: #444;
+      flex-direction: column;
+      gap: 6px;
     }
+  }
+</style>
 
-    .btn-certificado {
-      text-align: center;
-      background-color: var(--color-fuerte-uta);
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .btn-certificado:hover {
-      background-color: #a00000;
-      transform: scale(1.03);
-    }
-
-    .texto-inactivo {
-      text-align: center;
-      font-size: 0.85rem;
-      color: #999;
-      font-style: italic;
-    }
-
-    @media (max-width: 500px) {
-      .card-info {
-        flex-direction: column;
-        gap: 6px;
-      }
-    }
-  </style>
-</Layout>
+<div class="evento-card">
+  <div class="card-header">
+    <h3>{nombre}</h3>
+    <span class={`badge ${estado === "completo" ? "completo" : "incompleto"}`}>
+      {estado === "completo" ? "Completo" : "Incompleto"}
+    </span>
+  </div>
+  <p class="fecha">📅 {fecha}</p>
+  <div class="card-info">
+    <div><strong>Calificación:</strong> {calificacion}</div>
+    <div><strong>Asistencia:</strong> {asistencia}%</div>
+  </div>
+  {
+    certificadoDisponible
+      ? <a href="#" class="btn-certificado">🎓 Descargar Certificado</a>
+      : <p class="texto-inactivo">🚫 Certificado no disponible</p>
+  }
+</div>
