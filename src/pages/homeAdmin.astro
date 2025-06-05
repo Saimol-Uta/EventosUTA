@@ -19,13 +19,9 @@ const links = [
     { label: "Carreras", href: "/historial" },
 ];
 
-const upcomingEvents = [
-    "Evento 1",
-    "Evento 2",
-    "Evento 3",
-    "Evento 4",
-    "Evento 5",
-];
+const { data: resultProximos } = await Astro.callAction(actions.getEventosProximos, {});
+
+const upcomingEvents = resultProximos?.eventos || [];
 const inscripcionesPendientes = [
     "Inscripción 1",
     "Inscripción 2",
@@ -41,7 +37,7 @@ const { data: cuenta } = await Astro.callAction(
     session?.user?.id || "",
 );
 
-// ✅ Debug: Verificar los datos
+
 console.log("🔍 Debug homeAdmin:");
 console.log("Session user ID:", session?.user?.id);
 console.log("Cuenta data:", cuenta);
