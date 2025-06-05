@@ -11,125 +11,80 @@ import { actions } from "astro:actions";
 import type { CustomUser } from "../../auth.config";
 import { effect } from "astro:schema";
 import { getSession } from "auth-astro/server";
+
 const session = await getSession(Astro.request);
 
-const { data: cuenta } = await Astro.callAction(
-    actions.getCuentaById,
-    session?.user?.id || "",
+// Renombramos esta variable para que no choque con la de abajo
+const { data: cuentaUsuario } = await Astro.callAction(
+  actions.getCuentaById,
+  session?.user?.id || "",
 );
 
-console.log(cuenta);
+console.log(cuentaUsuario);
 
-const result = await Astro.callAction(actions.getEventosPorUsuario, {
-    idUsuario: session?.user?.id || "",
+// Renombramos esta variable también
+const eventosResult = await Astro.callAction(actions.getEventosPorUsuario, {
+  idUsuario: session?.user?.id || "",
 });
 
-const upcomingEvents = ["Evento 1", "Evento 2"]; // o cambia según tu modelo
-const certificates = ["Certificado A", "Certificado B"]; // si tienes una tabla real, cámbiala
+const upcomingEvents = ["Evento 1", "Evento 2"];
+const certificates = ["Certificado A", "Certificado B"];
+
+let pdfData = null;
+let error = null;
+
+if (Astro.url.searchParams.get("generar") === "true") {
+  const result = await Astro.callAction(actions.GenerarCertificado, {
+    eventoId: "b27ad9a8-15f3-4992-9509-cac0fd6a5964",
+  });
+
+  console.log('Resultado GenerarCertificado:', result);
+
+  if (result.data?.success && result.data?.data?.pdfBase64) {
+    pdfData = result.data.data;
+  } else {
+    error = result.error ?? result.data?.error ?? { message: 'Error desconocido' };
+  }
+}
 ---
 
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-    </head>
-    <body>
-        <Header />
-        <NavBar />
+  <body>
+    <h1>Generar Certificado</h1>
+    <a href="?generar=true">
+      <button class="bg-red-600 text-white px-4 py-2 rounded">
+        Generar
+      </button>
+    </a>
 
-        <div class="flex flex-col md:flex-row gap-6 p-6">
-            <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
-                <Avatar
-                    defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
-                    size="w-50 h-50"
-                />
-                <p class="text-red-800 font-semibold text-lg">
-                    {session?.user?.name || "Usuario Anónimo"}
-                </p>
-                <Button text="Editar Perfil" />
-                <div class="text-center mt-4 text-red-800">Documentos</div>
-                <div class="flex gap-2 mt-2">
-                    <DocumentButton
-                        label="Cédula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ced_cue}
-                        fieldName="enl_ced_cue"
-                        size="w-24 h-24"
-                    />
+    {error && <p class="text-red-600">Error: {error.message}</p>}
 
-                    <DocumentButton
-                        label="Matrícula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_mat_cue}
-                        fieldName="enl_mat_cue"
-                        size="w-24 h-24"
-                    />
+    {pdfData && (
+      <script define:vars={{ pdfData }}>
+        // Ahora `pdfData` es un objeto JavaScript real en el navegador
+        const base64 = pdfData.pdfBase64;
+        const fileName = pdfData.fileName;
 
-                    <DocumentButton
-                        label="Extensión"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ext_cue}
-                        fieldName="enl_ext_cue"
-                        size="w-24 h-24"
-                    />
-                </div>
-            </div>
+        const byteCharacters = atob(base64);
+        const byteArrays = [];
+        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+          const slice = byteCharacters.slice(offset, offset + 512);
+          const byteNumbers = new Array(slice.length);
+          for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          byteArrays.push(byteArray);
+        }
 
-            <div class="w-full md:w-3/4 flex flex-col gap-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-                    <Card title="Eventos Próximos">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                upcomingEvents
-                                    .slice(0, 4)
-                                    .map((e) => (
-                                        <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                            {e}
-                                        </div>
-                                    ))
-                            }
-                            {
-                                upcomingEvents.length > 4 && (
-                                    <a
-                                        href="/eventos"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
-                    </Card>
-
-                    <Card title="Certificados">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                certificates
-                                    .slice(0, 4)
-                                    .map((c) => (
-                                        <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                            {c}
-                                        </div>
-                                    ))
-                            }
-                            {
-                                certificates.length > 4 && (
-                                    <a
-                                        href="/certificados"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
-                    </Card>
-                </div>
-
-                <h1 class="text-xl font-semibold mt-8 text-red-800">
-                    Historial de Eventos
-                </h1>
-                <EventoUsuario eventos={result.data?.eventos} />
-            </div>
-        </div>
-    </body>
+        const blob = new Blob(byteArrays, { type: "application/pdf" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link); // Buena práctica añadirlo al DOM antes del clic
+        link.click();
+        document.body.removeChild(link); // Limpiar el DOM después de la descarga
+      </script>
+    )}
+  </body>
 </html>
