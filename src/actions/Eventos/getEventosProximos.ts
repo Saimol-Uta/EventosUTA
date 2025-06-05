@@ -2,8 +2,6 @@ import { defineAction } from 'astro:actions';
 import prisma from '../../db';
 
 export const getEventosProximos = defineAction({
-  accept: 'json',
-
   handler: async () => {
     try {
       const eventos = await prisma.eventos.findMany({
