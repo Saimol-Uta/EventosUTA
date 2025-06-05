@@ -8,10 +8,10 @@ import ModalDetallesPago from "../../components/ModalDetallesPago.astro";
 import "../../styles/AprobacionesInscripciones.css";
 
 const links = [
-  { label: "Eventos", href: "/" },
+  { label: "Eventos", href: "EventosCRUD" },
   { label: "Usuarios", href: "/perfil" },
   { label: "Organizadores", href: "/historial" },
-  { label: "Inscripciones", href: "/historial" },
+  { label: "Inscripciones", href: "AprobacionInscripciones" },
   { label: "Categorías", href: "/historial" },
   { label: "Carreras", href: "/historial" },
 ];
@@ -19,12 +19,6 @@ const links = [
 
 <Layout>
   <body>
-    <head
-      ><link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-      />
-    </head>
     <Header />
     <NavBar />
     <MenuAdmin links={links} />
@@ -69,7 +63,7 @@ const links = [
                 />
               </button>
 
-              <button onclick="window.abrirModalPago()" title="Verificar Factura">
+              <button onclick="window.abrirModalPago()" title="Verificar Facturación">
                 <img
                   class="imagen-boton-modificar"
                   src="/img/factura.svg"
