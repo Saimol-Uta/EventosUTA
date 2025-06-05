@@ -203,8 +203,7 @@ export const modificarEvento = defineAction({
     input: z.object({
         evento_id: z.string().uuid(),
         nombre: z.string().min(1),
-        descripcion: z.string().min(1),
-        categoria: z.string().uuid(), // Ahora esperamos un UUID de categoría
+        descripcion: z.string().min(1), categoria: z.string().uuid(), // Ahora esperamos un UUID de categoría
         area: z.enum(['PRACTICA', 'INVESTIGACION', 'ACADEMICA', 'TECNICA', 'INDUSTRIAL', 'EMPRESARIAL', 'IA', 'REDES']).optional(),
         precio: z.number().min(0),
         fecha_inicio: z.string().transform(str => new Date(str)),
@@ -215,6 +214,8 @@ export const modificarEvento = defineAction({
         ubicacion: z.string().min(1),
         cedula_organizador: z.string().min(10).max(10),
         imagen: z.string().optional(),
+        nota_aprobacion: z.number().min(0).max(10).optional(),
+        tiempo_registro_asignacion: z.boolean().optional(),
     }),
     async handler(input) {
         try {
@@ -266,10 +267,11 @@ export const modificarEvento = defineAction({
                         hor_fin_eve: input.hora_fin ? new Date(`1970-01-01T${input.hora_fin}:00`) : undefined,
                         dur_eve: input.duracion,
                         are_eve: input.area,
-                        ubi_eve: input.ubicacion,
-                        ced_org_eve: input.cedula_organizador,
+                        ubi_eve: input.ubicacion, ced_org_eve: input.cedula_organizador,
                         img_eve: input.imagen,
-                        precio: input.precio
+                        precio: input.precio,
+                        not_apr_eve: input.nota_aprobacion || 7.0,
+                        tie_reg_asi: input.tiempo_registro_asignacion ?? true
                     }
                 });
 
@@ -436,7 +438,11 @@ export const getAsignacionesByEvento = defineAction({
         try {
             const asignaciones = await prisma.asignaciones.findMany({
                 where: {
-                    id_eve_per: input.id_evento
+                    eventos_asignaciones: {
+                        some: {
+                            id_eve: input.id_evento
+                        }
+                    }
                 },
                 include: {
                     carreras: true,
@@ -461,15 +467,14 @@ export const getAsignacionesByEvento = defineAction({
 });
 
 export const crearAsignacion = defineAction({
-    accept: 'json',
-    input: z.object({
+    accept: 'json', input: z.object({
         nom_asi: z.string().min(1, 'El nombre es requerido'),
         des_asi: z.string().min(1, 'La descripción es requerida'),
         id_car_asi: z.string().nullable().optional(),
         es_publico_general: z.boolean().default(false),
         es_gratuito: z.boolean().default(false),
         requiere_validacion: z.boolean().default(false),
-        id_eve_per: z.string(),
+        id_evento: z.string(),
         requisitos: z.array(z.object({
             nom_req: z.string(),
             des_req: z.string(),
@@ -489,7 +494,14 @@ export const crearAsignacion = defineAction({
                         es_publico_general: input.es_publico_general,
                         es_gratuito: input.es_gratuito,
                         requiere_validacion: input.requiere_validacion,
-                        id_eve_per: input.id_eve_per
+                    }
+                });
+
+                // Crear la relación evento-asignación
+                await tx.eventos_asignaciones.create({
+                    data: {
+                        id_eve: input.id_evento,
+                        id_asi: asignacion.id_asi
                     }
                 });
 
@@ -716,9 +728,7 @@ export const crearAsignacionCompleta = defineAction({
                             ced_org_eve: primerOrganizador.ced_org
                         }
                     });
-                }
-
-                const asignacion = await tx.asignaciones.create({
+                } const asignacion = await tx.asignaciones.create({
                     data: {
                         nom_asi: input.nom_asi,
                         des_asi: input.des_asi,
@@ -726,7 +736,14 @@ export const crearAsignacionCompleta = defineAction({
                         es_publico_general: input.es_publico_general,
                         es_gratuito: input.es_gratuito,
                         requiere_validacion: input.requiere_validacion,
-                        id_eve_per: eventoPlantilla.id_eve
+                    }
+                });
+
+                // Crear la relación evento-asignación
+                await tx.eventos_asignaciones.create({
+                    data: {
+                        id_eve: eventoPlantilla.id_eve,
+                        id_asi: asignacion.id_asi
                     }
                 });
 
@@ -859,25 +876,58 @@ export const eliminarAsignacionCompleta = defineAction({
 // Acción para obtener asignaciones plantilla (para usar en eventos)
 export const getAsignacionesPlantilla = defineAction({
     accept: 'json',
-    input: z.object({}),
-    async handler() {
+    input: z.object({}), async handler() {
         try {
+            console.log('🚀 Iniciando getAsignacionesPlantilla...');
+
             // Buscar el evento plantilla
-            const eventoPlantilla = await prisma.eventos.findFirst({
+            let eventoPlantilla = await prisma.eventos.findFirst({
                 where: { nom_eve: 'PLANTILLA_ASIGNACIONES' }
             });
 
-            if (!eventoPlantilla) {
-                return {
-                    success: true,
-                    asignaciones: []
-                };
+            console.log('📋 Evento plantilla encontrado:', !!eventoPlantilla);
+            if (eventoPlantilla) {
+                console.log('🎯 ID del evento plantilla:', eventoPlantilla.id_eve);
             }
 
+            // Si no existe el evento plantilla, intentar crearlo
+            if (!eventoPlantilla) {
+                console.log('⚡ Creando evento plantilla...');
+
+                // Obtener el primer organizador y categoría disponibles
+                const primerOrganizador = await prisma.organizadores.findFirst();
+                const primeraCategoria = await prisma.categorias_eventos.findFirst();
+
+                if (!primerOrganizador || !primeraCategoria) {
+                    console.warn('⚠️ No hay organizadores o categorías disponibles para crear evento plantilla');
+                    return {
+                        success: true,
+                        asignaciones: []
+                    };
+                }
+
+                eventoPlantilla = await prisma.eventos.create({
+                    data: {
+                        nom_eve: 'PLANTILLA_ASIGNACIONES',
+                        des_eve: 'Evento plantilla para asignaciones reutilizables',
+                        fec_ini_eve: new Date('2024-01-01'),
+                        fec_fin_eve: new Date('2024-01-01'),
+                        hor_ini_eve: new Date('1970-01-01T00:00:00Z'),
+                        hor_fin_eve: new Date('1970-01-01T23:59:59Z'),
+                        ubi_eve: 'Virtual',
+                        precio: 0,
+                        id_cat_eve: primeraCategoria.id_cat,
+                        ced_org_eve: primerOrganizador.ced_org
+                    }
+                });
+
+                console.log('✅ Evento plantilla creado:', eventoPlantilla.id_eve);
+            }
+
+            // Buscar todas las asignaciones en el sistema (no solo las del evento plantilla)
+            // Esto permite usar cualquier asignación existente como plantilla
+            console.log('🔍 Buscando todas las asignaciones disponibles...');
             const asignaciones = await prisma.asignaciones.findMany({
-                where: {
-                    id_eve_per: eventoPlantilla.id_eve
-                },
                 include: {
                     carreras: true,
                     requisitos: true
@@ -887,14 +937,23 @@ export const getAsignacionesPlantilla = defineAction({
                 }
             });
 
+            console.log('📊 Total de asignaciones encontradas:', asignaciones.length);
+
+            // Log detallado de cada asignación
+            asignaciones.forEach((asig, index) => {
+                console.log(`📝 Asignación ${index + 1}: "${asig.nom_asi}" (ID: ${asig.id_asi})`);
+            });
+
             const asignacionesPlanas = JSON.parse(JSON.stringify(asignaciones));
+
+            console.log('🎉 Retornando', asignacionesPlanas.length, 'asignaciones');
 
             return {
                 success: true,
                 asignaciones: asignacionesPlanas
             };
         } catch (error) {
-            console.error('Error al obtener asignaciones plantilla:', error);
+            console.error('💥 Error al obtener asignaciones plantilla:', error);
             return {
                 success: false,
                 error: 'Error al obtener las asignaciones plantilla'
@@ -903,7 +962,82 @@ export const getAsignacionesPlantilla = defineAction({
     }
 });
 
-// Acción para duplicar una asignación plantilla a un evento específico
+// Acción para vincular una asignación existente a un evento específico
+export const vincularAsignacionAEvento = defineAction({
+    accept: 'json',
+    input: z.object({
+        id_asignacion: z.string(),
+        id_evento: z.string()
+    }),
+    async handler(input) {
+        return await vincularAsignacionHelper(input.id_asignacion, input.id_evento);
+    }
+});
+
+// Función auxiliar reutilizable para vincular asignaciones
+async function vincularAsignacionHelper(id_asignacion: string, id_evento: string) {
+    try {
+        console.log('🔗 Vinculando asignación al evento...', { id_asignacion, id_evento });
+
+        const result = await prisma.$transaction(async (tx) => {
+            // Verificar que la asignación existe
+            const asignacion = await tx.asignaciones.findUnique({
+                where: { id_asi: id_asignacion }
+            });
+
+            if (!asignacion) {
+                throw new Error('Asignación no encontrada');
+            }
+
+            // Verificar que el evento existe
+            const evento = await tx.eventos.findUnique({
+                where: { id_eve: id_evento }
+            });
+
+            if (!evento) {
+                throw new Error('Evento no encontrado');
+            }
+
+            // Verificar si ya existe la relación
+            const relacionExistente = await tx.eventos_asignaciones.findFirst({
+                where: {
+                    id_eve: id_evento,
+                    id_asi: id_asignacion
+                }
+            });
+
+            if (relacionExistente) {
+                console.log('⚠️ La relación ya existe, saltando creación');
+                return { yaExistia: true, relacion: relacionExistente };
+            }
+
+            // Crear la relación evento-asignación
+            const nuevaRelacion = await tx.eventos_asignaciones.create({
+                data: {
+                    id_eve: id_evento,
+                    id_asi: id_asignacion
+                }
+            });
+
+            console.log('✅ Relación creada exitosamente');
+            return { yaExistia: false, relacion: nuevaRelacion };
+        });
+
+        return {
+            success: true,
+            yaExistia: result.yaExistia,
+            relacion: JSON.parse(JSON.stringify(result.relacion))
+        };
+    } catch (error) {
+        console.error('💥 Error al vincular asignación:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Error al vincular la asignación'
+        };
+    }
+}
+
+// Ahora corregimos duplicarAsignacionAEvento para usar solo vinculación
 export const duplicarAsignacionAEvento = defineAction({
     accept: 'json',
     input: z.object({
@@ -911,71 +1045,93 @@ export const duplicarAsignacionAEvento = defineAction({
         id_evento_destino: z.string()
     }),
     async handler(input) {
+        console.log('🔗 Vinculando asignación existente al evento (sin duplicar)...');
+
+        // Usar la función auxiliar para vincular
+        const result = await vincularAsignacionHelper(
+            input.id_asignacion_plantilla,
+            input.id_evento_destino
+        );
+
+        if (!result.success) {
+            return { success: false, error: result.error };
+        }
+
+        return {
+            success: true,
+            duplicada: !result.yaExistia,
+            asignacion: { id_asi: input.id_asignacion_plantilla }
+        };
+    }
+});
+
+// Función temporal para crear asignaciones de prueba
+export const crearAsignacionesPrueba = defineAction({
+    accept: 'json',
+    input: z.object({}),
+    async handler() {
         try {
-            const result = await prisma.$transaction(async (tx) => {
-                // Obtener la asignación plantilla
-                const asignacionPlantilla = await tx.asignaciones.findUnique({
-                    where: { id_asi: input.id_asignacion_plantilla },
-                    include: { requisitos: true }
-                });
+            // Obtener una carrera existente
+            const primerCarrera = await prisma.carreras.findFirst();
 
-                if (!asignacionPlantilla) {
-                    throw new Error('Asignación plantilla no encontrada');
+            // Crear asignaciones de prueba
+            const asignacionesPrueba = [
+                {
+                    nom_asi: 'Estudiantes de Pregrado',
+                    des_asi: 'Asignación para estudiantes de pregrado de todas las carreras',
+                    id_car_asi: null,
+                    es_publico_general: false,
+                    es_gratuito: true,
+                    requiere_validacion: false
+                },
+                {
+                    nom_asi: 'Profesionales TI',
+                    des_asi: 'Asignación para profesionales del área de tecnología',
+                    id_car_asi: primerCarrera?.id_car || null,
+                    es_publico_general: true,
+                    es_gratuito: false,
+                    requiere_validacion: true
+                },
+                {
+                    nom_asi: 'Docentes Universitarios',
+                    des_asi: 'Asignación específica para docentes universitarios',
+                    id_car_asi: null,
+                    es_publico_general: true,
+                    es_gratuito: true,
+                    requiere_validacion: true
                 }
+            ];
 
-                // Verificar si ya existe una asignación similar en el evento destino
-                const asignacionExistente = await tx.asignaciones.findFirst({
-                    where: {
-                        id_eve_per: input.id_evento_destino,
-                        nom_asi: asignacionPlantilla.nom_asi,
-                        des_asi: asignacionPlantilla.des_asi,
-                        id_car_asi: asignacionPlantilla.id_car_asi
-                    }
+            const asignacionesCreadas = [];
+
+            for (const datosAsignacion of asignacionesPrueba) {
+                // Verificar si ya existe
+                const existe = await prisma.asignaciones.findFirst({
+                    where: { nom_asi: datosAsignacion.nom_asi }
                 });
 
-                if (asignacionExistente) {
-                    return { duplicada: false, asignacion: asignacionExistente };
-                }
-
-                // Crear la nueva asignación en el evento destino
-                const nuevaAsignacion = await tx.asignaciones.create({
-                    data: {
-                        nom_asi: asignacionPlantilla.nom_asi,
-                        des_asi: asignacionPlantilla.des_asi,
-                        id_car_asi: asignacionPlantilla.id_car_asi,
-                        es_publico_general: asignacionPlantilla.es_publico_general,
-                        es_gratuito: asignacionPlantilla.es_gratuito,
-                        requiere_validacion: asignacionPlantilla.requiere_validacion,
-                        id_eve_per: input.id_evento_destino
-                    }
-                });
-
-                // Duplicar los requisitos
-                if (asignacionPlantilla.requisitos.length > 0) {
-                    await tx.requisitos.createMany({
-                        data: asignacionPlantilla.requisitos.map(req => ({
-                            nom_req: req.nom_req,
-                            des_req: req.des_req,
-                            tipo_req: req.tipo_req,
-                            obligatorio: req.obligatorio,
-                            id_asi_per: nuevaAsignacion.id_asi
-                        }))
+                if (!existe) {
+                    const nuevaAsignacion = await prisma.asignaciones.create({
+                        data: datosAsignacion,
+                        include: {
+                            carreras: true,
+                            requisitos: true
+                        }
                     });
+                    asignacionesCreadas.push(nuevaAsignacion);
                 }
-
-                return { duplicada: true, asignacion: nuevaAsignacion };
-            });
+            }
 
             return {
                 success: true,
-                duplicada: result.duplicada,
-                asignacion: JSON.parse(JSON.stringify(result.asignacion))
+                mensaje: `Se crearon ${asignacionesCreadas.length} asignaciones de prueba`,
+                asignaciones: JSON.parse(JSON.stringify(asignacionesCreadas))
             };
         } catch (error) {
-            console.error('Error al duplicar asignación:', error);
+            console.error('Error al crear asignaciones de prueba:', error);
             return {
                 success: false,
-                error: 'Error al duplicar la asignación'
+                error: 'Error al crear asignaciones de prueba'
             };
         }
     }

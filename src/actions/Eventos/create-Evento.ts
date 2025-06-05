@@ -20,6 +20,8 @@ export const crearEvento = defineAction({
         ubicacion: z.string().min(1),
         cedula_organizador: z.string().min(10).max(10),
         imagen: z.string().optional(),
+        nota_aprobacion: z.number().min(0).max(10).optional(),
+        tiempo_registro_asignacion: z.boolean().optional(),
     }),
     async handler(input) {
         try {
@@ -44,9 +46,7 @@ export const crearEvento = defineAction({
                         success: false,
                         error: 'La categoría especificada no existe'
                     };
-                }
-
-                // 3. Crear el evento
+                }                // 3. Crear el evento
                 const nuevoEvento = await tx.eventos.create({
                     data: {
                         nom_eve: input.nombre,
@@ -61,7 +61,9 @@ export const crearEvento = defineAction({
                         ubi_eve: input.ubicacion,
                         ced_org_eve: input.cedula_organizador,
                         img_eve: input.imagen,
-                        precio: input.precio
+                        precio: input.precio,
+                        not_apr_eve: input.nota_aprobacion || 7.0,
+                        tie_reg_asi: input.tiempo_registro_asignacion ?? true
                     }
                 });
 

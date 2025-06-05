@@ -79,7 +79,6 @@ import "../styles/ModalModificarEvento.css";
                             </div>
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Precio (USD):</p>
                         <div class="contenedor-input">
@@ -91,6 +90,40 @@ import "../styles/ModalModificarEvento.css";
                                 name="precio"
                                 value="0"
                             />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Nota de Aprobación:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    max="10"
+                                    class="input-dato"
+                                    name="nota-aprobacion"
+                                    value="7.0"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Tiempo de Registro:</p>
+                            <div class="contenedor-input">
+                                <select
+                                    name="tiempo-registro-asignacion"
+                                    class="input-dato"
+                                >
+                                    <option value="true" selected
+                                        >Permitir registro en cualquier momento</option
+                                    >
+                                    <option value="false"
+                                        >Restringir tiempo de registro</option
+                                    >
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -284,7 +317,6 @@ import "../styles/ModalModificarEvento.css";
     <script>
         import { actions } from "astro:actions";
         import Swal from "sweetalert2";
-
         interface Evento {
             id_eve: string;
             nom_eve: string;
@@ -300,6 +332,8 @@ import "../styles/ModalModificarEvento.css";
             precio: number;
             ced_org_eve: string;
             id_cat_eve: string;
+            not_apr_eve?: number;
+            tie_reg_asi?: boolean;
         }
         declare global {
             interface Window {
@@ -595,6 +629,12 @@ import "../styles/ModalModificarEvento.css";
             const cedulaOrganizador = form.querySelector(
                 'select[name="cedula-organizador"]',
             ) as HTMLSelectElement;
+            const notaAprobacion = form.querySelector(
+                'input[name="nota-aprobacion"]',
+            ) as HTMLInputElement;
+            const tiempoRegistro = form.querySelector(
+                'select[name="tiempo-registro-asignacion"]',
+            ) as HTMLSelectElement;
             const eventoIdInput = form.querySelector(
                 'input[name="evento_id"]',
             ) as HTMLInputElement;
@@ -623,6 +663,12 @@ import "../styles/ModalModificarEvento.css";
                 duracion.value = evento.dur_eve.toString();
             if (ubicacion) ubicacion.value = evento.ubi_eve;
             if (cedulaOrganizador) cedulaOrganizador.value = evento.ced_org_eve;
+            if (notaAprobacion)
+                notaAprobacion.value = (evento.not_apr_eve || 7.0).toString();
+            if (tiempoRegistro)
+                tiempoRegistro.value = (
+                    evento.tie_reg_asi !== false
+                ).toString();
             if (eventoIdInput) eventoIdInput.value = evento.id_eve;
             if (eventoImagen)
                 eventoImagen.src =
@@ -686,13 +732,17 @@ import "../styles/ModalModificarEvento.css";
                 form.addEventListener("submit", async (e) => {
                     e.preventDefault();
 
-                    const formData = new FormData(form);
-
-                    // Obtener valores y validar área
+                    const formData = new FormData(form); // Obtener valores y validar área
                     const areaValue = formData.get("area") as string;
                     const fechaFin = formData.get("fecha-fin") as string;
                     const horaFin = formData.get("hora-fin") as string;
                     const duracionStr = formData.get("duracion") as string;
+                    const notaAprobacionStr = formData.get(
+                        "nota-aprobacion",
+                    ) as string;
+                    const tiempoRegistroStr = formData.get(
+                        "tiempo-registro-asignacion",
+                    ) as string;
 
                     // Validar que el área sea uno de los valores permitidos
                     const areasPermitidas = [
@@ -738,6 +788,13 @@ import "../styles/ModalModificarEvento.css";
                         ...(fechaFin && { fecha_fin: fechaFin }),
                         ...(horaFin && { hora_fin: horaFin }),
                         ...(duracionStr && { duracion: parseInt(duracionStr) }),
+                        ...(notaAprobacionStr && {
+                            nota_aprobacion: parseFloat(notaAprobacionStr),
+                        }),
+                        ...(tiempoRegistroStr && {
+                            tiempo_registro_asignacion:
+                                tiempoRegistroStr === "true",
+                        }),
                     };
 
                     try {

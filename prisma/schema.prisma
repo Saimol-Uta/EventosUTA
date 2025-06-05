@@ -99,6 +99,7 @@ model inscripciones {
   not_par         Decimal?  @db.Decimal(4, 1)
   enl_cer_par     String?
   fec_cer_par     DateTime? @db.Date
+  est_ins         String    @default("DPendiente") @db.VarChar(12)
   eventos         eventos   @relation(fields: [id_eve_ins], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
   usuarios        usuarios  @relation(fields: [id_usu_ins], references: [id_usu], onDelete: NoAction, onUpdate: NoAction)
 

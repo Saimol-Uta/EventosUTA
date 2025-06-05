@@ -90,7 +90,6 @@ const { categorias = [], organizadores = [] } = Astro.props;
                             </div>
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Precio (USD):</p>
                         <div class="contenedor-input">
@@ -102,6 +101,40 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                 name="precio"
                                 value="0"
                             />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Nota de Aprobación:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    max="10"
+                                    class="input-dato"
+                                    name="nota-aprobacion"
+                                    value="7.0"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Tiempo de Registro:</p>
+                            <div class="contenedor-input">
+                                <select
+                                    name="tiempo-registro-asignacion"
+                                    class="input-dato"
+                                >
+                                    <option value="true" selected
+                                        >Permitir registro en cualquier momento</option
+                                    >
+                                    <option value="false"
+                                        >Restringir tiempo de registro</option
+                                    >
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -321,60 +354,191 @@ const { categorias = [], organizadores = [] } = Astro.props;
 
     let asignacionesDisponibles: any[] = [];
 
-    async function cargarAsignacionesPlantilla() {
+    // Función de prueba independiente
+    async function testearConexionAcciones() {
         try {
-            const { data, error } = await actions.getAsignacionesPlantilla({});
+            console.log("🧪 Probando conexión con acciones...");
+            console.log("🧪 actions object:", actions);
+            console.log(
+                "🧪 getAsignacionesPlantilla function:",
+                actions.getAsignacionesPlantilla,
+            );
 
-            if (!error && data?.asignaciones) {
-                asignacionesDisponibles = data.asignaciones;
-                const select = document.getElementById(
-                    "asignaciones-evento",
-                ) as HTMLSelectElement;
-
-                if (select) {
-                    select.innerHTML = "";
-
-                    // Agregar opción por defecto
-                    const defaultOption = document.createElement("option");
-                    defaultOption.value = "";
-                    defaultOption.textContent =
-                        "Ninguna asignación (evento sin restricciones)";
-                    defaultOption.disabled = true;
-                    select.appendChild(defaultOption);
-
-                    // Agregar asignaciones disponibles
-                    asignacionesDisponibles.forEach((asignacion) => {
-                        const option = document.createElement("option");
-                        option.value = asignacion.id_asi;
-
-                        const carreraTexto = asignacion.carreras
-                            ? ` (${asignacion.carreras.nom_car})`
-                            : " (Público general)";
-
-                        const badges = [];
-                        if (asignacion.es_gratuito) badges.push("Gratuito");
-                        if (asignacion.requiere_validacion)
-                            badges.push("Validación");
-
-                        const badgeTexto =
-                            badges.length > 0 ? ` [${badges.join(", ")}]` : "";
-
-                        option.textContent = `${asignacion.nom_asi}${carreraTexto}${badgeTexto}`;
-                        select.appendChild(option);
-                    });
-                }
-            }
+            const resultado = await actions.getAsignacionesPlantilla({});
+            console.log("🧪 Resultado de prueba:", resultado);
+            return resultado;
         } catch (error) {
-            console.error("Error al cargar asignaciones plantilla:", error);
+            console.error("🧪 Error en prueba:", error);
+            return null;
         }
     }
 
+    async function cargarAsignacionesPlantilla() {
+        try {
+            console.log("🔄 Iniciando carga de asignaciones plantilla...");
+            const { data, error } = await actions.getAsignacionesPlantilla({});
+
+            console.log("📦 Respuesta completa:", { data, error });
+
+            if (error) {
+                console.error("❌ Error en getAsignacionesPlantilla:", error);
+                const select = document.getElementById(
+                    "asignaciones-evento",
+                ) as HTMLSelectElement;
+                if (select) {
+                    select.innerHTML =
+                        '<option value="">Error al cargar asignaciones</option>';
+                }
+                return;
+            }
+
+            if (!data) {
+                console.warn("⚠️ No se recibieron datos de asignaciones");
+                const select = document.getElementById(
+                    "asignaciones-evento",
+                ) as HTMLSelectElement;
+                if (select) {
+                    select.innerHTML =
+                        '<option value="">No se recibieron datos</option>';
+                }
+                return;
+            }
+
+            console.log("✅ Datos recibidos:", data);
+
+            if (!data.success) {
+                console.warn("⚠️ La consulta no fue exitosa:", data.error);
+                const select = document.getElementById(
+                    "asignaciones-evento",
+                ) as HTMLSelectElement;
+                if (select) {
+                    select.innerHTML =
+                        '<option value="">Error: ' +
+                        (data.error || "Consulta no exitosa") +
+                        "</option>";
+                }
+                return;
+            }
+
+            if (!data.asignaciones) {
+                console.warn("⚠️ Propiedad asignaciones no existe en data");
+                const select = document.getElementById(
+                    "asignaciones-evento",
+                ) as HTMLSelectElement;
+                if (select) {
+                    select.innerHTML =
+                        '<option value="">Propiedad asignaciones no encontrada</option>';
+                }
+                return;
+            }
+
+            console.log("📊 Número de asignaciones:", data.asignaciones.length);
+            console.log("📋 Asignaciones detalladas:", data.asignaciones);
+
+            if (data.asignaciones.length === 0) {
+                console.warn("⚠️ No hay asignaciones disponibles");
+                const select = document.getElementById(
+                    "asignaciones-evento",
+                ) as HTMLSelectElement;
+                if (select) {
+                    select.innerHTML =
+                        '<option value="">No hay asignaciones disponibles. Crea algunas en /Admin/Asignaciones</option>';
+                }
+                return;
+            }
+
+            asignacionesDisponibles = data.asignaciones;
+            console.log(
+                "✅ Asignaciones cargadas en variable local:",
+                asignacionesDisponibles.length,
+            );
+
+            const select = document.getElementById(
+                "asignaciones-evento",
+            ) as HTMLSelectElement;
+
+            if (!select) {
+                console.error(
+                    "❌ No se encontró el elemento select #asignaciones-evento",
+                );
+                return;
+            }
+
+            console.log("🎯 Select encontrado, limpiando contenido...");
+            select.innerHTML = "";
+
+            // Agregar opción por defecto
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent =
+                "Ninguna asignación (evento sin restricciones)";
+            defaultOption.disabled = true;
+            select.appendChild(defaultOption);
+
+            console.log("➕ Añadiendo asignaciones al select...");
+            // Agregar asignaciones disponibles
+            asignacionesDisponibles.forEach((asignacion, index) => {
+                console.log(
+                    `📝 Procesando asignación ${index + 1}:`,
+                    asignacion,
+                );
+
+                const option = document.createElement("option");
+                option.value = asignacion.id_asi;
+
+                const carreraTexto = asignacion.carreras
+                    ? ` (${asignacion.carreras.nom_car})`
+                    : " (Público general)";
+
+                const badges = [];
+                if (asignacion.es_gratuito) badges.push("Gratuito");
+                if (asignacion.requiere_validacion) badges.push("Validación");
+
+                const badgeTexto =
+                    badges.length > 0 ? ` [${badges.join(", ")}]` : "";
+
+                option.textContent = `${asignacion.nom_asi}${carreraTexto}${badgeTexto}`;
+                select.appendChild(option);
+
+                console.log(`✅ Añadida opción: ${option.textContent}`);
+            });
+
+            console.log(
+                "🎉 Select actualizado exitosamente con",
+                asignacionesDisponibles.length,
+                "asignaciones",
+            );
+            console.log("📈 Opciones en select:", select.options.length);
+        } catch (error) {
+            console.error(
+                "💥 Error crítico al cargar asignaciones plantilla:",
+                error,
+            );
+            const select = document.getElementById(
+                "asignaciones-evento",
+            ) as HTMLSelectElement;
+            if (select) {
+                select.innerHTML =
+                    '<option value="">Error crítico al cargar</option>';
+            }
+        }
+    }
     function abrirModalNuevo(): void {
+        console.log("🎯 Abriendo modal nuevo evento...");
         const modal = document.getElementById("modalNuevoEvento");
         if (modal) {
             modal.style.display = "block";
-            // Cargar asignaciones cuando se abre el modal
-            cargarAsignacionesPlantilla();
+            console.log("✅ Modal abierto, ejecutando prueba...");
+
+            // Primero ejecutar prueba
+            testearConexionAcciones().then(() => {
+                console.log(
+                    "✅ Prueba completada, iniciando carga de asignaciones...",
+                );
+                cargarAsignacionesPlantilla();
+            });
+        } else {
+            console.error("❌ No se encontró el modal #modalNuevoEvento");
         }
     }
     function cerrarModalNuevo(): void {
@@ -452,13 +616,17 @@ const { categorias = [], organizadores = [] } = Astro.props;
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
-                const formData = new FormData(form);
-
-                // Obtener valores y validar área
+                const formData = new FormData(form); // Obtener valores y validar área
                 const areaValue = formData.get("area") as string;
                 const fechaFin = formData.get("fecha-fin") as string;
                 const horaFin = formData.get("hora-fin") as string;
                 const duracionStr = formData.get("duracion") as string;
+                const notaAprobacionStr = formData.get(
+                    "nota-aprobacion",
+                ) as string;
+                const tiempoRegistroStr = formData.get(
+                    "tiempo-registro-asignacion",
+                ) as string;
 
                 // Validar que el área sea uno de los valores permitidos
                 const areasPermitidas = [
@@ -501,6 +669,13 @@ const { categorias = [], organizadores = [] } = Astro.props;
                     ...(fechaFin && { fecha_fin: fechaFin }),
                     ...(horaFin && { hora_fin: horaFin }),
                     ...(duracionStr && { duracion: parseInt(duracionStr) }),
+                    ...(notaAprobacionStr && {
+                        nota_aprobacion: parseFloat(notaAprobacionStr),
+                    }),
+                    ...(tiempoRegistroStr && {
+                        tiempo_registro_asignacion:
+                            tiempoRegistroStr === "true",
+                    }),
                 };
 
                 try {

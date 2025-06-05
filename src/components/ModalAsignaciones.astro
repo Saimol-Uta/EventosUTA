@@ -436,7 +436,6 @@
         }
         limpiarFormularioAsignacion();
     }
-
     function limpiarFormularioAsignacion() {
         const form = document.getElementById(
             "formNuevaAsignacion",
@@ -449,6 +448,15 @@
         const listaRequisitos = document.getElementById("listaRequisitos");
         if (listaRequisitos) {
             listaRequisitos.innerHTML = "";
+        }
+
+        // Restaurar el botón a su estado original
+        const submitBtn = form?.querySelector(
+            'button[type="submit"]',
+        ) as HTMLButtonElement;
+        if (submitBtn) {
+            submitBtn.textContent = "Crear Asignación";
+            submitBtn.removeAttribute("data-editing");
         }
     }
 
@@ -623,13 +631,16 @@
             }
         });
     });
-
     async function crearAsignacion() {
         try {
             const form = document.getElementById(
                 "formNuevaAsignacion",
             ) as HTMLFormElement;
             const formData = new FormData(form);
+            const submitBtn = form.querySelector(
+                'button[type="submit"]',
+            ) as HTMLButtonElement;
+            const isEditing = submitBtn?.getAttribute("data-editing");
 
             // Recopilar requisitos
             const requisitos: any[] = [];
@@ -667,28 +678,48 @@
                 es_publico_general: formData.has("esPublicoGeneral"),
                 es_gratuito: formData.has("esGratuito"),
                 requiere_validacion: formData.has("requiereValidacion"),
-                id_eve_per: eventoIdActual,
+                id_evento: eventoIdActual,
                 requisitos: requisitos,
             };
 
-            const { data, error } = await (
-                window as any
-            ).actions.crearAsignacion(asignacionData);
+            let result;
+            if (isEditing) {
+                // Modificar asignación existente
+                result = await (window as any).actions.modificarAsignacion({
+                    id_asignacion: isEditing,
+                    ...asignacionData,
+                });
+            } else {
+                // Crear nueva asignación
+                result = await (window as any).actions.crearAsignacion(
+                    asignacionData,
+                );
+            }
+
+            const { data, error } = result;
 
             if (error || !data?.success) {
                 alert(
-                    `Error al crear asignación: ${data?.error || "Error desconocido"}`,
+                    `Error al ${isEditing ? "modificar" : "crear"} asignación: ${data?.error || "Error desconocido"}`,
                 );
                 return;
             }
 
             // Éxito
-            alert("Asignación creada correctamente");
+            alert(
+                `Asignación ${isEditing ? "modificada" : "creada"} correctamente`,
+            );
             limpiarFormularioAsignacion();
             await cargarAsignacionesExistentes();
+
+            // Restaurar el botón a su estado original
+            if (submitBtn) {
+                submitBtn.textContent = "Crear Asignación";
+                submitBtn.removeAttribute("data-editing");
+            }
         } catch (error) {
-            console.error("Error al crear asignación:", error);
-            alert("Error al crear la asignación");
+            console.error("Error al procesar asignación:", error);
+            alert("Error al procesar la asignación");
         }
     }
 
@@ -718,10 +749,108 @@
             alert("Error al eliminar la asignación");
         }
     }
+    async function editarAsignacion(idAsignacion: string) {
+        try {
+            // Obtener todas las asignaciones del evento para encontrar la asignación específica
+            const { data, error } = await (
+                window as any
+            ).actions.getAsignacionesByEvento({
+                id_evento: eventoIdActual,
+            });
 
-    function editarAsignacion(idAsignacion: string) {
-        // TODO: Implementar edición de asignaciones
-        alert("Función de edición en desarrollo");
+            if (error || !data?.asignaciones) {
+                alert("Error al obtener datos de la asignación");
+                return;
+            }
+
+            const asignacion = data.asignaciones.find(
+                (a: any) => a.id_asi === idAsignacion,
+            );
+
+            if (!asignacion) {
+                alert("Asignación no encontrada");
+                return;
+            }
+
+            // Rellenar el formulario con los datos actuales
+            const form = document.getElementById(
+                "formNuevaAsignacion",
+            ) as HTMLFormElement;
+            if (form) {
+                (
+                    form.querySelector(
+                        'input[name="nombreAsignacion"]',
+                    ) as HTMLInputElement
+                ).value = asignacion.nom_asi;
+                (
+                    form.querySelector(
+                        'textarea[name="descripcionAsignacion"]',
+                    ) as HTMLTextAreaElement
+                ).value = asignacion.des_asi;
+                (
+                    form.querySelector(
+                        'select[name="carreraAsignacion"]',
+                    ) as HTMLSelectElement
+                ).value = asignacion.id_car_asi || "";
+                (
+                    form.querySelector(
+                        'input[name="esPublicoGeneral"]',
+                    ) as HTMLInputElement
+                ).checked = asignacion.es_publico_general;
+                (
+                    form.querySelector(
+                        'input[name="esGratuito"]',
+                    ) as HTMLInputElement
+                ).checked = asignacion.es_gratuito;
+                (
+                    form.querySelector(
+                        'input[name="requiereValidacion"]',
+                    ) as HTMLInputElement
+                ).checked = asignacion.requiere_validacion;
+
+                // Cargar requisitos
+                const listaRequisitos =
+                    document.getElementById("listaRequisitos");
+                if (listaRequisitos && asignacion.requisitos) {
+                    listaRequisitos.innerHTML = "";
+                    asignacion.requisitos.forEach((req: any) => {
+                        const requisitoDiv = document.createElement("div");
+                        requisitoDiv.className = "requisito-item";
+                        requisitoDiv.innerHTML = `
+                            <input type="text" placeholder="Nombre del requisito" value="${req.nom_req}" required>
+                            <input type="text" placeholder="Descripción del requisito" value="${req.des_req}" required>
+                            <select>
+                                <option value="DOCUMENTO" ${req.tipo_req === "DOCUMENTO" ? "selected" : ""}>Documento</option>
+                                <option value="CERTIFICADO" ${req.tipo_req === "CERTIFICADO" ? "selected" : ""}>Certificado</option>
+                                <option value="OTRO" ${req.tipo_req === "OTRO" ? "selected" : ""}>Otro</option>
+                            </select>
+                            <label>
+                                <input type="checkbox" ${req.obligatorio ? "checked" : ""}> Obligatorio
+                            </label>
+                            <button type="button" class="btn-eliminar-requisito" onclick="eliminarRequisito(this)">
+                                Eliminar
+                            </button>
+                        `;
+                        listaRequisitos.appendChild(requisitoDiv);
+                    });
+                }
+
+                // Cambiar el texto del botón
+                const submitBtn = form.querySelector(
+                    'button[type="submit"]',
+                ) as HTMLButtonElement;
+                if (submitBtn) {
+                    submitBtn.textContent = "Actualizar Asignación";
+                    submitBtn.setAttribute("data-editing", idAsignacion);
+                }
+
+                // Scroll al formulario
+                form.scrollIntoView({ behavior: "smooth" });
+            }
+        } catch (error) {
+            console.error("Error al cargar asignación para editar:", error);
+            alert("Error al cargar los datos de la asignación");
+        }
     }
 
     // Exponer funciones globalmente
