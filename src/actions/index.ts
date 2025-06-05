@@ -8,6 +8,7 @@ import { setUser } from './Users/setUsers.action';
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+import { getInscripcionesPendientes } from './Admin';
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -21,5 +22,6 @@ export const server = {
     getCuentaById,
     uploadDocumentImage,
     getCertificadosPorUsuario,
-    getEventosProximos
+    getEventosProximos,
+    getInscripcionesPendientes
 };
