@@ -5,6 +5,7 @@ import { createCambio } from './Cambios';
 import { getUseById } from './auth';
 import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
+import { getDatosInscripcion } from './Eventos';
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
 export const server = {
     getEventos,
@@ -17,5 +18,7 @@ export const server = {
     setUser,
     uploadImageUser,
     getCuentaById,
-    uploadDocumentImage
+    uploadDocumentImage,
+    getDatosInscripcion,
+
 };
