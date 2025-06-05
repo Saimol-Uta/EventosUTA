@@ -3,8 +3,8 @@ import { getSession } from "auth-astro/server";
 
 // Rutas específicas por rol
 const adminRoutes = ['/homeAdmin', '/admin/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD']; // Añadir más rutas de admin aquí
-const studentRoutes = ['/homeUser', '/student/*', '/Eventos/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de estudiante aquí
-const userRoutes = ['/homeUser', '/user/*', '/Eventos/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de usuario aquí
+const studentRoutes = ['/homeUser', '/student/*', '/Eventos/*','/Inscripcion/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de estudiante aquí
+const userRoutes = ['/homeUser', '/user/*', '/Eventos/*', '/Inscripcion/*' , '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de usuario aquí
 const masterRoutes = ['/homeAdmin', '/master/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD']; // Añadir más rutas de master aquí
 
 // Rutas que no requieren autenticación
