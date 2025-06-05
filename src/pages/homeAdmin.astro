@@ -22,13 +22,10 @@ const links = [
 const { data: resultProximos } = await Astro.callAction(actions.getEventosProximos, {});
 
 const upcomingEvents = resultProximos?.eventos || [];
-const inscripcionesPendientes = [
-    "Inscripción 1",
-    "Inscripción 2",
-    "Incripción 3",
-    "Incripción 4",
-    "Inscripción 5",
-];
+
+const  { data: resultInscripciones } = await Astro.callAction(actions.getInscripcionesPendientes, {});
+
+const inscripciones = resultInscripciones?.inscripciones || [];
 
 const session = await getSession(Astro.request);
 
@@ -114,32 +111,33 @@ if (session && session.user) {
 
             <div class="w-full md:w-3/4 flex flex-col gap-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
-                    <!-- Inscripciones Pendientes -->
+                    
                     <Card title="Inscripciones Pendientes">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                inscripcionesPendientes
-                                    .slice(0, 4)
-                                    .map((c) => (
-                                        <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                            {c}
-                                        </div>
-                                    ))
-                            }
-                            {
-                                inscripcionesPendientes.length > 4 && (
-                                    <a
-                                        href="/inscripciones"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
+                     <div class="flex flex-col gap-y-4">
+    {
+        inscripciones
+            .slice(0, 4)
+            .map((c) => (
+                <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
+                    <p><strong>Estudiante:</strong> {c.usuarios.nom_usu1}</p>
+                    <p><strong>Evento:</strong> {c.eventos.nom_eve}</p>
+                </div>
+            ))
+    }
+    {
+        inscripciones.length > 4 && (
+            <a
+                href="/inscripciones"
+                class="text-red-800 underline text-sm mt-2"
+            >
+                Ver más...
+            </a>
+        )
+    }
+</div>
+
                     </Card>
 
-                    <!-- Eventos Próximos -->
                     <Card title="Eventos Próximos">
                         <div class="flex flex-col gap-y-4">
                             {
@@ -147,8 +145,9 @@ if (session && session.user) {
                                     .slice(0, 4)
                                     .map((e) => (
                                         <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                            {e}
-                                        </div>
+                                  <p><strong>Evento:</strong> {e.nom_eve}</p>
+                                     <p><strong>Fecha de inicio:</strong> {e.fec_ini_eve}</p>
+                                  </div>
                                     ))
                             }
                             {

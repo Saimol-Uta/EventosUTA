@@ -10,8 +10,12 @@ export const getInscripcionesPendientes = defineAction({
             in: ['DPendiente', 'FPendiente'],
           },
         },
+        include: {
+          usuarios: true, 
+          eventos: true,  
+        },
         orderBy: {
-          fec_ins: 'desc', 
+          fec_ins: 'desc',
         },
       });
 

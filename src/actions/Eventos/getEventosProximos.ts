@@ -7,11 +7,15 @@ export const getEventosProximos = defineAction({
       const eventos = await prisma.eventos.findMany({
         where: {
           fec_ini_eve: {
-            gt: new Date(), // Fecha actual del servidor (equivalente a SYSDATE)
+            gt: new Date(), // Fecha actual del servidor
           },
         },
         orderBy: {
-          fec_ini_eve: 'asc', // Opcional: para ordenarlos por fecha
+          fec_ini_eve: 'asc',
+        },
+        select: {
+          nom_eve: true,        
+          fec_ini_eve: true,    
         },
       });
 
@@ -20,10 +24,10 @@ export const getEventosProximos = defineAction({
         eventos,
       };
     } catch (error) {
-      console.error(error);
+      console.error('Error al obtener eventos próximos:', error);
       return {
         success: false,
-        error: 'Error al obtener eventos próximos',
+        error: 'No se pudieron obtener los eventos próximos.',
       };
     }
   },
