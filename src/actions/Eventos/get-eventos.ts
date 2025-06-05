@@ -699,36 +699,7 @@ export const crearAsignacionCompleta = defineAction({
     async handler(input) {
         try {
             const result = await prisma.$transaction(async (tx) => {
-                // Crear una asignación "plantilla" con un evento temporal
-                let eventoPlantilla = await tx.eventos.findFirst({
-                    where: { nom_eve: 'PLANTILLA_ASIGNACIONES' }
-                });
-
-                // Si no existe el evento plantilla, lo creamos
-                if (!eventoPlantilla) {
-                    // Obtener la primera categoría y organizador disponible
-                    const primeraCategoria = await tx.categorias_eventos.findFirst();
-                    const primerOrganizador = await tx.organizadores.findFirst();
-
-                    if (!primeraCategoria || !primerOrganizador) {
-                        throw new Error('No se encontraron categorías o organizadores disponibles');
-                    }
-
-                    eventoPlantilla = await tx.eventos.create({
-                        data: {
-                            nom_eve: 'PLANTILLA_ASIGNACIONES',
-                            des_eve: 'Evento temporal para almacenar plantillas de asignaciones',
-                            fec_ini_eve: new Date(),
-                            fec_fin_eve: new Date(),
-                            hor_ini_eve: new Date('1970-01-01T00:00:00Z'),
-                            hor_fin_eve: new Date('1970-01-01T23:59:59Z'),
-                            ubi_eve: 'Virtual',
-                            precio: 0,
-                            id_cat_eve: primeraCategoria.id_cat,
-                            ced_org_eve: primerOrganizador.ced_org
-                        }
-                    });
-                } const asignacion = await tx.asignaciones.create({
+                const asignacion = await tx.asignaciones.create({
                     data: {
                         nom_asi: input.nom_asi,
                         des_asi: input.des_asi,
@@ -736,14 +707,6 @@ export const crearAsignacionCompleta = defineAction({
                         es_publico_general: input.es_publico_general,
                         es_gratuito: input.es_gratuito,
                         requiere_validacion: input.requiere_validacion,
-                    }
-                });
-
-                // Crear la relación evento-asignación
-                await tx.eventos_asignaciones.create({
-                    data: {
-                        id_eve: eventoPlantilla.id_eve,
-                        id_asi: asignacion.id_asi
                     }
                 });
 

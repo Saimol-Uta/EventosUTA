@@ -117,10 +117,10 @@ import "../styles/ModalModificarEvento.css";
                                     class="input-dato"
                                 >
                                     <option value="true" selected
-                                        >Permitir registro en cualquier momento</option
+                                        >Se requiere registro de asistencia</option
                                     >
                                     <option value="false"
-                                        >Restringir tiempo de registro</option
+                                        >No se requiere registro de asistencia</option
                                     >
                                 </select>
                             </div>
@@ -271,7 +271,6 @@ import "../styles/ModalModificarEvento.css";
                             </button>
                         </div>
                     </div>
-
                     <div class="contenedor-boton-modificar">
                         <button
                             type="button"
@@ -284,136 +283,143 @@ import "../styles/ModalModificarEvento.css";
                     </div>
                 </div>
             </form>
-        </div>
 
-        <div class="contenedor-imagen">
-            <img
-                id="evento-imagen"
-                class="imagen-evento"
-                style="display: none;"
-                alt="Imagen del evento"
-            />
-
-            <div class="contenedor-file">
-                <label for="file-upload-modificar" class="custom-file-upload">
-                    <img
-                        src="/img/CRUD/upload.png"
-                        alt="Subir imagen"
-                        class="upload-icon"
-                    />
-                    <span>Seleccionar imagen</span>
-                </label>
-                <input
-                    id="file-upload-modificar"
-                    type="file"
-                    class="input-file"
-                    accept="image/*"
+            <div class="contenedor-imagen">
+                <img
+                    id="evento-imagen"
+                    class="imagen-evento"
+                    style="display: none;"
+                    alt="Imagen del evento"
                 />
-                <p class="file-name">No se ha seleccionado ningún archivo</p>
+
+                <div class="contenedor-file">
+                    <label
+                        for="file-upload-modificar"
+                        class="custom-file-upload"
+                    >
+                        <img
+                            src="/img/CRUD/upload.png"
+                            alt="Subir imagen"
+                            class="upload-icon"
+                        />
+                        <span>Seleccionar imagen</span>
+                    </label>
+                    <input
+                        id="file-upload-modificar"
+                        type="file"
+                        class="input-file"
+                        accept="image/*"
+                    />
+                    <p class="file-name">
+                        No se ha seleccionado ningún archivo
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        import { actions } from "astro:actions";
-        import Swal from "sweetalert2";
-        interface Evento {
-            id_eve: string;
-            nom_eve: string;
-            des_eve: string;
-            fec_ini_eve: string;
-            fec_fin_eve?: string;
-            hor_ini_eve: string;
-            hor_fin_eve?: string;
-            dur_eve?: number;
-            are_eve?: string;
-            ubi_eve: string;
-            img_eve?: string;
-            precio: number;
-            ced_org_eve: string;
-            id_cat_eve: string;
-            not_apr_eve?: number;
-            tie_reg_asi?: boolean;
-        }
-        declare global {
-            interface Window {
-                abrirModal: (eventoId: string) => void;
-                cerrarModal: () => void;
-                abrirAsignacionesModal: (eventoId: string) => void;
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
+            interface Evento {
+                id_eve: string;
+                nom_eve: string;
+                des_eve: string;
+                fec_ini_eve: string;
+                fec_fin_eve?: string;
+                hor_ini_eve: string;
+                hor_fin_eve?: string;
+                dur_eve?: number;
+                are_eve?: string;
+                ubi_eve: string;
+                img_eve?: string;
+                precio: number;
+                ced_org_eve: string;
+                id_cat_eve: string;
+                not_apr_eve?: number;
+                tie_reg_asi?: boolean;
             }
-        }
-        async function cargarCategoriasYOrganizadores() {
-            try {
-                // Cargar categorías usando acciones de Astro
-                const { data: categoriasData } = await actions.getCategorias(
-                    {},
-                );
+            declare global {
+                interface Window {
+                    abrirModal: (eventoId: string) => void;
+                    cerrarModal: () => void;
+                    abrirAsignacionesModal: (eventoId: string) => void;
+                }
+            }
+            async function cargarCategoriasYOrganizadores() {
+                try {
+                    // Cargar categorías usando acciones de Astro
+                    const { data: categoriasData } =
+                        await actions.getCategorias({});
 
-                if (categoriasData?.success) {
-                    const selectCategoria = document.querySelector(
-                        'select[name="categoria"]',
-                    ) as HTMLSelectElement;
+                    if (categoriasData?.success) {
+                        const selectCategoria = document.querySelector(
+                            'select[name="categoria"]',
+                        ) as HTMLSelectElement;
 
-                    if (selectCategoria) {
-                        selectCategoria.innerHTML =
-                            '<option value="">Seleccione una categoría</option>';
-                        categoriasData.categorias.forEach((categoria: any) => {
-                            const option = document.createElement("option");
-                            option.value = categoria.id_cat;
-                            option.textContent = categoria.nom_cat;
-                            selectCategoria.appendChild(option);
+                        if (selectCategoria) {
+                            selectCategoria.innerHTML =
+                                '<option value="">Seleccione una categoría</option>';
+                            categoriasData.categorias.forEach(
+                                (categoria: any) => {
+                                    const option =
+                                        document.createElement("option");
+                                    option.value = categoria.id_cat;
+                                    option.textContent = categoria.nom_cat;
+                                    selectCategoria.appendChild(option);
+                                },
+                            );
+                        }
+                    }
+
+                    // Cargar organizadores usando acciones de Astro
+                    const { data: organizadoresData } =
+                        await actions.getOrganizadores({});
+
+                    if (organizadoresData?.success) {
+                        const selectOrganizador = document.querySelector(
+                            'select[name="cedula-organizador"]',
+                        ) as HTMLSelectElement;
+
+                        if (selectOrganizador) {
+                            selectOrganizador.innerHTML =
+                                '<option value="">Seleccione un organizador</option>';
+                            organizadoresData.organizadores.forEach(
+                                (organizador: any) => {
+                                    const option =
+                                        document.createElement("option");
+                                    option.value = organizador.ced_org;
+                                    option.textContent = `${organizador.nom_org1} ${organizador.nom_org2} ${organizador.ape_org1} ${organizador.ape_org2} - ${organizador.ced_org}`;
+                                    selectOrganizador.appendChild(option);
+                                },
+                            );
+                        }
+                    }
+                } catch (error) {
+                    console.error(
+                        "Error al cargar categorías y organizadores:",
+                        error,
+                    );
+                }
+            }
+            async function cargarAsignacionesActuales(eventoId: string) {
+                try {
+                    const { data: asignacionesData } =
+                        await actions.getAsignacionesByEvento({
+                            id_evento: eventoId,
                         });
-                    }
-                }
 
-                // Cargar organizadores usando acciones de Astro
-                const { data: organizadoresData } =
-                    await actions.getOrganizadores({});
-
-                if (organizadoresData?.success) {
-                    const selectOrganizador = document.querySelector(
-                        'select[name="cedula-organizador"]',
-                    ) as HTMLSelectElement;
-
-                    if (selectOrganizador) {
-                        selectOrganizador.innerHTML =
-                            '<option value="">Seleccione un organizador</option>';
-                        organizadoresData.organizadores.forEach(
-                            (organizador: any) => {
-                                const option = document.createElement("option");
-                                option.value = organizador.ced_org;
-                                option.textContent = `${organizador.nom_org1} ${organizador.nom_org2} ${organizador.ape_org1} ${organizador.ape_org2} - ${organizador.ced_org}`;
-                                selectOrganizador.appendChild(option);
-                            },
-                        );
-                    }
-                }
-            } catch (error) {
-                console.error(
-                    "Error al cargar categorías y organizadores:",
-                    error,
-                );
-            }
-        }
-        async function cargarAsignacionesActuales(eventoId: string) {
-            try {
-                const { data: asignacionesData } =
-                    await actions.getAsignacionesByEvento({
-                        id_evento: eventoId,
-                    });
-
-                const contenedorAsignaciones = document.getElementById(
-                    "asignaciones-actuales",
-                );
-                if (!contenedorAsignaciones) return;
-                if (
-                    asignacionesData?.success &&
-                    asignacionesData.asignaciones.length > 0
-                ) {
-                    contenedorAsignaciones.innerHTML =
-                        asignacionesData.asignaciones
-                            .map(
-                                (asignacion: any) => `
+                    const contenedorAsignaciones = document.getElementById(
+                        "asignaciones-actuales",
+                    );
+                    if (!contenedorAsignaciones) return;
+                    if (
+                        asignacionesData?.success &&
+                        asignacionesData.asignaciones.length > 0
+                    ) {
+                        contenedorAsignaciones.innerHTML =
+                            asignacionesData.asignaciones
+                                .map(
+                                    (asignacion: any) => `
                             <div class="asignacion-item" data-asignacion-id="${asignacion.id_asi}">
                                 <span class="asignacion-nombre">${asignacion.nom_asi}</span>
                                 <span class="asignacion-detalle">${asignacion.des_asi}</span>
@@ -422,450 +428,471 @@ import "../styles/ModalModificarEvento.css";
                                 </button>
                             </div>
                         `,
-                            )
-                            .join("");
-                } else {
-                    contenedorAsignaciones.innerHTML =
-                        '<p class="no-asignaciones">No hay asignaciones asignadas a este evento.</p>';
+                                )
+                                .join("");
+                    } else {
+                        contenedorAsignaciones.innerHTML =
+                            '<p class="no-asignaciones">No hay asignaciones asignadas a este evento.</p>';
+                    }
+                } catch (error) {
+                    console.error(
+                        "Error al cargar asignaciones actuales:",
+                        error,
+                    );
                 }
-            } catch (error) {
-                console.error("Error al cargar asignaciones actuales:", error);
             }
-        }
 
-        async function cargarAsignacionesDisponibles() {
-            try {
-                const { data: plantillasData } =
-                    await actions.getAsignacionesPlantilla({});
+            async function cargarAsignacionesDisponibles() {
+                try {
+                    const { data: plantillasData } =
+                        await actions.getAsignacionesPlantilla({});
 
+                    const selectAsignaciones = document.getElementById(
+                        "asignaciones-disponibles",
+                    ) as HTMLSelectElement;
+                    if (!selectAsignaciones) return;
+                    if (plantillasData?.success) {
+                        selectAsignaciones.innerHTML = "";
+                        plantillasData.asignaciones.forEach(
+                            (asignacion: any) => {
+                                const option = document.createElement("option");
+                                option.value = asignacion.id_asi;
+                                option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
+                                selectAsignaciones.appendChild(option);
+                            },
+                        );
+                    }
+                } catch (error) {
+                    console.error(
+                        "Error al cargar asignaciones disponibles:",
+                        error,
+                    );
+                }
+            }
+
+            async function agregarAsignacionesSeleccionadas(eventoId: string) {
                 const selectAsignaciones = document.getElementById(
                     "asignaciones-disponibles",
                 ) as HTMLSelectElement;
                 if (!selectAsignaciones) return;
-                if (plantillasData?.success) {
-                    selectAsignaciones.innerHTML = "";
-                    plantillasData.asignaciones.forEach((asignacion: any) => {
-                        const option = document.createElement("option");
-                        option.value = asignacion.id_asi;
-                        option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
-                        selectAsignaciones.appendChild(option);
+
+                const asignacionesSeleccionadas = Array.from(
+                    selectAsignaciones.selectedOptions,
+                ).map((option) => option.value);
+
+                if (asignacionesSeleccionadas.length === 0) {
+                    await Swal.fire({
+                        icon: "warning",
+                        title: "Atención",
+                        text: "Por favor selecciona al menos una asignación.",
+                        confirmButtonColor: "#dc2626",
                     });
+                    return;
                 }
-            } catch (error) {
-                console.error(
-                    "Error al cargar asignaciones disponibles:",
-                    error,
-                );
-            }
-        }
-
-        async function agregarAsignacionesSeleccionadas(eventoId: string) {
-            const selectAsignaciones = document.getElementById(
-                "asignaciones-disponibles",
-            ) as HTMLSelectElement;
-            if (!selectAsignaciones) return;
-
-            const asignacionesSeleccionadas = Array.from(
-                selectAsignaciones.selectedOptions,
-            ).map((option) => option.value);
-
-            if (asignacionesSeleccionadas.length === 0) {
-                await Swal.fire({
-                    icon: "warning",
-                    title: "Atención",
-                    text: "Por favor selecciona al menos una asignación.",
-                    confirmButtonColor: "#dc2626",
-                });
-                return;
-            }
-            try {
-                for (const asignacionId of asignacionesSeleccionadas) {
-                    const { data, error } =
-                        await actions.duplicarAsignacionAEvento({
-                            id_asignacion_plantilla: asignacionId,
-                            id_evento_destino: eventoId,
-                        });
-
-                    if (!data?.success) {
-                        throw new Error(
-                            error?.message || "Error al agregar asignación",
-                        );
-                    }
-                }
-
-                await Swal.fire({
-                    icon: "success",
-                    title: "Éxito",
-                    text: `Se agregaron ${asignacionesSeleccionadas.length} asignación(es) al evento.`,
-                    confirmButtonColor: "#059669",
-                });
-
-                // Recargar asignaciones actuales y limpiar selección
-                await cargarAsignacionesActuales(eventoId);
-                selectAsignaciones.selectedIndex = -1;
-            } catch (error) {
-                console.error("Error al agregar asignaciones:", error);
-                await Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "No se pudieron agregar las asignaciones seleccionadas.",
-                    confirmButtonColor: "#dc2626",
-                });
-            }
-        }
-
-        async function eliminarAsignacion(
-            asignacionId: string,
-            eventoId: string,
-        ) {
-            const resultado = await Swal.fire({
-                title: "¿Estás seguro?",
-                text: "Esta acción eliminará la asignación del evento.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#dc2626",
-                cancelButtonColor: "#6b7280",
-                confirmButtonText: "Sí, eliminar",
-                cancelButtonText: "Cancelar",
-            });
-
-            if (resultado.isConfirmed) {
                 try {
-                    const { data, error } = await actions.eliminarAsignacion({
-                        id_asignacion: asignacionId,
+                    for (const asignacionId of asignacionesSeleccionadas) {
+                        const { data, error } =
+                            await actions.duplicarAsignacionAEvento({
+                                id_asignacion_plantilla: asignacionId,
+                                id_evento_destino: eventoId,
+                            });
+
+                        if (!data?.success) {
+                            throw new Error(
+                                error?.message || "Error al agregar asignación",
+                            );
+                        }
+                    }
+
+                    await Swal.fire({
+                        icon: "success",
+                        title: "Éxito",
+                        text: `Se agregaron ${asignacionesSeleccionadas.length} asignación(es) al evento.`,
+                        confirmButtonColor: "#059669",
                     });
 
-                    if (data?.success) {
-                        await Swal.fire({
-                            icon: "success",
-                            title: "Eliminado",
-                            text: "Asignación eliminada correctamente.",
-                            confirmButtonColor: "#059669",
-                        });
-
-                        // Recargar asignaciones actuales
-                        await cargarAsignacionesActuales(eventoId);
-                    } else {
-                        throw new Error(
-                            error?.message || "Error al eliminar asignación",
-                        );
-                    }
+                    // Recargar asignaciones actuales y limpiar selección
+                    await cargarAsignacionesActuales(eventoId);
+                    selectAsignaciones.selectedIndex = -1;
                 } catch (error) {
-                    console.error("Error al eliminar asignación:", error);
+                    console.error("Error al agregar asignaciones:", error);
                     await Swal.fire({
                         icon: "error",
                         title: "Error",
-                        text: "No se pudo eliminar la asignación.",
+                        text: "No se pudieron agregar las asignaciones seleccionadas.",
                         confirmButtonColor: "#dc2626",
                     });
                 }
             }
-        }
-        function abrirAsignacionesModal(eventoId: string) {
-            // Esta función abrirá el modal de gestión de asignaciones existente
-            if (window.abrirModalAsignaciones) {
-                window.abrirModalAsignaciones(eventoId, "Evento");
-            }
-        }
-        async function abrirModal(eventoId: string): Promise<void> {
-            const modal = document.getElementById("modalModificarEvento");
-            const form = document.getElementById(
-                "formulario-modificar-evento",
-            ) as HTMLFormElement;
 
-            if (!modal || !form) return; // Cargar categorías y organizadores dinámicamente
-            await cargarCategoriasYOrganizadores();
-
-            // Cargar asignaciones
-            await cargarAsignacionesActuales(eventoId);
-            await cargarAsignacionesDisponibles();
-
-            // Obtener todos los eventos del DOM
-            const eventosInputs = document.querySelectorAll(
-                'input[name="evento"]',
-            );
-            const eventos = Array.from(eventosInputs).map((input) =>
-                JSON.parse((input as HTMLInputElement).value),
-            );
-
-            const evento = eventos.find((e: Evento) => e.id_eve === eventoId);
-
-            if (!evento) return;
-
-            // Llenar el formulario con los datos del evento
-            const nombre = form.querySelector(
-                'input[name="nombre"]',
-            ) as HTMLInputElement;
-            const descripcion = form.querySelector(
-                'textarea[name="descripcion"]',
-            ) as HTMLTextAreaElement;
-            const categoria = form.querySelector(
-                'select[name="categoria"]',
-            ) as HTMLSelectElement;
-            const area = form.querySelector(
-                'select[name="area"]',
-            ) as HTMLSelectElement;
-            const precio = form.querySelector(
-                'input[name="precio"]',
-            ) as HTMLInputElement;
-            const fechaInicio = form.querySelector(
-                'input[name="fecha-inicio"]',
-            ) as HTMLInputElement;
-            const horaInicio = form.querySelector(
-                'input[name="hora-inicio"]',
-            ) as HTMLInputElement;
-            const fechaFin = form.querySelector(
-                'input[name="fecha-fin"]',
-            ) as HTMLInputElement;
-            const horaFin = form.querySelector(
-                'input[name="hora-fin"]',
-            ) as HTMLInputElement;
-            const duracion = form.querySelector(
-                'input[name="duracion"]',
-            ) as HTMLInputElement;
-            const ubicacion = form.querySelector(
-                'input[name="ubicacion"]',
-            ) as HTMLInputElement;
-            const cedulaOrganizador = form.querySelector(
-                'select[name="cedula-organizador"]',
-            ) as HTMLSelectElement;
-            const notaAprobacion = form.querySelector(
-                'input[name="nota-aprobacion"]',
-            ) as HTMLInputElement;
-            const tiempoRegistro = form.querySelector(
-                'select[name="tiempo-registro-asignacion"]',
-            ) as HTMLSelectElement;
-            const eventoIdInput = form.querySelector(
-                'input[name="evento_id"]',
-            ) as HTMLInputElement;
-            const eventoImagen = document.getElementById(
-                "evento-imagen",
-            ) as HTMLImageElement;
-
-            // Asignar valores
-            if (nombre) nombre.value = evento.nom_eve;
-            if (descripcion) descripcion.value = evento.des_eve;
-            if (categoria) categoria.value = evento.id_cat_eve;
-            if (area) area.value = evento.are_eve || "";
-            if (precio) precio.value = evento.precio.toString();
-            if (fechaInicio)
-                fechaInicio.value = new Date(evento.fec_ini_eve)
-                    .toISOString()
-                    .split("T")[0];
-            if (horaInicio) horaInicio.value = evento.hor_ini_eve;
-            if (fechaFin && evento.fec_fin_eve)
-                fechaFin.value = new Date(evento.fec_fin_eve)
-                    .toISOString()
-                    .split("T")[0];
-            if (horaFin && evento.hor_fin_eve)
-                horaFin.value = evento.hor_fin_eve;
-            if (duracion && evento.dur_eve)
-                duracion.value = evento.dur_eve.toString();
-            if (ubicacion) ubicacion.value = evento.ubi_eve;
-            if (cedulaOrganizador) cedulaOrganizador.value = evento.ced_org_eve;
-            if (notaAprobacion)
-                notaAprobacion.value = (evento.not_apr_eve || 7.0).toString();
-            if (tiempoRegistro)
-                tiempoRegistro.value = (
-                    evento.tie_reg_asi !== false
-                ).toString();
-            if (eventoIdInput) eventoIdInput.value = evento.id_eve;
-            if (eventoImagen)
-                eventoImagen.src =
-                    evento.img_eve ||
-                    "https://via.placeholder.com/300x200?text=Sin+Imagen";
-
-            modal.style.display = "block";
-        }
-
-        function cerrarModal(): void {
-            const modal = document.getElementById("modalModificarEvento");
-            const form = document.getElementById(
-                "formulario-modificar-evento",
-            ) as HTMLFormElement;
-
-            if (modal && form) {
-                modal.style.display = "none";
-                form.reset();
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const form = document.getElementById(
-                "formulario-modificar-evento",
-            ) as HTMLFormElement;
-            const fileInput = document.getElementById(
-                "file-upload-modificar",
-            ) as HTMLInputElement;
-            const fileNameDisplay = document.querySelector(
-                ".file-name",
-            ) as HTMLElement;
-            const eventoImagen = document.getElementById(
-                "evento-imagen",
-            ) as HTMLImageElement;
-
-            // Manejar cambio de archivo
-            if (fileInput && fileNameDisplay && eventoImagen) {
-                fileInput.addEventListener("change", (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    const file = target.files?.[0];
-
-                    if (file && file.type.match("image.*")) {
-                        fileNameDisplay.textContent = file.name;
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            if (event.target?.result) {
-                                eventoImagen.src = event.target
-                                    .result as string;
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    } else {
-                        fileNameDisplay.textContent =
-                            "No se ha seleccionado ningún archivo válido";
-                    }
+            async function eliminarAsignacion(
+                asignacionId: string,
+                eventoId: string,
+            ) {
+                const resultado = await Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "Esta acción eliminará la asignación del evento.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#dc2626",
+                    cancelButtonColor: "#6b7280",
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar",
                 });
-            }
 
-            // Manejar envío del formulario
-            if (form) {
-                form.addEventListener("submit", async (e) => {
-                    e.preventDefault();
-
-                    const formData = new FormData(form); // Obtener valores y validar área
-                    const areaValue = formData.get("area") as string;
-                    const fechaFin = formData.get("fecha-fin") as string;
-                    const horaFin = formData.get("hora-fin") as string;
-                    const duracionStr = formData.get("duracion") as string;
-                    const notaAprobacionStr = formData.get(
-                        "nota-aprobacion",
-                    ) as string;
-                    const tiempoRegistroStr = formData.get(
-                        "tiempo-registro-asignacion",
-                    ) as string;
-
-                    // Validar que el área sea uno de los valores permitidos
-                    const areasPermitidas = [
-                        "PRACTICA",
-                        "INVESTIGACION",
-                        "ACADEMICA",
-                        "TECNICA",
-                        "INDUSTRIAL",
-                        "EMPRESARIAL",
-                        "IA",
-                        "REDES",
-                    ];
-                    const areaValida =
-                        areaValue && areasPermitidas.includes(areaValue)
-                            ? areaValue
-                            : undefined;
-
-                    const eventoData = {
-                        evento_id: formData.get("evento_id") as string,
-                        nombre: formData.get("nombre") as string,
-                        descripcion: formData.get("descripcion") as string,
-                        categoria: formData.get("categoria") as string,
-                        precio:
-                            parseFloat(formData.get("precio") as string) || 0,
-                        fecha_inicio: formData.get("fecha-inicio") as string,
-                        hora_inicio: formData.get("hora-inicio") as string,
-                        ubicacion: formData.get("ubicacion") as string,
-                        cedula_organizador: formData.get(
-                            "cedula-organizador",
-                        ) as string,
-                        // Campos opcionales - solo incluir si tienen valor válido
-                        ...(areaValida && {
-                            area: areaValida as
-                                | "PRACTICA"
-                                | "INVESTIGACION"
-                                | "ACADEMICA"
-                                | "TECNICA"
-                                | "INDUSTRIAL"
-                                | "EMPRESARIAL"
-                                | "IA"
-                                | "REDES",
-                        }),
-                        ...(fechaFin && { fecha_fin: fechaFin }),
-                        ...(horaFin && { hora_fin: horaFin }),
-                        ...(duracionStr && { duracion: parseInt(duracionStr) }),
-                        ...(notaAprobacionStr && {
-                            nota_aprobacion: parseFloat(notaAprobacionStr),
-                        }),
-                        ...(tiempoRegistroStr && {
-                            tiempo_registro_asignacion:
-                                tiempoRegistroStr === "true",
-                        }),
-                    };
-
+                if (resultado.isConfirmed) {
                     try {
                         const { data, error } =
-                            await actions.modificarEvento(eventoData);
+                            await actions.eliminarAsignacion({
+                                id_asignacion: asignacionId,
+                            });
 
                         if (data?.success) {
                             await Swal.fire({
                                 icon: "success",
-                                title: "Éxito",
-                                text: "Evento modificado correctamente.",
+                                title: "Eliminado",
+                                text: "Asignación eliminada correctamente.",
                                 confirmButtonColor: "#059669",
-                            }).then(() => {
-                                window.location.reload();
                             });
+
+                            // Recargar asignaciones actuales
+                            await cargarAsignacionesActuales(eventoId);
                         } else {
-                            await Swal.fire({
-                                icon: "error",
-                                title: "Error",
-                                text:
-                                    error?.message ||
-                                    "No se pudo modificar el evento.",
-                                confirmButtonColor: "#dc2626",
-                            });
+                            throw new Error(
+                                error?.message ||
+                                    "Error al eliminar asignación",
+                            );
                         }
                     } catch (error) {
-                        console.error("Error:", error);
+                        console.error("Error al eliminar asignación:", error);
                         await Swal.fire({
                             icon: "error",
                             title: "Error",
-                            text: "Error al procesar la solicitud",
+                            text: "No se pudo eliminar la asignación.",
                             confirmButtonColor: "#dc2626",
                         });
                     }
-                });
-            } // Asignar funciones al objeto window
-            window.abrirModal = abrirModal;
-            window.cerrarModal = cerrarModal;
-            window.abrirAsignacionesModal = abrirAsignacionesModal;
+                }
+            }
+            function abrirAsignacionesModal(eventoId: string) {
+                // Esta función abrirá el modal de gestión de asignaciones existente
+                if (window.abrirModalAsignaciones) {
+                    window.abrirModalAsignaciones(eventoId, "Evento");
+                }
+            }
+            async function abrirModal(eventoId: string): Promise<void> {
+                const modal = document.getElementById("modalModificarEvento");
+                const form = document.getElementById(
+                    "formulario-modificar-evento",
+                ) as HTMLFormElement;
 
-            // Event listeners para botones de asignaciones
-            const btnAgregarAsignaciones = document.getElementById(
-                "btn-agregar-asignaciones",
-            );
-            const btnGestionarAsignaciones = document.getElementById(
-                "btn-gestionar-asignaciones",
-            );
+                if (!modal || !form) return; // Cargar categorías y organizadores dinámicamente
+                await cargarCategoriasYOrganizadores();
 
-            if (btnAgregarAsignaciones) {
-                btnAgregarAsignaciones.addEventListener("click", async () => {
-                    const eventoIdInput = document.querySelector(
-                        'input[name="evento_id"]',
-                    ) as HTMLInputElement;
-                    if (eventoIdInput && eventoIdInput.value) {
-                        await agregarAsignacionesSeleccionadas(
-                            eventoIdInput.value,
-                        );
-                    }
-                });
+                // Cargar asignaciones
+                await cargarAsignacionesActuales(eventoId);
+                await cargarAsignacionesDisponibles();
+
+                // Obtener todos los eventos del DOM
+                const eventosInputs = document.querySelectorAll(
+                    'input[name="evento"]',
+                );
+                const eventos = Array.from(eventosInputs).map((input) =>
+                    JSON.parse((input as HTMLInputElement).value),
+                );
+
+                const evento = eventos.find(
+                    (e: Evento) => e.id_eve === eventoId,
+                );
+
+                if (!evento) return;
+
+                // Llenar el formulario con los datos del evento
+                const nombre = form.querySelector(
+                    'input[name="nombre"]',
+                ) as HTMLInputElement;
+                const descripcion = form.querySelector(
+                    'textarea[name="descripcion"]',
+                ) as HTMLTextAreaElement;
+                const categoria = form.querySelector(
+                    'select[name="categoria"]',
+                ) as HTMLSelectElement;
+                const area = form.querySelector(
+                    'select[name="area"]',
+                ) as HTMLSelectElement;
+                const precio = form.querySelector(
+                    'input[name="precio"]',
+                ) as HTMLInputElement;
+                const fechaInicio = form.querySelector(
+                    'input[name="fecha-inicio"]',
+                ) as HTMLInputElement;
+                const horaInicio = form.querySelector(
+                    'input[name="hora-inicio"]',
+                ) as HTMLInputElement;
+                const fechaFin = form.querySelector(
+                    'input[name="fecha-fin"]',
+                ) as HTMLInputElement;
+                const horaFin = form.querySelector(
+                    'input[name="hora-fin"]',
+                ) as HTMLInputElement;
+                const duracion = form.querySelector(
+                    'input[name="duracion"]',
+                ) as HTMLInputElement;
+                const ubicacion = form.querySelector(
+                    'input[name="ubicacion"]',
+                ) as HTMLInputElement;
+                const cedulaOrganizador = form.querySelector(
+                    'select[name="cedula-organizador"]',
+                ) as HTMLSelectElement;
+                const notaAprobacion = form.querySelector(
+                    'input[name="nota-aprobacion"]',
+                ) as HTMLInputElement;
+                const tiempoRegistro = form.querySelector(
+                    'select[name="tiempo-registro-asignacion"]',
+                ) as HTMLSelectElement;
+                const eventoIdInput = form.querySelector(
+                    'input[name="evento_id"]',
+                ) as HTMLInputElement;
+                const eventoImagen = document.getElementById(
+                    "evento-imagen",
+                ) as HTMLImageElement;
+
+                // Asignar valores
+                if (nombre) nombre.value = evento.nom_eve;
+                if (descripcion) descripcion.value = evento.des_eve;
+                if (categoria) categoria.value = evento.id_cat_eve;
+                if (area) area.value = evento.are_eve || "";
+                if (precio) precio.value = evento.precio.toString();
+                if (fechaInicio)
+                    fechaInicio.value = new Date(evento.fec_ini_eve)
+                        .toISOString()
+                        .split("T")[0];
+                if (horaInicio) horaInicio.value = evento.hor_ini_eve;
+                if (fechaFin && evento.fec_fin_eve)
+                    fechaFin.value = new Date(evento.fec_fin_eve)
+                        .toISOString()
+                        .split("T")[0];
+                if (horaFin && evento.hor_fin_eve)
+                    horaFin.value = evento.hor_fin_eve;
+                if (duracion && evento.dur_eve)
+                    duracion.value = evento.dur_eve.toString();
+                if (ubicacion) ubicacion.value = evento.ubi_eve;
+                if (cedulaOrganizador)
+                    cedulaOrganizador.value = evento.ced_org_eve;
+                if (notaAprobacion)
+                    notaAprobacion.value = (
+                        evento.not_apr_eve || 7.0
+                    ).toString();
+                if (tiempoRegistro)
+                    tiempoRegistro.value = (
+                        evento.tie_reg_asi !== false
+                    ).toString();
+                if (eventoIdInput) eventoIdInput.value = evento.id_eve;
+                if (eventoImagen)
+                    eventoImagen.src =
+                        evento.img_eve ||
+                        "https://via.placeholder.com/300x200?text=Sin+Imagen";
+
+                modal.style.display = "block";
             }
 
-            if (btnGestionarAsignaciones) {
-                btnGestionarAsignaciones.addEventListener("click", () => {
-                    const eventoIdInput = document.querySelector(
-                        'input[name="evento_id"]',
-                    ) as HTMLInputElement;
-                    if (eventoIdInput && eventoIdInput.value) {
-                        abrirAsignacionesModal(eventoIdInput.value);
-                    }
-                });
+            function cerrarModal(): void {
+                const modal = document.getElementById("modalModificarEvento");
+                const form = document.getElementById(
+                    "formulario-modificar-evento",
+                ) as HTMLFormElement;
+
+                if (modal && form) {
+                    modal.style.display = "none";
+                    form.reset();
+                }
             }
-        });
-    </script>
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const form = document.getElementById(
+                    "formulario-modificar-evento",
+                ) as HTMLFormElement;
+                const fileInput = document.getElementById(
+                    "file-upload-modificar",
+                ) as HTMLInputElement;
+                const fileNameDisplay = document.querySelector(
+                    ".file-name",
+                ) as HTMLElement;
+                const eventoImagen = document.getElementById(
+                    "evento-imagen",
+                ) as HTMLImageElement;
+
+                // Manejar cambio de archivo
+                if (fileInput && fileNameDisplay && eventoImagen) {
+                    fileInput.addEventListener("change", (e: Event) => {
+                        const target = e.target as HTMLInputElement;
+                        const file = target.files?.[0];
+
+                        if (file && file.type.match("image.*")) {
+                            fileNameDisplay.textContent = file.name;
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                                if (event.target?.result) {
+                                    eventoImagen.src = event.target
+                                        .result as string;
+                                }
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                            fileNameDisplay.textContent =
+                                "No se ha seleccionado ningún archivo válido";
+                        }
+                    });
+                }
+
+                // Manejar envío del formulario
+                if (form) {
+                    form.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+
+                        const formData = new FormData(form); // Obtener valores y validar área
+                        const areaValue = formData.get("area") as string;
+                        const fechaFin = formData.get("fecha-fin") as string;
+                        const horaFin = formData.get("hora-fin") as string;
+                        const duracionStr = formData.get("duracion") as string;
+                        const notaAprobacionStr = formData.get(
+                            "nota-aprobacion",
+                        ) as string;
+                        const tiempoRegistroStr = formData.get(
+                            "tiempo-registro-asignacion",
+                        ) as string;
+
+                        // Validar que el área sea uno de los valores permitidos
+                        const areasPermitidas = [
+                            "PRACTICA",
+                            "INVESTIGACION",
+                            "ACADEMICA",
+                            "TECNICA",
+                            "INDUSTRIAL",
+                            "EMPRESARIAL",
+                            "IA",
+                            "REDES",
+                        ];
+                        const areaValida =
+                            areaValue && areasPermitidas.includes(areaValue)
+                                ? areaValue
+                                : undefined;
+
+                        const eventoData = {
+                            evento_id: formData.get("evento_id") as string,
+                            nombre: formData.get("nombre") as string,
+                            descripcion: formData.get("descripcion") as string,
+                            categoria: formData.get("categoria") as string,
+                            precio:
+                                parseFloat(formData.get("precio") as string) ||
+                                0,
+                            fecha_inicio: formData.get(
+                                "fecha-inicio",
+                            ) as string,
+                            hora_inicio: formData.get("hora-inicio") as string,
+                            ubicacion: formData.get("ubicacion") as string,
+                            cedula_organizador: formData.get(
+                                "cedula-organizador",
+                            ) as string,
+                            // Campos opcionales - solo incluir si tienen valor válido
+                            ...(areaValida && {
+                                area: areaValida as
+                                    | "PRACTICA"
+                                    | "INVESTIGACION"
+                                    | "ACADEMICA"
+                                    | "TECNICA"
+                                    | "INDUSTRIAL"
+                                    | "EMPRESARIAL"
+                                    | "IA"
+                                    | "REDES",
+                            }),
+                            ...(fechaFin && { fecha_fin: fechaFin }),
+                            ...(horaFin && { hora_fin: horaFin }),
+                            ...(duracionStr && {
+                                duracion: parseInt(duracionStr),
+                            }),
+                            ...(notaAprobacionStr && {
+                                nota_aprobacion: parseFloat(notaAprobacionStr),
+                            }),
+                            ...(tiempoRegistroStr && {
+                                tiempo_registro_asignacion:
+                                    tiempoRegistroStr === "true",
+                            }),
+                        };
+
+                        try {
+                            const { data, error } =
+                                await actions.modificarEvento(eventoData);
+
+                            if (data?.success) {
+                                await Swal.fire({
+                                    icon: "success",
+                                    title: "Éxito",
+                                    text: "Evento modificado correctamente.",
+                                    confirmButtonColor: "#059669",
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                await Swal.fire({
+                                    icon: "error",
+                                    title: "Error",
+                                    text:
+                                        error?.message ||
+                                        "No se pudo modificar el evento.",
+                                    confirmButtonColor: "#dc2626",
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Error:", error);
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "Error al procesar la solicitud",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        }
+                    });
+                } // Asignar funciones al objeto window
+                window.abrirModal = abrirModal;
+                window.cerrarModal = cerrarModal;
+                window.abrirAsignacionesModal = abrirAsignacionesModal;
+
+                // Event listeners para botones de asignaciones
+                const btnAgregarAsignaciones = document.getElementById(
+                    "btn-agregar-asignaciones",
+                );
+                const btnGestionarAsignaciones = document.getElementById(
+                    "btn-gestionar-asignaciones",
+                );
+
+                if (btnAgregarAsignaciones) {
+                    btnAgregarAsignaciones.addEventListener(
+                        "click",
+                        async () => {
+                            const eventoIdInput = document.querySelector(
+                                'input[name="evento_id"]',
+                            ) as HTMLInputElement;
+                            if (eventoIdInput && eventoIdInput.value) {
+                                await agregarAsignacionesSeleccionadas(
+                                    eventoIdInput.value,
+                                );
+                            }
+                        },
+                    );
+                }
+
+                if (btnGestionarAsignaciones) {
+                    btnGestionarAsignaciones.addEventListener("click", () => {
+                        const eventoIdInput = document.querySelector(
+                            'input[name="evento_id"]',
+                        ) as HTMLInputElement;
+                        if (eventoIdInput && eventoIdInput.value) {
+                            abrirAsignacionesModal(eventoIdInput.value);
+                        }
+                    });
+                }
+            });
+        </script>
+    </div>
 </div>
