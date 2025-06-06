@@ -1,247 +1,618 @@
 ---
 import "../styles/ModalModificarEvento.css";
+
+interface Props {
+    categorias?: any[];
+    organizadores?: any[];
+}
+
+const { categorias = [], organizadores = [] } = Astro.props;
 ---
 
-<div id="modalNuevaReserva" class="modal">
-  <div class="modal-contenido">
-    <span class="cerrar" onclick="cerrarModal()">&times;</span>
-    <div class="formulario-completo">
-      <form
-        class="formulario-modificar-registro"
-        action="/modificar-evento"
-        method="POST"
-        id="formulario-modificar-reserva"
-      >
-        <div class="contenedor-superior">
-          <p class="texto-centrado texto-rojo">Información General</p>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Nombre</p>
-            <div class="contenedor-input">
-              <input type="text" class="input-dato" name="cedulaConductor" />
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Descripción</p>
-            <div class="contenedor-input">
-              <input type="text" class="input-dato" name="telefonoConductor" />
-            </div>
-          </div>
-
-          <div class="contenedor-nombre">
-            <div class="contenedor-dato">
-              <p class="texto-dato">Categoría:</p>
-              <div class="contenedor-input">
-                <select name="categoria" class="input-dato">
-                  <option value="Actual">Elija una Categoría</option>
-                  <option value="curso">Curso</option>
-                  <option value="congreso">Congreso</option>
-                  <option value="webinar">Webinar</option>
-                  <option value="conferencia">Conferencia</option>
-                  <option value="socializacion">Socialización</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="contenedor-dato">
-              <p class="texto-dato">Área:</p>
-              <div class="contenedor-input">
-                <select name="area" class="input-dato">
-                  <option value="Actual">Elija una Área</option>
-                  <option value="activa">Práctica</option>
-                  <option value="investigacion">Investigación</option>
-                  <option value="academica">Academica</option>
-                  <option value="tecnica">Técnica</option>
-                  <option value="industrial">Industrial</option>
-                  <option value="empresarial">Empresarial</option>
-                  <option value="ia">IA</option>
-                  <option value="redes">Redes</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Asignación:</p>
-            <div class="contenedor-input">
-              <select name="estado" class="input-dato">
-                <option value="Actual">Elija una Asignación</option>
-                <option value="General">Publico general</option>
-                <option value="Especifica">Carrera específica</option>
-                <option value="Facultad">Facultad</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="contenedor-superior">
-          <p class="texto-centrado texto-rojo">Programación</p>
-          <div class="contenedor-nombre">
-            <div class="contenedor-dato">
-              <p class="texto-dato">Fecha de Inicio:</p>
-              <div class="contenedor-input">
-                <input type="date" class="input-dato" name="fecha-inicio" />
-              </div>
-            </div>
-
-            <div class="contenedor-dato">
-              <p class="texto-dato">Hora de Inicio:</p>
-              <div class="contenedor-input">
-                <input type="time" class="input-dato" name="hora-inicio" />
-              </div>
-            </div>
-          </div>
-
-          <div class="contenedor-nombre">
-            <div class="contenedor-dato">
-              <p class="texto-dato">Fecha de Finalización:</p>
-              <div class="contenedor-input">
-                <input type="date" class="input-dato" name="fecha-fin" />
-              </div>
-            </div>
-
-            <div class="contenedor-dato">
-              <p class="texto-dato">Hora de Finalización:</p>
-              <div class="contenedor-input">
-                <input type="time" class="input-dato" name="hora-fin" />
-              </div>
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Duración</p>
-            <div class="contenedor-input">
-              <input type="number" class="input-dato" name="duracion" />
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Ubicación</p>
-            <div class="contenedor-input">
-              <input type="text" class="input-dato" name="telefonoConductor" />
-            </div>
-          </div>
-        </div>
-
-        <div class="contenedor-inferior">
-          <p class="texto-centrado texto-rojo">Organizador</p>
-          <div class="contenedor-dato">
-            <p class="texto-dato">Cédula</p>
-            <div class="contenedor-input">
-              <input type="text" class="input-dato" name="cedulaConductor" />
-            </div>
-          </div>
-
-          <div class="contenedor-dato">
-            <p class="texto-dato">Nombre</p>
-            <p>
-              Aquí va el nombre completo del organizador con su cargo si se
-              desea
-            </p>
-          </div>
-
-          <div class="contenedor-boton-modificar">
-            <button
-              type="button"
-              class="boton-modificar"
-              onclick="cerrarModal()">Cancelar</button
+<div id="modalNuevoEvento" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalNuevo()">&times;</span>
+        <div class="formulario-completo">
+            <form
+                class="formulario-modificar-registro"
+                method="POST"
+                id="formulario-nuevo-evento"
+                enctype="multipart/form-data"
             >
-            <button type="submit" class="boton-modificar">Guardar</button>
-          </div>
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-rojo">Información General</p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Nombre</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="nombre"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Descripción</p>
+                        <div class="contenedor-input">
+                            <textarea
+                                class="input-dato"
+                                name="descripcion"
+                                rows="3"
+                                required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Categoría:</p>
+                            <div class="contenedor-input">
+                                <select
+                                    name="categoria"
+                                    class="input-dato"
+                                    required
+                                >
+                                    <option value="">Elija una Categoría</option
+                                    >
+                                    {
+                                        categorias.map((categoria) => (
+                                            <option value={categoria.id_cat}>
+                                                {categoria.nom_cat}
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Área:</p>
+                            <div class="contenedor-input">
+                                <select name="area" class="input-dato">
+                                    <option value="">Elija una Área</option>
+                                    <option value="PRACTICA">Práctica</option>
+                                    <option value="INVESTIGACION"
+                                        >Investigación</option
+                                    >
+                                    <option value="ACADEMICA">Académica</option>
+                                    <option value="TECNICA">Técnica</option>
+                                    <option value="INDUSTRIAL"
+                                        >Industrial</option
+                                    >
+                                    <option value="EMPRESARIAL"
+                                        >Empresarial</option
+                                    >
+                                    <option value="IA">IA</option>
+                                    <option value="REDES">Redes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Precio (USD):</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="input-dato"
+                                name="precio"
+                                value="0"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Nota de Aprobación:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0"
+                                    max="10"
+                                    class="input-dato"
+                                    name="nota_aprobacion"
+                                    value="7.0"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Tiempo de Registro:</p>
+                            <div class="contenedor-input">
+                                <select
+                                    name="tiempo_registro_asignacion"
+                                    class="input-dato"
+                                >
+                                    <option value="true" selected
+                                        >Se requiere registro de asistencia</option
+                                    >
+                                    <option value="false"
+                                        >No se requiere registro de asistencia</option
+                                    >
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-rojo">Programación</p>
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Fecha de Inicio:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="date"
+                                    class="input-dato"
+                                    name="fecha_inicio"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Hora de Inicio:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="time"
+                                    class="input-dato"
+                                    name="hora_inicio"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Fecha de Finalización:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="date"
+                                    class="input-dato"
+                                    name="fecha_fin"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Hora de Finalización:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="time"
+                                    class="input-dato"
+                                    name="hora_fin"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Duración (horas)</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="number"
+                                min="1"
+                                class="input-dato"
+                                name="duracion"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Ubicación</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="ubicacion"
+                                required
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contenedor-inferior">
+                    <p class="texto-centrado texto-rojo">Organizador</p>
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Organizador</p>
+                        <div class="contenedor-input">
+                            <select
+                                name="cedula_organizador"
+                                class="input-dato"
+                                required
+                            >
+                                <option value=""
+                                    >Seleccione un Organizador</option
+                                >
+                                {
+                                    organizadores.map((organizador) => (
+                                        <option value={organizador.ced_org}>
+                                            {organizador.nom_org1}{" "}
+                                            {organizador.nom_org2 || ""}{" "}
+                                            {organizador.ape_org1}{" "}
+                                            {organizador.ape_org2} -{" "}
+                                            {organizador.ced_org}
+                                        </option>
+                                    ))
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sección de Asignaciones -->
+                    <div class="contenedor-superior">
+                        <p class="texto-centrado texto-rojo">Asignaciones</p>
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Seleccionar Asignaciones:</p>
+                            <div class="contenedor-input">
+                                <select
+                                    id="asignaciones-evento"
+                                    name="asignaciones[]"
+                                    class="input-dato"
+                                    multiple
+                                    size="6"
+                                >
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                            <p class="texto-info-asignaciones">
+                                Mantén presionado Ctrl/Cmd para seleccionar
+                                múltiples asignaciones. Si no seleccionas
+                                ninguna, el evento no tendrá restricciones de
+                                inscripción.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-boton-modificar">
+                        <button
+                            type="button"
+                            class="boton-modificar"
+                            onclick="cerrarModalNuevo()">Cancelar</button
+                        >
+                        <button type="submit" class="boton-modificar"
+                            >Crear Evento</button
+                        >
+                    </div>
+                </div>
+
+                <div class="contenedor-imagen">
+                    <img
+                        id="nueva-evento-imagen"
+                        class="imagen-evento"
+                        style="display: none;"
+                        alt="Imagen del nuevo evento"
+                    />
+                    <div class="contenedor-file">
+                        <label
+                            for="file-upload-nuevo"
+                            class="custom-file-upload"
+                        >
+                            <img
+                                src="/img/CRUD/upload.png"
+                                alt="Subir imagen"
+                                class="upload-icon"
+                            />
+                            <span>Seleccionar imagen</span>
+                        </label>
+                        <input
+                            id="file-upload-nuevo"
+                            type="file"
+                            name="imagen"
+                            class="input-file"
+                            accept="image/*"
+                        />
+                        <p class="file-name">
+                            No se ha seleccionado ningún archivo
+                        </p>
+                    </div>
+                </div>
+            </form>
         </div>
-      </form>
-      <div class="contenedor-imagen">
-        <img
-          id="nueva-evento-imagen"
-          class="imagen-evento"
-          style="display: none;"
-          alt="Imagen del nuevo evento"
-        />
-        <div class="contenedor-file">
-          <label for="file-upload" class="custom-file-upload">
-            <img
-              src="/img/CRUD/upload.png"
-              alt="Subir imagen"
-              class="upload-icon"
-            />
-            <span>Seleccionar imagen</span>
-          </label>
-          <input id="file-upload" type="file" class="input-file" />
-          <p class="file-name">No se ha seleccionado ningún archivo</p>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<style>
+    .texto-info-asignaciones {
+        margin-top: 5px;
+        color: #6b7280;
+        font-size: 12px;
+        font-style: italic;
+    }
+
+    .contenedor-dato select[multiple] {
+        height: auto;
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .contenedor-dato select[multiple] option {
+        padding: 8px;
+        margin: 2px 0;
+        border-radius: 4px;
+    }
+
+    .contenedor-dato select[multiple] option:hover {
+        background-color: #f0f8ff;
+    }
+
+    .contenedor-dato select[multiple] option:checked {
+        background-color: #4169e1;
+        color: white;
+    }
+</style>
+
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
     declare global {
-      interface Window {
-        abrirModalNuevo: (id: string) => void;
-        cerrarModal: () => void;
-      }
+        interface Window {
+            abrirModalNuevo: () => void;
+            cerrarModalNuevo: () => void;
+        }
     }
 
-    function abrirModalNuevo() {
-      const modal = document.getElementById("modalNuevaReserva");
-      if (modal) modal.style.display = "block";
+    let asignacionesDisponibles: any[] = [];
+
+    async function testearConexionAcciones() {
+        try {
+            console.log("🧪 Probando conexión con acciones...");
+            const resultado = await actions.getAsignacionesPlantilla({});
+            console.log("🧪 Resultado de prueba:", resultado);
+            return resultado;
+        } catch (error) {
+            console.error("🧪 Error en prueba:", error);
+            return null;
+        }
     }
 
-    function cerrarModal() {
-      const modal = document.getElementById("modalNuevaReserva");
-      const form = document.getElementById(
-        "formulario-modificar-reserva"
-      ) as HTMLFormElement | null;
-      if (modal && form) {
-        modal.style.display = "none";
-        form.reset();
-      }
+    async function cargarAsignacionesPlantilla() {
+        try {
+            console.log("🔄 Iniciando carga de asignaciones plantilla...");
+            const { data, error } = await actions.getAsignacionesPlantilla({});
+
+            if (error) {
+                console.error("❌ Error en getAsignacionesPlantilla:", error);
+                return;
+            }
+
+            if (!data?.success) {
+                console.warn("⚠️ La consulta no fue exitosa:", data?.error);
+                return;
+            }
+
+            if (!data.asignaciones || data.asignaciones.length === 0) {
+                console.warn("⚠️ No hay asignaciones disponibles");
+                return;
+            }
+
+            asignacionesDisponibles = data.asignaciones;
+            const select = document.getElementById(
+                "asignaciones-evento",
+            ) as HTMLSelectElement;
+
+            if (!select) {
+                console.error(
+                    "❌ No se encontró el elemento select #asignaciones-evento",
+                );
+                return;
+            }
+
+            select.innerHTML = "";
+
+            // Agregar opción por defecto
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent =
+                "Ninguna asignación (evento sin restricciones)";
+            defaultOption.disabled = true;
+            select.appendChild(defaultOption);
+
+            // Agregar asignaciones disponibles
+            asignacionesDisponibles.forEach((asignacion) => {
+                const option = document.createElement("option");
+                option.value = asignacion.id_asi;
+
+                const carreraTexto = asignacion.carreras
+                    ? ` (${asignacion.carreras.nom_car})`
+                    : " (Público general)";
+
+                const badges = [];
+                if (asignacion.es_gratuito) badges.push("Gratuito");
+                if (asignacion.requiere_validacion) badges.push("Validación");
+
+                const badgeTexto =
+                    badges.length > 0 ? ` [${badges.join(", ")}]` : "";
+
+                option.textContent = `${asignacion.nom_asi}${carreraTexto}${badgeTexto}`;
+                select.appendChild(option);
+            });
+
+            console.log(
+                "🎉 Select actualizado exitosamente con",
+                asignacionesDisponibles.length,
+                "asignaciones",
+            );
+        } catch (error) {
+            console.error(
+                "💥 Error crítico al cargar asignaciones plantilla:",
+                error,
+            );
+        }
+    }
+
+    function abrirModalNuevo(): void {
+        console.log("🎯 Abriendo modal nuevo evento...");
+        const modal = document.getElementById("modalNuevoEvento");
+        if (modal) {
+            modal.style.display = "block";
+            testearConexionAcciones().then(() => {
+                cargarAsignacionesPlantilla();
+            });
+        }
+    }
+
+    function cerrarModalNuevo(): void {
+        const modal = document.getElementById("modalNuevoEvento");
+        const form = document.getElementById(
+            "formulario-nuevo-evento",
+        ) as HTMLFormElement;
+
+        if (modal && form) {
+            modal.style.display = "none";
+            form.reset();
+
+            // Resetear imagen
+            const imagen = document.getElementById(
+                "nueva-evento-imagen",
+            ) as HTMLImageElement;
+            const fileName = document.querySelector(
+                "#modalNuevoEvento .file-name",
+            ) as HTMLElement;
+            if (imagen) imagen.style.display = "none";
+            if (fileName)
+                fileName.textContent = "No se ha seleccionado ningún archivo";
+
+            // Resetear selector de asignaciones
+            const selectAsignaciones = document.getElementById(
+                "asignaciones-evento",
+            ) as HTMLSelectElement;
+            if (selectAsignaciones) {
+                selectAsignaciones.selectedIndex = -1;
+            }
+        }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const cerrar = document.querySelector("#modalNuevaReserva .cerrar");
-      if (cerrar) cerrar.addEventListener("click", cerrarModal);
-      window.abrirModalNuevo = abrirModalNuevo;
-      window.cerrarModal = cerrarModal;
-    });
+        const form = document.getElementById(
+            "formulario-nuevo-evento",
+        ) as HTMLFormElement;
+        const fileInput = document.getElementById(
+            "file-upload-nuevo",
+        ) as HTMLInputElement;
+        const fileNameDisplay = document.querySelector(
+            "#modalNuevoEvento .file-name",
+        ) as HTMLElement;
+        const nuevaEventoImagen = document.getElementById(
+            "nueva-evento-imagen",
+        ) as HTMLImageElement;
 
-    const fileInput = document.getElementById(
-      "file-upload"
-    ) as HTMLInputElement | null;
-    const fileNameDisplay = document.querySelector(
-      ".file-name"
-    ) as HTMLElement | null;
-    const nuevaEventoImagen = document.getElementById(
-      "nueva-evento-imagen"
-    ) as HTMLImageElement | null;
+        // Manejar cambio de archivo
+        if (fileInput && fileNameDisplay && nuevaEventoImagen) {
+            fileInput.addEventListener("change", (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                const file = target.files?.[0];
 
-    if (fileInput && fileNameDisplay && nuevaEventoImagen) {
-      fileInput.addEventListener("change", (e: Event) => {
-        const target = e.target as HTMLInputElement;
-        const file = target.files?.[0];
-
-        if (file && file.type.match("image.*")) {
-          // Mostrar el nombre del archivo
-          fileNameDisplay.textContent = file.name;
-
-          // Crear una URL temporal para la imagen
-          const reader = new FileReader();
-
-          reader.onload = (event) => {
-            if (event.target?.result) {
-              // Mostrar y configurar la imagen subida
-              nuevaEventoImagen.src = event.target.result as string;
-              nuevaEventoImagen.style.display = "block";
-            }
-          };
-
-          reader.readAsDataURL(file);
-        } else {
-          fileNameDisplay.textContent =
-            "No se ha seleccionado ningún archivo válido";
-          nuevaEventoImagen.style.display = "none";
+                if (file && file.type.match("image.*")) {
+                    fileNameDisplay.textContent = file.name;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        if (event.target?.result) {
+                            nuevaEventoImagen.src = event.target
+                                .result as string;
+                            nuevaEventoImagen.style.display = "block";
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    fileNameDisplay.textContent =
+                        "No se ha seleccionado ningún archivo válido";
+                    nuevaEventoImagen.style.display = "none";
+                }
+            });
         }
-      });
-    }
-  </script>
-</div>
+
+        // Manejar envío del formulario
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                try {
+                    const { data, error } = await actions.crearEvento(formData);
+
+                    if (data?.success) {
+                        // Obtener asignaciones seleccionadas
+                        const selectAsignaciones = document.getElementById(
+                            "asignaciones-evento",
+                        ) as HTMLSelectElement;
+                        const asignacionesSeleccionadas = Array.from(
+                            selectAsignaciones.selectedOptions,
+                        )
+                            .map((option) => option.value)
+                            .filter((value) => value !== "");
+
+                        // Si hay asignaciones seleccionadas, duplicarlas al evento
+                        if (
+                            asignacionesSeleccionadas.length > 0 &&
+                            data.data?.id
+                        ) {
+                            await Promise.all(
+                                asignacionesSeleccionadas.map(
+                                    async (idAsignacion) => {
+                                        try {
+                                            await actions.duplicarAsignacionAEvento(
+                                                {
+                                                    id_asignacion_plantilla:
+                                                        idAsignacion,
+                                                    id_evento_destino:
+                                                        data.data.id,
+                                                },
+                                            );
+                                        } catch (error) {
+                                            console.error(
+                                                "Error al duplicar asignación:",
+                                                error,
+                                            );
+                                        }
+                                    },
+                                ),
+                            );
+                        }
+
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text:
+                                asignacionesSeleccionadas.length > 0
+                                    ? `Evento creado correctamente con ${asignacionesSeleccionadas.length} asignación(es).`
+                                    : "Evento creado correctamente sin restricciones de inscripción.",
+                            confirmButtonColor: "#059669",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                data?.message ||
+                                error?.message ||
+                                "No se pudo crear el evento.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            });
+        }
+
+        // Asignar funciones al objeto window
+        window.abrirModalNuevo = abrirModalNuevo;
+        window.cerrarModalNuevo = cerrarModalNuevo;
+    });
+</script>
