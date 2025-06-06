@@ -12,7 +12,7 @@ const noAuthRoutes = ['/login', '/register', '/'];
 
 // Rutas públicas accesibles por todos (autenticados y no autenticados)
 const publicRoutes = [
-    '/',
+    '/*',
     '/Admin/*',
     '/img/usuario.png',
     '/default-avatar.png',

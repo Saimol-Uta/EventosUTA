@@ -8,14 +8,14 @@ import "../styles/ModalModificarEvento.css";
         <div class="formulario-completo">
             <form
                 class="formulario-modificar-registro"
-                action="/modificar-evento"
                 method="POST"
                 id="formulario-modificar-evento"
+                enctype="multipart/form-data"
             >
                 <input type="hidden" name="evento_id" />
 
                 <div class="contenedor-superior">
-                    <p class="texto-centrado texto-rojo">Información General</p>
+                    <p class="texto-centrado texto-roja">Información General</p>
 
                     <div class="contenedor-dato">
                         <p class="texto-dato">Nombre</p>
@@ -103,7 +103,7 @@ import "../styles/ModalModificarEvento.css";
                                     min="0"
                                     max="10"
                                     class="input-dato"
-                                    name="nota-aprobacion"
+                                    name="nota_aprobacion"
                                     value="7.0"
                                 />
                             </div>
@@ -113,7 +113,7 @@ import "../styles/ModalModificarEvento.css";
                             <p class="texto-dato">Tiempo de Registro:</p>
                             <div class="contenedor-input">
                                 <select
-                                    name="tiempo-registro-asignacion"
+                                    name="tiempo_registro_asignacion"
                                     class="input-dato"
                                 >
                                     <option value="true" selected
@@ -129,7 +129,7 @@ import "../styles/ModalModificarEvento.css";
                 </div>
 
                 <div class="contenedor-superior">
-                    <p class="texto-centrado texto-rojo">Programación</p>
+                    <p class="texto-centrado texto-roja">Programación</p>
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
                             <p class="texto-dato">Fecha de Inicio:</p>
@@ -137,7 +137,7 @@ import "../styles/ModalModificarEvento.css";
                                 <input
                                     type="date"
                                     class="input-dato"
-                                    name="fecha-inicio"
+                                    name="fecha_inicio"
                                     required
                                 />
                             </div>
@@ -149,7 +149,7 @@ import "../styles/ModalModificarEvento.css";
                                 <input
                                     type="time"
                                     class="input-dato"
-                                    name="hora-inicio"
+                                    name="hora_inicio"
                                     required
                                 />
                             </div>
@@ -163,7 +163,7 @@ import "../styles/ModalModificarEvento.css";
                                 <input
                                     type="date"
                                     class="input-dato"
-                                    name="fecha-fin"
+                                    name="fecha_fin"
                                 />
                             </div>
                         </div>
@@ -174,7 +174,7 @@ import "../styles/ModalModificarEvento.css";
                                 <input
                                     type="time"
                                     class="input-dato"
-                                    name="hora-fin"
+                                    name="hora_fin"
                                 />
                             </div>
                         </div>
@@ -205,12 +205,12 @@ import "../styles/ModalModificarEvento.css";
                     </div>
                 </div>
                 <div class="contenedor-inferior">
-                    <p class="texto-centrado texto-rojo">Organizador</p>
+                    <p class="texto-centrado texto-roja">Organizador</p>
                     <div class="contenedor-dato">
                         <p class="texto-dato">Organizador</p>
                         <div class="contenedor-input">
                             <select
-                                name="cedula-organizador"
+                                name="cedula_organizador"
                                 class="input-dato"
                                 required
                             >
@@ -224,7 +224,7 @@ import "../styles/ModalModificarEvento.css";
 
                     <!-- Sección de Asignaciones -->
                     <div class="contenedor-superior">
-                        <p class="texto-centrado texto-rojo">Asignaciones</p>
+                        <p class="texto-centrado texto-roja">Asignaciones</p>
                         <div class="contenedor-dato">
                             <p class="texto-dato">Asignaciones Actuales:</p>
                             <div
@@ -282,39 +282,39 @@ import "../styles/ModalModificarEvento.css";
                         >
                     </div>
                 </div>
-            </form>
-
-            <div class="contenedor-imagen">
-                <img
-                    id="evento-imagen"
-                    class="imagen-evento"
-                    style="display: none;"
-                    alt="Imagen del evento"
-                />
-
-                <div class="contenedor-file">
-                    <label
-                        for="file-upload-modificar"
-                        class="custom-file-upload"
-                    >
-                        <img
-                            src="/img/CRUD/upload.png"
-                            alt="Subir imagen"
-                            class="upload-icon"
-                        />
-                        <span>Seleccionar imagen</span>
-                    </label>
-                    <input
-                        id="file-upload-modificar"
-                        type="file"
-                        class="input-file"
-                        accept="image/*"
+                <div class="contenedor-imagen">
+                    <img
+                        id="evento-imagen"
+                        class="imagen-evento"
+                        style="display: none;"
+                        alt="Imagen del evento"
                     />
-                    <p class="file-name">
-                        No se ha seleccionado ningún archivo
-                    </p>
+
+                    <div class="contenedor-file">
+                        <label
+                            for="file-upload-modificar"
+                            class="custom-file-upload"
+                        >
+                            <img
+                                src="/img/CRUD/upload.png"
+                                alt="Subir imagen"
+                                class="upload-icon"
+                            />
+                            <span>Seleccionar imagen</span>
+                        </label>
+                        <input
+                            id="file-upload-modificar"
+                            type="file"
+                            name="imagen"
+                            class="input-file"
+                            accept="image/*"
+                        />
+                        <p class="file-name">
+                            No se ha seleccionado ningún archivo
+                        </p>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
 
         <script>
@@ -377,7 +377,7 @@ import "../styles/ModalModificarEvento.css";
 
                     if (organizadoresData?.success) {
                         const selectOrganizador = document.querySelector(
-                            'select[name="cedula-organizador"]',
+                            'select[name="cedula_organizador"]',
                         ) as HTMLSelectElement;
 
                         if (selectOrganizador) {
@@ -624,16 +624,16 @@ import "../styles/ModalModificarEvento.css";
                     'input[name="precio"]',
                 ) as HTMLInputElement;
                 const fechaInicio = form.querySelector(
-                    'input[name="fecha-inicio"]',
+                    'input[name="fecha_inicio"]',
                 ) as HTMLInputElement;
                 const horaInicio = form.querySelector(
-                    'input[name="hora-inicio"]',
+                    'input[name="hora_inicio"]',
                 ) as HTMLInputElement;
                 const fechaFin = form.querySelector(
-                    'input[name="fecha-fin"]',
+                    'input[name="fecha_fin"]',
                 ) as HTMLInputElement;
                 const horaFin = form.querySelector(
-                    'input[name="hora-fin"]',
+                    'input[name="hora_fin"]',
                 ) as HTMLInputElement;
                 const duracion = form.querySelector(
                     'input[name="duracion"]',
@@ -642,13 +642,13 @@ import "../styles/ModalModificarEvento.css";
                     'input[name="ubicacion"]',
                 ) as HTMLInputElement;
                 const cedulaOrganizador = form.querySelector(
-                    'select[name="cedula-organizador"]',
+                    'select[name="cedula_organizador"]',
                 ) as HTMLSelectElement;
                 const notaAprobacion = form.querySelector(
-                    'input[name="nota-aprobacion"]',
+                    'input[name="nota_aprobacion"]',
                 ) as HTMLInputElement;
                 const tiempoRegistro = form.querySelector(
-                    'select[name="tiempo-registro-asignacion"]',
+                    'select[name="tiempo_registro_asignacion"]',
                 ) as HTMLSelectElement;
                 const eventoIdInput = form.querySelector(
                     'input[name="evento_id"]',
@@ -750,16 +750,18 @@ import "../styles/ModalModificarEvento.css";
                     form.addEventListener("submit", async (e) => {
                         e.preventDefault();
 
-                        const formData = new FormData(form); // Obtener valores y validar área
+                        const formData = new FormData(form);
+
+                        // Obtener valores y validar área
                         const areaValue = formData.get("area") as string;
-                        const fechaFin = formData.get("fecha-fin") as string;
-                        const horaFin = formData.get("hora-fin") as string;
+                        const fechaFin = formData.get("fecha_fin") as string;
+                        const horaFin = formData.get("hora_fin") as string;
                         const duracionStr = formData.get("duracion") as string;
                         const notaAprobacionStr = formData.get(
-                            "nota-aprobacion",
+                            "nota_aprobacion",
                         ) as string;
                         const tiempoRegistroStr = formData.get(
-                            "tiempo-registro-asignacion",
+                            "tiempo_registro_asignacion",
                         ) as string;
 
                         // Validar que el área sea uno de los valores permitidos
@@ -778,51 +780,41 @@ import "../styles/ModalModificarEvento.css";
                                 ? areaValue
                                 : undefined;
 
-                        const eventoData = {
-                            evento_id: formData.get("evento_id") as string,
-                            nombre: formData.get("nombre") as string,
-                            descripcion: formData.get("descripcion") as string,
-                            categoria: formData.get("categoria") as string,
-                            precio:
-                                parseFloat(formData.get("precio") as string) ||
-                                0,
-                            fecha_inicio: formData.get(
-                                "fecha-inicio",
-                            ) as string,
-                            hora_inicio: formData.get("hora-inicio") as string,
-                            ubicacion: formData.get("ubicacion") as string,
-                            cedula_organizador: formData.get(
-                                "cedula-organizador",
-                            ) as string,
-                            // Campos opcionales - solo incluir si tienen valor válido
-                            ...(areaValida && {
-                                area: areaValida as
-                                    | "PRACTICA"
-                                    | "INVESTIGACION"
-                                    | "ACADEMICA"
-                                    | "TECNICA"
-                                    | "INDUSTRIAL"
-                                    | "EMPRESARIAL"
-                                    | "IA"
-                                    | "REDES",
-                            }),
-                            ...(fechaFin && { fecha_fin: fechaFin }),
-                            ...(horaFin && { hora_fin: horaFin }),
-                            ...(duracionStr && {
-                                duracion: parseInt(duracionStr),
-                            }),
-                            ...(notaAprobacionStr && {
-                                nota_aprobacion: parseFloat(notaAprobacionStr),
-                            }),
-                            ...(tiempoRegistroStr && {
-                                tiempo_registro_asignacion:
-                                    tiempoRegistroStr === "true",
-                            }),
-                        };
+                        // Limpiar campos vacíos
+                        if (!fechaFin || fechaFin.trim() === "") {
+                            formData.delete("fecha_fin");
+                        }
+                        if (!horaFin || horaFin.trim() === "") {
+                            formData.delete("hora_fin");
+                        }
+                        if (!duracionStr || duracionStr.trim() === "") {
+                            formData.delete("duracion");
+                        }
+                        if (
+                            !notaAprobacionStr ||
+                            notaAprobacionStr.trim() === ""
+                        ) {
+                            formData.set("nota_aprobacion", "7.0");
+                        }
+                        if (
+                            !tiempoRegistroStr ||
+                            tiempoRegistroStr.trim() === ""
+                        ) {
+                            formData.set("tiempo_registro_asignacion", "true");
+                        }
+                        if (!areaValida) {
+                            formData.delete("area");
+                        }
+
+                        // Verificar si hay imagen seleccionada
+                        const imagenFile = formData.get("imagen") as File;
+                        if (!imagenFile || imagenFile.size === 0) {
+                            formData.delete("imagen");
+                        }
 
                         try {
                             const { data, error } =
-                                await actions.modificarEvento(eventoData);
+                                await actions.modificarEvento(formData);
 
                             if (data?.success) {
                                 await Swal.fire({

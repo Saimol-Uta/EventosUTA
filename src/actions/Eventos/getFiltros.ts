@@ -3,57 +3,66 @@ import prisma from '../../db';
 import { z } from 'astro:schema';
 
 export const getEventosFiltrados = defineAction({
-  accept: 'json',
+    accept: 'json',
 
-  input: z.object({
-    categoria: z.string().optional(),
-    duracion: z.string().optional(),
-  }),
+    input: z.object({
+        categoria: z.string().optional(),
+        duracion: z.string().optional(),
+    }),
 
-  handler: async ({ categoria, duracion }) => {
-    try {
-      const condiciones: any[] = [];
+    handler: async ({ categoria, duracion }) => {
+        try {
+            const condiciones: any[] = [];
+            console.log('Obteniendo eventos filtrados con categoría:', categoria, 'y duración:', duracion);
 
-      // ✅ Filtro por categoría (área del evento)
-      if (categoria) {
-        condiciones.push({ are_eve: categoria });
-      }
+            // ✅ Filtro por categoría (ID de categoría del evento)
+            if (categoria) {
+                condiciones.push({ id_cat_eve: categoria });
+            }
 
-      // ✅ Filtro por duración (rango de minutos)
-      if (duracion) {
-        switch (duracion) {
-          case "Menos de 5 horas":
-            condiciones.push({ dur_eve: { lt: 300 } });
-            break;
-          case "De 5 a 30 horas":
-            condiciones.push({ dur_eve: { gte: 300, lt: 1800 } });
-            break;
-          case "De 30 a 60 horas":
-            condiciones.push({ dur_eve: { gte: 1800, lt: 3600 } });
-            break;
-          case "Más de 60 horas":
-            condiciones.push({ dur_eve: { gte: 3600 } });
-            break;
+            // ✅ Filtro por duración (rango de minutos)
+            if (duracion) {
+                switch (duracion) {
+                    case "Menos de 5 horas":
+                        condiciones.push({ dur_eve: { lt: 300 } });
+                        break;
+                    case "De 5 a 30 horas":
+                        condiciones.push({ dur_eve: { gte: 300, lt: 1800 } });
+                        break;
+                    case "De 30 a 60 horas":
+                        condiciones.push({ dur_eve: { gte: 1800, lt: 3600 } });
+                        break;
+                    case "Más de 60 horas":
+                        condiciones.push({ dur_eve: { gte: 3600 } });
+                        break;
+                }
+            }
+
+            const eventos = await prisma.eventos.findMany({
+                where: condiciones.length > 0 ? { AND: condiciones } : undefined,
+                orderBy: { nom_eve: 'asc' },
+                include: {
+                    categorias_eventos: true,
+                    organizadores: true,
+                    inscripciones: {
+                        include: {
+                            usuarios: true
+                        }
+                    }
+                },
+            });
+
+            console.log('Eventos filtrados obtenidos:', eventos);
+            return {
+                success: true,
+                eventos,
+            };
+        } catch (error) {
+            console.error('Error al obtener eventos filtrados:', error);
+            return {
+                success: false,
+                error: 'Error al obtener eventos filtrados',
+            };
         }
-      }
-
-      const eventos = await prisma.eventos.findMany({
-        where: condiciones.length > 0 ? { AND: condiciones } : undefined,
-        orderBy: { nom_eve: 'asc' },
-        include: {
-          asignaciones: true,
-        },
-      });
-
-      return {
-        success: true,
-        eventos,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Error al obtener eventos filtrados',
-      };
-    }
-  },
+    },
 });
