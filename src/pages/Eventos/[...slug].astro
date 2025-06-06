@@ -107,9 +107,9 @@ const { evento, requisitos, organizador } = data;
         >
         <ul style="margin: 0; padding-left: 1.5rem;">
             {
-                evento.asignaciones.map((asignacion) => (
-                    <li>{asignacion.nom_asi}</li>
-                ))
+               evento.eventos_asignaciones.map((ea) => (
+    <li>{ea.asignaciones.nom_asi}</li>
+))
             }
         </ul>
     </div>
