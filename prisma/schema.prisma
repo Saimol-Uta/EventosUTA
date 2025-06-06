@@ -18,7 +18,6 @@ model asignaciones {
   carreras             carreras?              @relation(fields: [id_car_asi], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
   eventos_asignaciones eventos_asignaciones[]
   requisitos           requisitos[]
-
   @@index([id_car_asi], map: "idx_asignaciones_carrera")
 }
 
@@ -171,6 +170,8 @@ model cambios {
   cuentas     cuentas  @relation(fields: [id_cue_sol], references: [id_cue], onDelete: Cascade, onUpdate: NoAction)
 }
 
+
+
 model eventos_asignaciones {
   id_eve_asi   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   id_eve       String       @db.Uuid
@@ -180,3 +181,4 @@ model eventos_asignaciones {
 
   @@unique([id_eve, id_asi], map: "uk_eve_asi")
 }
+

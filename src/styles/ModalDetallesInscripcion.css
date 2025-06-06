@@ -104,7 +104,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 500px;
 }
 
 .seccion-detalles h3 {
@@ -127,18 +126,22 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.info-grid p:hover {
+  color: var(--color-fuerte-uta);
+}
+
 .info-grid strong {
   color: #444;
   margin-right: 8px;
 }
 
-.campo-factura {
-  flex: 0.5;
-}
-
 .descripcion-completa-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   width: 100%;
   margin-top: 15px;
+  
 }
 
 .descripcion-completa-container p {
@@ -148,6 +151,41 @@
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   width: 100%;
+}
+
+.contenedor-boton-modificar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.boton-modificar {
+  background-color: var(--color-fuerte-uta);
+  padding: 10px 20px;
+  min-width: 100px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.boton-modificar:first-child {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.boton-modificar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.boton-modificar:last-child:hover {
+  background-color: var(--color-oscuro-uta);
 }
 
 @media (max-width: 768px) {
@@ -160,3 +198,4 @@
     grid-template-columns: 1fr;
   }
 }
+
