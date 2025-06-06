@@ -1,0 +1,75 @@
+---
+import "../styles/ModalDetallesInscripcion.css";
+---
+
+<div id="modalDetallesPago" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar" onclick="cerrarModalPago()">&times;</span>
+    <div class="detalles-reserva">
+      <h2>Nombre del Evento</h2>
+
+      <div class="seccion-detalles">
+        <h3>Información del Usuario</h3>
+        <div class="descripcion-completa-container">
+          <p>
+            <strong>Nombres:</strong>
+            <span id="usuario-nombres"></span>
+          </p>
+          <p>
+            <strong>Apellidos:</strong>
+            <span id="usuario-apellidos"></span>
+          </p>
+          <p>
+            <strong>Correo:</strong>
+            <span id="usuario-correo"></span>
+          </p>
+          <p>
+            <strong>Cédula:</strong>
+            <span id="usuario-cedula"></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="seccion-detalles">
+        <h3>Documentación</h3>
+        <div class="info-grid">
+          <p class="centrar campo-factura">
+            <a href="#" >Factura o Comprobante de Pago</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="contenedor-boton-modificar">
+        <button class="boton-modificar">Aprobar</button>
+        <button class="boton-modificar">Rechazar</button>
+      </div>
+    </div>
+
+    <script>
+      declare global {
+        interface Window {
+          cerrarModalPago: () => void;
+          abrirModalPago: () => void;
+        }
+      }
+
+      function cerrarModalPago() {
+        const modal = document.getElementById("modalDetallesPago"); // Cambiado a modalDetallesPago
+        if (modal) modal.style.display = "none";
+      }
+
+      function abrirModalPago() {
+        const modal = document.getElementById("modalDetallesPago"); // Cambiado a modalDetallesPago
+        if (modal) modal.style.display = "block";
+      }
+
+      window.onclick = function (event) {
+        const modal = document.getElementById("modalDetallesPago"); // Cambiado a modalDetallesPago
+        if (event.target === modal) cerrarModalPago();
+      };
+
+      window.cerrarModalPago = cerrarModalPago;
+      window.abrirModalPago = abrirModalPago;
+    </script>
+  </div>
+</div>
