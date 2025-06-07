@@ -11,6 +11,7 @@ export const getEventosPorUsuario = defineAction({
 
   handler: async ({ idUsuario }) => {
     try {
+      // Busca los eventos en los que el usuario está inscrito (solo sus eventos)
       const inscripciones = await prisma.inscripciones.findMany({
         where: { id_usu_ins: idUsuario },
         include: {
@@ -18,14 +19,25 @@ export const getEventosPorUsuario = defineAction({
         },
       });
 
-      const eventos = inscripciones.map(i => i.eventos);
+      // Extrae solo los eventos (sin duplicados)
+      const eventosMap = new Map();
+      inscripciones.forEach(i => {
+        if (i.eventos && i.eventos.id_eve) {
+          eventosMap.set(i.eventos.id_eve, {
+            ...i.eventos,
+            estado_inscripcion: i.est_par, // usa el campo correcto de estado
+            fecha_inscripcion: i.fec_ins,
+          });
+        }
+      });
+      const eventos = Array.from(eventosMap.values());
 
       return {
         success: true,
         eventos,
       };
     } catch (error) {
-      console.error(error);
+      console.error("Error en getEventosPorUsuario:", error);
       return {
         success: false,
         error: 'Error al obtener eventos del usuario',
