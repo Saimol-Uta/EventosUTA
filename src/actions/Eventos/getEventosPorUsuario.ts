@@ -6,19 +6,16 @@ export const getEventosPorUsuario = defineAction({
   accept: 'json',
 
   input: z.object({
-    idUsuario: z.string().uuid(), 
+    idUsuario: z.string().uuid(),
   }),
 
   handler: async ({ idUsuario }) => {
     try {
-      // Busca los eventos en los que el usuario está inscrito (solo sus eventos)
+
       const inscripciones = await prisma.inscripciones.findMany({
         where: { id_usu_ins: idUsuario },
-        include: {
-          eventos: true,
-        },
+        select: { id_eve_ins: true },
       });
-
       // Extrae solo los eventos (sin duplicados)
       const eventosMap = new Map();
       inscripciones.forEach(i => {

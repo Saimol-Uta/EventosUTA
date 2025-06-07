@@ -17,8 +17,6 @@ model asignaciones {
   requiere_validacion  Boolean?               @default(false)
   carreras             carreras?              @relation(fields: [id_car_asi], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
   eventos_asignaciones eventos_asignaciones[]
-  requisitos           requisitos[]
-
   @@index([id_car_asi], map: "idx_asignaciones_carrera")
 }
 
@@ -177,6 +175,6 @@ model eventos_asignaciones {
   id_asi       String       @db.Uuid
   asignaciones asignaciones @relation(fields: [id_asi], references: [id_asi], onDelete: Cascade, onUpdate: NoAction)
   eventos      eventos      @relation(fields: [id_eve], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
-
   @@unique([id_eve, id_asi], map: "uk_eve_asi")
 }
+
