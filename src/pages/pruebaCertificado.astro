@@ -1,0 +1,90 @@
+---
+import Header from "../components/Header.astro";
+import NavBar from "../components/Navbar.astro";
+import ContenedorEvento from "../components/ContenedorEvento.astro";
+import EventoUsuario from "../components/EventoUsuario.astro";
+import Avatar from "../components/Avatar.astro";
+import Button from "../components/Button.astro";
+import DocumentButton from "../components/DocumentButton.astro";
+import Card from "../components/Card.astro";
+import { actions } from "astro:actions";
+import type { CustomUser } from "../../auth.config";
+import { effect } from "astro:schema";
+import { getSession } from "auth-astro/server";
+
+const session = await getSession(Astro.request);
+
+// Renombramos esta variable para que no choque con la de abajo
+const { data: cuentaUsuario } = await Astro.callAction(
+  actions.getCuentaById,
+  session?.user?.id || "",
+);
+
+console.log(cuentaUsuario);
+
+// Renombramos esta variable también
+const eventosResult = await Astro.callAction(actions.getEventosPorUsuario, {
+  idUsuario: session?.user?.id || "",
+});
+
+const upcomingEvents = ["Evento 1", "Evento 2"];
+const certificates = ["Certificado A", "Certificado B"];
+
+let pdfData = null;
+let error = null;
+
+if (Astro.url.searchParams.get("generar") === "true") {
+  const result = await Astro.callAction(actions.GenerarCertificado, {
+    eventoId: "b27ad9a8-15f3-4992-9509-cac0fd6a5964",
+  });
+
+  console.log('Resultado GenerarCertificado:', result);
+
+  if (result.data?.success && result.data?.data?.pdfBase64) {
+    pdfData = result.data.data;
+  } else {
+    error = result.error ?? result.data?.error ?? { message: 'Error desconocido' };
+  }
+}
+---
+
+<html lang="es">
+  <body>
+    <h1>Generar Certificado</h1>
+    <a href="?generar=true">
+      <button class="bg-red-600 text-white px-4 py-2 rounded">
+        Generar
+      </button>
+    </a>
+
+    {error && <p class="text-red-600">Error: {error.message}</p>}
+
+    {pdfData && (
+      <script define:vars={{ pdfData }}>
+        // Ahora `pdfData` es un objeto JavaScript real en el navegador
+        const base64 = pdfData.pdfBase64;
+        const fileName = pdfData.fileName;
+
+        const byteCharacters = atob(base64);
+        const byteArrays = [];
+        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+          const slice = byteCharacters.slice(offset, offset + 512);
+          const byteNumbers = new Array(slice.length);
+          for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          byteArrays.push(byteArray);
+        }
+
+        const blob = new Blob(byteArrays, { type: "application/pdf" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link); // Buena práctica añadirlo al DOM antes del clic
+        link.click();
+        document.body.removeChild(link); // Limpiar el DOM después de la descarga
+      </script>
+    )}
+  </body>
+</html>
