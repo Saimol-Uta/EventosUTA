@@ -4,7 +4,7 @@ import "../styles/ModalDetallesInscripcion.css";
 
 <div id="modalDetallesReserva" class="modal">
   <div class="modal-contenido">
-    <span class="cerrar" onclick="cerrarModalDetalles()">&times;</span>
+    <span class="cerrar" onclick="cerrarModalDetallesInscripcion()">&times;</span>
     <div class="detalles-reserva">
       <h2>Nombre del Evento</h2>
 
@@ -55,28 +55,28 @@ import "../styles/ModalDetallesInscripcion.css";
     <script>
       declare global {
         interface Window {
-          cerrarModalDetalles: () => void;
-          abrirModalDetalles: () => void;
+          cerrarModalDetallesInscripcion: () => void;
+          abrirModalDetallesInscripcion: () => void;
         }
       }
 
-      function cerrarModalDetalles() {
+      function cerrarModalDetallesInscripcion() {
         const modal = document.getElementById("modalDetallesReserva");
         if (modal) modal.style.display = "none";
       }
 
-      function abrirModalDetalles() {
+      function abrirModalDetallesInscripcion() {
         const modal = document.getElementById("modalDetallesReserva");
         if (modal) modal.style.display = "block";
       }
 
       window.onclick = function (event) {
         const modal = document.getElementById("modalDetallesReserva");
-        if (event.target === modal) cerrarModalDetalles();
+        if (event.target === modal) cerrarModalDetallesInscripcion();
       };
 
-      window.cerrarModalDetalles = cerrarModalDetalles;
-      window.abrirModalDetalles = abrirModalDetalles;
+      window.cerrarModalDetallesInscripcion = cerrarModalDetallesInscripcion;
+      window.abrirModalDetallesInscripcion = abrirModalDetallesInscripcion;
     </script>
   </div>
 </div>
