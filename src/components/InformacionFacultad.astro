@@ -11,8 +11,11 @@ const {
   imagenMision,
   tituloVision,
   contenidoVision,
-  imagenVision
+  imagenVision,
+  modoAdmin=false
 } = Astro.props;
+
+
 ---
 
 <div class="bg-gray-100 min-h-screen py-8">
@@ -25,6 +28,7 @@ const {
   titulo={tituloDescripcion}
   contenido={contenidoDescripcion}
   imagenUrl={imagenDescripcion}
+  modoEdicion={modoAdmin}
 />
 
 <TarjetaConImagen
@@ -32,12 +36,14 @@ const {
   contenido={contenidoMision}
   imagenUrl={imagenMision}
   invertir={true}
+    modoEdicion={modoAdmin}
 />
 
 <TarjetaConImagen
   titulo={tituloVision}
   contenido={contenidoVision}
   imagenUrl={imagenVision}
+    modoEdicion={modoAdmin}
 />
 
   </div>

@@ -4,6 +4,22 @@ import Header from "../components/Header.astro";
 import InformacionFacultad from "../components/InformacionFacultad.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
+import type { CustomUser } from "../../auth.config";
+import { getSession } from "auth-astro/server";
+import InformacionUsuario from "@/components/InformacionUsuario.astro";
+import ContenedorInfo from "@/components/ContenedorInfo.astro";
+
+const session = await getSession(Astro.request);
+let esAdmin =false;
+
+if (session && session.user) {
+      const user = session.user as CustomUser;
+    const rol = user.rol?.toUpperCase();
+    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+       esAdmin= true;
+    } 
+}
+
 ---
 
 <Layout>
@@ -20,6 +36,7 @@ import Navbar from "../components/Navbar.astro";
         tituloVision="Visión"
         contenidoVision="Aspiramos a formar profesionales que impacten positivamente en la sociedad a través de la tecnología."
         imagenVision="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+        admin={esAdmin}
     />
     <Footer />
 </Layout>

@@ -17,13 +17,10 @@ const { titulo, contenido, imagenUrl, invertir = false, admin = false, modoEdici
             name="nuevoContenido"
             class="w-full h-40 p-3 border rounded-md resize-none text-[#010101]"
           >{contenido}</textarea>
-
-          <!-- Puedes incluir un campo oculto si necesitas identificar la tarjeta -->
           <input type="hidden" name="titulo" value={titulo} />
-
           <button
             type="submit"
-            class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+            class="mt-4 px-4 py-2 bg-red-800 text-white rounded hover:bg-green-700 transition"
           >
             Guardar cambios
           </button>
