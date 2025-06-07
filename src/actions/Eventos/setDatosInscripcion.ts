@@ -45,15 +45,14 @@ export const setDatosInscripcion = defineAction({
         };
       }
 
-      // 3. Crear la inscripción
       const inscripcion = await prisma.inscripciones.create({
         data: {
           id_usu_ins: idUsu,
           id_eve_ins: idEvento,
-          // Solo acepta los valores permitidos por la tabla
+        
           met_pag_ins: metodoPago && ["TRANSFERENCIA", "DEPOSITO", "ONLINE"].includes(metodoPago) ? metodoPago : null,
           enl_ord_pag_ins: enlaceComprobante || null,
-          est_par: "APROBADA",
+          //est_par: "APROBADA",
         },
       });
 
