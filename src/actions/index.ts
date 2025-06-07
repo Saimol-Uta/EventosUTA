@@ -13,13 +13,13 @@ import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
 
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
-import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+
 
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
 import { getInscripcionesPendientes } from './Admin';
-
+import { POST } from './Admin';
 
 export const server = {
     getEventos,
@@ -38,6 +38,7 @@ export const server = {
     setDatosInscripcion,
     uploadComprobante,
 
+    POST,
 
 
     getCertificadosPorUsuario,

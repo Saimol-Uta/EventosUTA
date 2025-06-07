@@ -1,6 +1,7 @@
 ---
 import TarjetaConImagen from "../components/ContenedorInfo.astro";
 import "../styles/global.css";
+
 const {
   tituloFacultad,
   tituloDescripcion,
@@ -12,10 +13,8 @@ const {
   tituloVision,
   contenidoVision,
   imagenVision,
-  modoAdmin=false
+  modoAdmin = false
 } = Astro.props;
-
-
 ---
 
 <div class="bg-gray-100 min-h-screen py-8">
@@ -24,27 +23,29 @@ const {
       {tituloFacultad}
     </h1>
 
-  <TarjetaConImagen
-  titulo={tituloDescripcion}
-  contenido={contenidoDescripcion}
-  imagenUrl={imagenDescripcion}
-  modoEdicion={modoAdmin}
-/>
+    <TarjetaConImagen
+      titulo={tituloDescripcion}
+      contenido={contenidoDescripcion}
+      imagenUrl={imagenDescripcion}
+      columna="des_pag"
+      modoEdicion={modoAdmin} 
+    />
 
-<TarjetaConImagen
-  titulo={tituloMision}
-  contenido={contenidoMision}
-  imagenUrl={imagenMision}
-  invertir={true}
-    modoEdicion={modoAdmin}
-/>
+    <TarjetaConImagen
+      titulo={tituloMision}
+      contenido={contenidoMision}
+      imagenUrl={imagenMision}
+      invertir={true}
+      columna="mis_pag"
+      modoEdicion={modoAdmin}
+    />
 
-<TarjetaConImagen
-  titulo={tituloVision}
-  contenido={contenidoVision}
-  imagenUrl={imagenVision}
-    modoEdicion={modoAdmin}
-/>
-
+    <TarjetaConImagen
+      titulo={tituloVision}
+      contenido={contenidoVision}
+      imagenUrl={imagenVision}
+      columna="vis_pag"
+      modoEdicion={modoAdmin}
+    />
   </div>
 </div>

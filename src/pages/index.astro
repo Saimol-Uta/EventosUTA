@@ -8,6 +8,7 @@ import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
 import InformacionUsuario from "@/components/InformacionUsuario.astro";
 import ContenedorInfo from "@/components/ContenedorInfo.astro";
+import prisma from "@/db";
 
 const session = await getSession(Astro.request);
 let esAdmin =false;
@@ -20,6 +21,10 @@ if (session && session.user) {
     } 
 }
 
+
+const pagina = await prisma.pagina_principal.findUnique({
+  where: { id_pag: 1 },
+});
 ---
 
 <Layout>
@@ -28,15 +33,15 @@ if (session && session.user) {
     <InformacionFacultad
         tituloFacultad="Facultad de Ciencias de la Computación"
         tituloDescripcion="Descripción"
-        contenidoDescripcion="Computación y la tecnología. Ofrecemos programas de grado y posgrado que combinan teoría y práctica, preparando a nuestros estudiantes para enfrentar los desafíos del mundo digital."
+        contenidoDescripcion= {pagina?.des_pag ?? ""}
         imagenDescripcion="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
         tituloMision="Misión"
-        contenidoMision="Buscamos fomentar un ambiente académico que promueva la investigación, el aprendizaje continuo y el trabajo colaborativo."
+        contenidoMision={pagina?.mis_pag ?? ""}
         imagenMision="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80"
         tituloVision="Visión"
-        contenidoVision="Aspiramos a formar profesionales que impacten positivamente en la sociedad a través de la tecnología."
+        contenidoVision={pagina?.vis_pag ?? ""}
         imagenVision="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-        admin={esAdmin}
+       modoAdmin={esAdmin} 
     />
     <Footer />
 </Layout>
