@@ -1,9 +1,8 @@
 import * as fs from 'fs';
-import * as path from 'path'; // Importamos el módulo 'path' de Node.js para manejar rutas de forma segura
-
-// Importaciones de tipos y valores de pdf-lib
+import * as path from 'path';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { PDFFont, PDFPage, RGB } from 'pdf-lib';
+
 
 export async function generarCertificadoPDF({
   nombreUsuario,
@@ -21,21 +20,14 @@ export async function generarCertificadoPDF({
   fechaGeneracion: string;
 }) {
   const pdfDoc = await PDFDocument.create();
-  
-  // --- CAMBIO 1: TAMAÑO DE LA PÁGINA ---
-  // Hacemos que la página del PDF tenga las mismas dimensiones que tu imagen.
   const page = pdfDoc.addPage([1920, 1080]);
   const { width, height } = page.getSize();
-  const margin = 120; // Aumentamos el margen para el nuevo tamaño
+  const margin = 120;
 
-  // --- Carga de Assets ---
-  // --- CAMBIO 2: RUTA DE LA IMAGEN ---
-  // Usamos path.join para crear una ruta absoluta y segura a tu archivo en la carpeta 'public'.
+  // Carga de assets (sin cambios)
   const plantillaPath = path.join(process.cwd(), 'public/img/Texto.png');
   const plantillaBytes = fs.readFileSync(plantillaPath);
   const plantillaImage = await pdfDoc.embedPng(plantillaBytes);
-
-  // Usamos fuentes estándar para evitar errores de archivos no encontrados
   const titleFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   
@@ -44,7 +36,7 @@ export async function generarCertificadoPDF({
     primary: rgb(0.56, 0.09, 0.13),
   };
 
-  // 1. Dibuja tu plantilla como fondo
+  // Dibuja la plantilla (sin cambios)
   page.drawImage(plantillaImage, {
     x: 0,
     y: 0,
@@ -52,66 +44,65 @@ export async function generarCertificadoPDF({
     height: height,
   });
 
-  // --- 2. Dibuja el texto dinámico con coordenadas ajustadas para 1920x1080 ---
-  // --- CAMBIO 3: COORDENADAS VERTICALES ---
-  let currentY = 580; // Nueva posición inicial para el texto
+  // --- Dibuja el texto dinámico con NUEVAS dimensiones y posiciones ---
+  let currentY = 510; // <-- CAMBIO: Bajamos la posición inicial de todo el bloque
 
-  // NOMBRE DEL PARTICIPANTE (Centrado)
+  // NOMBRE DEL PARTICIPANTE
   const nombreUsuarioText = nombreUsuario.toUpperCase();
-  const nombreUsuarioWidth = titleFont.widthOfTextAtSize(nombreUsuarioText, 42); // Tamaño de fuente más grande
+  const nombreUsuarioWidth = titleFont.widthOfTextAtSize(nombreUsuarioText, 48); // <-- CAMBIO: Tamaño aumentado
   page.drawText(nombreUsuarioText, {
     x: (width - nombreUsuarioWidth) / 2,
     y: currentY,
     font: titleFont,
-    size: 42,
+    size: 48, // <-- CAMBIO: Tamaño aumentado
     color: colors.text,
   });
-  currentY -= 70; // Mayor espaciado
+  currentY -= 80; // <-- CAMBIO: Espaciado aumentado
 
-  // "Por haber participado..." (Centrado)
+  // "Por haber participado..."
   const textoParticipado = 'Por haber participado y aprobado el curso de:';
-  const textoParticipadoWidth = bodyFont.widthOfTextAtSize(textoParticipado, 20);
+  const textoParticipadoWidth = bodyFont.widthOfTextAtSize(textoParticipado, 24); // <-- CAMBIO: Tamaño aumentado
   page.drawText(textoParticipado, {
     x: (width - textoParticipadoWidth) / 2,
     y: currentY,
     font: bodyFont,
-    size: 20,
+    size: 24, // <-- CAMBIO: Tamaño aumentado
     color: colors.text,
   });
-  currentY -= 50;
+  currentY -= 60; // <-- CAMBIO: Espaciado aumentado
 
-  // NOMBRE DEL CURSO/EVENTO (Centrado)
+  // NOMBRE DEL CURSO/EVENTO
   const nombreCursoText = nombreCurso.toUpperCase();
-  const nombreCursoWidth = titleFont.widthOfTextAtSize(nombreCursoText, 26);
+  const nombreCursoWidth = titleFont.widthOfTextAtSize(nombreCursoText, 32); // <-- CAMBIO: Tamaño aumentado
   page.drawText(nombreCursoText, {
     x: (width - nombreCursoWidth) / 2,
     y: currentY,
     font: titleFont,
-    size: 26,
+    size: 32, // <-- CAMBIO: Tamaño aumentado
     color: colors.primary,
   });
-  currentY -= 50;
+  currentY -= 60; // <-- CAMBIO: Espaciado aumentado
 
-  // FECHAS Y DURACIÓN (Centrado)
+  // FECHAS Y DURACIÓN
   const combinedText = `del ${fechaInicio} al ${fechaFin}, con una duración de ${duracionHoras} horas académicas.`;
-  const combinedTextWidth = bodyFont.widthOfTextAtSize(combinedText, 18);
+  const combinedTextWidth = bodyFont.widthOfTextAtSize(combinedText, 22); // <-- CAMBIO: Tamaño aumentado
   page.drawText(combinedText, {
     x: (width - combinedTextWidth) / 2,
     y: currentY,
     font: bodyFont,
-    size: 18,
+    size: 22, // <-- CAMBIO: Tamaño aumentado
     color: colors.text,
   });
-  currentY -= 110; // Mayor espaciado
+  currentY -= 120; // <-- CAMBIO: Espaciado aumentado
 
-  // FECHA DE GENERACIÓN (Alineada a la derecha)
+  // FECHA DE GENERACIÓN
   const generationDateText = `Ambato, ${fechaGeneracion}`;
-  const dateTextWidth = bodyFont.widthOfTextAtSize(generationDateText, 18);
+  const dateTextWidth = bodyFont.widthOfTextAtSize(generationDateText, 22); // <-- CAMBIO: Tamaño aumentado
   page.drawText(generationDateText, {
     x: width - margin - dateTextWidth,
     y: currentY,
     font: bodyFont,
-    size: 18,
+    size: 22, // <-- CAMBIO: Tamaño aumentado
     color: colors.text,
   });
 
