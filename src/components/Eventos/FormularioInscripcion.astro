@@ -294,38 +294,62 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
 )}
 
 <script is:inline>
-  // Solo para el frontend, no persistente
   document.addEventListener("DOMContentLoaded", () => {
     const checks = document.querySelectorAll('input[name="requisitosMarcados"]');
     const btn = document.getElementById("btn-inscribirse");
-    // Corrige: datosUsuarioCompletos como valor JS real, no como objeto
     const datosUsuarioCompletos = !!JSON.parse(document.getElementById("datos-usuario-completos").value);
+    const esPagado = !!JSON.parse(document.getElementById("es-pagado").value);
+
     function actualizarBoton() {
+      // Validación de requisitos
       if (checks.length === 0) {
         btn.disabled = !datosUsuarioCompletos;
-        return;
+      } else {
+        const todosMarcados = Array.from(checks).every(c => c.checked);
+        btn.disabled = !todosMarcados || !datosUsuarioCompletos;
       }
-      const todosMarcados = Array.from(checks).every(c => c.checked);
-      btn.disabled = !todosMarcados || !datosUsuarioCompletos;
+      // Validación de comprobante si es pagado
+      if (esPagado) {
+        const fileInput = document.getElementById("file-upload");
+        if (fileInput && !fileInput.files.length) {
+          btn.disabled = true;
+        }
+      }
     }
+
+    // Requisitos
     checks.forEach((check) => {
       check.addEventListener("change", actualizarBoton);
     });
+    // Comprobante
+    const fileInput = document.getElementById("file-upload");
+    if (fileInput) {
+      fileInput.addEventListener("change", actualizarBoton);
+    }
     actualizarBoton();
   });
 
   function validarRequisitosMarcados() {
     const checks = document.querySelectorAll('input[name="requisitosMarcados"]');
     const datosUsuarioCompletos = !!JSON.parse(document.getElementById("datos-usuario-completos").value);
+    const esPagado = !!JSON.parse(document.getElementById("es-pagado").value);
     if (!datosUsuarioCompletos) {
       alert("Completa tus datos personales para inscribirte.");
       return false;
     }
-    if (checks.length === 0) return true;
-    const todosMarcados = Array.from(checks).every(c => c.checked);
-    if (!todosMarcados) {
-      alert("Debes marcar todos los requisitos para inscribirte.");
-      return false;
+    if (checks.length > 0) {
+      const todosMarcados = Array.from(checks).every(c => c.checked);
+      if (!todosMarcados) {
+        alert("Debes marcar todos los requisitos para inscribirte.");
+        return false;
+      }
+    }
+    if (esPagado) {
+      const fileInput = document.getElementById("file-upload");
+      if (!fileInput || !fileInput.files.length) {
+        alert("Debes subir el comprobante de pago.");
+        return false;
+      }
     }
     return true;
   }
@@ -341,3 +365,4 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
   }
 </script>
 <input type="hidden" id="datos-usuario-completos" value={JSON.stringify(!!datosUsuarioCompletos)} />
+<input type="hidden" id="es-pagado" value={JSON.stringify(!!esPagado)} />
