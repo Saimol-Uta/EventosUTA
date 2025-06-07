@@ -25,7 +25,7 @@ export const GenerarCertificado = defineAction({
         where: {
           id_usu_ins: userId,
           id_eve_ins: input.eventoId,
-          est_par: { in: ['COMPLETADO', 'APROBADO'] },
+          est_par: 'APROBADA',
         },
         include: {
           usuarios: true,
