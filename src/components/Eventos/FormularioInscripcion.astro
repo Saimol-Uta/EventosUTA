@@ -159,6 +159,7 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
     style="max-width: 1200px; margin: 0 auto; font-size: 1.05rem;"
     method="POST"
     enctype="multipart/form-data"
+    onsubmit="return validarRequisitosMarcados();"
   >
     <input type="hidden" name="idUsuario" value={usuario?.cuentas?.[0]?.id_cue || usuario?.id_usu || ""} />
     <input type="hidden" name="idEvento" value={evento?.id_eve || ""} />
@@ -205,17 +206,25 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
       <h3 style="font-size: 1.3rem;">Requisitos</h3>
       <div class="requisitos-container">
         {requisitosCompletos ? (
-          requisitos.map((req, index) => (
-            <div class="requisito-item">
-              <div class="requisito-info">
-                <span class="requisito-texto">{req.nom_req}</span>
-                <div class="requisito-estado">
-                  <input type="checkbox" class="requisito-checkbox" readonly />
-                  <label class="custom-checkbox"></label>
+          requisitos.map((req, index) => {
+            return (
+              <div class="requisito-item">
+                <div class="requisito-info">
+                  <span class="requisito-texto">{req.nom_req}</span>
+                  <div class="requisito-estado">
+                    <input
+                      type="checkbox"
+                      class="requisito-checkbox"
+                      id={`req-check-${index}`}
+                      name="requisitosMarcados"
+                      value={index}
+                    />
+                    <label class="custom-checkbox" for={`req-check-${index}`}></label>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p style="color: red;">No hay requisitos registrados para este curso.</p>
         )}
@@ -259,6 +268,7 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
         <button
           class="submit-button"
           type="submit"
+          id="btn-inscribirse"
           disabled={!datosUsuarioCompletos}
         >
           Inscribirse
@@ -284,6 +294,42 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
 )}
 
 <script is:inline>
+  // Solo para el frontend, no persistente
+  document.addEventListener("DOMContentLoaded", () => {
+    const checks = document.querySelectorAll('input[name="requisitosMarcados"]');
+    const btn = document.getElementById("btn-inscribirse");
+    // Corrige: datosUsuarioCompletos como valor JS real, no como objeto
+    const datosUsuarioCompletos = !!JSON.parse(document.getElementById("datos-usuario-completos").value);
+    function actualizarBoton() {
+      if (checks.length === 0) {
+        btn.disabled = !datosUsuarioCompletos;
+        return;
+      }
+      const todosMarcados = Array.from(checks).every(c => c.checked);
+      btn.disabled = !todosMarcados || !datosUsuarioCompletos;
+    }
+    checks.forEach((check) => {
+      check.addEventListener("change", actualizarBoton);
+    });
+    actualizarBoton();
+  });
+
+  function validarRequisitosMarcados() {
+    const checks = document.querySelectorAll('input[name="requisitosMarcados"]');
+    const datosUsuarioCompletos = !!JSON.parse(document.getElementById("datos-usuario-completos").value);
+    if (!datosUsuarioCompletos) {
+      alert("Completa tus datos personales para inscribirte.");
+      return false;
+    }
+    if (checks.length === 0) return true;
+    const todosMarcados = Array.from(checks).every(c => c.checked);
+    if (!todosMarcados) {
+      alert("Debes marcar todos los requisitos para inscribirte.");
+      return false;
+    }
+    return true;
+  }
+
   function mostrarNombreArchivo(e) {
     const input = e.target;
     const p = document.getElementById("nombre-archivo");
@@ -294,3 +340,4 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
     }
   }
 </script>
+<input type="hidden" id="datos-usuario-completos" value={JSON.stringify(!!datosUsuarioCompletos)} />
