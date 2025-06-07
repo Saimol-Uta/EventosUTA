@@ -5,6 +5,12 @@ import { createCambio } from './Cambios';
 import { getUseById } from './auth';
 import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
+
+import { getDatosInscripcion } from './Eventos';
+import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
+import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
+
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
@@ -13,6 +19,7 @@ import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCar
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
 import { getInscripcionesPendientes } from './Admin';
+
 
 export const server = {
     getEventos,
@@ -26,6 +33,12 @@ export const server = {
     uploadImageUser,
     getCuentaById,
     uploadDocumentImage,
+
+    getDatosInscripcion,
+    setDatosInscripcion,
+    uploadComprobante,
+
+
 
     getCertificadosPorUsuario,
     getEventosProximos,
@@ -63,4 +76,5 @@ export const server = {
     getByIdInscripcion,
     updateParticipante,
     updateEstadoInscripcion
+
 };

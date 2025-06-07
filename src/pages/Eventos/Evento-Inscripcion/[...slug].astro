@@ -1,0 +1,65 @@
+---
+import { getSession } from "auth-astro/server";
+import { actions } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import FormularioInscripcion2 from "@/components/Eventos/FormularioInscripcion.astro";
+import "@styles/global.css";
+
+
+const { slug } = Astro.params;
+if (!slug) {
+  return Astro.redirect("/404");
+}
+const idEvento = Array.isArray(slug) ? slug[0] : slug; 
+
+
+const session = await getSession(Astro.request);
+if (!session?.user) {
+  return Astro.redirect("/login");
+}
+
+const idUsuario = session.user.id;
+
+if (!idUsuario) {
+  throw new Error("El usuario no tiene un ID válido.");
+}
+
+
+const { data, error } = await Astro.callAction(actions.getDatosInscripcion, {
+  idUsuario,
+  idEvento,
+});
+
+if (error || !data?.data || !data.data.evento) {
+  return Astro.redirect("/404");
+}
+
+
+const { usuario, evento, inscripcion, requisitos } = data.data;
+
+
+
+const campoTexto1 = "Cédula";
+const campoTexto2 = "Nombres";
+const campoTexto3 = "Apellidos";
+const campoTexto4 = "Correo electrónico";
+const campoTexto5 = "Teléfono";
+const campoArchivo = "Suba su documento";
+---
+
+<Layout>
+ <FormularioInscripcion2
+  campoTitle={evento.nom_eve}
+  campoTexto1={campoTexto1}
+  campoTexto2={campoTexto2}
+  campoTexto3={campoTexto3}
+  campoTexto4={campoTexto4}
+  campoTexto5={campoTexto5}
+  campoArchivo={campoArchivo}
+  usuario={usuario}
+  evento={evento}
+  requisitos={requisitos}
+  inscripcion={inscripcion}
+/>
+</Layout>
+
