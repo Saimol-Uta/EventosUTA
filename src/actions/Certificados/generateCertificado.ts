@@ -98,35 +98,25 @@ export async function generarCertificadoPDF({
   currentY -= 30;
 
   // FECHAS
-  const dateRangeText = `del ${fechaInicio} al ${fechaFin}`;
-  drawTextCentered(page, dateRangeText, {
-    font: bodyFont,
-    size: 12,
-    y: currentY,
-    color: colors.text,
-  });
-  currentY -= 20;
+const combinedText = `del ${fechaInicio} al ${fechaFin}, con una duración de ${duracionHoras} horas académicas.`;
+drawTextCentered(page, combinedText, {
+  font: bodyFont,
+  size: 12,
+  y: currentY,
+  color: colors.text,
+});
+currentY -= 60; // Dejamos un buen espacio antes de la fecha de generación
 
-  // DURACIÓN
-  const durationText = `con una duración de ${duracionHoras} horas académicas.`;
-  drawTextCentered(page, durationText, {
-    font: bodyFont,
-    size: 12,
-    y: currentY,
-    color: colors.text,
-  });
-  currentY -= 60; // Más espacio antes de la fecha final
-
-  // FECHA DE GENERACIÓN (Alineada a la derecha)
-  const generationDateText = `Ambato, ${fechaGeneracion}`;
-  const dateTextWidth = bodyFont.widthOfTextAtSize(generationDateText, 12);
-  page.drawText(generationDateText, {
-    x: width - margin - dateTextWidth,
-    y: currentY,
-    font: bodyFont,
-    size: 12,
-    color: colors.text,
-  });
+// FECHA DE GENERACIÓN (Alineada a la derecha)
+const generationDateText = `Ambato, ${fechaGeneracion}`;
+const dateTextWidth = bodyFont.widthOfTextAtSize(generationDateText, 12);
+page.drawText(generationDateText, {
+  x: width - margin - dateTextWidth,
+  y: currentY,
+  font: bodyFont,
+  size: 12,
+  color: colors.text,
+});
 
   const pdfBytes = await pdfDoc.save();
   return pdfBytes;
