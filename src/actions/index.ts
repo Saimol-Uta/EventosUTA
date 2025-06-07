@@ -8,6 +8,7 @@ import { setUser } from './Users/setUsers.action';
 import { getDatosInscripcion } from './Eventos';
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
+import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -22,5 +23,6 @@ export const server = {
     uploadDocumentImage,
     getDatosInscripcion,
     setDatosInscripcion,
+    uploadComprobante,
 
 };

@@ -58,16 +58,22 @@ if (Astro.request.method === "POST") {
       }
     }
 
-    // Procesa el comprobante si existe
+    // Procesa el comprobante si existe y es un archivo válido
     const comprobante = formData.get("comprobante");
     if (
       comprobante &&
       typeof comprobante === "object" &&
-      "name" in comprobante &&
-      typeof comprobante.name === "string" &&
-      comprobante.name.length > 0
+      comprobante instanceof File &&
+      comprobante.name &&
+      comprobante.size > 0
     ) {
-      enlaceComprobante = `https://banco.com/comprobante/${comprobante.name}`;
+      // Llama a la action para subir el archivo y obtener la URL
+      const uploadResult = await Astro.callAction(actions.uploadComprobante, formData);
+      if (uploadResult?.data?.url) {
+        enlaceComprobante = uploadResult.data.url;
+      } else {
+        throw new Error("Error al subir el comprobante de pago.");
+      }
     }
   }
 
