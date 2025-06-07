@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 // Importaciones de valores y tipos separadas para compatibilidad
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { PDFFont, PDFPage, RGB } from 'pdf-lib';
 
 // --- Función de ayuda para centrar texto (muy útil para este diseño) ---
@@ -46,13 +46,13 @@ export async function generarCertificadoPDF({
 
   // --- Carga de Assets ---
   const plantillaBytes = fs.readFileSync('./assets/Texto.png');
-  const fontBoldBytes = fs.readFileSync('./assets/fonts/Montserrat-Bold.ttf');
-  const fontRegularBytes = fs.readFileSync('./assets/fonts/Montserrat-Regular.ttf');
-  
-  // --- Incrustar Assets ---
   const plantillaImage = await pdfDoc.embedPng(plantillaBytes);
-  const titleFont = await pdfDoc.embedFont(fontBoldBytes);
-  const bodyFont = await pdfDoc.embedFont(fontRegularBytes);
+
+  // --- Incrustar Fuentes Estándar ---
+  // En lugar de cargar archivos, usamos las fuentes incorporadas
+  const titleFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
   
   const colors = {
     text: rgb(0.15, 0.15, 0.15), // Un gris oscuro para buena legibilidad
