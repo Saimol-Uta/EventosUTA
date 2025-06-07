@@ -1,0 +1,180 @@
+---
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Completar Registro</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f9fafb;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 4rem auto;
+        background-color: white;
+        padding: 2rem 3rem;
+        border-radius: 12px;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 0.25rem;
+      }
+
+      p.subtitulo {
+        font-size: 16px;
+        color: #4b5563;
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 18px;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem 1.5rem;
+      }
+
+      label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #111827;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        font-size: 15px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        outline: none;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
+      }
+
+      .radio-group {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .full-width {
+        grid-column: 1 / -1;
+      }
+
+      .submit-button {
+        grid-column: 1 / -1;
+        background-color: #fbbf24;
+        color: white;
+        font-size: 16px;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .submit-button:hover {
+        background-color: #f59e0b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>¡Bienvenido Manuel Ramirez!</h1>
+      <p class="subtitulo">
+        Para personalizar tu experiencia, completa tus datos:
+      </p>
+
+      <form>
+        <div class="full-width section-title">Información Personal</div>
+
+        <div>
+          <label for="nombre">Nombre*</label>
+          <input id="nombre" name="nombre" required />
+        </div>
+
+        <div>
+          <label for="apellido">Apellido*</label>
+          <input id="apellido" name="apellido" required />
+        </div>
+
+        <div>
+          <label for="tipo-documento">Tipo de Documento*</label>
+          <select id="tipo-documento" name="tipo-documento">
+            <option value="">Seleccione</option>
+            <option value="cedula">Cédula</option>
+            <option value="pasaporte">Pasaporte</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="numero-documento">Número de Documento*</label>
+          <input id="numero-documento" name="numero-documento" required />
+        </div>
+
+        <div>
+          <label for="fecha-nacimiento">Fecha de Nacimiento*</label>
+          <input id="fecha-nacimiento" name="fecha-nacimiento" type="date" required />
+        </div>
+
+        <div>
+          <label for="nacionalidad">Nacionalidad*</label>
+          <input id="nacionalidad" name="nacionalidad" required />
+        </div>
+
+        <div class="full-width">
+          <label>Sexo*</label>
+          <div class="radio-group">
+            <label><input type="radio" name="sexo" value="masculino" /> Masculino</label>
+            <label><input type="radio" name="sexo" value="femenino" /> Femenino</label>
+            <label><input type="radio" name="sexo" value="otro" /> Otro</label>
+          </div>
+        </div>
+
+        <div class="full-width section-title">Datos de Contacto</div>
+
+        <div>
+          <label for="telefono">Teléfono*</label>
+          <input id="telefono" name="telefono" required />
+        </div>
+
+        <div>
+          <label for="direccion">Dirección de Contacto*</label>
+          <input id="direccion" name="direccion" required />
+        </div>
+
+        <div class="full-width">
+          <label for="preferencia-contacto">Preferencia de Contacto*</label>
+          <select id="preferencia-contacto" name="preferencia-contacto">
+            <option value="email">Email</option>
+            <option value="telefono">Teléfono</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-button">Completar Registro</button>
+      </form>
+    </div>
+  </body>
+</html>

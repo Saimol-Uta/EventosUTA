@@ -24,7 +24,7 @@ export const server = {
 
     getCertificadosPorUsuario,
     getEventosProximos,
-    getInscripcionesPendientes
+    getInscripcionesPendientes,
 
     getOrganizadorByEvento,
     getOrganizadores,
