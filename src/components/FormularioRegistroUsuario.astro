@@ -1,0 +1,127 @@
+---
+interface Props {
+  cedula: string;
+}
+
+const { cedula } = Astro.props as Props;
+---
+
+<h1>¡Bienvenido!</h1>
+<p class="subtitulo">Completa tus datos:</p>
+
+<form>
+  <div class="section-title">Información Personal</div>
+
+  <div>
+    <label for="cedula">Cédula*</label>
+    <input id="cedula" name="cedula" required value={cedula} />
+  </div>
+
+  <div>
+    <label for="nombre1">Primer nombre*</label>
+    <input id="nombre1" name="nombre1" required />
+  </div>
+
+  <div>
+    <label for="nombre2">Segundo nombre</label>
+    <input id="nombre2" name="nombre2" />
+  </div>
+
+  <div>
+    <label for="apellido1">Primer apellido*</label>
+    <input id="apellido1" name="apellido1" required />
+  </div>
+
+  <div>
+    <label for="apellido2">Segundo apellido</label>
+    <input id="apellido2" name="apellido2" />
+  </div>
+
+  <div>
+    <label for="fecha-nacimiento">Fecha de nacimiento*</label>
+    <input id="fecha-nacimiento" name="fecha-nacimiento" type="date" required />
+  </div>
+
+  <div>
+    <label for="telefono">Teléfono*</label>
+    <input id="telefono" name="telefono" required />
+  </div>
+
+  <div>
+    <label for="carrera">Carrera*</label>
+    <input id="carrera" name="carrera" required />
+  </div>
+
+  <button type="submit" class="submit-button">Completar Registro</button>
+</form>
+
+<style>
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+  }
+
+  .subtitulo {
+    font-size: 16px;
+    color: #4b5563;
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 18px;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    grid-column: 1 / -1;
+  }
+
+  form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem 2rem;
+  }
+
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #111827;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+  }
+
+  input:focus,
+  select:focus {
+    border-color: #991b1b;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+  }
+
+  .submit-button {
+    grid-column: 1 / -1;
+    background-color: #991b1b;
+    color: white;
+    font-size: 16px;
+    padding: 14px 40px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out;
+    margin-top: 1rem;
+  }
+
+  .submit-button:hover {
+    background-color: #7f1d1d;
+  }
+</style>
