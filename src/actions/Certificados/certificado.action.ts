@@ -59,15 +59,36 @@ export const GenerarCertificado = defineAction({
       }
 
       const nombreCompleto = `${inscripcion.usuarios.nom_usu1} ${inscripcion.usuarios.nom_usu2 ?? ''} ${inscripcion.usuarios.ape_usu1} ${inscripcion.usuarios.ape_usu2 ?? ''}`.trim();
-      const nombreEvento = inscripcion.eventos.nom_eve;
-      const fechaCertificado = inscripcion.fec_cer_par?.toLocaleDateString('es-EC') ?? new Date().toLocaleDateString('es-EC');
-      const calificacion = inscripcion.not_par?.toString() ?? 'Aprobado';
 
+      // 2. Nombre del Curso (de la tabla 'eventos')
+      const nombreCurso = inscripcion.eventos.nom_eve;
+
+      // 3. Fechas del Evento (de la tabla 'eventos')
+      // Opciones para formatear las fechas en español (ej: "7 de junio")
+      const opcionesFechaCorta = { day: 'numeric', month: 'long' } as const;
+      const opcionesFechaLarga = { day: 'numeric', month: 'long', year: 'numeric' } as const;
+      
+      const fechaInicioFmt = inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', opcionesFechaCorta);
+      // Usamos la fecha de fin del evento, o si no existe, usamos la de inicio
+      const fechaFinFmt = (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', opcionesFechaLarga);
+
+      // 4. Duración en Horas (de la tabla 'eventos')
+      // Usamos 'dur_eve' que parece más apropiado. Si es nulo, ponemos '40' como fallback.
+      const duracionHoras = inscripcion.eventos.dur_eve?.toString() ?? '40';
+      // Si prefieres usar la nota del participante, descomenta la siguiente línea y comenta la de arriba:
+      // const duracionHoras = inscripcion.not_par?.toString() ?? 'Aprobado';
+
+      // 5. Fecha de Generación del Certificado (de la tabla 'inscripciones' o la fecha actual)
+      const fechaGeneracion = (inscripcion.fec_cer_par ?? new Date()).toLocaleDateString('es-EC', opcionesFechaLarga);
+
+      // --- Llamada a la función que genera el PDF con los nuevos parámetros ---
       const pdf = await generarCertificadoPDF({
         nombreUsuario: nombreCompleto,
-        evento: nombreEvento,
-        fecha: fechaCertificado,
-        calificacion,
+        nombreCurso: nombreCurso,
+        fechaInicio: fechaInicioFmt,
+        fechaFin: fechaFinFmt,
+        duracionHoras: duracionHoras,
+        fechaGeneracion: fechaGeneracion,
       });
 
       const pdfBase64 = Buffer.from(pdf).toString('base64');
@@ -76,7 +97,7 @@ export const GenerarCertificado = defineAction({
         success: true,
         data: {
           pdfBase64,
-          fileName: `certificado-${nombreEvento}.pdf`,
+          fileName: `certificado-${nombreCurso}.pdf`,
         },
       };
 
