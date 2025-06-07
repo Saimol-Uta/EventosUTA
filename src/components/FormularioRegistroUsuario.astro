@@ -1,59 +1,77 @@
 ---
 interface Props {
+  camposFormulario: {
+    titulo: string;
+    valor: string;
+    name: string;
+  }[];
   cedula: string;
+  mostrarBotones: boolean;
+  textoBotonGuardarInfo: string;
+  textoBotonCancelar: string;
+  textoBotonMasTarde: string;
+  textoBotonAsociar?: string;
 }
+const {
+  camposFormulario,
+  cedula,
+  mostrarBotones,
+  textoBotonGuardarInfo,
+  textoBotonCancelar,
+  textoBotonMasTarde,
+} = Astro.props as Props;
 
-const { cedula } = Astro.props as Props;
 ---
 
 <h1>¡Bienvenido!</h1>
 <p class="subtitulo">Completa tus datos:</p>
 
-<form>
-  <div class="section-title">Información Personal</div>
+<form method="POST">
+  <input type="hidden" name="action" value="guardarInfo" />
 
   <div>
-    <label for="cedula">Cédula*</label>
-    <input id="cedula" name="cedula" required value={cedula} />
+    <label for="ced_usu">Cédula</label>
+    <input id="ced_usu" name="ced_usu" required value={cedula} />
   </div>
 
   <div>
-    <label for="nombre1">Primer nombre*</label>
-    <input id="nombre1" name="nombre1" required />
+    <label for="nom_usu1">Primer nombre</label>
+    <input id="nom_usu1" name="nom_usu1" required />
   </div>
 
   <div>
-    <label for="nombre2">Segundo nombre</label>
-    <input id="nombre2" name="nombre2" />
+    <label for="nom_usu2">Segundo nombre</label>
+    <input id="nom_usu2" name="nom_usu2" />
   </div>
 
   <div>
-    <label for="apellido1">Primer apellido*</label>
-    <input id="apellido1" name="apellido1" required />
+    <label for="ape_usu1">Primer apellido*</label>
+    <input id="ape_usu1" name="ape_usu1" required />
   </div>
 
   <div>
-    <label for="apellido2">Segundo apellido</label>
-    <input id="apellido2" name="apellido2" />
+    <label for="ape_usu2">Segundo apellido</label>
+    <input id="ape_usu2" name="ape_usu2" />
   </div>
 
   <div>
-    <label for="fecha-nacimiento">Fecha de nacimiento*</label>
-    <input id="fecha-nacimiento" name="fecha-nacimiento" type="date" required />
+    <label for="fec_nac_usu">Fecha de nacimiento*</label>
+    <input id="fec_nac_usu" name="fec_nac_usu" type="date" required />
   </div>
 
   <div>
-    <label for="telefono">Teléfono*</label>
-    <input id="telefono" name="telefono" required />
+    <label for="num_tel_usu">Teléfono*</label>
+    <input id="num_tel_usu" name="num_tel_usu" required />
   </div>
 
   <div>
-    <label for="carrera">Carrera*</label>
-    <input id="carrera" name="carrera" required />
+    <label for="id_car_per">Carrera*</label>
+    <input id="id_car_per" name="id_car_per" required />
   </div>
 
   <button type="submit" class="submit-button">Completar Registro</button>
 </form>
+
 
 <style>
   h1 {
