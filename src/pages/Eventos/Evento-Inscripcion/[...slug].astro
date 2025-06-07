@@ -2,7 +2,7 @@
 import { getSession } from "auth-astro/server";
 import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
-import FormularioInscripcion2 from "@/components/Eventos/FormularioInscripcion2.astro";
+import FormularioInscripcion2 from "@/components/Eventos/FormularioInscripcion3.astro";
 import "@styles/global.css";
 
 // 1. Obtener el parámetro slug desde la URL
@@ -46,9 +46,6 @@ const campoArchivo = "Suba su documento";
 ---
 
 <Layout>
-    <pre style="background: #f0f0f0; padding: 1em; font-size: 0.9em; overflow-x: auto;">
-    {JSON.stringify(usuario, null, 2)}
-  </pre>
   <FormularioInscripcion2
     campoTitle={evento.nom_eve}
     campoTexto1={campoTexto1}

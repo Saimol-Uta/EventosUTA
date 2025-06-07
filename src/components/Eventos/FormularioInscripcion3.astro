@@ -1,0 +1,179 @@
+---
+import "../../styles/Inscripcion.css";
+
+interface CampoProps {
+  usuario: any;
+  evento: any;
+  requisitos: any[];
+}
+
+const { usuario, evento, requisitos } = Astro.props as CampoProps;
+
+const requisitosCompletos = Array.isArray(requisitos) && requisitos.length > 0;
+const datosUsuarioCompletos =
+  usuario?.nom_usu1 && usuario?.ape_usu1 && usuario?.ced_usu;
+const puedeInscribirse = requisitosCompletos && datosUsuarioCompletos;
+const esPagado = Number(evento?.precio ?? 0) > 0;
+---
+
+<div class="container">
+  <!-- Formulario de inscripción -->
+  <div class="form-card">
+    <h2>Inscripción</h2>
+    <p>{new Date().toLocaleDateString("es-EC")}</p>
+
+    <h3>Datos del Usuario</h3>
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input type="email" value={usuario?.cuentas?.[0]?.cor_cue ?? ""} readonly />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" value={usuario?.nom_usu1 ?? ""} readonly />
+      </div>
+      <div class="form-group">
+        <label>Apellido</label>
+        <input type="text" value={usuario?.ape_usu1 ?? ""} readonly />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipo de Documento</label>
+        <select disabled>
+          <option selected>Cédula</option>
+          <option>Pasaporte</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Número de Documento</label>
+        <input type="text" value={usuario?.ced_usu ?? ""} readonly />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Teléfono</label>
+      <input type="tel" value={usuario?.num_tel_usu ?? ""} readonly />
+    </div>
+
+    <h3>Requisitos</h3>
+    <div class="requisitos-container">
+      {requisitosCompletos ? (
+        requisitos.map((req, index) => (
+          <div class="requisito-item">
+            <div class="requisito-info">
+              <span class="requisito-texto">{req.nom_req}</span>
+              <div class="requisito-estado">
+                <input type="checkbox" class="requisito-checkbox" readonly />
+                <label class="custom-checkbox"></label>
+              </div>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p style="color: red;">No hay requisitos registrados para este curso.</p>
+      )}
+    </div>
+
+    <!-- Proceso de pago debajo de requisitos -->
+    {esPagado && (
+      <div class="form-card">
+        <h2>Proceso de Pago</h2>
+        <div class="form-group">
+          <label for="metodoPago">Forma de pago</label>
+          <select id="metodoPago" name="metodo_pago">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia Bancaria</option>
+          </select>
+        </div>
+
+        <div id="formEfectivo" class="formulario-pago">
+          <h4>Pago en Secretaría</h4>
+          <p><strong>Lugar:</strong> Secretaría de la FISEI</p>
+        </div>
+
+        <div id="formTransferencia" class="formulario-pago">
+          <h4>Transferencia Bancaria</h4>
+          <p><strong>Banco:</strong> Banco Pichincha</p>
+          <p><strong>Cuenta:</strong> Corriente #2206674884</p>
+        </div>
+
+        <div class="contenedor-file">
+          <label for="file-upload" class="custom-file-upload">
+            <img src="/img/CRUD/upload.png" alt="Subir" class="upload-icon" />
+            <span>Subir comprobante</span>
+          </label>
+          <input id="file-upload" type="file" class="input-file" />
+          <p class="file-name">No se ha seleccionado ningún archivo</p>
+        </div>
+
+        <div class="form-row">
+          <button class="submit-button" type="button" onclick="history.back()">Cancelar</button>
+          <button class="submit-button" type="button">Finalizar Pago</button>
+        </div>
+      </div>
+    )}
+
+    <div class="form-row">
+      <button class="submit-button" type="button" onclick="history.back()">Cancelar</button>
+      <button
+        class="submit-button"
+        type="submit"
+        disabled={esPagado || !puedeInscribirse}
+      >
+        Inscribirse
+      </button>
+    </div>
+  </div>
+
+  <!-- Información del evento (al final) -->
+  <div class="vehicle-card">
+    <h3>{evento?.nom_eve ?? "Evento no disponible"}</h3>
+    <img
+      src={evento?.img_eve ?? "/img/placeholder.jpg"}
+      alt="Curso"
+      class="curso-imagen"
+    />
+    <p><strong>Asignación:</strong> {evento?.eventos_asignaciones?.[0]?.asignaciones?.nom_asi ?? "-"}</p>
+    <p><strong>Categoría:</strong> {evento?.categorias_eventos?.nom_cat ?? "-"}</p>
+    <p><strong>Precio:</strong> ${evento?.precio ?? "0.00"}</p>
+    <p><strong>Área:</strong> {evento?.are_eve ?? "-"}</p>
+    <p><strong>Fecha Inicio:</strong> {new Date(evento?.fec_ini_eve ?? "").toLocaleDateString("es-EC")}</p>
+    <p><strong>Duración:</strong> {evento?.dur_eve ?? 0} horas</p>
+  </div>
+</div>
+
+<script type="module" is:inline>
+  document.addEventListener("DOMContentLoaded", () => {
+    const metodoPago = document.getElementById("metodoPago");
+    const efectivo = document.getElementById("formEfectivo");
+    const transferencia = document.getElementById("formTransferencia");
+
+    function toggleForm() {
+      efectivo?.classList.remove("active");
+      transferencia?.classList.remove("active");
+      if (metodoPago?.value === "efectivo") {
+        efectivo?.classList.add("active");
+      } else {
+        transferencia?.classList.add("active");
+      }
+    }
+
+    metodoPago?.addEventListener("change", toggleForm);
+    toggleForm();
+
+    const fileInput = document.getElementById("file-upload");
+    const fileNameDisplay = document.querySelector(".file-name");
+
+    fileInput?.addEventListener("change", function (e) {
+      const target = e.target;
+      if (target instanceof HTMLInputElement && target.files?.length) {
+        fileNameDisplay.textContent = target.files[0].name;
+      } else {
+        fileNameDisplay.textContent = "No se ha seleccionado ningún archivo";
+      }
+    });
+  });
+</script>
