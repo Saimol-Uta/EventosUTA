@@ -1,28 +1,10 @@
 import * as fs from 'fs';
-// Importaciones de valores y tipos separadas para compatibilidad
+import * as path from 'path'; // Importamos el módulo 'path' de Node.js para manejar rutas de forma segura
+
+// Importaciones de tipos y valores de pdf-lib
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import type { PDFFont, PDFPage, RGB } from 'pdf-lib';
 
-// --- Función de ayuda para centrar texto (muy útil para este diseño) ---
-function drawTextCentered(
-  page: PDFPage,
-  text: string,
-  options: {
-    font: PDFFont;
-    size: number;
-    y: number;
-    color?: RGB;
-  }
-) {
-  const textWidth = options.font.widthOfTextAtSize(text, options.size);
-  const pageWidth = page.getWidth();
-  page.drawText(text, {
-    x: (pageWidth - textWidth) / 2,
-    ...options,
-  });
-}
-
-// --- La firma de la función ahora es más descriptiva ---
 export async function generarCertificadoPDF({
   nombreUsuario,
   nombreCurso,
@@ -33,30 +15,33 @@ export async function generarCertificadoPDF({
 }: {
   nombreUsuario: string;
   nombreCurso: string;
-  fechaInicio: string; // Ejemplo: "22 de septiembre"
-  fechaFin: string; // Ejemplo: "29 de septiembre de 2023"
+  fechaInicio: string;
+  fechaFin: string;
   duracionHoras: string;
-  fechaGeneracion: string; // Ejemplo: "7 de junio de 2025"
+  fechaGeneracion: string;
 }) {
   const pdfDoc = await PDFDocument.create();
-  // Usamos A4 en horizontal para que coincida con tu plantilla
-  const page = pdfDoc.addPage([841.89, 595.28]);
+  
+  // --- CAMBIO 1: TAMAÑO DE LA PÁGINA ---
+  // Hacemos que la página del PDF tenga las mismas dimensiones que tu imagen.
+  const page = pdfDoc.addPage([1920, 1080]);
   const { width, height } = page.getSize();
-  const margin = 50;
+  const margin = 120; // Aumentamos el margen para el nuevo tamaño
 
   // --- Carga de Assets ---
-  const plantillaBytes = fs.readFileSync('./assets/Texto.png');
+  // --- CAMBIO 2: RUTA DE LA IMAGEN ---
+  // Usamos path.join para crear una ruta absoluta y segura a tu archivo en la carpeta 'public'.
+  const plantillaPath = path.join(process.cwd(), 'public/img/Texto.png');
+  const plantillaBytes = fs.readFileSync(plantillaPath);
   const plantillaImage = await pdfDoc.embedPng(plantillaBytes);
 
-  // --- Incrustar Fuentes Estándar ---
-  // En lugar de cargar archivos, usamos las fuentes incorporadas
+  // Usamos fuentes estándar para evitar errores de archivos no encontrados
   const titleFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
   
   const colors = {
-    text: rgb(0.15, 0.15, 0.15), // Un gris oscuro para buena legibilidad
-    primary: rgb(0.56, 0.09, 0.13), // El color vino/rojo de tu plantilla
+    text: rgb(0.15, 0.15, 0.15),
+    primary: rgb(0.56, 0.09, 0.13),
   };
 
   // 1. Dibuja tu plantilla como fondo
@@ -67,56 +52,68 @@ export async function generarCertificadoPDF({
     height: height,
   });
 
-  // --- 2. Dibuja el texto dinámico en el orden solicitado ---
-  let currentY = 320; // Posición vertical inicial (ajústala si es necesario)
+  // --- 2. Dibuja el texto dinámico con coordenadas ajustadas para 1920x1080 ---
+  // --- CAMBIO 3: COORDENADAS VERTICALES ---
+  let currentY = 580; // Nueva posición inicial para el texto
 
-  // NOMBRE DEL PARTICIPANTE
-  drawTextCentered(page, nombreUsuario.toUpperCase(), {
-    font: titleFont,
-    size: 28,
+  // NOMBRE DEL PARTICIPANTE (Centrado)
+  const nombreUsuarioText = nombreUsuario.toUpperCase();
+  const nombreUsuarioWidth = titleFont.widthOfTextAtSize(nombreUsuarioText, 42); // Tamaño de fuente más grande
+  page.drawText(nombreUsuarioText, {
+    x: (width - nombreUsuarioWidth) / 2,
     y: currentY,
+    font: titleFont,
+    size: 42,
     color: colors.text,
   });
-  currentY -= 45; // Aumentar espacio después del nombre
+  currentY -= 70; // Mayor espaciado
 
-  // "Por haber participado..."
-  drawTextCentered(page, 'Por haber participado y aprobado el curso de:', {
+  // "Por haber participado..." (Centrado)
+  const textoParticipado = 'Por haber participado y aprobado el curso de:';
+  const textoParticipadoWidth = bodyFont.widthOfTextAtSize(textoParticipado, 20);
+  page.drawText(textoParticipado, {
+    x: (width - textoParticipadoWidth) / 2,
+    y: currentY,
     font: bodyFont,
-    size: 14,
-    y: currentY,
+    size: 20,
     color: colors.text,
   });
-  currentY -= 30;
+  currentY -= 50;
 
-  // NOMBRE DEL CURSO/EVENTO
-  drawTextCentered(page, nombreCurso.toUpperCase(), {
-    font: titleFont,
-    size: 16,
+  // NOMBRE DEL CURSO/EVENTO (Centrado)
+  const nombreCursoText = nombreCurso.toUpperCase();
+  const nombreCursoWidth = titleFont.widthOfTextAtSize(nombreCursoText, 26);
+  page.drawText(nombreCursoText, {
+    x: (width - nombreCursoWidth) / 2,
     y: currentY,
-    color: colors.primary, // Usamos el color primario para destacarlo
+    font: titleFont,
+    size: 26,
+    color: colors.primary,
   });
-  currentY -= 30;
+  currentY -= 50;
 
-  // FECHAS
-const combinedText = `del ${fechaInicio} al ${fechaFin}, con una duración de ${duracionHoras} horas académicas.`;
-drawTextCentered(page, combinedText, {
-  font: bodyFont,
-  size: 12,
-  y: currentY,
-  color: colors.text,
-});
-currentY -= 60; // Dejamos un buen espacio antes de la fecha de generación
+  // FECHAS Y DURACIÓN (Centrado)
+  const combinedText = `del ${fechaInicio} al ${fechaFin}, con una duración de ${duracionHoras} horas académicas.`;
+  const combinedTextWidth = bodyFont.widthOfTextAtSize(combinedText, 18);
+  page.drawText(combinedText, {
+    x: (width - combinedTextWidth) / 2,
+    y: currentY,
+    font: bodyFont,
+    size: 18,
+    color: colors.text,
+  });
+  currentY -= 110; // Mayor espaciado
 
-// FECHA DE GENERACIÓN (Alineada a la derecha)
-const generationDateText = `Ambato, ${fechaGeneracion}`;
-const dateTextWidth = bodyFont.widthOfTextAtSize(generationDateText, 12);
-page.drawText(generationDateText, {
-  x: width - margin - dateTextWidth,
-  y: currentY,
-  font: bodyFont,
-  size: 12,
-  color: colors.text,
-});
+  // FECHA DE GENERACIÓN (Alineada a la derecha)
+  const generationDateText = `Ambato, ${fechaGeneracion}`;
+  const dateTextWidth = bodyFont.widthOfTextAtSize(generationDateText, 18);
+  page.drawText(generationDateText, {
+    x: width - margin - dateTextWidth,
+    y: currentY,
+    font: bodyFont,
+    size: 18,
+    color: colors.text,
+  });
 
   const pdfBytes = await pdfDoc.save();
   return pdfBytes;
