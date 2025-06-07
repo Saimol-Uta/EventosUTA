@@ -8,74 +8,99 @@ import ModalDetallesPago from "../../components/ModalDetallesPago.astro";
 import "../../styles/AprobacionesInscripciones.css";
 
 const links = [
-  { label: "Eventos", href: "EventosCRUD" },
-  { label: "Usuarios", href: "/perfil" },
-  { label: "Organizadores", href: "/historial" },
-  { label: "Inscripciones", href: "AprobacionInscripciones" },
-  { label: "Categorías", href: "/historial" },
-  { label: "Carreras", href: "/historial" },
+    { label: "Eventos", href: "EventosCRUD" },
+    { label: "Usuarios", href: "/perfil" },
+    { label: "Organizadores", href: "/historial" },
+    { label: "Inscripciones", href: "AprobacionInscripciones" },
+    { label: "Categorías", href: "/historial" },
+    { label: "Carreras", href: "/historial" },
 ];
 ---
 
 <Layout>
-  <body>
-    <Header />
-    <NavBar />
-    <MenuAdmin links={links} />
-    <ModalDetallesInscripcion />
-    <ModalDetallesPago />
+    <body>
+        <Header />
+        <MenuAdmin links={links} />
+        <ModalDetallesInscripcion />
+        <ModalDetallesPago />
 
-    <main class="registros">
-      <div class="registros-grid">
-        <div class="registros-superior">
-          <div class="registros-superior-izquierdo">Inscripciones</div>
-          <div class="registros-superior-derecho">
-            <select name="filtros" id="filtros" class="select-estado">
-              <option value="documentacion">Documentación</option>
-              <option value="factura">Facturación</option>
-            </select>
-          </div>
-        </div>
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        Inscripciones
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <select
+                            name="filtros"
+                            id="filtros"
+                            class="select-estado"
+                        >
+                            <option value="documentacion">Documentación</option>
+                            <option value="factura">Facturación</option>
+                        </select>
+                    </div>
+                </div>
 
-        <div class="registros-inferior-titulos">
-          <div class="registro-fila">
-            <div class="parte-izquierda-registro-encabezado">Nombres</div>
-            <div class="parte-izquierda-registro-encabezado">Apellidos</div>
-            <div class="parte-izquierda-registro-encabezado">Fecha</div>
-            <div class="parte-izquierda-registro-encabezado">Estado</div>
-            <div class="parte-derecha-registro-encabezado">Opciones</div>
-          </div>
-        </div>
-        <div class="registros-inferior">
-          <div class="registro-fila">
-            <div class="parte-izquierda-registro-fila">Manuel Eduardo</div>
-            <div class="parte-izquierda-registro-fila">Ramírez Hinostroza</div>
-            <div class="parte-izquierda-registro-fila">12/05/2025</div>
-            <div class="parte-izquierda-registro-fila">
-              Documentación Pendiente
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombres
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Apellidos
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Fecha
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Estado
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>
+                <div class="registros-inferior">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-fila">
+                            Manuel Eduardo
+                        </div>
+                        <div class="parte-izquierda-registro-fila">
+                            Ramírez Hinostroza
+                        </div>
+                        <div class="parte-izquierda-registro-fila">
+                            12/05/2025
+                        </div>
+                        <div class="parte-izquierda-registro-fila">
+                            Documentación Pendiente
+                        </div>
+                        <div class="registro-opciones">
+                            <button
+                                onclick="window.abrirModalDetalles()"
+                                title="Verificar Documentación"
+                            >
+                                <img
+                                    class="imagen-boton-registro"
+                                    src="/img/documento.svg"
+                                    alt="documento"
+                                />
+                            </button>
+
+                            <button
+                                onclick="window.abrirModalPago()"
+                                title="Verificar Facturación"
+                            >
+                                <img
+                                    class="imagen-boton-modificar"
+                                    src="/img/factura.svg"
+                                    alt="factura"
+                                />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="registro-opciones">
-              <button onclick="window.abrirModalDetalles()" title="Verificar Documentación">
-                <img
-                  class="imagen-boton-registro"
-                  src="/img/documento.svg"
-                  alt="documento"
-                />
-              </button>
-
-              <button onclick="window.abrirModalPago()" title="Verificar Facturación">
-                <img
-                  class="imagen-boton-modificar"
-                  src="/img/factura.svg"
-                  alt="factura"
-                />
-              </button>
-            </div>
-          </div>
-
-          
-        </div>
-      </div>
-    </main>
-  </body>
+        </main>
+    </body>
 </Layout>
