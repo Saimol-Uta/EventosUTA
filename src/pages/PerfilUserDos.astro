@@ -3,36 +3,13 @@ import Header from "../components/Header.astro";
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import FormularioRegistroUsuario from "../components/FormularioRegistroUsuario.astro";
-
-let cedulaIngresada = "";
-let mostrarFormulario = false;
-
-const method = Astro.request.method;
-
-if (method === "POST") {
-  const formData = await Astro.request.formData();
-  cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-  mostrarFormulario = !!cedulaIngresada;
-}
 ---
 
 <Layout>
   <Header />
   <Navbar />
   <div class="container">
-    {mostrarFormulario ? (
-      <FormularioRegistroUsuario cedula={cedulaIngresada} />
-    ) : (
-      <form method="POST" class="cedula-formulario">
-        <h1 class="text-xl font-bold mb-1">Validar identidad</h1>
-        <p class="subtitulo">Ingresa tu número de cédula para continuar.</p>
-        <div class="form-group">
-          <label for="ced_usu">Cédula*</label>
-          <input id="ced_usu" name="ced_usu" required maxlength="10" inputmode="numeric" />
-        </div>
-        <button type="submit" class="submit-button">Continuar</button>
-      </form>
-    )}
+    <FormularioRegistroUsuario cedula="" />
   </div>
 
   <style>
@@ -49,19 +26,6 @@ if (method === "POST") {
       padding: 2rem 3rem;
       border-radius: 12px;
       box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
-    }
-
-    h1 {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 0.25rem;
-    }
-
-    .subtitulo {
-      font-size: 16px;
-      color: #4b5563;
-      margin-bottom: 2rem;
     }
 
     .cedula-formulario {
