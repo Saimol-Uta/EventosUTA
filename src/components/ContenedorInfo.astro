@@ -1,6 +1,6 @@
 ---
 // TarjetaConImagen.astro
-const { titulo, contenido, imagenUrl, invertir = false } = Astro.props;
+const { titulo, contenido, imagenUrl, invertir = false, admin = false, modoEdicion = false } = Astro.props;
 ---
 
 <div class={`flex flex-col ${invertir ? 'lg:flex-row-reverse' : 'lg:flex-row'} justify-center items-start gap-6 mx-auto max-w-6xl px-4 py-8`}>
@@ -10,9 +10,41 @@ const { titulo, contenido, imagenUrl, invertir = false } = Astro.props;
       <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-[#650000] mb-4">
         {titulo}
       </h2>
-      <p class="text-base sm:text-lg text-[#010101] leading-relaxed">
-        {contenido}
-      </p>
+
+      {modoEdicion ? (
+        <form method="POST" action="/api/actualizar-tarjeta">
+          <textarea
+            name="nuevoContenido"
+            class="w-full h-40 p-3 border rounded-md resize-none text-[#010101]"
+          >{contenido}</textarea>
+
+          <!-- Puedes incluir un campo oculto si necesitas identificar la tarjeta -->
+          <input type="hidden" name="titulo" value={titulo} />
+
+          <button
+            type="submit"
+            class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          >
+            Guardar cambios
+          </button>
+        </form>
+      ) : (
+        <p class="text-base sm:text-lg text-[#010101] leading-relaxed">
+          {contenido}
+        </p>
+      )}
+
+      {admin && !modoEdicion && (
+        <form method="GET">
+          <input type="hidden" name="modoEdicion" value="true" />
+          <button
+            type="submit"
+            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          >
+            Editar contenido
+          </button>
+        </form>
+      )}
     </div>
   </div>
 
