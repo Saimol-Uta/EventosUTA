@@ -1,10 +1,10 @@
 ---
-import "../styles/ModalDetallesEvento.css";
+import "../../../styles/Admin/ModalDetallesEvento.css";
 ---
 
 <div id="modalDetallesReserva" class="modal">
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalDetalles()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalDetallesEvento()">&times;</span>
         <div class="detalles-reserva">
             <h2 id="evento-nombre">Nombre del Evento</h2>
 
@@ -12,8 +12,6 @@ import "../styles/ModalDetallesEvento.css";
                 <img
                     id="evento-imagen-detalle"
                     class="imagen-curso"
-                    src="https://i0.wp.com/niaxus.com/wp-content/uploads/2025/02/vrchyzq6javascript_1705438000.png"
-                    alt="imagen evento"
                 />
                 <div class="descripcion-completa-container">
                     <p class="descripcion-completa">
@@ -105,17 +103,17 @@ import "../styles/ModalDetallesEvento.css";
 <script>
     declare global {
         interface Window {
-            cerrarModalDetalles: () => void;
-            abrirModalDetalles: (evento: any) => void;
+            cerrarModalDetallesEvento: () => void;
+            abrirModalDetallesEvento: (evento: any) => void;
         }
     }
 
-    function cerrarModalDetalles() {
+    function cerrarModalDetallesEvento() {
         const modal = document.getElementById("modalDetallesReserva");
         if (modal) modal.style.display = "none";
     }
 
-    function abrirModalDetalles(evento: any) {
+    function abrirModalDetallesEvento(evento: any) {
         const modal = document.getElementById("modalDetallesReserva");
         if (!modal) return;
 
@@ -245,9 +243,9 @@ import "../styles/ModalDetallesEvento.css";
     window.onclick = function (event) {
         const modal = document.getElementById("modalDetallesReserva");
         if (event.target === modal) {
-            cerrarModalDetalles();
+            cerrarModalDetallesEvento();
         }
     }; // Exponer funciones globalmente
-    window.cerrarModalDetalles = cerrarModalDetalles;
-    window.abrirModalDetalles = abrirModalDetalles;
+    window.cerrarModalDetallesEvento = cerrarModalDetallesEvento;
+    window.abrirModalDetallesEvento = abrirModalDetallesEvento;
 </script>

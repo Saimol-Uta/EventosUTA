@@ -1,10 +1,10 @@
 ---
-import "../styles/ModalModificarEvento.css";
+import "../../../styles/Admin/ModalModificarEvento.css";
 ---
 
 <div id="modalModificarEvento" class="modal">
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModal()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalModificarEvento()">&times;</span>
         <div class="formulario-completo">
             <form
                 class="formulario-modificar-registro"
@@ -275,7 +275,7 @@ import "../styles/ModalModificarEvento.css";
                         <button
                             type="button"
                             class="boton-modificar"
-                            onclick="cerrarModal()">Cancelar</button
+                            onclick="cerrarModalModificarEvento()">Cancelar</button
                         >
                         <button type="submit" class="boton-modificar"
                             >Modificar Evento</button
@@ -340,8 +340,8 @@ import "../styles/ModalModificarEvento.css";
             }
             declare global {
                 interface Window {
-                    abrirModal: (eventoId: string) => void;
-                    cerrarModal: () => void;
+                    abrirModalModificarEvento: (eventoId: string) => void;
+                    cerrarModalModificarEvento: () => void;
                     abrirAsignacionesModal: (eventoId: string) => void;
                 }
             }
@@ -580,7 +580,7 @@ import "../styles/ModalModificarEvento.css";
                     window.abrirModalAsignaciones(eventoId, "Evento");
                 }
             }
-            async function abrirModal(eventoId: string): Promise<void> {
+            async function abrirModalModificarEvento(eventoId: string): Promise<void> {
                 const modal = document.getElementById("modalModificarEvento");
                 const form = document.getElementById(
                     "formulario-modificar-evento",
@@ -696,7 +696,7 @@ import "../styles/ModalModificarEvento.css";
                 modal.style.display = "block";
             }
 
-            function cerrarModal(): void {
+            function cerrarModalModificarEvento(): void {
                 const modal = document.getElementById("modalModificarEvento");
                 const form = document.getElementById(
                     "formulario-modificar-evento",
@@ -846,8 +846,8 @@ import "../styles/ModalModificarEvento.css";
                         }
                     });
                 } // Asignar funciones al objeto window
-                window.abrirModal = abrirModal;
-                window.cerrarModal = cerrarModal;
+                window.abrirModalModificarEvento = abrirModalModificarEvento;
+                window.cerrarModalModificarEvento = cerrarModalModificarEvento;
                 window.abrirAsignacionesModal = abrirAsignacionesModal;
 
                 // Event listeners para botones de asignaciones
