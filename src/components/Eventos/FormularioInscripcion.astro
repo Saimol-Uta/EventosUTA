@@ -275,11 +275,16 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
           class="submit-button"
           type="submit"
           id="btn-inscribirse"
-          disabled={!datosUsuarioCompletos}
         >
           Inscribirse
         </button>
       </div>
+
+      {/* Mensaje de error visual para validación de requisitos/pago */}
+      <div id="mensaje-error-validacion" style="display:none; margin-top:1rem; text-align:center;">
+        {/* El mensaje se inserta dinámicamente */}
+      </div>
+
     </div>
 
     <div class="vehicle-card" style="margin-top: 2rem;">
@@ -300,65 +305,75 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
 )}
 
 <script is:inline>
-  document.addEventListener("DOMContentLoaded", () => {
-    const checks = document.querySelectorAll('input[name="requisitosMarcados"]');
-    const btn = document.getElementById("btn-inscribirse");
-    const datosUsuarioCompletos = !!JSON.parse(document.getElementById("datos-usuario-completos").value);
-    const esPagado = !!JSON.parse(document.getElementById("es-pagado").value);
-
-    function actualizarBoton() {
-      // Validación de requisitos
-      if (checks.length === 0) {
-        btn.disabled = !datosUsuarioCompletos;
-      } else {
-        const todosMarcados = Array.from(checks).every(c => c.checked);
-        btn.disabled = !todosMarcados || !datosUsuarioCompletos;
-      }
-      // Validación de comprobante si es pagado
-      if (esPagado) {
-        const fileInput = document.getElementById("file-upload");
-        if (fileInput && !fileInput.files.length) {
-          btn.disabled = true;
-        }
-      }
+  function mostrarErrorValidacion(msg) {
+    const div = document.getElementById("mensaje-error-validacion");
+    if (div) {
+      div.style.display = "block";
+      div.innerHTML = `
+        <span style="
+          display:inline-block;
+          background:#fff0f0;
+          color:#c0392b;
+          border:1.5px solid #e74c3c;
+          border-radius:8px;
+          padding:0.8rem 1.2rem;
+          font-weight:bold;
+          font-size:1.1rem;
+          box-shadow:0 2px 8px #0001;
+        ">${msg}</span>
+      `;
     }
-
-    // Requisitos
-    checks.forEach((check) => {
-      check.addEventListener("change", actualizarBoton);
-    });
-    // Comprobante
-    const fileInput = document.getElementById("file-upload");
-    if (fileInput) {
-      fileInput.addEventListener("change", actualizarBoton);
+  }
+  function ocultarErrorValidacion() {
+    const div = document.getElementById("mensaje-error-validacion");
+    if (div) {
+      div.style.display = "none";
+      div.innerHTML = "";
     }
-    actualizarBoton();
-  });
+  }
 
   function validarRequisitosMarcados() {
     const checks = document.querySelectorAll('input[name="requisitosMarcados"]');
     const datosUsuarioCompletos = !!JSON.parse(document.getElementById("datos-usuario-completos").value);
     const esPagado = !!JSON.parse(document.getElementById("es-pagado").value);
+    ocultarErrorValidacion();
     if (!datosUsuarioCompletos) {
-      alert("Completa tus datos personales para inscribirte.");
+      mostrarErrorValidacion("Completa tus datos personales para inscribirte.");
       return false;
     }
     if (checks.length > 0) {
       const todosMarcados = Array.from(checks).every(c => c.checked);
       if (!todosMarcados) {
-        alert("Debes marcar todos los requisitos para inscribirte.");
+        mostrarErrorValidacion("Debes marcar todos los requisitos para inscribirte.");
         return false;
       }
     }
     if (esPagado) {
       const fileInput = document.getElementById("file-upload");
       if (!fileInput || !fileInput.files.length) {
-        alert("Debes subir el comprobante de pago.");
+        mostrarErrorValidacion("Debes subir el comprobante de pago.");
         return false;
       }
     }
+    ocultarErrorValidacion();
     return true;
   }
+
+  // Oculta el error si el usuario corrige la acción
+  document.addEventListener("DOMContentLoaded", () => {
+    const checks = document.querySelectorAll('input[name="requisitosMarcados"]');
+    const fileInput = document.getElementById("file-upload");
+    checks.forEach((check) => {
+      check.addEventListener("change", () => {
+        ocultarErrorValidacion();
+      });
+    });
+    if (fileInput) {
+      fileInput.addEventListener("change", () => {
+        ocultarErrorValidacion();
+      });
+    }
+  });
 
   function mostrarNombreArchivo(e) {
     const input = e.target;
@@ -366,7 +381,7 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
     if (input.files && input.files.length > 0) {
       p.textContent = input.files[0].name;
     } else {
-      p.textContent = "No se ha seleccionado ningún archivo";
+      p.textContent = "No se ha seleccionado ningún archivo JPEG, PNG";
     }
   }
 </script>
