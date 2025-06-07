@@ -1,5 +1,5 @@
 ---
-import "../styles/ModalModificarEvento.css";
+import "../../../styles/Admin/ModalModificarEvento.css";
 
 interface Props {
     categorias?: any[];
@@ -11,7 +11,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
 
 <div id="modalNuevoEvento" class="modal">
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalNuevo()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalNuevoEvento()">&times;</span>
         <div class="formulario-completo">
             <form
                 class="formulario-modificar-registro"
@@ -273,7 +273,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                         <button
                             type="button"
                             class="boton-modificar"
-                            onclick="cerrarModalNuevo()">Cancelar</button
+                            onclick="cerrarModalNuevoEvento()">Cancelar</button
                         >
                         <button type="submit" class="boton-modificar"
                             >Crear Evento</button
@@ -353,8 +353,8 @@ const { categorias = [], organizadores = [] } = Astro.props;
 
     declare global {
         interface Window {
-            abrirModalNuevo: () => void;
-            cerrarModalNuevo: () => void;
+            abrirModalNuevoEvento: () => void;
+            cerrarModalNuevoEvento: () => void;
         }
     }
 
@@ -447,7 +447,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
         }
     }
 
-    function abrirModalNuevo(): void {
+    function abrirModalNuevoEvento(): void {
         console.log("🎯 Abriendo modal nuevo evento...");
         const modal = document.getElementById("modalNuevoEvento");
         if (modal) {
@@ -458,7 +458,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
         }
     }
 
-    function cerrarModalNuevo(): void {
+    function cerrarModalNuevoEvento(): void {
         const modal = document.getElementById("modalNuevoEvento");
         const form = document.getElementById(
             "formulario-nuevo-evento",
@@ -612,7 +612,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
         }
 
         // Asignar funciones al objeto window
-        window.abrirModalNuevo = abrirModalNuevo;
-        window.cerrarModalNuevo = cerrarModalNuevo;
+        window.abrirModalNuevoEvento = abrirModalNuevoEvento;
+        window.cerrarModalNuevoEvento = cerrarModalNuevoEvento;
     });
 </script>

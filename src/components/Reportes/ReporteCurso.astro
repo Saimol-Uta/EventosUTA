@@ -1,0 +1,65 @@
+---
+interface Participante {
+  nombre: string;
+  cedula: string;
+  fecha: string;
+  asistencia: number;
+  nota: number | null;
+}
+
+const props = Astro.props as { participantes: Participante[] };
+const participantes = props.participantes;
+---
+
+<section>
+  <h2>Reporte de Participantes con Calificación</h2>
+  <button id="btn-descargar-reporte">Descargar PDF</button>
+
+  <table id="tablaCurso">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Cédula</th>
+        <th>Fecha de Inscripción</th>
+        <th>Asistencia (%)</th>
+        <th>Nota</th>
+      </tr>
+    </thead>
+    <tbody>
+      {participantes.map((p) => (
+        <tr>
+          <td>{p.nombre}</td>
+          <td>{p.cedula}</td>
+          <td>{p.fecha}</td>
+          <td>{p.asistencia}</td>
+          <td>{p.nota}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</section>
+
+<!-- Script para generar PDF -->
+<script type="module">
+  import jsPDF from 'jspdf';
+  import autoTable from 'jspdf-autotable';
+
+  document.getElementById('btn-descargar-reporte').addEventListener('click', () => {
+    const doc = new jsPDF();
+
+    doc.text("Reporte de Curso - Participantes", 14, 15);
+
+    autoTable(doc, {
+      html: '#tablaCurso',
+      startY: 20,
+      headStyles: {
+        fillColor: [176, 16, 37] // Rojo institucional
+      },
+      styles: {
+        fontSize: 10,
+      }
+    });
+
+    doc.save("reporte_curso.pdf");
+  });
+</script>

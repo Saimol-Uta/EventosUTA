@@ -3,12 +3,11 @@ import "../styles/ModalDetallesInscripcion.css";
 ---
 
 <div id="modalDetallesReserva" class="modal">
-    <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalDetallesInscripcion()"
-            >&times;</span
-        >
-        <div class="detalles-reserva">
-            <h2>Nombre del Evento</h2>
+
+  <div class="modal-contenido">
+    <span class="cerrar" onclick="cerrarModalDetallesInscripcion()">&times;</span>
+    <div class="detalles-reserva">
+      <h2>Nombre del Evento</h2>
 
             <div class="seccion-detalles">
                 <h3>Información del Usuario</h3>
@@ -81,49 +80,31 @@ import "../styles/ModalDetallesInscripcion.css";
             }
             let currentInscripcionId = "";
 
-            function cerrarModalDetallesInscripcion() {
-                const modal = document.getElementById("modalDetallesReserva");
-                if (modal) modal.style.display = "none";
-            }
+    <script>
+      declare global {
+        interface Window {
+          cerrarModalDetallesInscripcion: () => void;
+          abrirModalDetallesInscripcion: () => void;
+        }
+      }
 
-            function abrirModalDetallesInscripcion(inscripcionId: string) {
-                const modal = document.getElementById("modalDetallesReserva");
-                if (modal) modal.style.display = "block";
-                currentInscripcionId = inscripcionId;
-                window.currentInscripcionId = inscripcionId;
-            }
-            function aprobarInscripcionDocumentacion() {
-                if (window.aprobarInscripcion && window.currentInscripcionId) {
-                    window.aprobarInscripcion(
-                        window.currentInscripcionId,
-                        "documentacion",
-                    );
-                    cerrarModalDetallesInscripcion();
-                }
-            }
-            function rechazarInscripcionDocumentacion() {
-                if (window.rechazarInscripcion && window.currentInscripcionId) {
-                    window.rechazarInscripcion(
-                        window.currentInscripcionId,
-                        "documentacion",
-                    );
-                    cerrarModalDetallesInscripcion();
-                }
-            }
+      function cerrarModalDetallesInscripcion() {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (modal) modal.style.display = "none";
+      }
 
-            window.onclick = function (event) {
-                const modal = document.getElementById("modalDetallesReserva");
-                if (event.target === modal) cerrarModalDetallesInscripcion();
-            };
+      function abrirModalDetallesInscripcion() {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (modal) modal.style.display = "block";
+      }
 
-            window.cerrarModalDetallesInscripcion =
-                cerrarModalDetallesInscripcion;
-            window.abrirModalDetallesInscripcion =
-                abrirModalDetallesInscripcion;
-            window.aprobarInscripcionDocumentacion =
-                aprobarInscripcionDocumentacion;
-            window.rechazarInscripcionDocumentacion =
-                rechazarInscripcionDocumentacion;
-        </script>
-    </div>
+      window.onclick = function (event) {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (event.target === modal) cerrarModalDetallesInscripcion();
+      };
+
+      window.cerrarModalDetallesInscripcion = cerrarModalDetallesInscripcion;
+      window.abrirModalDetallesInscripcion = abrirModalDetallesInscripcion;
+    </script>
+  </div>
 </div>
