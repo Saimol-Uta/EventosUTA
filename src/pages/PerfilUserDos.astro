@@ -1,148 +1,170 @@
 ---
+import Header from "../components/Header.astro";
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+
+let cedulaIngresada = "";
+let mostrarFormulario = false;
+
+const method = Astro.request.method;
+
+if (method === "POST") {
+  const formData = await Astro.request.formData();
+  cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
+  mostrarFormulario = !!cedulaIngresada;
+}
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Completar Registro</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: 'Segoe UI', sans-serif;
-        background-color: #f9fafb;
-      }
+<Layout>
+  <Header />
+  <Navbar />
+  <div class="container">
+    {mostrarFormulario ? (
+      <>
+        <h1>¡Bienvenido Manuel Ramirez!</h1>
+        <p class="subtitulo">Completa tus datos:</p>
 
-      .container {
-        max-width: 960px;
-        margin: 4rem auto;
-        background-color: white;
-        padding: 2rem 3rem;
-        border-radius: 12px;
-        box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
-      }
+        <form>
+          <div class="section-title">Información Personal</div>
 
-      h1 {
-        font-size: 28px;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 0.25rem;
-      }
+          <div>
+            <label for="cedula">Cédula*</label>
+            <input id="cedula" name="cedula" required value={cedulaIngresada} />
+          </div>
 
-      p.subtitulo {
-        font-size: 16px;
-        color: #4b5563;
-        margin-bottom: 2rem;
-      }
+          <div>
+            <label for="nombre1">Primer nombre*</label>
+            <input id="nombre1" name="nombre1" required />
+          </div>
 
-      .section-title {
-        font-weight: 600;
-        color: #1f2937;
-        font-size: 18px;
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-        grid-column: 1 / -1;
-      }
+          <div>
+            <label for="nombre2">Segundo nombre</label>
+            <input id="nombre2" name="nombre2" />
+          </div>
 
-      form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem 2rem;
-      }
+          <div>
+            <label for="apellido1">Primer apellido*</label>
+            <input id="apellido1" name="apellido1" required />
+          </div>
 
-      label {
-        display: block;
-        font-weight: 500;
-        margin-bottom: 6px;
-        color: #111827;
-      }
+          <div>
+            <label for="apellido2">Segundo apellido</label>
+            <input id="apellido2" name="apellido2" />
+          </div>
 
-      input,
-      select {
-        width: 100%;
-        padding: 12px;
-        font-size: 15px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        outline: none;
-      }
+          <div>
+            <label for="fecha-nacimiento">Fecha de nacimiento*</label>
+            <input id="fecha-nacimiento" name="fecha-nacimiento" type="date" required />
+          </div>
 
-      input:focus,
-      select:focus {
-        border-color: #fbbf24;
-        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
-      }
+          <div>
+            <label for="telefono">Teléfono*</label>
+            <input id="telefono" name="telefono" required />
+          </div>
 
-      .submit-button {
-        grid-column: 1 / -1;
-        background-color: #fbbf24;
-        color: white;
-        font-size: 16px;
-        padding: 14px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: background-color 0.2s ease-in-out;
-      }
+          <div>
+            <label for="carrera">Carrera*</label>
+            <input id="carrera" name="carrera" required />
+          </div>
 
-      .submit-button:hover {
-        background-color: #f59e0b;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>¡Bienvenido Manuel Ramirez!</h1>
-      <p class="subtitulo">
-        Para personalizar tu experiencia, completa tus datos:
-      </p>
-
-      <form>
-        <div class="section-title">Información Personal</div>
-
+          <button type="submit" class="submit-button">Completar Registro</button>
+        </form>
+      </>
+    ) : (
+      <form method="POST">
+        <h1>Validar identidad</h1>
+        <p class="subtitulo">Ingresa tu número de cédula para continuar.</p>
         <div>
-          <label for="cedula">Cédula*</label>
-          <input id="cedula" name="cedula" required />
+          <label for="ced_usu">Cédula*</label>
+          <input id="ced_usu" name="ced_usu" required maxlength="10" />
         </div>
-
-        <div>
-          <label for="nombre1">Primer nombre*</label>
-          <input id="nombre1" name="nombre1" required />
-        </div>
-
-        <div>
-          <label for="nombre2">Segundo nombre</label>
-          <input id="nombre2" name="nombre2" />
-        </div>
-
-        <div>
-          <label for="apellido1">Primer apellido*</label>
-          <input id="apellido1" name="apellido1" required />
-        </div>
-
-        <div>
-          <label for="apellido2">Segundo apellido</label>
-          <input id="apellido2" name="apellido2" />
-        </div>
-
-        <div>
-          <label for="fecha-nacimiento">Fecha de nacimiento*</label>
-          <input id="fecha-nacimiento" name="fecha-nacimiento" type="date" required />
-        </div>
-
-        <div>
-          <label for="telefono">Teléfono*</label>
-          <input id="telefono" name="telefono" required />
-        </div>
-
-        <div>
-          <label for="carrera">Carrera*</label>
-          <input id="carrera" name="carrera" required />
-        </div>
-
-        <button type="submit" class="submit-button">Completar Registro</button>
+        <button type="submit" class="submit-button">Continuar</button>
       </form>
-    </div>
-  </body>
-</html>
+    )}
+  </div>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9fafb;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 4rem auto;
+      background-color: white;
+      padding: 2rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitulo {
+      font-size: 16px;
+      color: #4b5563;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 18px;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      grid-column: 1 / -1;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem 2rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #111827;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #991b1b;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+    }
+
+    .submit-button {
+      grid-column: 1 ;
+      background-color: #991b1b;
+      color: white;
+      font-size: 16px;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .submit-button:hover {
+      background-color: #7f1d1d;
+    }
+  </style>
+</Layout>
