@@ -14,7 +14,7 @@
       }
 
       .container {
-        max-width: 1000px;
+        max-width: 960px;
         margin: 4rem auto;
         background-color: white;
         padding: 2rem 3rem;
@@ -41,12 +41,13 @@
         font-size: 18px;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
+        grid-column: 1 / -1;
       }
 
       form {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem 2rem;
       }
 
       label {
@@ -59,7 +60,7 @@
       input,
       select {
         width: 100%;
-        padding: 10px;
+        padding: 12px;
         font-size: 15px;
         border: 1px solid #d1d5db;
         border-radius: 8px;
@@ -72,26 +73,17 @@
         box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
       }
 
-      .radio-group {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-      }
-
-      .full-width {
-        grid-column: 1 / -1;
-      }
-
       .submit-button {
         grid-column: 1 / -1;
         background-color: #fbbf24;
         color: white;
         font-size: 16px;
-        padding: 12px;
+        padding: 14px;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
         font-weight: 600;
+        transition: background-color 0.2s ease-in-out;
       }
 
       .submit-button:hover {
@@ -107,52 +99,37 @@
       </p>
 
       <form>
-        <div class="full-width section-title">Información Personal</div>
+        <div class="section-title">Información Personal</div>
 
         <div>
-          <label for="nombre">Nombre*</label>
-          <input id="nombre" name="nombre" required />
+          <label for="cedula">Cédula*</label>
+          <input id="cedula" name="cedula" required />
         </div>
 
         <div>
-          <label for="apellido">Apellido*</label>
-          <input id="apellido" name="apellido" required />
+          <label for="nombre1">Primer nombre*</label>
+          <input id="nombre1" name="nombre1" required />
         </div>
 
         <div>
-          <label for="tipo-documento">Tipo de Documento*</label>
-          <select id="tipo-documento" name="tipo-documento">
-            <option value="">Seleccione</option>
-            <option value="cedula">Cédula</option>
-            <option value="pasaporte">Pasaporte</option>
-          </select>
+          <label for="nombre2">Segundo nombre</label>
+          <input id="nombre2" name="nombre2" />
         </div>
 
         <div>
-          <label for="numero-documento">Número de Documento*</label>
-          <input id="numero-documento" name="numero-documento" required />
+          <label for="apellido1">Primer apellido*</label>
+          <input id="apellido1" name="apellido1" required />
         </div>
 
         <div>
-          <label for="fecha-nacimiento">Fecha de Nacimiento*</label>
+          <label for="apellido2">Segundo apellido</label>
+          <input id="apellido2" name="apellido2" />
+        </div>
+
+        <div>
+          <label for="fecha-nacimiento">Fecha de nacimiento*</label>
           <input id="fecha-nacimiento" name="fecha-nacimiento" type="date" required />
         </div>
-
-        <div>
-          <label for="nacionalidad">Nacionalidad*</label>
-          <input id="nacionalidad" name="nacionalidad" required />
-        </div>
-
-        <div class="full-width">
-          <label>Sexo*</label>
-          <div class="radio-group">
-            <label><input type="radio" name="sexo" value="masculino" /> Masculino</label>
-            <label><input type="radio" name="sexo" value="femenino" /> Femenino</label>
-            <label><input type="radio" name="sexo" value="otro" /> Otro</label>
-          </div>
-        </div>
-
-        <div class="full-width section-title">Datos de Contacto</div>
 
         <div>
           <label for="telefono">Teléfono*</label>
@@ -160,17 +137,8 @@
         </div>
 
         <div>
-          <label for="direccion">Dirección de Contacto*</label>
-          <input id="direccion" name="direccion" required />
-        </div>
-
-        <div class="full-width">
-          <label for="preferencia-contacto">Preferencia de Contacto*</label>
-          <select id="preferencia-contacto" name="preferencia-contacto">
-            <option value="email">Email</option>
-            <option value="telefono">Teléfono</option>
-            <option value="whatsapp">WhatsApp</option>
-          </select>
+          <label for="carrera">Carrera*</label>
+          <input id="carrera" name="carrera" required />
         </div>
 
         <button type="submit" class="submit-button">Completar Registro</button>
