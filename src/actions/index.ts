@@ -8,7 +8,12 @@ import { setUser } from './Users/setUsers.action';
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+
+import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
+import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
+
 import { getInscripcionesPendientes } from './Admin';
+
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -45,6 +50,17 @@ export const server = {
     getAsignacionesPlantilla,
     duplicarAsignacionAEvento,
     vincularAsignacionAEvento,
-    crearAsignacionesPrueba
 
+    crearAsignacionesPrueba,
+
+    // Nuevas acciones para CRUD de carreras
+    crearCarrera,
+    modificarCarrera,
+    eliminarCarrera,
+    getAllCarreras,
+    getCarreraById,    // Nuevas acciones para Inscripciones
+    getEventosINS,
+    getByIdInscripcion,
+    updateParticipante,
+    updateEstadoInscripcion
 };
