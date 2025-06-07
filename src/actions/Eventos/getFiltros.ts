@@ -13,7 +13,7 @@ export const getEventosFiltrados = defineAction({
     handler: async ({ categoria, duracion }) => {
         try {
             const condiciones: any[] = [];
-            console.log('Obteniendo eventos filtrados con categoría:', categoria, 'y duración:', duracion);
+
 
             // ✅ Filtro por categoría (ID de categoría del evento)
             if (categoria) {
@@ -52,13 +52,12 @@ export const getEventosFiltrados = defineAction({
                 },
             });
 
-            console.log('Eventos filtrados obtenidos:', eventos);
+
             return {
                 success: true,
                 eventos,
             };
         } catch (error) {
-            console.error('Error al obtener eventos filtrados:', error);
             return {
                 success: false,
                 error: 'Error al obtener eventos filtrados',

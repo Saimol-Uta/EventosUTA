@@ -107,9 +107,9 @@ const { evento, requisitos, organizador } = data;
         >
         <ul style="margin: 0; padding-left: 1.5rem;">
             {
-                evento.asignaciones.map((asignacion) => (
-                    <li>{asignacion.nom_asi}</li>
-                ))
+               evento.eventos_asignaciones.map((ea) => (
+    <li>{ea.asignaciones.nom_asi}</li>
+))
             }
         </ul>
     </div>
@@ -135,7 +135,7 @@ const { evento, requisitos, organizador } = data;
 
     <div class="text-center mb-8">
         <a
-            href={`/Eventos/Evento-Inscipcion/${slug}`}
+            href={`/Eventos/Evento-Inscripcion/${slug}`}
             class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
         >
             Registrarme en el curso

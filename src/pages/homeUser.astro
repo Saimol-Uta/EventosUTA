@@ -8,71 +8,116 @@ import Button from "../components/Button.astro";
 import DocumentButton from "../components/DocumentButton.astro";
 import Card from "../components/Card.astro";
 import { actions } from "astro:actions";
-import type { CustomUser } from "../../auth.config";
-import { effect } from "astro:schema";
 import { getSession } from "auth-astro/server";
+
 const session = await getSession(Astro.request);
 
+// Obtener datos de cuenta del usuario
 const { data: cuenta } = await Astro.callAction(
-    actions.getCuentaById,
-    session?.user?.id || "",
+  actions.getCuentaById,
+  session?.user?.id || ""
 );
 
-console.log(cuenta);
 
-const result = await Astro.callAction(actions.getEventosPorUsuario, {
-    idUsuario: session?.user?.id || "",
+let eventosUsuario = [];
+if (cuenta?.id_usu_per && typeof cuenta.id_usu_per === "string") {
+  const result = await Astro.callAction(actions.getEventosPorUsuario, {
+    idUsuario: String(cuenta.id_usu_per),
+  });
+  eventosUsuario = result?.data?.eventos ?? [];
+} else {
+  eventosUsuario = [];
+}
+
+const { data: resultEventos } = await Astro.callAction(actions.getEventosPorUsuario, {
+  idUsuario: session?.user?.id || "",
 });
 
-const upcomingEvents = ["Evento 1", "Evento 2"]; // o cambia según tu modelo
-const certificates = ["Certificado A", "Certificado B"]; // si tienes una tabla real, cámbiala
+// Obtener eventos próximos
+const { data: resultProximos } = await Astro.callAction(actions.getEventosProximos, {});
+
+
+// Certificados del usuario
+const { data: resultCertificados } = await Astro.callAction(actions.getCertificadosPorUsuario, {
+  idUsuario: session?.user?.id || "",
+});
+
+
+const upcomingEvents = resultProximos?.eventos || [];
+const certificates = resultCertificados?.enlaces || [];
 ---
 
 <html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-    </head>
-    <body>
-        <Header />
-        <NavBar />
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <Header />
+    <NavBar />
 
-        <div class="flex flex-col md:flex-row gap-6 p-6">
-            <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
-                <Avatar
-                    defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
-                    size="w-50 h-50"
-                />
-                <p class="text-red-800 font-semibold text-lg">
-                    {session?.user?.name || "Usuario Anónimo"}
-                </p>
-                <Button text="Editar Perfil" />
-                <div class="text-center mt-4 text-red-800">Documentos</div>
-                <div class="flex gap-2 mt-2">
-                    <DocumentButton
-                        label="Cédula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ced_cue}
-                        fieldName="enl_ced_cue"
-                        size="w-24 h-24"
-                    />
+    <div class="flex flex-col md:flex-row gap-6 p-6">
+      <!-- Perfil del Usuario -->
+      <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
+        <Avatar
+          defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
+          size="w-50 h-50"
+        />
+        <p class="text-red-800 font-semibold text-lg">
+          {session?.user?.name || "Usuario Anónimo"}
+        </p>
+        <Button text="Editar Perfil" />
+        <div class="text-center mt-4 text-red-800">Documentos</div>
+        <div class="flex gap-2 mt-2">
+          <DocumentButton
+            label="Cédula"
+            cuentaId={session?.user?.id}
+            currentImage={cuenta?.enl_ced_cue}
+            fieldName="enl_ced_cue"
+            size="w-24 h-24"
+          />
+          <DocumentButton
+            label="Matrícula"
+            cuentaId={session?.user?.id}
+            currentImage={cuenta?.enl_mat_cue}
+            fieldName="enl_mat_cue"
+            size="w-24 h-24"
+          />
+          <DocumentButton
+            label="Extensión"
+            cuentaId={session?.user?.id}
+            currentImage={cuenta?.enl_ext_cue}
+            fieldName="enl_ext_cue"
+            size="w-24 h-24"
+          />
+        </div>
+      </div>
 
-                    <DocumentButton
-                        label="Matrícula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_mat_cue}
-                        fieldName="enl_mat_cue"
-                        size="w-24 h-24"
-                    />
-
-                    <DocumentButton
-                        label="Extensión"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ext_cue}
-                        fieldName="enl_ext_cue"
-                        size="w-24 h-24"
-                    />
-                </div>
+      <!-- Contenido principal -->
+      <div class="w-full md:w-3/4 flex flex-col gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+          <!-- Eventos Próximos -->
+          <Card title="Eventos Próximos">
+            <div class="flex flex-col gap-y-4">
+              {
+                upcomingEvents.slice(0, 4).map((evento) => (
+                  <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
+                    <strong>{evento.nom_eve}</strong><br />
+                    <span class="text-sm text-gray-600">
+                      Inicio: {new Date(evento.fec_ini_eve).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))
+              }
+              {
+                upcomingEvents.length > 4 && (
+                  <a href="/eventos" class="text-red-800 underline text-sm mt-2">
+                    Ver más...
+                  </a>
+                )
+              }
             </div>
+          </Card>
+
 
             <div class="w-full md:w-3/4 flex flex-col gap-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
@@ -128,8 +173,35 @@ const certificates = ["Certificado A", "Certificado B"]; // si tienes una tabla 
                 <h1 class="text-xl font-semibold mt-8 text-red-800">
                     Historial de Eventos
                 </h1>
-                <EventoUsuario eventos={result.data?.eventos} />
+                <div class="flex flex-col gap-6">
+                  {(Array.isArray(eventosUsuario) && eventosUsuario.length > 0) ? (
+                    eventosUsuario.map((evento) => (
+                      <div class="bg-white border rounded-xl shadow-md p-4">
+                        <div class="font-bold text-lg text-gray-800">{evento?.nombre || evento?.nom_eve || "Sin nombre"}</div>
+                        {/* Puedes mostrar más datos del evento aquí si quieres */}
+                        <div class="text-gray-600 text-sm mt-1">
+                          Fecha: {evento?.fecha || evento?.fec_ini_eve || "Sin fecha"}
+                        </div>
+                        <div class="text-gray-600 text-sm">
+                          Estado: {evento?.estado || evento?.estado_inscripcion || "Inscrito"}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div class="text-gray-500">No tienes eventos registrados.</div>
+                  )}
+                </div>
+
             </div>
+          </Card>
         </div>
-    </body>
+
+        <!-- Historial de Eventos -->
+        <h1 class="text-xl font-semibold mt-8 text-red-800">
+          Historial de Eventos
+        </h1>
+        <EventoUsuario eventos={resultEventos?.eventos} />
+      </div>
+    </div>
+  </body>
 </html>
