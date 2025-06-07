@@ -52,12 +52,15 @@ export const GenerarCertificado = defineAction({
         calificacion,
       });
 
-      return new Response(pdf, {
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="certificado-${nombreEvento}.pdf"`,
+      const pdfBase64 = Buffer.from(pdf).toString('base64');
+
+      return {
+        success: true,
+        data: {
+          pdfBase64,
+          fileName: `certificado-${nombreEvento}.pdf`,
         },
-      });
+      };
 
     } catch (error: any) {
       console.error('Error al generar certificado:', error);
