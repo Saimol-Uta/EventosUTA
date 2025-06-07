@@ -5,9 +5,15 @@ import { createCambio } from './Cambios';
 import { getUseById } from './auth';
 import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
+import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
+import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
+
+import { getInscripcionesPendientes } from './Admin';
+
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -20,6 +26,11 @@ export const server = {
     uploadImageUser,
     getCuentaById,
     uploadDocumentImage,
+
+    getCertificadosPorUsuario,
+    getEventosProximos,
+    getInscripcionesPendientes,
+
     getOrganizadorByEvento,
     getOrganizadores,
     getCategoriaById,
@@ -39,6 +50,7 @@ export const server = {
     getAsignacionesPlantilla,
     duplicarAsignacionAEvento,
     vincularAsignacionAEvento,
+
     crearAsignacionesPrueba,
 
     // Nuevas acciones para CRUD de carreras
