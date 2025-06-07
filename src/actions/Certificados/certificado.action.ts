@@ -11,9 +11,9 @@ export const GenerarCertificado = defineAction({
 
   handler: async (input, context) => {
     const session = await getSession(context.request);
-    const userId = session?.user?.id;
+    const accountId = session?.user?.id;
 
-    if (!userId) {
+    if (!accountId) {
       return {
         success: false,
         error: { message: 'Usuario no autenticado.' },
@@ -21,6 +21,24 @@ export const GenerarCertificado = defineAction({
     }
 
     try {
+      const cuentaConUsuario = await prisma.cuentas.findUnique({
+        where: {
+          id_cue: accountId,
+        },
+        include: {
+          usuarios: true,
+        },
+      });
+
+      if (!cuentaConUsuario || !cuentaConUsuario.usuarios) {
+        return {
+          success: false,
+          error: { message: 'No se encontró un perfil de usuario para esta cuenta.' },
+        };
+      }
+
+      const userId = cuentaConUsuario.usuarios.id_usu;
+
       const inscripcion = await prisma.inscripciones.findFirst({
         where: {
           id_usu_ins: userId,
