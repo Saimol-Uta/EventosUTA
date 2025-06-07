@@ -41,53 +41,14 @@ if (Astro.request.method === "POST") {
   const formData = await Astro.request.formData();
   const idUsuario = formData.get("idUsuario") ?? "";
   const idEvento = formData.get("idEvento") ?? "";
-  let metodoPago = formData.get("metodoPago") ?? "";
-  let enlaceComprobante: string | undefined = undefined;
-
-  // Procesamiento para cursos pagados
-  if (esPagado) {
-    // Normaliza el método de pago a los valores válidos de la base de datos
-    if (typeof metodoPago === "string") {
-      const metodo = metodoPago.trim().toUpperCase();
-      if (["TRANSFERENCIA", "DEPOSITO", "ONLINE"].includes(metodo)) {
-        metodoPago = metodo;
-      } else if (metodo === "EFECTIVO") {
-        metodoPago = "DEPOSITO";
-      } else {
-        metodoPago = "TRANSFERENCIA";
-      }
-    }
-
-    // Procesa el comprobante si existe
-    const comprobante = formData.get("comprobante");
-    if (
-      comprobante &&
-      typeof comprobante === "object" &&
-      "name" in comprobante &&
-      typeof comprobante.name === "string" &&
-      comprobante.name.length > 0
-    ) {
-      enlaceComprobante = `https://banco.com/comprobante/${comprobante.name}`;
-    }
-  }
+  const metodoPago = formData.get("metodoPago") ?? "";
 
   try {
-    // Define el tipo correcto para los parámetros según la action
-    const params: {
-      idUsuario: string;
-      idEvento: string;
-      metodoPago?: string;
-      enlaceComprobante?: string;
-    } = {
+    const params = {
       idUsuario: typeof idUsuario === "string" ? idUsuario : String(idUsuario),
       idEvento: typeof idEvento === "string" ? idEvento : String(idEvento),
+      metodoPago: typeof metodoPago === "string" ? metodoPago : String(metodoPago),
     };
-    if (esPagado) {
-      params.metodoPago = typeof metodoPago === "string" ? metodoPago : String(metodoPago);
-      if (enlaceComprobante) {
-        params.enlaceComprobante = enlaceComprobante;
-      }
-    }
     const { data, error } = await Astro.callAction(actions.setDatosInscripcion, params);
     inscripcionResult = data;
     inscripcionError = error;

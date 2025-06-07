@@ -7,6 +7,7 @@ import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
 import { getDatosInscripcion } from './Eventos';
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -20,5 +21,6 @@ export const server = {
     getCuentaById,
     uploadDocumentImage,
     getDatosInscripcion,
+    setDatosInscripcion,
 
 };

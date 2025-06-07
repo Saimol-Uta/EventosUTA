@@ -18,7 +18,7 @@ const { data: cuenta } = await Astro.callAction(
     session?.user?.id || "",
 );
 
-console.log(cuenta);
+//console.log(cuenta);
 
 const result = await Astro.callAction(actions.getEventosPorUsuario, {
     idUsuario: session?.user?.id || "",

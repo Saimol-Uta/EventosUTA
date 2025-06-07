@@ -12,12 +12,13 @@ const initialColor = hasImage ? "bg-green-600" : "bg-red-800";
 const initialLabel = hasImage ? "✓ Imagen" : label;
 
 // ✅ Debug props
-console.log(`🔍 DocumentButton Debug (${label}):`, {
+/*console.log(`🔍 DocumentButton Debug (${label}):`, {
     cuentaId,
     currentImage,
     fieldName,
     hasImage,
 });
+*/
 ---
 
 <!-- ✅ Cambio: Usar un único contenedor con todos los datos -->
@@ -71,23 +72,26 @@ console.log(`🔍 DocumentButton Debug (${label}):`, {
 
         // Obtener el contenedor padre
         const container = target.closest("[data-cuenta-id]") as HTMLElement;
-        if (!container) {
+        /*if (!container) {
             console.error("❌ No se encontró el contenedor padre");
             return;
         }
+            */
+        
 
         // Obtener datos del contenedor
         const cuentaId = container.getAttribute("data-cuenta-id");
         const fieldName = container.getAttribute("data-field-name");
         const currentImage = container.getAttribute("data-current-image");
 
-        console.log("🔍 Datos obtenidos del contenedor:", {
+    /* console.log("🔍 Datos obtenidos del contenedor:", {
             cuentaId,
             fieldName,
             currentImage,
             fileName: file.name,
             fileSize: file.size,
         });
+        */
 
         // Validar datos
         if (!cuentaId || !fieldName) {
@@ -149,12 +153,12 @@ console.log(`🔍 DocumentButton Debug (${label}):`, {
             formData.append("imagen", file);
             formData.append("fieldName", fieldName);
 
-            console.log("📤 Enviando a uploadDocumentImage...");
+            //console.log("📤 Enviando a uploadDocumentImage...");
 
             // Llamar a la action
             const result = await actions.uploadDocumentImage(formData);
 
-            console.log("📥 Respuesta recibida:", result);
+           // console.log("📥 Respuesta recibida:", result);
 
             if (result.data?.success) {
                 updateButtonState(
@@ -189,7 +193,7 @@ console.log(`🔍 DocumentButton Debug (${label}):`, {
                 );
             }
         } catch (error) {
-            console.error("❌ Error al subir imagen:", error);
+           // console.error("❌ Error al subir imagen:", error);
             updateButtonState(uploadContainer, uploadLabel, false, "Error");
             showToast(
                 container,

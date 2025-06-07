@@ -10,14 +10,16 @@ const { slug } = Astro.params;
 if (!slug) {
   return Astro.redirect("/404");
 }
-const idEvento = slug;
+const idEvento = Array.isArray(slug) ? slug[0] : slug; // Asegura que idEvento sea string
 
 // 2. Obtener sesión del usuario
 const session = await getSession(Astro.request);
 if (!session?.user) {
   return Astro.redirect("/login");
 }
+// Si 'cuentas' no existe en el tipo 'User', solo usa el id del usuario de la sesión
 const idUsuario = session.user.id;
+
 if (!idUsuario) {
   throw new Error("El usuario no tiene un ID válido.");
 }
@@ -46,17 +48,18 @@ const campoArchivo = "Suba su documento";
 ---
 
 <Layout>
-  <FormularioInscripcion2
-    campoTitle={evento.nom_eve}
-    campoTexto1={campoTexto1}
-    campoTexto2={campoTexto2}
-    campoTexto3={campoTexto3}
-    campoTexto4={campoTexto4}
-    campoTexto5={campoTexto5}
-    campoArchivo={campoArchivo}
-    usuario={usuario}
-    evento={evento}
-    requisitos={requisitos}
-  />
+ <FormularioInscripcion2
+  campoTitle={evento.nom_eve}
+  campoTexto1={campoTexto1}
+  campoTexto2={campoTexto2}
+  campoTexto3={campoTexto3}
+  campoTexto4={campoTexto4}
+  campoTexto5={campoTexto5}
+  campoArchivo={campoArchivo}
+  usuario={usuario}
+  evento={evento}
+  requisitos={requisitos}
+  inscripcion={inscripcion}
+/>
 </Layout>
 

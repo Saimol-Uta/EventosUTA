@@ -1,5 +1,6 @@
 ---
 import "../../styles/Inscripcion.css";
+
 interface CampoProps {
   usuario: any;
   evento: any;
@@ -8,20 +9,20 @@ interface CampoProps {
 
 const { usuario, evento, requisitos } = Astro.props as CampoProps;
 
-// Determinar si faltan datos del usuario o requisitos
 const requisitosCompletos = Array.isArray(requisitos) && requisitos.length > 0;
 const datosUsuarioCompletos =
   usuario?.nom_usu1 && usuario?.ape_usu1 && usuario?.ced_usu;
 const puedeInscribirse = requisitosCompletos && datosUsuarioCompletos;
+const esPagado = Number(evento?.precio ?? 0) > 0;
 ---
 
-<div class="container">
-  <div class="form-card">
-    <h2>Inscripción</h2>
+<div class="container" style="max-width: 1200px; margin: 0 auto; font-size: 1.05rem;">
+  <!-- Formulario de inscripción -->
+  <div class="form-card" style="padding: 2rem;">
+    <h2 style="font-size: 1.6rem;">Inscripción</h2>
     <p>{new Date().toLocaleDateString("es-EC")}</p>
 
-    <h3>Datos del Usuario</h3>
-
+    <h3 style="font-size: 1.3rem;">Datos del Usuario</h3>
     <div class="form-group">
       <label>Correo electrónico</label>
       <input type="email" value={usuario?.cuentas?.[0]?.cor_cue ?? ""} readonly />
@@ -57,7 +58,7 @@ const puedeInscribirse = requisitosCompletos && datosUsuarioCompletos;
       <input type="tel" value={usuario?.num_tel_usu ?? ""} readonly />
     </div>
 
-    <h3>Requisitos</h3>
+    <h3 style="font-size: 1.3rem;">Requisitos</h3>
     <div class="requisitos-container">
       {requisitosCompletos ? (
         requisitos.map((req, index) => (
@@ -65,14 +66,8 @@ const puedeInscribirse = requisitosCompletos && datosUsuarioCompletos;
             <div class="requisito-info">
               <span class="requisito-texto">{req.nom_req}</span>
               <div class="requisito-estado">
-                <input
-                  type="checkbox"
-                  id={`req-${index}`}
-                  class="requisito-checkbox"
-                  checked={false}
-                  readonly
-                />
-                <label for={`req-${index}`} class="custom-checkbox"></label>
+                <input type="checkbox" class="requisito-checkbox" readonly />
+                <label class="custom-checkbox"></label>
               </div>
             </div>
           </div>
@@ -82,15 +77,58 @@ const puedeInscribirse = requisitosCompletos && datosUsuarioCompletos;
       )}
     </div>
 
-    <div class="form-row">
+    <!-- Proceso de pago debajo de requisitos -->
+    {esPagado && (
+      <div class="form-card" style="margin-top: 2rem;">
+        <h2 style="font-size: 1.4rem;">Proceso de Pago</h2>
+        <div class="form-group">
+          <label for="metodoPago">Forma de pago</label>
+          <select id="metodoPago" name="metodo_pago">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia Bancaria</option>
+          </select>
+        </div>
+
+        <div id="formEfectivo" class="formulario-pago">
+          <h4>Pago en Secretaría</h4>
+          <p><strong>Lugar:</strong> Secretaría de la FISEI</p>
+        </div>
+
+        <div id="formTransferencia" class="formulario-pago">
+          <h4>Transferencia Bancaria</h4>
+          <p><strong>Banco:</strong> Banco Pichincha</p>
+          <p><strong>Cuenta:</strong> Corriente #2206674884</p>
+        </div>
+
+        <div class="contenedor-file">
+          <label for="file-upload" class="custom-file-upload">
+            <img src="/img/CRUD/upload.png" alt="Subir" class="upload-icon" />
+            <span>Subir comprobante</span>
+          </label>
+          <input id="file-upload" type="file" class="input-file" />
+          <p class="file-name">No se ha seleccionado ningún archivo</p>
+        </div>
+
+        <div class="form-row">
+          <button class="submit-button" type="button">Finalizar Pago</button>
+        </div>
+      </div>
+    )}
+
+    <div class="form-row" style="margin-top: 2rem;">
       <button class="submit-button" type="button" onclick="history.back()">Cancelar</button>
-      <button class="submit-button" type="submit" disabled={!puedeInscribirse}>
+      <button
+        class="submit-button"
+        type="submit"
+        disabled={esPagado || !puedeInscribirse}
+      >
         Inscribirse
       </button>
     </div>
   </div>
 
-  <div class="vehicle-card">
+  <!-- Información del evento (al final) -->
+  <div class="vehicle-card" style="margin-top: 2rem;">
     <h3>{evento?.nom_eve ?? "Evento no disponible"}</h3>
     <img
       src={evento?.img_eve ?? "/img/placeholder.jpg"}
@@ -105,3 +143,36 @@ const puedeInscribirse = requisitosCompletos && datosUsuarioCompletos;
     <p><strong>Duración:</strong> {evento?.dur_eve ?? 0} horas</p>
   </div>
 </div>
+
+<script type="module" is:inline>
+  document.addEventListener("DOMContentLoaded", () => {
+    const metodoPago = document.getElementById("metodoPago");
+    const efectivo = document.getElementById("formEfectivo");
+    const transferencia = document.getElementById("formTransferencia");
+
+    function toggleForm() {
+      efectivo?.classList.remove("active");
+      transferencia?.classList.remove("active");
+      if (metodoPago?.value === "efectivo") {
+        efectivo?.classList.add("active");
+      } else {
+        transferencia?.classList.add("active");
+      }
+    }
+
+    metodoPago?.addEventListener("change", toggleForm);
+    toggleForm();
+
+    const fileInput = document.getElementById("file-upload");
+    const fileNameDisplay = document.querySelector(".file-name");
+
+    fileInput?.addEventListener("change", function (e) {
+      const target = e.target;
+      if (target instanceof HTMLInputElement && target.files?.length) {
+        fileNameDisplay.textContent = target.files[0].name;
+      } else {
+        fileNameDisplay.textContent = "No se ha seleccionado ningún archivo";
+      }
+    });
+  });
+</script>

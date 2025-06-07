@@ -4,7 +4,9 @@ export * from './getFiltros';
 export * from './setCursos';
 export * from './getDatosInscripcion.action';
 
+
 export { getEventosFiltrados } from './getFiltros';
 export { getEventosPorUsuario } from './getEventosPorUsuario';
 export { getDatosInscripcion } from './getDatosInscripcion.action';
+export { setDatosInscripcion } from './setDatosInscripcion';
 
