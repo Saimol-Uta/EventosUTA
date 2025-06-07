@@ -1,0 +1,295 @@
+---
+import Header from "@components/Header.astro";
+import NavBar from "../../components/Navbar.astro";
+import MenuAdmin from "../../components/MenuAdministrador.astro";
+import Layout from "../../layouts/Layout.astro";
+import ModalDetallesInscripcion from "../../components/ModalDetallesInscripcion.astro";
+import ModalDetallesPago from "../../components/ModalDetallesPago.astro";
+import "../../styles/AprobacionesInscripciones.css";
+import { actions } from "astro:actions";
+
+const { eventoId } = Astro.params;
+
+const { data: inscripcion, error } = await Astro.callAction(
+    actions.getByIdInscripcion,
+    {
+        id: eventoId || "default-event-id",
+    },
+);
+
+if (error) {
+    console.error("Error al obtener inscripciones:", error);
+}
+
+const inscripciones = inscripcion?.inscripciones || [];
+console.log("Inscripciones obtenidas:", inscripciones.length);
+
+// Función para formatear fecha
+function formatearFecha(fecha: string) {
+    if (!fecha) return "Sin fecha";
+    return new Date(fecha).toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    });
+}
+
+// Función para obtener el estado en español
+function getEstadoTexto(estado: string) {
+    switch (estado) {
+        case "Aprobado":
+            return "Aprobado";
+        case "DPendiente":
+            return "Documentación Pendiente";
+        case "FPendiente":
+            return "Facturación Pendiente";
+        default:
+            return estado;
+    }
+}
+
+const links = [
+    { label: "Eventos", href: "EventosCRUD" },
+    { label: "Usuarios", href: "/perfil" },
+    { label: "Organizadores", href: "/historial" },
+    { label: "Inscripciones", href: "AprobacionInscripciones" },
+    { label: "Categorías", href: "/historial" },
+    { label: "Carreras", href: "/historial" },
+];
+---
+
+<Layout>
+    <body>
+        <Header />
+        <MenuAdmin links={links} />
+        <ModalDetallesInscripcion />
+        <ModalDetallesPago />
+
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        Inscripciones - {
+                            inscripciones.length > 0
+                                ? inscripciones[0].eventos?.nom_eve
+                                : "Evento"
+                        }
+                        <span class="total-inscripciones"
+                            >({inscripciones.length} inscripciones)</span
+                        >
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <select
+                            name="filtros"
+                            id="filtros"
+                            class="select-estado"
+                        >
+                            <option value="">Todos los estados</option>
+                            <option value="Aprobado">Aprobados</option>
+                            <option value="DPendiente"
+                                >Documentación Pendiente</option
+                            >
+                            <option value="FPendiente"
+                                >Facturación Pendiente</option
+                            >
+                        </select>
+                    </div>
+                </div>
+
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombres
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Apellidos
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Fecha
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Estado
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>
+                <div class="registros-inferior">
+                    {
+                        inscripciones.length > 0 ? (
+                            inscripciones.map((inscripcion: any) => (
+                                <div
+                                    class="registro-fila"
+                                    data-estado={inscripcion.est_ins}
+                                >
+                                    <div class="parte-izquierda-registro-fila">
+                                        {inscripcion.usuarios?.nom_usu1}{" "}
+                                        {inscripcion.usuarios?.nom_usu2 || ""}
+                                    </div>
+                                    <div class="parte-izquierda-registro-fila">
+                                        {inscripcion.usuarios?.ape_usu1}{" "}
+                                        {inscripcion.usuarios?.ape_usu2}
+                                    </div>
+                                    <div class="parte-izquierda-registro-fila">
+                                        {formatearFecha(inscripcion.fec_ins)}
+                                    </div>
+                                    <div class="parte-izquierda-registro-fila">
+                                        <span
+                                            class={`estado-badge ${inscripcion.est_ins.toLowerCase()}`}
+                                        >
+                                            {getEstadoTexto(
+                                                inscripcion.est_ins,
+                                            )}
+                                        </span>
+                                    </div>{" "}
+                                    <div class="registro-opciones">
+                                        <button
+                                            onclick={`window.abrirModalDetallesInscripcion('${inscripcion.id_ins}')`}
+                                            title="Verificar Documentación"
+                                        >
+                                            <img
+                                                class="imagen-boton-registro"
+                                                src="/img/documento.svg"
+                                                alt="documento"
+                                            />
+                                        </button>
+
+                                        <button
+                                            onclick={`window.abrirModalPagoInscripcion('${inscripcion.id_ins}')`}
+                                            title="Verificar Facturación"
+                                        >
+                                            <img
+                                                class="imagen-boton-modificar"
+                                                src="/img/factura.svg"
+                                                alt="factura"
+                                            />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div class="sin-inscripciones">
+                                <p>No hay inscripciones para este evento.</p>
+                            </div>
+                        )
+                    }
+                </div>
+            </div>
+        </main>
+    </body>
+</Layout>
+
+<style>
+    .total-inscripciones {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: normal;
+    }
+
+    .estado-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .estado-badge.aprobado {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .estado-badge.dpendiente {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .estado-badge.fpendiente {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .sin-inscripciones {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    .registro-fila[data-estado="hidden"] {
+        display: none;
+    }
+
+    .select-estado {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+    }
+
+    .select-estado:focus {
+        outline: none;
+        border-color: #ad272e;
+        box-shadow: 0 0 0 2px rgba(173, 39, 46, 0.1);
+    }
+</style>
+
+<script>
+    // Función para filtrar inscripciones por estado
+    document.addEventListener("DOMContentLoaded", function () {
+        const filtroSelect = document.getElementById(
+            "filtros",
+        ) as HTMLSelectElement;
+        const filas = document.querySelectorAll(".registro-fila[data-estado]");
+
+        if (filtroSelect) {
+            filtroSelect.addEventListener("change", function () {
+                const filtroValor = this.value;
+
+                filas.forEach((fila) => {
+                    const filaElement = fila as HTMLElement;
+                    if (
+                        !filtroValor ||
+                        filaElement.dataset.estado === filtroValor
+                    ) {
+                        filaElement.style.display = "";
+                    } else {
+                        filaElement.style.display = "none";
+                    }
+                });
+            });
+        }
+    });
+
+    // Funciones para modales con parámetros de inscripción
+    function abrirModalDetallesInscripcion(inscripcionId: string) {
+        console.log(
+            "Abriendo modal de detalles para inscripción:",
+            inscripcionId,
+        );
+        // Aquí puedes implementar la lógica para abrir el modal con los detalles
+        // Por ejemplo, cargar los datos de la inscripción y mostrar el modal
+        if (window.abrirModalDetalles) {
+            window.abrirModalDetalles({ id_ins: inscripcionId });
+        }
+    }
+
+    function abrirModalPagoInscripcion(inscripcionId: string) {
+        console.log("Abriendo modal de pago para inscripción:", inscripcionId);
+        // Aquí puedes implementar la lógica para abrir el modal de pago
+        // Por ejemplo, cargar los datos de pago y mostrar el modal
+        if (window.abrirModalPago) {
+            window.abrirModalPago();
+        }
+    }
+
+    // Hacer las funciones disponibles globalmente
+    (window as any).abrirModalDetallesInscripcion =
+        abrirModalDetallesInscripcion;
+    (window as any).abrirModalPagoInscripcion = abrirModalPagoInscripcion;
+</script>
