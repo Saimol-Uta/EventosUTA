@@ -6,6 +6,7 @@ import { getUseById } from './auth';
 import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -37,5 +38,12 @@ export const server = {
     getAsignacionesPlantilla,
     duplicarAsignacionAEvento,
     vincularAsignacionAEvento,
-    crearAsignacionesPrueba
+    crearAsignacionesPrueba,
+
+    // Nuevas acciones para CRUD de carreras
+    crearCarrera,
+    modificarCarrera,
+    eliminarCarrera,
+    getAllCarreras,
+    getCarreraById
 };
