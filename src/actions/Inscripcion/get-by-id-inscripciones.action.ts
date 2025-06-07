@@ -20,10 +20,14 @@ export const getByIdInscripcion = defineAction({
                             nom_usu1: true,
                             nom_usu2: true,
                             ape_usu1: true,
-                            ape_usu2: true,
-                            ced_usu: true,
+                            ape_usu2: true, ced_usu: true,
                             fec_nac_usu: true,
                             num_tel_usu: true,
+                            cuentas: {
+                                select: {
+                                    cor_cue: true
+                                }
+                            },
                             carreras: {
                                 select: {
                                     nom_car: true,

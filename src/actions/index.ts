@@ -7,7 +7,7 @@ import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
-import { getByIdInscripcion, getEventosINS, updateParticipante } from './Inscripcion';
+import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -49,5 +49,6 @@ export const server = {
     getCarreraById,    // Nuevas acciones para Inscripciones
     getEventosINS,
     getByIdInscripcion,
-    updateParticipante
+    updateParticipante,
+    updateEstadoInscripcion
 };
