@@ -1,31 +1,87 @@
 ---
 const { userName, userImage } = Astro.props;
+
+const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
 ---
 
 <div class="relative inline-block text-left">
-  <details class="group">
-    <summary class="flex items-center gap-3 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow cursor-pointer hover:bg-gray-50 transition">
-      <img src={userImage} alt="Usuario" class="w-10 h-10 rounded-full object-cover" />
+    <details class="group">
+        <summary
+            class="flex items-center gap-3 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow cursor-pointer hover:bg-gray-50 transition"
+        >
+            <img
+                src={userImage}
+                alt="Usuario"
+                class="w-10 h-10 rounded-full object-cover"
+            />
 
-      <span class="text-gray-800 font-medium">{userName}</span>
+            <span class="text-gray-800 font-medium">{userName}</span>
 
-      <svg class="w-5 h-5 text-gray-600 group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" stroke-width="2"
-        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </summary>
+            <svg
+                class="w-5 h-5 text-gray-600 group-open:rotate-90 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </summary>
 
-    <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-      <a href="/perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver perfil</a>
-      <a href="/eventos" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ver eventos</a>
-      <a href="/Eventos/historial" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Historial</a>
-      <a href="/" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100" id="logout-link">Cerrar sesión</a>
-    </div>
-  </details>
+        <div
+            class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+        >
+            <a
+                href="/"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >Inicio</a
+            >
+
+            {
+                (isAdmin && (
+                    <a
+                        href="/homeAdmin"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                        Ver perfil
+                    </a>
+                )) || (
+                    <a
+                        href="/homeUser"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                        Ver perfil
+                    </a>
+                )
+            }
+
+            <a
+                href="/cursosCompleto"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >Ver eventos</a
+            >
+            <a
+                href="/User/historial"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >Historial</a
+            >
+            <a
+                href="/"
+                class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                id="logout-link">Cerrar sesión</a
+            >
+        </div>
+    </details>
 </div>
 <script>
- const { signOut } = await import("auth-astro/client");
-    const logoutElem = document.querySelector("#logout-link") as HTMLAnchorElement;
+    const { signOut } = await import("auth-astro/client");
+    const logoutElem = document.querySelector(
+        "#logout-link",
+    ) as HTMLAnchorElement;
     let isLoggingOut = false; // Variable para prevenir múltiples clicks
 
     logoutElem?.addEventListener("click", async (e) => {

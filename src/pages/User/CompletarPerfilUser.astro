@@ -1,10 +1,10 @@
 ---
-import InformacionUsuario from "../components/InformacionUsuario.astro";
-import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
-import Navbar from "../components/Navbar.astro";
+import InformacionUsuario from "@components/InformacionUsuario.astro";
+import Layout from "@layouts/Layout.astro";
+import Header from "@components/Header.astro";
+import Navbar from "@components/Navbar.astro";
 import { actions } from "astro:actions";
-import type { Usuario } from "../actions/Users/getUserByCedula.action";
+import type { Usuario } from "../../actions/Users/getUserByCedula.action";
 
 type SafeResult<T> = {
     success: boolean;
