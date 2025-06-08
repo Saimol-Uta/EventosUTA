@@ -8,55 +8,39 @@ import Card from "../components/Card.astro";
 import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
 
-
 const session = await getSession(Astro.request);
 
-
 const { data: cuenta } = await Astro.callAction(
-    actions.getCuentaById,
-    session?.user?.id || "",
+  actions.getCuentaById,
+  session?.user?.id || ""
 );
 
-if (cuenta?.usuarios.ced_usu === null) {
-    return Astro.redirect("/User/CompletarPerfilUser");
+if (!cuenta?.usuarios?.ced_usu) {
+  return Astro.redirect("/User/CompletarPerfilUser");
 }
+
+const idUsuario = cuenta?.id_usu_per;
 
 let eventosUsuario = [];
-if (cuenta?.id_usu_per && typeof cuenta.id_usu_per === "string") {
-    const result = await Astro.callAction(actions.getEventosPorUsuario, {
-        idUsuario: String(cuenta.id_usu_per),
-    });
-    eventosUsuario = result?.data?.eventos ?? [];
-} else {
-    eventosUsuario = [];
+let upcomingEvents = [];
+let certificates = [];
+
+if (idUsuario && typeof idUsuario === "string") {
+  const { data: eventosData } = await Astro.callAction(actions.getEventosPorUsuario, {
+    idUsuario,
+  });
+  eventosUsuario = eventosData?.eventos ?? [];
+
+  const { data: resultCertificados } = await Astro.callAction(actions.getCertificadosPorUsuario, {
+    idUsuario,
+  });
+  certificates = resultCertificados?.enlaces ?? [];
 }
 
-const { data: resultEventos } = await Astro.callAction(
-    actions.getEventosPorUsuario,
-    {
-        idUsuario: session?.user?.id || "",
-    },
-);
-
-// Obtener eventos próximos
-const { data: resultProximos } = await Astro.callAction(
-    actions.getEventosProximos,
-    {},
-);
-
-// Certificados del usuario
-const { data: resultCertificados } = await Astro.callAction(
-    actions.getCertificadosPorUsuario,
-    {
-        idUsuario: session?.user?.id || "",
-    },
-);
-
-console.log("¿Hay certificados?", resultCertificados?.enlaces);
-
-const upcomingEvents = resultProximos?.eventos || [];
-const certificates = resultCertificados?.enlaces || [];
+const { data: resultProximos } = await Astro.callAction(actions.getEventosProximos, {});
+upcomingEvents = resultProximos?.eventos ?? [];
 ---
+
 
 <html lang="es">
     <head>
