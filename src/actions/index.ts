@@ -13,7 +13,6 @@ import { GenerarCertificado } from './Certificados/certificado.action';
 
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
-import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
 
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
