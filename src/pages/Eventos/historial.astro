@@ -7,10 +7,19 @@ import { getSession } from "auth-astro/server";
 import prisma from "../../db";
 import type { Decimal } from "@prisma/client/runtime/library";
 
+type TarjetaEventoProps = {
+  nombre: string;
+  fecha: string;
+  calificacion: string;
+  asistencia: number;
+  estado: string;
+  certificadoDisponible: boolean;
+};
+
 const session = await getSession(Astro.request);
 const userId = session?.user?.id;
 
-let eventosParaTarjeta = [];
+let eventosParaTarjeta: TarjetaEventoProps[] = [];
 
 if (userId) {
   const inscripciones = await prisma.inscripciones.findMany({
@@ -30,9 +39,7 @@ if (userId) {
   eventosParaTarjeta = inscripciones.map(inscripcion => {
     const asistenciaNum = inscripcion.asi_par ?? 0;
     const calificacionNum = (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
-
     const esCertificadoDisponible = asistenciaNum >= 70 && calificacionNum >= 7.0;
-
     const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
 
     return {
@@ -68,7 +75,6 @@ if (userId) {
             asistencia={evento.asistencia}
             estado={evento.estado}
             certificadoDisponible={evento.certificadoDisponible}
-            eventoId={evento.eventoId}
           />
         ))
       ) : (
