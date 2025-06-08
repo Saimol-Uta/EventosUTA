@@ -4,6 +4,8 @@ interface Props {
     titulo: string;
     valor: string;
     name: string;
+    tipo?: "text" | "select";
+    opciones?: { valor: string; texto: string }[];
   }[];
   cedula: string;
   mostrarBotones: boolean;
@@ -23,55 +25,39 @@ const {
 
 ---
 
-<h1>¡Bienvenido!</h1>
+<h1>Edicion de tu Informacion</h1>
 <p class="subtitulo">Completa tus datos:</p>
-
 <form method="POST">
   <input type="hidden" name="action" value="guardarInfo" />
-  
 
-  <div>
-    <label for="ced_usu">Cédula</label>
-    <input id="ced_usu" name="ced_usu" required value={cedula} />
-  </div>
+  {camposFormulario.map((campo) => (
+    <div>
+      <label for={campo.name}>{campo.titulo}</label>
 
-  <div>
-    <label for="nom_usu1">Primer nombre</label>
-    <input id="nom_usu1" name="nom_usu1" required />
-  </div>
-
-  <div>
-    <label for="nom_usu2">Segundo nombre</label>
-    <input id="nom_usu2" name="nom_usu2" />
-  </div>
-
-  <div>
-    <label for="ape_usu1">Primer apellido*</label>
-    <input id="ape_usu1" name="ape_usu1" required />
-  </div>
-
-  <div>
-    <label for="ape_usu2">Segundo apellido</label>
-    <input id="ape_usu2" name="ape_usu2" />
-  </div>
-
-  <div>
-    <label for="fec_nac_usu">Fecha de nacimiento*</label>
-    <input id="fec_nac_usu" name="fec_nac_usu" type="date" required />
-  </div>
-
-  <div>
-    <label for="num_tel_usu">Teléfono*</label>
-    <input id="num_tel_usu" name="num_tel_usu" required />
-  </div>
-
-  <div>
-    <label for="id_car_per">Carrera*</label>
-    <input id="id_car_per" name="id_car_per" required />
-  </div>
+      {campo.tipo === "select" ? (
+        <select id={campo.name} name={campo.name} required>
+          <option value="">Seleccione una opción</option>
+          {campo.opciones?.map((op) => (
+            <option value={op.valor} selected={campo.valor === op.valor}>
+              {op.texto}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          id={campo.name}
+          name={campo.name}
+          value={campo.valor}
+          required={campo.name !== "nom_usu2" && campo.name !== "ape_usu2"}
+          type={campo.name === "fec_nac_usu" ? "date" : "text"}
+        />
+      )}
+    </div>
+  ))}
 
   <button type="submit" class="submit-button">Completar Registro</button>
 </form>
+
 
 
 <style>

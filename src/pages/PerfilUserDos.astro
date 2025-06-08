@@ -70,6 +70,10 @@ if (method === "POST") {
 // Simula obtener datos del usuario actual (como se hace en CompletarPerfilUser)
 const resultadoUsuario = await Astro.callAction(actions.getUserByCedula, { ced_usu: user?.ci_pas });
 usuario = resultadoUsuario?.data?.usuario ?? null;
+// Obtener carreras desde la base de datos
+const resultadoCarreras = await Astro.callAction(actions.getCarreras, {});
+const listaCarreras = resultadoCarreras?.data?.carreras ?? [];
+
 
 const camposFormulario = [
   { titulo: "Cédula", valor: usuario?.ced_usu ?? "", name: "ced_usu" },
@@ -79,7 +83,8 @@ const camposFormulario = [
   { titulo: "Segundo apellido", valor: usuario?.ape_usu2 ?? "", name: "ape_usu2" },
   { titulo: "Fecha de nacimiento", valor: formatDate(usuario?.fec_nac_usu ?? null), name: "fec_nac_usu" },
   { titulo: "Teléfono", valor: usuario?.num_tel_usu ?? "", name: "num_tel_usu" },
-  { titulo: "Carrera", valor: usuario?.id_car_per ?? "", name: "id_car_per" },
+{ titulo: "Carrera", valor: usuario?.id_car_per ?? "", name: "id_car_per" },
+
 ];
 
 const textoGuardarInfo = "Guardar Información";
