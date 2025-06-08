@@ -118,4 +118,59 @@ if (accountId) {
       padding: 3rem;
     }
   </style>
+    <script>
+    import { actions } from "astro:actions";
+
+    // Función para descargar el PDF
+    function descargarPdf(base64: string, fileName: string) {
+      const byteCharacters = atob(base64);
+      const byteArrays = [];
+      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+      const blob = new Blob(byteArrays, { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    document.querySelectorAll('.js-generate-cert').forEach(button => {
+      button.addEventListener('click', async (event) => {
+        const targetButton = event.currentTarget as HTMLButtonElement;
+        
+        const eventoId = targetButton.dataset.eventoid;
+
+        if (!eventoId) return;
+
+        targetButton.disabled = true;
+        targetButton.textContent = "Generando...";
+
+        try {
+          const result = await actions.GenerarCertificado({ eventoId });
+
+          if (result.data?.success && result.data?.data?.pdfBase64) {
+            descargarPdf(result.data.data.pdfBase64, result.data.data.fileName);
+          } else {
+            const errorMessage = result.error?.message || result.data?.error?.message || 'Ocurrió un error.';
+            alert(`Error al generar el certificado: ${errorMessage}`);
+          }
+        } catch (error) {
+            console.error(error);
+            alert('Error inesperado al contactar con el servidor.');
+        } finally {
+            targetButton.disabled = false;
+            targetButton.textContent = "Generar Certificado";
+        }
+      });
+    });
+  </script>
 </Layout>
