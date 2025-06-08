@@ -8,22 +8,28 @@ datasource db {
 }
 
 model asignaciones {
-  id_asi     String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_asi    String       @db.VarChar(100)
-  des_asi    String       @db.VarChar(500)
-  id_eve_per String       @db.Uuid
-  eventos    eventos      @relation(fields: [id_eve_per], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
-  requisitos requisitos[]
+  id_asi               String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_asi              String                 @db.VarChar(100)
+  des_asi              String                 @db.VarChar(500)
+  id_car_asi           String?                @db.Uuid
+  es_publico_general   Boolean?               @default(false)
+  es_gratuito          Boolean?               @default(false)
+  requiere_validacion  Boolean?               @default(false)
+  carreras             carreras?              @relation(fields: [id_car_asi], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
+  eventos_asignaciones eventos_asignaciones[]
+  requisitos           requisitos[]
 
-  @@index([id_eve_per], map: "idx_asignaciones_evento")
+  @@index([id_car_asi], map: "idx_asignaciones_carrera")
 }
 
 model carreras {
-  id_car      String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_car     String     @db.VarChar(100)
-  des_car     String     @db.VarChar(250)
-  nom_fac_per String     @db.VarChar(250)
-  usuarios    usuarios[]
+  id_car       String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_car      String         @db.VarChar(100)
+  des_car      String         @db.VarChar(250)
+  nom_fac_per  String         @db.VarChar(250)
+  cod_car      String?        @unique @db.VarChar(10)
+  asignaciones asignaciones[]
+  usuarios     usuarios[]
 }
 
 model categorias_eventos {
@@ -55,24 +61,26 @@ model cuentas {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model eventos {
-  id_eve              String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_eve             String                @db.VarChar(250)
-  des_eve             String                @db.VarChar(500)
-  id_cat_eve          String                @db.Uuid
-  fec_ini_eve         DateTime              @db.Date
-  fec_fin_eve         DateTime?             @db.Date
-  hor_ini_eve         DateTime              @db.Time(6)
-  hor_fin_eve         DateTime?             @db.Time(6)
-  dur_eve             Int?                  @db.SmallInt
-  are_eve             String?               @db.VarChar(50)
-  ubi_eve             String                @db.VarChar(150)
-  ced_org_eve         String                @db.VarChar(10)
-  img_eve             String?
-  asignaciones        asignaciones[]
-  organizadores       organizadores         @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
-  categorias_eventos  categorias_eventos    @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
-  inscripciones       inscripciones[]
-  inscripciones_nueva inscripciones_nueva[]
+  id_eve               String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_eve              String                 @db.VarChar(250)
+  des_eve              String                 @db.VarChar(500)
+  id_cat_eve           String                 @db.Uuid
+  fec_ini_eve          DateTime               @db.Date
+  fec_fin_eve          DateTime?              @db.Date
+  hor_ini_eve          DateTime               @db.Time(6)
+  hor_fin_eve          DateTime?              @db.Time(6)
+  dur_eve              Int?                   @db.SmallInt
+  are_eve              String?                @db.VarChar(50)
+  ubi_eve              String                 @db.VarChar(150)
+  ced_org_eve          String                 @db.VarChar(10)
+  img_eve              String?
+  precio               Decimal                @default(0.00) @db.Decimal(8, 2)
+  not_apr_eve          Decimal?               @default(7.0) @db.Decimal(4, 1)
+  tie_reg_asi          Boolean?               @default(true)
+  organizadores        organizadores          @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
+  categorias_eventos   categorias_eventos     @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
+  eventos_asignaciones eventos_asignaciones[]
+  inscripciones        inscripciones[]
 
   @@index([id_cat_eve], map: "idx_eventos_categoria")
   @@index([fec_ini_eve], map: "idx_eventos_fecha_ini")
@@ -80,16 +88,20 @@ model eventos {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model inscripciones {
-  id_ins          String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  fec_ins         DateTime          @default(now()) @db.Timestamptz(6)
-  val_ins         Decimal           @db.Decimal(8, 2)
-  met_pag_ins     String?           @db.VarChar(20)
+  id_ins          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fec_ins         DateTime  @default(now()) @db.Timestamptz(6)
+  met_pag_ins     String?   @db.VarChar(20)
   enl_ord_pag_ins String?
-  id_usu_ins      String            @db.Uuid
-  id_eve_ins      String            @db.Uuid
-  eventos         eventos           @relation(fields: [id_eve_ins], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
-  usuarios        usuarios          @relation(fields: [id_usu_ins], references: [id_usu], onDelete: NoAction, onUpdate: NoAction)
-  participaciones participaciones[]
+  id_usu_ins      String    @db.Uuid
+  id_eve_ins      String    @db.Uuid
+  est_par         String    @default("PENDIENTE") @db.VarChar(15)
+  asi_par         Int?      @db.SmallInt
+  not_par         Decimal?  @db.Decimal(4, 1)
+  enl_cer_par     String?
+  fec_cer_par     DateTime? @db.Date
+  est_ins         String    @default("DPendiente") @db.VarChar(12)
+  eventos         eventos   @relation(fields: [id_eve_ins], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
+  usuarios        usuarios  @relation(fields: [id_usu_ins], references: [id_usu], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([id_usu_ins, id_eve_ins], map: "uq_usuario_evento")
   @@index([id_eve_ins], map: "idx_inscripciones_evento")
@@ -114,42 +126,31 @@ model pagina_principal {
   vis_pag String?
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model participaciones {
-  id_par        String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  est_par       String        @default("PENDIENTE") @db.VarChar(15)
-  asi_par       Int?          @db.SmallInt
-  not_par       Decimal?      @db.Decimal(4, 1)
-  id_ins_per    String        @db.Uuid
-  enl_cer_par   String?
-  fec_cer_par   DateTime?     @db.Date
-  inscripciones inscripciones @relation(fields: [id_ins_per], references: [id_ins], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([id_ins_per], map: "idx_participaciones_inscripcion")
-}
-
 model requisitos {
   id_req       String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   nom_req      String       @db.VarChar(100)
   des_req      String       @db.VarChar(500)
   id_asi_per   String       @db.Uuid
+  obligatorio  Boolean?     @default(true)
+  tipo_req     String?      @default("DOCUMENTO") @db.VarChar(20)
   asignaciones asignaciones @relation(fields: [id_asi_per], references: [id_asi], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id_asi_per], map: "idx_requisitos_asignacion")
 }
 
 model usuarios {
-  id_usu              String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  ced_usu             String?               @unique @db.VarChar(20)
-  nom_usu1            String                @db.VarChar(20)
-  nom_usu2            String?               @db.VarChar(20)
-  ape_usu1            String                @db.VarChar(20)
-  ape_usu2            String?               @db.VarChar(20)
-  fec_nac_usu         DateTime              @db.Date
-  num_tel_usu         String?               @db.VarChar(20)
-  id_car_per          String?               @db.Uuid
-  cuentas             cuentas[]
-  inscripciones       inscripciones[]
-  inscripciones_nueva inscripciones_nueva[]
-  carreras            carreras?             @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
+  id_usu        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ced_usu       String?         @unique @db.VarChar(20)
+  nom_usu1      String          @db.VarChar(20)
+  nom_usu2      String?         @db.VarChar(20)
+  ape_usu1      String          @db.VarChar(20)
+  ape_usu2      String?         @db.VarChar(20)
+  fec_nac_usu   DateTime        @db.Date
+  num_tel_usu   String?         @db.VarChar(20)
+  id_car_per    String?         @db.Uuid
+  cuentas       cuentas[]
+  inscripciones inscripciones[]
+  carreras      carreras?       @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([ced_usu], map: "idx_usuarios_cedula")
 }
@@ -170,22 +171,12 @@ model cambios {
   cuentas     cuentas  @relation(fields: [id_cue_sol], references: [id_cue], onDelete: Cascade, onUpdate: NoAction)
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model inscripciones_nueva {
-  id_ins          String    @id @db.Uuid
-  fec_ins         DateTime  @db.Timestamptz(6)
-  val_ins         Decimal   @db.Decimal(6, 2)
-  met_pag_ins     String?   @db.VarChar(15)
-  enl_ord_pag_ins String?
-  id_usu_ins      String    @db.Uuid
-  id_eve_ins      String    @db.Uuid
-  est_par         String?   @default("PENDIENTE") @db.VarChar(10)
-  asi_par         Int?      @db.SmallInt
-  not_par         Decimal?  @db.Decimal(4, 1)
-  enl_cer         String?
-  fec_cer         DateTime? @db.Date
-  eventos         eventos   @relation(fields: [id_eve_ins], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
-  usuarios        usuarios  @relation(fields: [id_usu_ins], references: [id_usu], onDelete: NoAction, onUpdate: NoAction)
+model eventos_asignaciones {
+  id_eve_asi   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_eve       String       @db.Uuid
+  id_asi       String       @db.Uuid
+  asignaciones asignaciones @relation(fields: [id_asi], references: [id_asi], onDelete: Cascade, onUpdate: NoAction)
+  eventos      eventos      @relation(fields: [id_eve], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([id_usu_ins, id_eve_ins], map: "uq_usuario_evento_nuevo")
+  @@unique([id_eve, id_asi], map: "uk_eve_asi")
 }

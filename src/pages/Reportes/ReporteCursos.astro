@@ -1,0 +1,18 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getParticipantesPorEvento } from "../../actions/Reportes/getParticipantesPorEvento.ts";
+import ReporteCurso from "../../components/Reportes/ReporteCurso.astro";
+
+const eventoId = "ID_REAL_DEL_EVENTO_AQUI";
+
+const { data: participantes, error } = await Astro.callAction(getParticipantesPorEvento, eventoId);
+
+if (error) {
+  console.error("Error al obtener participantes:", error);
+}
+---
+
+
+<Layout>
+  <ReporteCurso participantes={participantes} />
+</Layout>

@@ -6,6 +6,7 @@ import { getUseById } from './auth';
 import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+import { getParticipantesPorEvento } from './Reportes/getParticipantesPorEvento';
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -17,5 +18,6 @@ export const server = {
     setUser,
     uploadImageUser,
     getCuentaById,
-    uploadDocumentImage
+    uploadDocumentImage,
+    getParticipantesPorEvento
 };
