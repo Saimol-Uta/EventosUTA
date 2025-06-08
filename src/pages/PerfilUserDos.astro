@@ -23,12 +23,21 @@ type ResultadoSetUser = {
 type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string };
 
 let usuario: UsuarioParcial | null = null;
-let cedulaIngresada = "";
-let mostrarFormulario = false;
-let mostrarError = false;
-let usuarioExistente = false;
 let mensajeGuardado: string | null = null;
+let mostrarError = false;
 
+const session = await getSession(Astro.request);
+const { isLoggedIn } = Astro.locals;
+const user = session?.user;
+
+if (!isLoggedIn || !user?.id || !user.ci_pas) {
+  return Astro.redirect("/login");
+}
+
+
+
+
+const id_usu = user.id;
 const method = Astro.request.method;
 
 function formatDate(date: string | Date | null): string {
@@ -37,131 +46,33 @@ function formatDate(date: string | Date | null): string {
   return d.toISOString().substring(0, 10);
 }
 
-function validarCedula(cedula: string): boolean {
-  if (!/^\d{10}$/.test(cedula)) return false;
-  const provincia = parseInt(cedula.substring(0, 2), 10);
-  if (provincia < 1 || provincia > 24) return false;
-  const digitos = cedula.split("").map(Number);
-  const digitoVerificador = digitos[9];
-  let suma = 0;
-  for (let i = 0; i < 9; i++) {
-    let val = digitos[i];
-    if (i % 2 === 0) {
-      val *= 2;
-      if (val > 9) val -= 9;
-    }
-    suma += val;
-  }
-  const decenaSuperior = Math.ceil(suma / 10) * 10;
-  const digitoCalculado = decenaSuperior - suma;
-  return digitoCalculado === 10
-    ? digitoVerificador === 0
-    : digitoVerificador === digitoCalculado;
-}
-
 if (method === "POST") {
   const formData = await Astro.request.formData();
   const accion = formData.get("action")?.toString();
 
-  switch (accion) {
-    case "guardarInfo":
-      if (formData.has("nom_usu1")) {
-        const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
-        const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
+  if (accion === "guardarInfo" && formData.has("nom_usu1")) {
+    formData.set("id_usu", id_usu); // Aseguramos que actualiza el usuario actual
 
-        if (resultadoGuardar.success) {
-          mostrarFormulario = true;
-          usuarioExistente = true;
-          mostrarError = false;
-          mensajeGuardado = resultadoGuardar.value?.created
-            ? "Se guardó con éxito."
-            : "Usuario actualizado correctamente.";
+    const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
+    const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
 
-          const fechaString = formData.get("fec_nac_usu")?.toString() ?? "";
-          const fecha = new Date(fechaString);
-          const fechaValida = !isNaN(fecha.getTime()) ? fecha : new Date("1900-01-01");
-
-          usuario = {
-            id_usu: formData.get("id_usu")?.toString() ?? "",
-            nom_usu1: formData.get("nom_usu1")?.toString() ?? "",
-            nom_usu2: formData.get("nom_usu2")?.toString() ?? "",
-            ape_usu1: formData.get("ape_usu1")?.toString() ?? "",
-            ape_usu2: formData.get("ape_usu2")?.toString() ?? "",
-            fec_nac_usu: fechaValida,
-            num_tel_usu: formData.get("num_tel_usu")?.toString() ?? "",
-            id_car_per: formData.get("id_car_per")?.toString() ?? "",
-            ced_usu: formData.get("ced_usu")?.toString() ?? "",
-          };
-
-          cedulaIngresada = usuario?.ced_usu ?? "";
-        } else {
-          mostrarError = true;
-          mostrarFormulario = true;
-          mensajeGuardado = resultadoGuardar.error || "No se pudo guardar. Intente de nuevo.";
-        }
-      }
-      break;
-
-    case "asociar":
-      if (formData.has("nom_usu1")) {
-        const { data, error } = await Astro.callAction(actions.setUser, formData);
-        const resultadoGuardar = data as ResultadoSetUser;
-
-        if (resultadoGuardar?.success) {
-          if (resultadoGuardar.requireReauth) {
-            Astro.cookies.delete("authjs.session-token", {
-              path: "/",
-              httpOnly: true,
-            });
-            return Astro.redirect("/login?message=perfil-actualizado");
-          } else {
-            return Astro.redirect("/");
-          }
-        } else {
-          mostrarError = true;
-          mostrarFormulario = true;
-          mensajeGuardado = resultadoGuardar?.error || "No se pudo guardar. Intente de nuevo.";
-        }
-      }
-      break;
-
-    case "cancelar":
-      cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-      mostrarFormulario = true;
-      mostrarError = false;
-      usuarioExistente = false;
-      usuario = null;
-      mensajeGuardado = null;
-      break;
-
-    case "masTarde":
-      return Astro.redirect("/homeUser");
-
-    default:
-      cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
-      if (!validarCedula(cedulaIngresada)) {
-        mostrarError = true;
-        mensajeGuardado = "Cédula inválida.";
-      } else {
-        mostrarFormulario = true;
-        const resultado = await Astro.callAction(actions.getUserByCedula, { ced_usu: cedulaIngresada });
-        const data = resultado.data;
-        if (data?.encontrado) {
-          usuarioExistente = true;
-          usuario = data.usuario ?? null;
-        } else {
-          usuarioExistente = false;
-          usuario = null;
-        }
-        mostrarError = false;
-        mensajeGuardado = null;
-      }
-      break;
+    if (resultadoGuardar.success) {
+      mensajeGuardado = resultadoGuardar.value?.created
+        ? "Se guardó con éxito."
+        : "Usuario actualizado correctamente.";
+    } else {
+      mostrarError = true;
+      mensajeGuardado = resultadoGuardar.error || "No se pudo guardar.";
+    }
   }
 }
 
+// Simula obtener datos del usuario actual (como se hace en CompletarPerfilUser)
+const resultadoUsuario = await Astro.callAction(actions.getUserByCedula, { ced_usu: user?.ci_pas });
+usuario = resultadoUsuario?.data?.usuario ?? null;
+
 const camposFormulario = [
-  { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
+  { titulo: "Cédula", valor: usuario?.ced_usu ?? "", name: "ced_usu" },
   { titulo: "Primer nombre", valor: usuario?.nom_usu1 ?? "", name: "nom_usu1" },
   { titulo: "Segundo nombre", valor: usuario?.nom_usu2 ?? "", name: "nom_usu2" },
   { titulo: "Primer apellido", valor: usuario?.ape_usu1 ?? "", name: "ape_usu1" },
@@ -170,12 +81,6 @@ const camposFormulario = [
   { titulo: "Teléfono", valor: usuario?.num_tel_usu ?? "", name: "num_tel_usu" },
   { titulo: "Carrera", valor: usuario?.id_car_per ?? "", name: "id_car_per" },
 ];
-
-const session = await getSession(Astro.request);
-const { isLoggedIn } = Astro.locals;
-
-if (!isLoggedIn) return Astro.redirect("/login");
-if (session?.user.ci_pas !== "null") return Astro.redirect("/");
 
 const textoGuardarInfo = "Guardar Información";
 const textoCancelar = "Cancelar";
@@ -193,10 +98,9 @@ const textoAsociar = "Asociar este usuario a la cuenta";
           {mensajeGuardado}
         </p>
       )}
-
       <FormularioRegistroUsuario
         camposFormulario={camposFormulario}
-        cedula={cedulaIngresada}
+        cedula={usuario?.ced_usu ?? ""}
         mostrarBotones={true}
         textoBotonGuardarInfo={textoGuardarInfo}
         textoBotonCancelar={textoCancelar}
