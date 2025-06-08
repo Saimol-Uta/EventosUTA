@@ -18,8 +18,7 @@ import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
-import { getInscripcionesPendientes } from './Admin';
-import { guardarContenido } from './Admin';
+import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Admin';
 
 export const server = {
     getEventos,
@@ -76,6 +75,8 @@ export const server = {
     updateParticipante,
     updateEstadoInscripcion,
 
-
+    //description
+    updatePaginaPrincipal,
+    getInfo
 };
 

@@ -1,17 +1,13 @@
 import { defineAction } from 'astro:actions';
-import { z } from 'astro:schema';
 import prisma from '../../db';
 
 export const getInfo = defineAction({
     accept: 'json',
-    input: z.object({
-        id: z.number()
-    }),
-    handler: async ({ id }) => {
+    handler: async () => {
         try {
             const info = await prisma.pagina_principal.findUnique({
                 where: {
-                    id_pag: id
+                    id_pag: 1 // Siempre será 1
                 }
             });
 

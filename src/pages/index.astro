@@ -9,6 +9,7 @@ import { getSession } from "auth-astro/server";
 import InformacionUsuario from "@/components/InformacionUsuario.astro";
 import ContenedorInfo from "@/components/ContenedorInfo.astro";
 import prisma from "@/db";
+import { actions } from "astro:actions";
 
 const session = await getSession(Astro.request);
 let esAdmin = false;
@@ -21,9 +22,7 @@ if (session && session.user) {
     }
 }
 
-const pagina = await prisma.pagina_principal.findUnique({
-    where: { id_pag: 1 },
-});
+const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 ---
 
 <Layout>
@@ -32,15 +31,15 @@ const pagina = await prisma.pagina_principal.findUnique({
     <InformacionFacultad
         tituloFacultad="Facultad de Ciencias de la Computación"
         tituloDescripcion="Descripción"
-        contenidoDescripcion={pagina?.des_pag ?? ""}
+        contenidoDescripcion={pagina?.data?.des_pag ?? ""}
         imagenDescripcion="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
         tituloMision="Misión"
-        contenidoMision={pagina?.mis_pag ?? ""}
+        contenidoMision={pagina?.data?.mis_pag ?? ""}
         imagenMision="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80"
         tituloVision="Visión"
-        contenidoVision={pagina?.vis_pag ?? ""}
+        contenidoVision={pagina?.data?.vis_pag ?? ""}
         imagenVision="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
         modoAdmin={esAdmin}
     />
     <Footer />
-</Layout>
+</Layout>; ---
