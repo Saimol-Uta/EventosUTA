@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
-import prisma from '../../db'; // Ajusta la ruta según tu proyecto
+import prisma from '../../db'; 
 
 export const getUser = defineAction({
   accept: 'json',  // o 'form' si usas formData

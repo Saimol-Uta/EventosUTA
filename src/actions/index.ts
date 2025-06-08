@@ -15,11 +15,11 @@ import { GenerarCertificado } from './Certificados/certificado.action';
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 
+
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
-import { getInscripcionesPendientes } from './Admin';
-
+import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Admin';
 
 export const server = {
     getEventos,
@@ -38,7 +38,6 @@ export const server = {
     setDatosInscripcion,
     uploadComprobante,
     GenerarCertificado,
-
 
     getCertificadosPorUsuario,
     getEventosProximos,
@@ -75,6 +74,10 @@ export const server = {
     getEventosINS,
     getByIdInscripcion,
     updateParticipante,
-    updateEstadoInscripcion
+    updateEstadoInscripcion,
 
+    //description
+    updatePaginaPrincipal,
+    getInfo
 };
+
