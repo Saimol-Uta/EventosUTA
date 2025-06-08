@@ -7,7 +7,7 @@ export const getEventosProximos = defineAction({
       const eventos = await prisma.eventos.findMany({
         where: {
           fec_ini_eve: {
-            gt: new Date(), // Fecha actual del servidor
+            gt: new Date(), 
           },
         },
         orderBy: {
