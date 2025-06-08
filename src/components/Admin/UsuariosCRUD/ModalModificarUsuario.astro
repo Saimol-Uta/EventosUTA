@@ -1,0 +1,394 @@
+---
+import "../../../styles/Admin/ModalModificarEvento.css";
+import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
+---
+
+<div id="modalModificarUsuario" class="modal">
+    <ModalGestionarCuenta />
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalModificarUsuario()">&times;</span>
+        <div class="formulario-completo">
+            <form
+                class="formulario-modificar-registro"
+                method="POST"
+                id="formulario-modificar-organizador"
+                enctype="multipart/form-data"
+            >
+                <input type="hidden" name="evento_id" />
+
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-roja">Información General</p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Cédula</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="usaurio-cedula"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Primer Nombre</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="usuario-nombre1"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Segundo Nombre</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="usuario-nombre2"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Primer Apellido</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="usuario-apellido1"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Segundo Apellido</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="usuario-apellido2"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Fecha de Nacimiento</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="date"
+                                class="input-dato"
+                                name="usuario-fecha-nacimiento"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Número de Teléfono</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="number"
+                                class="input-dato"
+                                name="numero-usuario"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Carrera</p>
+                        <div class="contenedor-input">
+                            <select>
+                                <option value="software">Software</option>
+                                <option value="ti">Tecnologías de la Información</option>
+                                <option value="industrial">Industrial</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contenedor-inferior">
+                    <p class="texto-centrado texto-roja">Cuentas Asociadas</p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Cuentas Actuales:</p>
+                        <div id="cuentas-actuales" class="asignaciones-display">
+                        <!-- Aquí se mostrará dinámicamente la lista de cuentas asociadas -->
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <div class="contenedor-botones-asignaciones">
+                            <button
+                            type="button"
+                            class="boton-asignacion btn-gestionar"
+                            onclick="abrirModalGestionarCuenta('correo@ejemplo.com', 'estudiante')"
+                            >
+                            🔧 Gestionar Cuenta
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-boton-modificar">
+                        <button
+                        type="button"
+                        class="boton-modificar"
+                        onclick="cerrarModalModificarUsuario()"
+                        >
+                        Cancelar
+                        </button>
+                        <button type="submit" class="boton-modificar">
+                        Modificar Usuario
+                        </button>
+                    </div>
+            </div>
+
+
+            </form>
+        </div>
+
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
+            interface Evento {
+                id_eve: string;
+                nom_eve: string;
+            }
+            declare global {
+                interface Window {
+                    abrirModalModificarUsuario: (eventoId: string) => void;
+                    cerrarModalModificarUsuario: () => void;
+                }
+            }
+            
+            async function abrirModalModificarUsuario(eventoId: string): Promise<void> {
+                const modal = document.getElementById("modalModificarUsuario");
+                const form = document.getElementById(
+                    "formulario-modificar-organizador",
+                ) as HTMLFormElement;
+
+                if (!modal || !form) return; // Cargar categorías y organizadores dinámicamente
+
+                // Obtener todos los eventos del DOM
+                const eventosInputs = document.querySelectorAll(
+                    'input[name="evento"]',
+                );
+                const eventos = Array.from(eventosInputs).map((input) =>
+                    JSON.parse((input as HTMLInputElement).value),
+                );
+
+                const evento = eventos.find(
+                    (e: Evento) => e.id_eve === eventoId,
+                );
+
+                if (!evento) return;
+
+                // Llenar el formulario con los datos del evento
+                const nombre = form.querySelector(
+                    'input[name="nombre"]',
+                ) as HTMLInputElement;
+                const descripcion = form.querySelector(
+                    'textarea[name="descripcion"]',
+                ) as HTMLTextAreaElement;
+                const categoria = form.querySelector(
+                    'select[name="categoria"]',
+                ) as HTMLSelectElement;
+                const area = form.querySelector(
+                    'select[name="area"]',
+                ) as HTMLSelectElement;
+                const precio = form.querySelector(
+                    'input[name="precio"]',
+                ) as HTMLInputElement;
+                const fechaInicio = form.querySelector(
+                    'input[name="fecha_inicio"]',
+                ) as HTMLInputElement;
+                const horaInicio = form.querySelector(
+                    'input[name="hora_inicio"]',
+                ) as HTMLInputElement;
+                const fechaFin = form.querySelector(
+                    'input[name="fecha_fin"]',
+                ) as HTMLInputElement;
+                const horaFin = form.querySelector(
+                    'input[name="hora_fin"]',
+                ) as HTMLInputElement;
+                const duracion = form.querySelector(
+                    'input[name="duracion"]',
+                ) as HTMLInputElement;
+                const ubicacion = form.querySelector(
+                    'input[name="ubicacion"]',
+                ) as HTMLInputElement;
+                const cedulaOrganizador = form.querySelector(
+                    'select[name="cedula_organizador"]',
+                ) as HTMLSelectElement;
+                const notaAprobacion = form.querySelector(
+                    'input[name="nota_aprobacion"]',
+                ) as HTMLInputElement;
+                const tiempoRegistro = form.querySelector(
+                    'select[name="tiempo_registro_asignacion"]',
+                ) as HTMLSelectElement;
+                const eventoIdInput = form.querySelector(
+                    'input[name="evento_id"]',
+                ) as HTMLInputElement;
+
+                // Asignar valores
+                if (nombre) nombre.value = evento.nom_eve;
+                if (descripcion) descripcion.value = evento.des_eve;
+                if (categoria) categoria.value = evento.id_cat_eve;
+                if (area) area.value = evento.are_eve || "";
+                if (precio) precio.value = evento.precio.toString();
+                if (fechaInicio)
+                    fechaInicio.value = new Date(evento.fec_ini_eve)
+                        .toISOString()
+                        .split("T")[0];
+                if (horaInicio) horaInicio.value = evento.hor_ini_eve;
+                if (fechaFin && evento.fec_fin_eve)
+                    fechaFin.value = new Date(evento.fec_fin_eve)
+                        .toISOString()
+                        .split("T")[0];
+                if (horaFin && evento.hor_fin_eve)
+                    horaFin.value = evento.hor_fin_eve;
+                if (duracion && evento.dur_eve)
+                    duracion.value = evento.dur_eve.toString();
+                if (ubicacion) ubicacion.value = evento.ubi_eve;
+                if (cedulaOrganizador)
+                    cedulaOrganizador.value = evento.ced_org_eve;
+                if (notaAprobacion)
+                    notaAprobacion.value = (
+                        evento.not_apr_eve || 7.0
+                    ).toString();
+                if (tiempoRegistro)
+                    tiempoRegistro.value = (
+                        evento.tie_reg_asi !== false
+                    ).toString();
+                if (eventoIdInput) eventoIdInput.value = evento.id_eve;
+
+                modal.style.display = "block";
+            }
+
+            function cerrarModalModificarUsuario(): void {
+                const modal = document.getElementById("modalModificarUsuario");
+                const form = document.getElementById(
+                    "formulario-modificar-organizador",
+                ) as HTMLFormElement;
+
+                if (modal && form) {
+                    modal.style.display = "none";
+                    form.reset();
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const form = document.getElementById(
+                    "formulario-modificar-organizador",
+                ) as HTMLFormElement;
+                const fileInput = document.getElementById(
+                    "file-upload-modificar",
+                ) as HTMLInputElement;
+                const fileNameDisplay = document.querySelector(
+                    ".file-name",
+                ) as HTMLElement;
+                const eventoImagen = document.getElementById(
+                    "evento-imagen",
+                ) as HTMLImageElement;
+
+                // Manejar envío del formulario
+                if (form) {
+                    form.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+
+                        const formData = new FormData(form);
+
+                        // Obtener valores y validar área
+                        const areaValue = formData.get("area") as string;
+                        const fechaFin = formData.get("fecha_fin") as string;
+                        const horaFin = formData.get("hora_fin") as string;
+                        const duracionStr = formData.get("duracion") as string;
+                        const notaAprobacionStr = formData.get(
+                            "nota_aprobacion",
+                        ) as string;
+                        const tiempoRegistroStr = formData.get(
+                            "tiempo_registro_asignacion",
+                        ) as string;
+
+                        // Limpiar campos vacíos
+                        if (!fechaFin || fechaFin.trim() === "") {
+                            formData.delete("fecha_fin");
+                        }
+                        if (!horaFin || horaFin.trim() === "") {
+                            formData.delete("hora_fin");
+                        }
+                        if (!duracionStr || duracionStr.trim() === "") {
+                            formData.delete("duracion");
+                        }
+                        if (
+                            !notaAprobacionStr ||
+                            notaAprobacionStr.trim() === ""
+                        ) {
+                            formData.set("nota_aprobacion", "7.0");
+                        }
+                        if (
+                            !tiempoRegistroStr ||
+                            tiempoRegistroStr.trim() === ""
+                        ) {
+                            formData.set("tiempo_registro_asignacion", "true");
+                        }
+
+                        // Verificar si hay imagen seleccionada
+                        const imagenFile = formData.get("imagen") as File;
+                        if (!imagenFile || imagenFile.size === 0) {
+                            formData.delete("imagen");
+                        }
+
+                        try {
+                            const { data, error } =
+                                await actions.modificarEvento(formData);
+
+                            if (data?.success) {
+                                await Swal.fire({
+                                    icon: "success",
+                                    title: "Éxito",
+                                    text: "Evento modificado correctamente.",
+                                    confirmButtonColor: "#059669",
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                await Swal.fire({
+                                    icon: "error",
+                                    title: "Error",
+                                    text:
+                                        error?.message ||
+                                        "No se pudo modificar el evento.",
+                                    confirmButtonColor: "#dc2626",
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Error:", error);
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "Error al procesar la solicitud",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        }
+                    });
+                } // Asignar funciones al objeto window
+                window.abrirModalModificarUsuario = abrirModalModificarUsuario;
+                window.cerrarModalModificarUsuario = cerrarModalModificarUsuario;
+
+            });
+        </script>
+    </div>
+</div>
