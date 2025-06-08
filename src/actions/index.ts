@@ -7,9 +7,10 @@ import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
 
 import { getDatosInscripcion } from './Eventos';
-import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
+import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
 import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
+import { GenerarCertificado } from './Certificados/certificado.action';
 
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
@@ -36,7 +37,7 @@ export const server = {
     getDatosInscripcion,
     setDatosInscripcion,
     uploadComprobante,
-
+    GenerarCertificado,
 
 
     getCertificadosPorUsuario,
