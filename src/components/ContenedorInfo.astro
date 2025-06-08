@@ -18,18 +18,25 @@ const {
       </h2>
 
       {modoEdicion ? (
-        <form method="POST" action="/api/guardar" class="space-y-4">
-          <input type="hidden" name="columna" value={columna} />
+        <>
+          <label for={`contenido-${columna}`} class="sr-only">Contenido</label>
           <textarea
-            name="contenido"
+            id={`contenido-${columna}`}
             class="w-full border border-gray-300 rounded p-2 text-[#010101]"
             rows="6"
-            required
           >{contenido}</textarea>
-          <button type="submit" class="mt-4 bg-[#650000] text-white py-2 px-4 rounded hover:bg-[#850000]">
+
+          <button
+            id={`btn-${columna}`}
+            class="mt-4 bg-[#650000] text-white py-2 px-4 rounded hover:bg-[#850000] disabled:opacity-50 disabled:cursor-not-allowed"
+            type="button"
+            onclick={`guardar('${columna}')`}
+          >
             Guardar
           </button>
-        </form>
+
+          <p id={`mensaje-${columna}`} class="mt-2 text-sm"></p>
+        </>
       ) : (
         <p class="text-base sm:text-lg text-[#010101] leading-relaxed">
           {contenido}
@@ -41,7 +48,60 @@ const {
   <div class="w-full max-w-md flex justify-center items-center">
     <img 
       src={imagenUrl} 
+      alt={`Imagen de ${titulo}`} 
       class="rounded-2xl shadow-lg object-cover w-full h-auto max-h-80"
+      loading="lazy"
     />
   </div>
 </div>
+
+{modoEdicion && (
+  <script type="module">
+    async function guardar(columna) {
+      const textarea = document.getElementById(`contenido-${columna}`);
+      const mensaje = document.getElementById(`mensaje-${columna}`);
+      const boton = document.getElementById(`btn-${columna}`);
+      const contenido = textarea.value.trim();
+
+      mensaje.textContent = "";
+      mensaje.className = "mt-2 text-sm";
+
+      if (!contenido) {
+        mensaje.textContent = "El contenido no puede estar vacío.";
+        mensaje.classList.add("text-red-600");
+        return;
+      }
+
+      boton.disabled = true;
+      mensaje.textContent = "Guardando...";
+      mensaje.classList.add("text-gray-600");
+
+      try {
+        const res = await fetch("/api/guardar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ columna, contenido })
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          mensaje.textContent = "Guardado correctamente";
+          mensaje.className = "text-green-600 mt-2";
+        } else {
+          mensaje.textContent = result.error || "Error al guardar";
+          mensaje.className = "text-red-600 mt-2";
+        }
+      } catch (err) {
+        mensaje.textContent = "Error de red al guardar";
+        mensaje.className = "text-red-600 mt-2";
+      } finally {
+        boton.disabled = false;
+      }
+    }
+
+    window.guardar = guardar;
+  </script>
+)}

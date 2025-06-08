@@ -1,2 +1,2 @@
 export { getInscripcionesPendientes } from './getInscripcionesPendientes';
-export { guardarContenido as POST } from "./editarInfoFacultad";
+export * from './update-info.action';
