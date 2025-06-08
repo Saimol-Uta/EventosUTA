@@ -1,8 +1,6 @@
 ---
 import Header from "../components/Header.astro";
 import NavBar from "../components/Navbar.astro";
-import ContenedorEvento from "../components/ContenedorEvento.astro";
-import EventoUsuario from "../components/EventoUsuario.astro";
 import Avatar from "../components/Avatar.astro";
 import Button from "../components/Button.astro";
 import DocumentButton from "../components/DocumentButton.astro";
@@ -10,9 +8,10 @@ import Card from "../components/Card.astro";
 import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
 
+
 const session = await getSession(Astro.request);
 
-// Obtener datos de cuenta del usuario
+
 const { data: cuenta } = await Astro.callAction(
     actions.getCuentaById,
     session?.user?.id || "",
@@ -77,7 +76,7 @@ const certificates = resultCertificados?.enlaces || [];
                 <p class="text-red-800 font-semibold text-lg">
                     {session?.user?.name || "Usuario Anónimo"}
                 </p>
-                <Button text="Editar Perfil" />
+                <Button text="Editar Perfil"/>
                 <div class="text-center mt-4 text-red-800">Documentos</div>
                 <div class="flex gap-2 mt-2">
                     <DocumentButton
@@ -129,7 +128,7 @@ const certificates = resultCertificados?.enlaces || [];
                             {
                                 upcomingEvents.length > 4 && (
                                     <a
-                                        href="/eventos"
+                                        href="/eventosProximos"
                                         class="text-red-800 underline text-sm mt-2"
                                     >
                                         Ver más...
