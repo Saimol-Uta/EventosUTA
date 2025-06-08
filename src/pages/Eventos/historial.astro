@@ -14,47 +14,59 @@ type TarjetaEventoProps = {
   asistencia: number;
   estado: string;
   certificadoDisponible: boolean;
+  eventoId: string;
 };
 
 const session = await getSession(Astro.request);
-const userId = session?.user?.id;
+const accountId = session?.user?.id;
 
 let eventosParaTarjeta: TarjetaEventoProps[] = [];
 
-if (userId) {
-  const inscripciones = await prisma.inscripciones.findMany({
+if (accountId) {
+  const cuenta = await prisma.cuentas.findUnique({
     where: {
-      id_usu_ins: userId,
+      id_cue: accountId,
     },
-    include: {
-      eventos: true,
-    },
-    orderBy: {
-      eventos: {
-        fec_ini_eve: 'desc',
+  });
+
+  if (cuenta && cuenta.id_usu_per) {
+    const userId = cuenta.id_usu_per;
+
+    const inscripciones = await prisma.inscripciones.findMany({
+      where: {
+        id_usu_ins: userId,
       },
-    },
-  });
+      include: {
+        eventos: true,
+      },
+      orderBy: {
+        eventos: {
+          fec_ini_eve: 'desc',
+        },
+      },
+    });
 
-  eventosParaTarjeta = inscripciones.map(inscripcion => {
-    const asistenciaNum = inscripcion.asi_par ?? 0;
-    const calificacionNum = (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
-    const esCertificadoDisponible = asistenciaNum >= 70 && calificacionNum >= 7.0;
-    const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
+    eventosParaTarjeta = inscripciones.map(inscripcion => {
+      const asistenciaNum = inscripcion.asi_par ?? 0;
+      const calificacionNum = (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
+      const esCertificadoDisponible = asistenciaNum >= 70 && calificacionNum >= 7.0;
+      const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
 
-    return {
-      nombre: inscripcion.eventos.nom_eve,
-      fecha: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }),
-      calificacion: calificacionNum.toFixed(1),
-      asistencia: asistenciaNum,
-      estado: estadoEvento,
-      certificadoDisponible: esCertificadoDisponible,
-    };
-  });
+      return {
+        nombre: inscripcion.eventos.nom_eve,
+        fecha: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        calificacion: calificacionNum.toFixed(1),
+        asistencia: asistenciaNum,
+        estado: estadoEvento,
+        certificadoDisponible: esCertificadoDisponible,
+        eventoId: inscripcion.id_eve_ins,
+      };
+    });
+  }
 }
 ---
 
@@ -64,21 +76,11 @@ if (userId) {
 
   <main class="historial-container">
     <h2 class="titulo">Historial de Eventos</h2>
-
     <div class="cards-grid">
       {eventosParaTarjeta.length > 0 ? (
-        eventosParaTarjeta.map(evento => (
-          <TarjetaEvento
-            nombre={evento.nombre}
-            fecha={evento.fecha}
-            calificacion={evento.calificacion}
-            asistencia={evento.asistencia}
-            estado={evento.estado}
-            certificadoDisponible={evento.certificadoDisponible}
-          />
-        ))
+        eventosParaTarjeta.map(evento => <TarjetaEvento {...evento} />)
       ) : (
-        <p class="no-eventos">Aún no te has inscrito en ningún evento.</p>
+        <p class="no-eventos">Aún no has participado en ningún evento.</p>
       )}
     </div>
   </main>
