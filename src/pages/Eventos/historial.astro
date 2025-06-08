@@ -1,8 +1,54 @@
 ---
+import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Navbar from "../../components/Navbar.astro";
-import Layout from "../../layouts/Layout.astro";
 import TarjetaEvento from "../../components/TarjetaEvento.astro";
+import { getSession } from "auth-astro/server";
+import prisma from "../../db";
+import type { Decimal } from "@prisma/client/runtime/library";
+
+const session = await getSession(Astro.request);
+const userId = session?.user?.id;
+
+let eventosParaTarjeta = [];
+
+if (userId) {
+  const inscripciones = await prisma.inscripciones.findMany({
+    where: {
+      id_usu_ins: userId,
+    },
+    include: {
+      eventos: true,
+    },
+    orderBy: {
+      eventos: {
+        fec_ini_eve: 'desc',
+      },
+    },
+  });
+
+  eventosParaTarjeta = inscripciones.map(inscripcion => {
+    const asistenciaNum = inscripcion.asi_par ?? 0;
+    const calificacionNum = (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
+
+    const esCertificadoDisponible = asistenciaNum >= 70 && calificacionNum >= 7.0;
+
+    const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
+
+    return {
+      nombre: inscripcion.eventos.nom_eve,
+      fecha: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+      calificacion: calificacionNum.toFixed(1),
+      asistencia: asistenciaNum,
+      estado: estadoEvento,
+      certificadoDisponible: esCertificadoDisponible,
+    };
+  });
+}
 ---
 
 <Layout>
@@ -13,102 +59,21 @@ import TarjetaEvento from "../../components/TarjetaEvento.astro";
     <h2 class="titulo">Historial de Eventos</h2>
 
     <div class="cards-grid">
-      <TarjetaEvento 
-        nombre="Curso de Introducción a la IA"
-        fecha="10 marzo 2025"
-        calificacion="8.5"
-        asistencia="90"
-        estado="completo"
-        certificadoDisponible={true}
-      />
-      <TarjetaEvento 
-        nombre="Taller de Desarrollo Web"
-        fecha="15 febrero 2025"
-        calificacion="6.5"
-        asistencia="75"
-        estado="incompleto"
-        certificadoDisponible={false}
-      />
-      <TarjetaEvento 
-        nombre="Seminario de Ciberseguridad"
-        fecha="25 enero 2025"
-        calificacion="9.0"
-        asistencia="95"
-        estado="completo"
-        certificadoDisponible={true}
-      />
-            <TarjetaEvento 
-        nombre="Curso de Introducción a la IA"
-        fecha="10 marzo 2025"
-        calificacion="8.5"
-        asistencia="90"
-        estado="completo"
-        certificadoDisponible={true}
-      />
-      <TarjetaEvento 
-        nombre="Taller de Desarrollo Web"
-        fecha="15 febrero 2025"
-        calificacion="6.5"
-        asistencia="75"
-        estado="incompleto"
-        certificadoDisponible={false}
-      />
-      <TarjetaEvento 
-        nombre="Seminario de Ciberseguridad"
-        fecha="25 enero 2025"
-        calificacion="9.0"
-        asistencia="95"
-        estado="completo"
-        certificadoDisponible={false}
-      />
-            <TarjetaEvento 
-        nombre="Curso de Introducción a la IA"
-        fecha="10 marzo 2025"
-        calificacion="8.5"
-        asistencia="90"
-        estado="completo"
-        certificadoDisponible={true}
-      />
-      <TarjetaEvento 
-        nombre="Taller de Desarrollo Web"
-        fecha="15 febrero 2025"
-        calificacion="6.5"
-        asistencia="75"
-        estado="incompleto"
-        certificadoDisponible={false}
-      />
-      <TarjetaEvento 
-        nombre="Seminario de Ciberseguridad"
-        fecha="25 enero 2025"
-        calificacion="9.0"
-        asistencia="95"
-        estado="completo"
-        certificadoDisponible={false}
-      />
-            <TarjetaEvento 
-        nombre="Curso de Introducción a la IA"
-        fecha="10 marzo 2025"
-        calificacion="8.5"
-        asistencia="90"
-        estado="completo"
-        certificadoDisponible={false}
-      />
-      <TarjetaEvento 
-        nombre="Taller de Desarrollo Web"
-        fecha="15 febrero 2025"
-        calificacion="6.5"
-        asistencia="75"
-        estado="incompleto"
-        certificadoDisponible={false}
-      />
-      <TarjetaEvento 
-        nombre="Seminario de Ciberseguridad"
-        fecha="25 enero 2025"
-        calificacion="9.0"
-        asistencia="95"
-        estado="completo"
-        certificadoDisponible={true}
-      />
+      {eventosParaTarjeta.length > 0 ? (
+        eventosParaTarjeta.map(evento => (
+          <TarjetaEvento
+            nombre={evento.nombre}
+            fecha={evento.fecha}
+            calificacion={evento.calificacion}
+            asistencia={evento.asistencia}
+            estado={evento.estado}
+            certificadoDisponible={evento.certificadoDisponible}
+            eventoId={evento.eventoId}
+          />
+        ))
+      ) : (
+        <p class="no-eventos">Aún no te has inscrito en ningún evento.</p>
+      )}
     </div>
   </main>
 
@@ -117,14 +82,12 @@ import TarjetaEvento from "../../components/TarjetaEvento.astro";
       --color-fuerte-uta: #b01025;
       --color-oscuro-uta: #d51d35;
     }
-
     .historial-container {
       max-width: 1200px;
       margin: 2rem auto;
       padding: 1rem 2rem;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     }
-
     .titulo {
       font-size: 2rem;
       text-align: center;
@@ -134,11 +97,17 @@ import TarjetaEvento from "../../components/TarjetaEvento.astro";
       -webkit-text-fill-color: transparent;
       font-weight: 800;
     }
-
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1.5rem;
+    }
+    .no-eventos {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #666;
+      padding: 3rem;
     }
   </style>
 </Layout>
