@@ -3,8 +3,8 @@ interface CampoFormulario {
   titulo: string;
   valor: string;
   name: string;
-  tipo?: "select"; // por defecto será input de texto si no se indica
-  opciones?: { valor: string; texto: string }[]; // solo si tipo === "select"
+  tipo?: "select";
+  opciones?: { valor: string; texto: string }[];
 }
 
 interface Props {
@@ -31,49 +31,42 @@ const {
 <h1>Edición de tu Información</h1>
 <p class="subtitulo">Completa tus datos:</p>
 
-<form method="POST">
-  <input type="hidden" name="action" value="guardarInfo" />
+<div class="form-container">
+  <form method="POST">
+    <input type="hidden" name="action" value="guardarInfo" />
 
-  {camposFormulario.map((campo) => (
-    <div>
-      <label for={campo.name}>{campo.titulo}</label>
+    {camposFormulario.map((campo) => (
+      <div>
+        <label for={campo.name}>{campo.titulo}</label>
 
-      {campo.tipo === "select" && campo.opciones ? (
-  <select name={campo.name} id={campo.name} required>
-    <option value="" disabled selected={!campo.valor}>Selecciona una opción</option>
-    {campo.opciones.map(op => (
-      <option
-        value={op.valor}
-        selected={op.valor === campo.valor}
-      >
-        {op.texto}
-      </option>
+        {campo.tipo === "select" && campo.opciones ? (
+          <select name={campo.name} id={campo.name} required>
+            <option value="" disabled selected={!campo.valor}>Selecciona una opción</option>
+            {campo.opciones.map(op => (
+              <option value={op.valor} selected={op.valor === campo.valor}>{op.texto}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            id={campo.name}
+            name={campo.name}
+            value={campo.valor}
+            required={["nom_usu1", "ape_usu1", "fec_nac_usu", "num_tel_usu", "id_car_per"].includes(campo.name)}
+            type={campo.name === "fec_nac_usu" ? "date" : "text"}
+          />
+        )}
+      </div>
     ))}
-  </select>
 
-      ) : (
-        <input
-          id={campo.name}
-          name={campo.name}
-          value={campo.valor}
-          required={["nom_usu1", "ape_usu1", "fec_nac_usu", "num_tel_usu", "id_car_per"].includes(campo.name)}
-          type={campo.name === "fec_nac_usu" ? "date" : "text"}
-        />
-      )}
-    </div>
-  ))}
-
-  {mostrarBotones && (
-    <div style="grid-column: 1 / -1;">
-      <button type="submit" class="submit-button">{textoBotonGuardarInfo}</button>
-      <button type="submit" name="action" value="cancelar">{textoBotonCancelar}</button>
-      <button type="submit" name="action" value="masTarde">{textoBotonMasTarde}</button>
-      {textoBotonAsociar && (
-        <button type="submit" name="action" value="asociar">{textoBotonAsociar}</button>
-      )}
-    </div>
-  )}
-</form>
+    {mostrarBotones && (
+      <div style="grid-column: 1 / -1;">
+        <button type="submit" class="submit-button">{textoBotonGuardarInfo}</button>
+        <button type="button" class="submit-button" onclick="history.back()">{textoBotonCancelar}</button>
+        
+      </div>
+    )}
+  </form>
+</div>
 
 <style>
   h1 {
@@ -87,6 +80,13 @@ const {
     font-size: 16px;
     color: #4b5563;
     margin-bottom: 2rem;
+  }
+
+  .form-container {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   form {
@@ -109,7 +109,7 @@ const {
   }
 
   .submit-button {
-    background-color: #2563eb;
+    background-color: #a00000;
     color: white;
     padding: 0.75rem 1.25rem;
     border: none;
@@ -119,6 +119,6 @@ const {
   }
 
   .submit-button:hover {
-    background-color: #1d4ed8;
+    background-color: #800707;
   }
 </style>
