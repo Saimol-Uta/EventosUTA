@@ -1,0 +1,107 @@
+---
+import "../../../styles/Admin/ModalGestionarCuenta.css";
+---
+
+<!-- Modal para gestionar cuentas de usuario -->
+<div id="modalDetallesCuenta" class="modal" style="display: none;">
+  <div class="modal-contenido" style="max-width: 700px; width: 90%;">
+    <span class="cerrar" onclick="cerrarModalDetallesCuenta()">&times;</span>
+
+    <div class="modal-header">
+      <h2>Gestionar Cuenta de Usuario</h2>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <img
+          src="https://static.nationalgeographic.es/files/styles/image_3200/public/75552.ngsversion.1422285553360.jpg?w=1900&h=1267"
+          alt="foto"
+          class="imagen-perfil"
+        />
+      </div>
+    </div>
+
+    <div class="seccion-detalles">
+      <div class="info-grid">
+        <p>
+          <strong>Nombre:</strong>
+          <span id="usuario-cedula"></span>
+        </p>
+      </div>
+    </div>
+    <div class="seccion-detalles">
+      <div class="info-grid">
+        <p>
+          <strong>Correo Electrónico:</strong>
+          <span id="usuario-cedula"></span>
+        </p>
+        <p>
+          <strong>Rol:</strong>
+          <span id="usuario-fec-nac"></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="seccion-detalles">
+      <h3>Documentación</h3>
+      <div class="info-grid">
+        <p>
+          <a href="#">Cédula y Papeleta de votación</a>
+        </p>
+        <p>
+          <a href="#">Certificado de Matriculación</a>
+        </p>
+
+        <p>
+          <a href="#">Carta de Motivación</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  declare global {
+    interface Window {
+      abrirModalDetallesCuenta: (correo: string, rol: string) => void;
+      cerrarModalDetallesCuenta: () => void;
+    }
+  }
+
+  function abrirModalDetallesCuenta(correo: string, rol: string): void {
+    const modal = document.getElementById("modalDetallesCuenta");
+    if (!modal) return;
+
+    const correoInput = document.getElementById(
+      "correoCuenta"
+    ) as HTMLInputElement;
+    const rolSelect = document.getElementById("rolCuenta") as HTMLSelectElement;
+
+    if (correoInput && rolSelect) {
+      correoInput.value = correo;
+      rolSelect.value = rol;
+    }
+
+    modal.style.display = "block";
+  }
+
+  function cerrarModalDetallesCuenta() {
+    const modal = document.getElementById("modalDetallesCuenta");
+    if (modal) {
+      modal.style.display = "none";
+      (
+        document.getElementById("formGestionCuenta") as HTMLFormElement
+      )?.reset();
+    }
+  }
+
+  window.abrirModalDetallesCuenta = abrirModalDetallesCuenta;
+  window.cerrarModalDetallesCuenta = cerrarModalDetallesCuenta;
+
+  window.addEventListener("click", (event) => {
+    const modal = document.getElementById("modalDetallesCuenta");
+    if (event.target === modal) {
+      cerrarModalDetallesCuenta();
+    }
+  });
+</script>
