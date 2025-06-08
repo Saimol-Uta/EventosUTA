@@ -75,7 +75,7 @@ export const server = {
     getByIdInscripcion,
     updateParticipante,
     updateEstadoInscripcion,
-    
+
 
 };
 

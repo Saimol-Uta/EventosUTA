@@ -9,6 +9,9 @@ export const getCuentaById = defineAction({
         // Acción
         const cuenta = await prisma.cuentas.findUnique({
             where: { id_cue: id_cuenta },
+            include: {
+                usuarios: true
+            }
         });
         return cuenta;
     },
