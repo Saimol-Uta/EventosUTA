@@ -8,6 +8,7 @@ import { setUser } from './Users/setUsers.action';
 
 import { getDatosInscripcion } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
+import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
 import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
 import { GenerarCertificado } from './Certificados/certificado.action';
 
