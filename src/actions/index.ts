@@ -38,7 +38,6 @@ export const server = {
     setDatosInscripcion,
     uploadComprobante,
 
-    guardarContenido,
 
     getCertificadosPorUsuario,
     getEventosProximos,
@@ -75,6 +74,8 @@ export const server = {
     getEventosINS,
     getByIdInscripcion,
     updateParticipante,
-    updateEstadoInscripcion
+    updateEstadoInscripcion,
+    
 
 };
+

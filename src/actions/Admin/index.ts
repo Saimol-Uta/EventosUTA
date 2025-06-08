@@ -1,2 +1,2 @@
 export { getInscripcionesPendientes } from './getInscripcionesPendientes';
-export * from './update-info.action';
+export { guardarContenido } from "@/actions/Admin/update-info.action";
