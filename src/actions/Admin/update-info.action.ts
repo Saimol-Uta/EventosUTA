@@ -1,4 +1,3 @@
-import { defineAction } from "astro:actions";
 import prisma from "@/db";
 import { z } from "zod";
 
@@ -7,25 +6,27 @@ const schema = z.object({
   contenido: z.string().min(1, "Contenido es requerido"),
 });
 
-export const guardarContenido = defineAction({
-  accept: "form",
-  input: async (data) => {
-    // Validar input con zod explícitamente para evitar advertencias
-    return schema.parse(data);
-  },
-  handler: async ({ input }) => {
-    const { columna, contenido } = input;
+export async function guardarContenido(json: any) {
+  const parseResult = schema.safeParse(json);
 
-    try {
-      await prisma.pagina_principal.update({
-        where: { id_pag: 1 },
-        data: { [columna]: contenido },
-      });
-
-      return { success: true };
-    } catch (err) {
-      console.error("Error al guardar en la base de datos:", err);
-      return { success: false, error: "Error al guardar en la base de datos" };
-    }
+  if (!parseResult.success) {
+    const errorMsg = parseResult.error.errors.map(err => err.message).join(", ");
+    return { success: false, error: errorMsg };
   }
-});
+
+  const { columna, contenido } = parseResult.data;
+
+  try {
+    await prisma.pagina_principal.update({
+      where: { id_pag: 1 },
+      data: {
+        [columna]: contenido,
+      },
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error("Error al guardar en la base de datos:", err);
+    return { success: false, error: "Error al guardar en la base de datos" };
+  }
+}
