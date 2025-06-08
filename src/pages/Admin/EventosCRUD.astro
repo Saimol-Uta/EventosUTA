@@ -1,13 +1,12 @@
 ---
 import Header from "@components/Header.astro";
-import NavBar from "../../components/Navbar.astro";
 import MenuAdmin from "../../components/MenuAdministrador.astro";
 import Layout from "../../layouts/Layout.astro";
-import ModalDetallesEvento from "../../components/ModalDetallesEvento.astro";
-import ModalModificarEvento from "../../components/ModalModificarEvento.astro";
-import ModalNuevoEvento from "../../components/ModalNuevoEvento.astro";
-import ModalAsignaciones from "../../components/ModalAsignaciones.astro";
-import "../../styles/EventosCRUD.css";
+import ModalDetallesEvento from "../../components/Admin/EventosCRUD/ModalDetallesEvento.astro";
+import ModalModificarEvento from "../../components/Admin/EventosCRUD/ModalModificarEvento.astro";
+import ModalNuevoEvento from "../../components/Admin/EventosCRUD/ModalNuevoEvento.astro";
+import ModalAsignaciones from "../../components/Admin/EventosCRUD/ModalAsignaciones.astro";
+import "../../styles/Admin/EventosCRUD.css";
 import { actions } from "astro:actions";
 
 const searchParams = Astro.url.searchParams;
@@ -52,12 +51,12 @@ const eventosCompletos = await Promise.all(
 );
 
 const links = [
-    { label: "Eventos", href: "/" },
+    { label: "Eventos", href: "/Admin/EventosCRUD" },
     { label: "Usuarios", href: "/perfil" },
     { label: "Organizadores", href: "/historial" },
     { label: "Inscripciones", href: "/historial" },
     { label: "Categorías", href: "/historial" },
-    { label: "Carreras", href: "/historial" },
+    { label: "Carreras", href: "/Admin/CarrerasCRUD" },
     { label: "Asignaciones", href: "/Admin/Asignaciones" },
 ];
 ---
@@ -94,7 +93,7 @@ const links = [
                     </div>
                     <div class="registros-superior-derecho">
                         <a
-                            onclick="window.abrirModalNuevo()"
+                            onclick="window.abrirModalNuevoEvento()"
                             class="contenedor-boton-nuevo-registro"
                         >
                             <button class="boton-nuevo-registro" title="Nuevo">
@@ -175,7 +174,7 @@ const links = [
                                     </button>
                                     <button
                                         title="Modificar"
-                                        onclick={`window.abrirModal('${evento.id_eve}')`}
+                                        onclick={`window.abrirModalModificarEvento('${evento.id_eve}')`}
                                     >
                                         <img
                                             src="/img/CRUD/modificar-registro.svg"
@@ -284,11 +283,11 @@ const links = [
                     return;
                 }
 
-                // Llamar directamente a la función de abrirModalDetalles del modal
-                if (window.abrirModalDetalles) {
-                    window.abrirModalDetalles(evento);
+                // Llamar directamente a la función de abrirModalDetallesEvento del modal
+                if (window.abrirModalDetallesEvento) {
+                    window.abrirModalDetallesEvento(evento);
                 } else {
-                    console.error('La función abrirModalDetalles no está disponible');
+                    console.error('La función abrirModalDetallesEvento no está disponible');
                 }
             }            function abrirModalAsignacionesEvento(eventoId: string, nombreEvento: string) {
                 // Verificar si la función del modal está disponible

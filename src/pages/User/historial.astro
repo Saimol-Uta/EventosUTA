@@ -1,0 +1,176 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Navbar from "../../components/Navbar.astro";
+import TarjetaEvento from "../../components/TarjetaEvento.astro";
+import { getSession } from "auth-astro/server";
+import prisma from "../../db";
+import type { Decimal } from "@prisma/client/runtime/library";
+
+type TarjetaEventoProps = {
+  nombre: string;
+  fecha: string;
+  calificacion: string;
+  asistencia: number;
+  estado: string;
+  certificadoDisponible: boolean;
+  eventoId: string;
+};
+
+const session = await getSession(Astro.request);
+const accountId = session?.user?.id;
+
+let eventosParaTarjeta: TarjetaEventoProps[] = [];
+
+if (accountId) {
+  const cuenta = await prisma.cuentas.findUnique({
+    where: {
+      id_cue: accountId,
+    },
+  });
+
+  if (cuenta && cuenta.id_usu_per) {
+    const userId = cuenta.id_usu_per;
+
+    const inscripciones = await prisma.inscripciones.findMany({
+      where: {
+        id_usu_ins: userId,
+      },
+      include: {
+        eventos: true,
+      },
+      orderBy: {
+        eventos: {
+          fec_ini_eve: 'desc',
+        },
+      },
+    });
+
+    eventosParaTarjeta = inscripciones.map(inscripcion => {
+      const asistenciaNum = inscripcion.asi_par ?? 0;
+      const calificacionNum = (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
+      const esCertificadoDisponible = asistenciaNum >= 70 && calificacionNum >= 7.0;
+      const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
+
+      return {
+        nombre: inscripcion.eventos.nom_eve,
+        fecha: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        calificacion: calificacionNum.toFixed(1),
+        asistencia: asistenciaNum,
+        estado: estadoEvento,
+        certificadoDisponible: esCertificadoDisponible,
+        eventoId: inscripcion.id_eve_ins,
+      };
+    });
+  }
+}
+---
+
+<Layout>
+  <Header />
+  <Navbar />
+
+  <main class="historial-container">
+    <h2 class="titulo">Historial de Eventos</h2>
+    <div class="cards-grid">
+      {eventosParaTarjeta.length > 0 ? (
+        eventosParaTarjeta.map(evento => <TarjetaEvento {...evento} />)
+      ) : (
+        <p class="no-eventos">Aún no has participado en ningún evento.</p>
+      )}
+    </div>
+  </main>
+
+  <style>
+    :root {
+      --color-fuerte-uta: #b01025;
+      --color-oscuro-uta: #d51d35;
+    }
+    .historial-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 1rem 2rem;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .titulo {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(90deg, var(--color-oscuro-uta), var(--color-fuerte-uta));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .no-eventos {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #666;
+      padding: 3rem;
+    }
+  </style>
+    <script>
+    import { actions } from "astro:actions";
+
+    // Función para descargar el PDF
+    function descargarPdf(base64: string, fileName: string) {
+      const byteCharacters = atob(base64);
+      const byteArrays = [];
+      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+      const blob = new Blob(byteArrays, { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    document.querySelectorAll('.js-generate-cert').forEach(button => {
+      button.addEventListener('click', async (event) => {
+        const targetButton = event.currentTarget as HTMLButtonElement;
+        
+        const eventoId = targetButton.dataset.eventoid;
+
+        if (!eventoId) return;
+
+        targetButton.disabled = true;
+        targetButton.textContent = "Generando...";
+
+        try {
+          const result = await actions.GenerarCertificado({ eventoId });
+
+          if (result.data?.success && result.data?.data?.pdfBase64) {
+            descargarPdf(result.data.data.pdfBase64, result.data.data.fileName);
+          } else {
+            const errorMessage = result.error?.message || result.data?.error?.message || 'Ocurrió un error.';
+            alert(`Error al generar el certificado: ${errorMessage}`);
+          }
+        } catch (error) {
+            console.error(error);
+            alert('Error inesperado al contactar con el servidor.');
+        } finally {
+            targetButton.disabled = false;
+            targetButton.textContent = "Generar Certificado";
+        }
+      });
+    });
+  </script>
+</Layout>

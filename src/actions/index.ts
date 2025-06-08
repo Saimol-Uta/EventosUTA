@@ -5,10 +5,22 @@ import { createCambio } from './Cambios';
 import { getUseById } from './auth';
 import { getUserByCedula } from './Users/getUserByCedula.action';
 import { setUser } from './Users/setUsers.action';
+
+import { getDatosInscripcion } from './Eventos';
+import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
+import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
+import { GenerarCertificado } from './Certificados/certificado.action';
+
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
-import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
-import { getInscripcionesPendientes } from './Admin';
+
+
+import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
+import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
+
+import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Admin';
+
 export const server = {
     getEventos,
     getEventoBySlug,
@@ -21,6 +33,11 @@ export const server = {
     uploadImageUser,
     getCuentaById,
     uploadDocumentImage,
+
+    getDatosInscripcion,
+    setDatosInscripcion,
+    uploadComprobante,
+    GenerarCertificado,
 
     getCertificadosPorUsuario,
     getEventosProximos,
@@ -45,6 +62,22 @@ export const server = {
     getAsignacionesPlantilla,
     duplicarAsignacionAEvento,
     vincularAsignacionAEvento,
-    crearAsignacionesPrueba
 
+    crearAsignacionesPrueba,
+
+    // Nuevas acciones para CRUD de carreras
+    crearCarrera,
+    modificarCarrera,
+    eliminarCarrera,
+    getAllCarreras,
+    getCarreraById,    // Nuevas acciones para Inscripciones
+    getEventosINS,
+    getByIdInscripcion,
+    updateParticipante,
+    updateEstadoInscripcion,
+
+    //description
+    updatePaginaPrincipal,
+    getInfo
 };
+

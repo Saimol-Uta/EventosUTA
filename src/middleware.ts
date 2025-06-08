@@ -7,6 +7,7 @@ const studentRoutes = ['/homeUser', '/student/*', '/Eventos/*', '/Inscripcion/In
 const userRoutes = ['/homeUser', '/user/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de usuario aquí
 const masterRoutes = ['/homeAdmin', '/master/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD', '/Admin/Asignaciones']; // Añadir más rutas de master aquí
 
+
 // Rutas que no requieren autenticación
 const noAuthRoutes = ['/login', '/register', '/'];
 

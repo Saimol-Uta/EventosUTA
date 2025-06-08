@@ -1,5 +1,13 @@
 ---
-const { nombre, fecha, calificacion, asistencia, estado, certificadoDisponible } = Astro.props;
+const {
+  nombre,
+  fecha,
+  calificacion,
+  asistencia,
+  estado,
+  certificadoDisponible,
+  eventoId,
+} = Astro.props;
 ---
 
 <style>
@@ -11,7 +19,9 @@ const { nombre, fecha, calificacion, asistencia, estado, certificadoDisponible }
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
     border: 2px solid transparent;
   }
 
@@ -75,7 +85,9 @@ const { nombre, fecha, calificacion, asistencia, estado, certificadoDisponible }
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition:
+      background-color 0.3s ease,
+      transform 0.2s ease;
   }
 
   .btn-certificado:hover {
@@ -105,14 +117,18 @@ const { nombre, fecha, calificacion, asistencia, estado, certificadoDisponible }
       {estado === "completo" ? "Completo" : "Incompleto"}
     </span>
   </div>
-  <p class="fecha"> {fecha}</p>
+  <p class="fecha">{fecha}</p>
   <div class="card-info">
     <div><strong>Calificación:</strong> {calificacion}</div>
     <div><strong>Asistencia:</strong> {asistencia}%</div>
   </div>
   {
-    certificadoDisponible
-      ? <a href="#" class="btn-certificado"> Generar Certificado</a>
-      : <p class="texto-inactivo">🚫 Certificado no disponible</p>
+    certificadoDisponible ? (
+      <button class="btn-certificado js-generate-cert" data-eventoid={eventoId}>
+        Generar Certificado
+      </button>
+    ) : (
+      <p class="texto-inactivo">🚫 Certificado no disponible</p>
+    )
   }
 </div>

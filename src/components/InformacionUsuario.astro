@@ -9,6 +9,7 @@ interface Campo {
     title?: string;
     oninput?: string;
     maxlength?: string;
+    opciones?: Array<{ value: string; text: string }>;
 }
 
 interface Props {
@@ -60,6 +61,7 @@ const session = await getSession(Astro.request);
                     title={campo.title}
                     oninput={campo.oninput}
                     maxlength={campo.maxlength}
+                    opciones={campo.opciones}
                 />
             ))
         }

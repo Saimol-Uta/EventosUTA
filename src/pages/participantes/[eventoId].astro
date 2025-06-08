@@ -1,0 +1,762 @@
+---
+import Header from "@components/Header.astro";
+import MenuAdmin from "../../components/MenuAdministrador.astro";
+import Layout from "../../layouts/Layout.astro";
+import "../../styles/AprobacionesInscripciones.css";
+import { actions } from "astro:actions";
+
+// Lógica para obtener participantes del evento específico
+const { eventoId } = Astro.params;
+
+if (!eventoId) {
+    Astro.redirect("/");
+}
+
+const { data: inscripcion, error } = await Astro.callAction(
+    actions.getByIdInscripcion,
+    {
+        id: eventoId || "default-event-id",
+    },
+);
+
+if (error) {
+    console.error("Error al obtener inscripciones:", error);
+}
+
+// Filtrar solo participantes aprobados (con estado 'Aprobado' en inscripción)
+const participantes =
+    inscripcion?.inscripciones?.filter(
+        (ins: any) => ins.est_ins === "Aprobado",
+    ) || [];
+
+console.log("Participantes obtenidos:", participantes.length);
+
+// Función para formatear la asistencia
+function formatearAsistencia(asiPar: number | null | undefined): {
+    texto: string;
+    clase: string;
+} {
+    if (asiPar === null || asiPar === undefined) {
+        return { texto: "Sin registrar", clase: "sin-registrar" };
+    }
+    return asiPar === 1
+        ? { texto: "Asistió", clase: "si" }
+        : { texto: "No asistió", clase: "no" };
+}
+
+// Función para formatear la nota
+function formatearNota(nota: number | string | null | undefined): string {
+    if (nota === null || nota === undefined) {
+        return "Sin calificar";
+    }
+
+    // Convertir a número si es string
+    const numeroNota = typeof nota === "string" ? parseFloat(nota) : nota;
+
+    // Verificar que sea un número válido
+    if (isNaN(numeroNota)) {
+        return "Sin calificar";
+    }
+
+    return numeroNota.toFixed(1);
+}
+
+// Función para formatear el estado de participación
+function formatearEstadoParticipacion(estado: string): {
+    texto: string;
+    clase: string;
+} {
+    switch (estado) {
+        case "APROBADA":
+            return { texto: "Aprobada", clase: "aprobada" };
+        case "REPROBADA":
+            return { texto: "Reprobada", clase: "reprobada" };
+        case "PENDIENTE":
+            return { texto: "Pendiente", clase: "pendiente" };
+        case "ASISTIO":
+            return { texto: "Solo Asistió", clase: "asistio" };
+        default:
+            return { texto: estado, clase: "pendiente" };
+    }
+}
+
+const links = [
+    { label: "Eventos", href: "/Admin/EventosCRUD" },
+    { label: "Usuarios", href: "/perfil" },
+    { label: "Organizadores", href: "/historial" },
+    { label: "Inscripciones", href: "AprobacionInscripciones" },
+    { label: "Categorías", href: "/historial" },
+    { label: "Carreras", href: "/historial" },
+];
+---
+
+<Layout>
+    <body>
+        <Header />
+        <MenuAdmin links={links} />
+
+        <!-- Modal para editar calificaciones -->
+        <div id="modalCalificaciones" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Gestionar Calificación</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="formCalificacion">
+                        <div class="form-group">
+                            <label for="participante">Participante:</label>
+                            <input type="text" id="participante" readonly />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="asistencia">Asistencia:</label>
+                            <select id="asistencia" name="asistencia">
+                                <option value="1">Asistió</option>
+                                <option value="0">No Asistió</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nota">Nota (0-10):</label>
+                            <input
+                                type="number"
+                                id="nota"
+                                name="nota"
+                                min="0"
+                                max="10"
+                                step="0.1"
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estado">Estado:</label>
+                            <select id="estado" name="estado">
+                                <option value="PENDIENTE">Pendiente</option>
+                                <option value="APROBADA">Aprobada</option>
+                                <option value="REPROBADA">Reprobada</option>
+                                <option value="ASISTIO">Solo Asistió</option>
+                            </select>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-cancelar"
+                                >Cancelar</button
+                            >
+                            <button type="submit" class="btn-guardar"
+                                >Guardar</button
+                            >
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        Calificaciones del Evento
+                        {
+                            participantes.length > 0 && (
+                                <span class="evento-nombre">
+                                    - {participantes[0].eventos?.nom_eve}
+                                </span>
+                            )
+                        }
+                        <span class="total-participantes"
+                            >({participantes.length} participantes)</span
+                        >
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <select
+                            name="filtroEstado"
+                            id="filtroEstado"
+                            class="select-estado"
+                        >
+                            <option value="todos">Todos</option>
+                            <option value="PENDIENTE">Pendientes</option>
+                            <option value="APROBADA">Aprobadas</option>
+                            <option value="REPROBADA">Reprobadas</option>
+                            <option value="ASISTIO">Solo Asistió</option>
+                        </select>
+                        <button
+                            class="btn-exportar"
+                            onclick="exportarCalificaciones()"
+                        >
+                            Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombres
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Apellidos
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Asistencia
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nota
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Estado
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>
+                <div class="registros-inferior">
+                    {
+                        participantes.length > 0 ? (
+                            participantes.map((participante: any) => {
+                                const asistencia = formatearAsistencia(
+                                    participante.asi_par,
+                                );
+                                const estadoParticipacion =
+                                    formatearEstadoParticipacion(
+                                        participante.est_par,
+                                    );
+                                return (
+                                    <div
+                                        class="registro-fila"
+                                        data-estado={participante.est_par}
+                                        data-participante-id={
+                                            participante.id_ins
+                                        }
+                                        data-asistencia={
+                                            participante.asi_par?.toString() ||
+                                            "0"
+                                        }
+                                        data-nota={
+                                            participante.not_par?.toString() ||
+                                            "0"
+                                        }
+                                    >
+                                        <div class="parte-izquierda-registro-fila">
+                                            {participante.usuarios?.nom_usu1}{" "}
+                                            {participante.usuarios?.nom_usu2 ||
+                                                ""}
+                                        </div>
+                                        <div class="parte-izquierda-registro-fila">
+                                            {participante.usuarios?.ape_usu1}{" "}
+                                            {participante.usuarios?.ape_usu2}
+                                        </div>
+                                        <div class="parte-izquierda-registro-fila">
+                                            <span
+                                                class={`badge-asistencia ${asistencia.clase}`}
+                                            >
+                                                {asistencia.texto}
+                                            </span>
+                                        </div>
+                                        <div class="parte-izquierda-registro-fila">
+                                            <span class="nota-display">
+                                                {formatearNota(
+                                                    participante.not_par,
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div class="parte-izquierda-registro-fila">
+                                            <span
+                                                class={`badge-estado ${estadoParticipacion.clase}`}
+                                            >
+                                                {estadoParticipacion.texto}
+                                            </span>
+                                        </div>
+                                        <div class="registro-opciones">
+                                            <button
+                                                onclick={`abrirModalCalificacion('${participante.id_ins}', '${participante.usuarios?.nom_usu1} ${participante.usuarios?.nom_usu2 || ""} ${participante.usuarios?.ape_usu1} ${participante.usuarios?.ape_usu2}')`}
+                                                title="Editar Calificación"
+                                                class="btn-calificar"
+                                            >
+                                                <svg
+                                                    class="imagen-boton-registro"
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                                    <path d="m18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div class="sin-participantes">
+                                <p>
+                                    No hay participantes aprobados para este
+                                    evento.
+                                </p>
+                            </div>
+                        )
+                    }
+                </div>
+            </div>
+        </main>
+    </body>
+
+    <style>
+        /* Estilos para badges de asistencia */
+        .badge-asistencia {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge-asistencia.si {
+            background-color: #28a745;
+            color: white;
+        }
+        .badge-asistencia.no {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-asistencia.sin-registrar {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* Estilos para badges de estado */
+        .badge-estado {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-estado.pendiente {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .badge-estado.aprobada {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .badge-estado.reprobada {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .badge-estado.asistio {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        /* Estilos para la nota */
+        .nota-display {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        /* Botón exportar */
+        .btn-exportar {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-exportar:hover {
+            background-color: #218838;
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancelar,
+        .btn-guardar {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-cancelar {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-guardar {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-calificar {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+        } /* Estilos adicionales para mejorar la apariencia */
+        .sin-participantes {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .evento-nombre {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .total-participantes {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .select-estado {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 0.5rem;
+        }
+
+        .registro-fila[data-estado] {
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-calificar:hover {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 1rem;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .btn-cancelar,
+            .btn-guardar {
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+        import { actions } from "astro:actions";
+        import Swal from "sweetalert2";
+
+        // Declarar tipos para funciones globales
+        declare global {
+            interface Window {
+                abrirModalCalificacion: (
+                    participanteId: string,
+                    nombreCompleto: string,
+                ) => void;
+                exportarCalificaciones: () => void;
+            }
+        } // Función para abrir modal de calificación
+        window.abrirModalCalificacion = function (
+            participanteId: string,
+            nombreCompleto: string,
+        ) {
+            const modal = document.getElementById(
+                "modalCalificaciones",
+            ) as HTMLElement;
+            const participanteInput = document.getElementById(
+                "participante",
+            ) as HTMLInputElement;
+            const asistenciaSelect = document.getElementById(
+                "asistencia",
+            ) as HTMLSelectElement;
+            const notaInput = document.getElementById(
+                "nota",
+            ) as HTMLInputElement;
+            const estadoSelect = document.getElementById(
+                "estado",
+            ) as HTMLSelectElement;
+
+            if (modal && participanteInput) {
+                participanteInput.value = nombreCompleto;
+
+                // Buscar los datos actuales del participante en la tabla
+                const filaParticipante = document.querySelector(
+                    `[data-participante-id="${participanteId}"]`,
+                ) as HTMLElement;
+                if (filaParticipante) {
+                    // Extraer datos actuales de la fila
+                    const asistenciaActual =
+                        filaParticipante.dataset.asistencia || "0";
+                    const notaActual = filaParticipante.dataset.nota || "0";
+                    const estadoActual =
+                        filaParticipante.dataset.estado || "PENDIENTE";
+
+                    if (asistenciaSelect)
+                        asistenciaSelect.value = asistenciaActual;
+                    if (notaInput)
+                        notaInput.value =
+                            notaActual === "Sin calificar" ? "0" : notaActual;
+                    if (estadoSelect) estadoSelect.value = estadoActual;
+                }
+
+                // Guardar el ID del participante en el modal para usarlo al enviar
+                modal.dataset.participanteId = participanteId;
+                modal.style.display = "flex";
+            }
+        };
+
+        // Cerrar modal
+        document.addEventListener("DOMContentLoaded", function () {
+            const closeBtn = document.querySelector(".close") as HTMLElement;
+            const cancelBtn = document.querySelector(
+                ".btn-cancelar",
+            ) as HTMLElement;
+            const modal = document.getElementById(
+                "modalCalificaciones",
+            ) as HTMLElement;
+            const form = document.getElementById(
+                "formCalificacion",
+            ) as HTMLFormElement;
+            const filtroEstado = document.getElementById(
+                "filtroEstado",
+            ) as HTMLSelectElement;
+
+            if (closeBtn && modal) {
+                closeBtn.addEventListener("click", function () {
+                    modal.style.display = "none";
+                });
+            }
+
+            if (cancelBtn && modal) {
+                cancelBtn.addEventListener("click", function () {
+                    modal.style.display = "none";
+                });
+            } // Guardar calificación
+            if (form && modal) {
+                form.addEventListener("submit", async function (e) {
+                    e.preventDefault();
+
+                    const participanteId = modal.dataset.participanteId;
+                    if (!participanteId) {
+                        alert("Error: No se pudo identificar al participante");
+                        return;
+                    }
+
+                    const formData = new FormData(this);
+                    formData.append("inscripcionId", participanteId);
+
+                    try {
+                        const { data, error } =
+                            await actions.updateParticipante(formData);
+
+                        if (data?.success) {
+                            await Swal.fire({
+                                title: "¡Éxito!",
+                                text: "Calificación actualizada exitosamente",
+                                icon: "success",
+                                confirmButtonText: "OK",
+                            });
+                            modal.style.display = "none";
+                            window.location.reload();
+                        } else {
+                            await Swal.fire({
+                                title: "Error",
+                                text:
+                                    error?.message ||
+                                    "Error al actualizar la calificación",
+                                icon: "error",
+                                confirmButtonText: "OK",
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error al enviar calificación:", error);
+                        alert(
+                            "Error de conexión al actualizar la calificación",
+                        );
+                    }
+                });
+            }
+
+            // Filtrar por estado
+            if (filtroEstado) {
+                filtroEstado.addEventListener("change", function () {
+                    const filtro = this.value;
+                    const filas = document.querySelectorAll(
+                        ".registros-inferior .registro-fila",
+                    ) as NodeListOf<HTMLElement>;
+
+                    filas.forEach((fila) => {
+                        const estado = fila.dataset.estado;
+                        if (filtro === "todos" || estado === filtro) {
+                            fila.style.display = "flex";
+                        } else {
+                            fila.style.display = "none";
+                        }
+                    });
+                });
+            }
+        }); // Función para exportar calificaciones
+        window.exportarCalificaciones = function () {
+            console.log("Exportando calificaciones...");
+
+            // Obtener información del evento
+            const eventoNombre =
+                document
+                    .querySelector(".evento-nombre")
+                    ?.textContent?.replace("- ", "") || "Evento";
+
+            // Crear encabezados CSV
+            const headers = [
+                "Nombres",
+                "Apellidos",
+                "Asistencia",
+                "Nota",
+                "Estado",
+            ];
+
+            // Obtener datos de participantes visibles (respetando filtros)
+            const participantesVisibles = Array.from(
+                document.querySelectorAll(
+                    '.registro-fila[data-estado]:not([style*="display: none"])',
+                ),
+            );
+
+            const csvData = participantesVisibles.map((row) => {
+                const cells = Array.from(
+                    row.querySelectorAll(".parte-izquierda-registro-fila"),
+                );
+                return cells.map((cell) => {
+                    const text =
+                        (cell as HTMLElement).textContent?.trim() || "";
+                    // Escapar comillas y envolver en comillas si contiene comas
+                    return text.includes(",")
+                        ? `"${text.replace(/"/g, '""')}"`
+                        : text;
+                });
+            });
+
+            // Combinar encabezados y datos
+            const csvContent = [
+                `Calificaciones del Evento: ${eventoNombre}`,
+                `Fecha de exportación: ${new Date().toLocaleDateString("es-ES")}`,
+                "", // Línea vacía
+                headers.join(","),
+                ...csvData.map((row) => row.join(",")),
+            ].join("\n");
+
+            // Crear y descargar archivo
+            const blob = new Blob([csvContent], {
+                type: "text/csv;charset=utf-8;",
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `calificaciones_${eventoNombre.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        };
+
+        // Cerrar modal al hacer clic fuera
+        window.addEventListener("click", function (event) {
+            const modal = document.getElementById(
+                "modalCalificaciones",
+            ) as HTMLElement;
+            if (event.target === modal && modal) {
+                modal.style.display = "none";
+            }
+        });
+    </script>
+</Layout>

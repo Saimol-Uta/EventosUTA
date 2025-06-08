@@ -1,11 +1,14 @@
 ---
-import InformacionUsuario from "../components/InformacionUsuario.astro";
-import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
-import Navbar from "../components/Navbar.astro";
+import InformacionUsuario from "@components/InformacionUsuario.astro";
+import Layout from "@layouts/Layout.astro";
+import Header from "@components/Header.astro";
+import Navbar from "@components/Navbar.astro";
 import { actions } from "astro:actions";
-import type { Usuario } from "../actions/Users/getUserByCedula.action";
+import type { Usuario } from "../../actions/Users/getUserByCedula.action";
 
+// Obtener las carreras disponibles
+const { data: carrerasData } = await Astro.callAction(actions.getCarreras, {});
+const carreras = carrerasData?.carreras || [];
 type SafeResult<T> = {
     success: boolean;
     value?: T | null;
@@ -267,13 +270,20 @@ const camposFormulario = [
         title: "Número de teléfono de 10 dígitos",
         oninput: "this.value = this.value.replace(/[^0-9]/g, '')",
         maxlength: "10",
-    },
-    {
+    },    {
         titulo: "Carrera",
         valor: usuario?.id_car_per ?? "",
         name: "id_car_per",
-    },
+        opciones: carreras.map((carrera: any) => ({
+            value: carrera.id_car,
+            text: `${carrera.nom_car}${carrera.cod_car ? ` (${carrera.cod_car})` : ''}`
+        }))    },
 ];
+
+console.log("CompletarPerfilUser: Campo carrera opciones:", carreras.map((carrera: any) => ({
+    value: carrera.id_car,
+    text: `${carrera.nom_car}${carrera.cod_car ? ` (${carrera.cod_car})` : ''}`
+})));
 
 import { getSession } from "auth-astro/server";
 

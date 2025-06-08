@@ -12,12 +12,6 @@ const initialColor = hasImage ? "bg-green-600" : "bg-red-800";
 const initialLabel = hasImage ? "✓ Imagen" : label;
 
 // ✅ Debug props
-console.log(`🔍 DocumentButton Debug (${label}):`, {
-    cuentaId,
-    currentImage,
-    fieldName,
-    hasImage,
-});
 ---
 
 <!-- ✅ Cambio: Usar un único contenedor con todos los datos -->
@@ -42,7 +36,7 @@ console.log(`🔍 DocumentButton Debug (${label}):`, {
 
     <!-- Indicador de carga -->
     <div
-        class="loading-indicator absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center hidden"
+        class="loading-indicator absolute inset-0 bg-black bg-opacity-50 rounded-full items-center justify-center hidden"
     >
         <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white">
         </div>
@@ -80,14 +74,6 @@ console.log(`🔍 DocumentButton Debug (${label}):`, {
         const cuentaId = container.getAttribute("data-cuenta-id");
         const fieldName = container.getAttribute("data-field-name");
         const currentImage = container.getAttribute("data-current-image");
-
-        console.log("🔍 Datos obtenidos del contenedor:", {
-            cuentaId,
-            fieldName,
-            currentImage,
-            fileName: file.name,
-            fileSize: file.size,
-        });
 
         // Validar datos
         if (!cuentaId || !fieldName) {
@@ -226,8 +212,10 @@ console.log(`🔍 DocumentButton Debug (${label}):`, {
 
         if (show) {
             loadingIndicator.classList.remove("hidden");
+            loadingIndicator.classList.add("flex");
         } else {
             loadingIndicator.classList.add("hidden");
+            loadingIndicator.classList.remove("flex");
         }
     }
 
