@@ -1,12 +1,14 @@
 ---
+interface CampoFormulario {
+  titulo: string;
+  valor: string;
+  name: string;
+  tipo?: "select"; // por defecto será input de texto si no se indica
+  opciones?: { valor: string; texto: string }[]; // solo si tipo === "select"
+}
+
 interface Props {
-  camposFormulario: {
-    titulo: string;
-    valor: string;
-    name: string;
-    tipo?: "text" | "select";
-    opciones?: { valor: string; texto: string }[];
-  }[];
+  camposFormulario: CampoFormulario[];
   cedula: string;
   mostrarBotones: boolean;
   textoBotonGuardarInfo: string;
@@ -14,6 +16,7 @@ interface Props {
   textoBotonMasTarde: string;
   textoBotonAsociar?: string;
 }
+
 const {
   camposFormulario,
   cedula,
@@ -21,12 +24,13 @@ const {
   textoBotonGuardarInfo,
   textoBotonCancelar,
   textoBotonMasTarde,
+  textoBotonAsociar,
 } = Astro.props as Props;
-
 ---
 
-<h1>Edicion de tu Informacion</h1>
+<h1>Edición de tu Información</h1>
 <p class="subtitulo">Completa tus datos:</p>
+
 <form method="POST">
   <input type="hidden" name="action" value="guardarInfo" />
 
@@ -34,31 +38,42 @@ const {
     <div>
       <label for={campo.name}>{campo.titulo}</label>
 
-      {campo.tipo === "select" ? (
-        <select id={campo.name} name={campo.name} required>
-          <option value="">Seleccione una opción</option>
-          {campo.opciones?.map((op) => (
-            <option value={op.valor} selected={campo.valor === op.valor}>
-              {op.texto}
-            </option>
-          ))}
-        </select>
+      {campo.tipo === "select" && campo.opciones ? (
+  <select name={campo.name} id={campo.name} required>
+    <option value="" disabled selected={!campo.valor}>Selecciona una opción</option>
+    {campo.opciones.map(op => (
+      <option
+        value={op.valor}
+        selected={op.valor === campo.valor}
+      >
+        {op.texto}
+      </option>
+    ))}
+  </select>
+
       ) : (
         <input
           id={campo.name}
           name={campo.name}
           value={campo.valor}
-          required={campo.name !== "nom_usu2" && campo.name !== "ape_usu2"}
+          required={["nom_usu1", "ape_usu1", "fec_nac_usu", "num_tel_usu", "id_car_per"].includes(campo.name)}
           type={campo.name === "fec_nac_usu" ? "date" : "text"}
         />
       )}
     </div>
   ))}
 
-  <button type="submit" class="submit-button">Completar Registro</button>
+  {mostrarBotones && (
+    <div style="grid-column: 1 / -1;">
+      <button type="submit" class="submit-button">{textoBotonGuardarInfo}</button>
+      <button type="submit" name="action" value="cancelar">{textoBotonCancelar}</button>
+      <button type="submit" name="action" value="masTarde">{textoBotonMasTarde}</button>
+      {textoBotonAsociar && (
+        <button type="submit" name="action" value="asociar">{textoBotonAsociar}</button>
+      )}
+    </div>
+  )}
 </form>
-
-
 
 <style>
   h1 {
@@ -74,15 +89,6 @@ const {
     margin-bottom: 2rem;
   }
 
-  .section-title {
-    font-weight: 600;
-    color: #1f2937;
-    font-size: 18px;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    grid-column: 1 / -1;
-  }
-
   form {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -92,41 +98,27 @@ const {
   label {
     display: block;
     font-weight: 500;
-    margin-bottom: 6px;
-    color: #111827;
+    margin-bottom: 0.5rem;
   }
 
-  input,
-  select {
+  input, select {
     width: 100%;
-    padding: 12px;
-    font-size: 15px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    outline: none;
-  }
-
-  input:focus,
-  select:focus {
-    border-color: #991b1b;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
   }
 
   .submit-button {
-    grid-column: 1 / -1;
-    background-color: #991b1b;
+    background-color: #2563eb;
     color: white;
-    font-size: 16px;
-    padding: 14px 40px;
+    padding: 0.75rem 1.25rem;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s ease-in-out;
-    margin-top: 1rem;
+    margin-right: 1rem;
   }
 
   .submit-button:hover {
-    background-color: #7f1d1d;
+    background-color: #1d4ed8;
   }
 </style>

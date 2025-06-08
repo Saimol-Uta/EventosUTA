@@ -12,6 +12,14 @@ type SafeResult<T> = {
   value?: T | null;
   error?: string;
 };
+type CampoFormulario = {
+  titulo: string;
+  valor: string;
+  name: string;
+  tipo?: "select";
+  opciones?: { valor: string; texto: string }[];
+};
+
 
 type ResultadoSetUser = {
   success?: boolean;
@@ -75,7 +83,7 @@ const resultadoCarreras = await Astro.callAction(actions.getCarreras, {});
 const listaCarreras = resultadoCarreras?.data?.carreras ?? [];
 
 
-const camposFormulario = [
+const camposFormulario: CampoFormulario[] = [
   { titulo: "Cédula", valor: usuario?.ced_usu ?? "", name: "ced_usu" },
   { titulo: "Primer nombre", valor: usuario?.nom_usu1 ?? "", name: "nom_usu1" },
   { titulo: "Segundo nombre", valor: usuario?.nom_usu2 ?? "", name: "nom_usu2" },
@@ -83,9 +91,18 @@ const camposFormulario = [
   { titulo: "Segundo apellido", valor: usuario?.ape_usu2 ?? "", name: "ape_usu2" },
   { titulo: "Fecha de nacimiento", valor: formatDate(usuario?.fec_nac_usu ?? null), name: "fec_nac_usu" },
   { titulo: "Teléfono", valor: usuario?.num_tel_usu ?? "", name: "num_tel_usu" },
-{ titulo: "Carrera", valor: usuario?.id_car_per ?? "", name: "id_car_per" },
-
+  {
+    titulo: "Carrera",
+    valor: usuario?.id_car_per ?? "",
+    name: "id_car_per",
+    tipo: "select",
+    opciones: listaCarreras.map((car: any) => ({
+      valor: car.id_car,
+      texto: car.nom_car,
+    })),
+  },
 ];
+
 
 const textoGuardarInfo = "Guardar Información";
 const textoCancelar = "Cancelar";
