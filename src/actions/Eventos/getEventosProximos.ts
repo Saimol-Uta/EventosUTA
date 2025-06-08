@@ -15,7 +15,8 @@ export const getEventosProximos = defineAction({
         },
         select: {
           nom_eve: true,        
-          fec_ini_eve: true,    
+          fec_ini_eve: true,  
+          img_eve: true  
         },
       });
 
