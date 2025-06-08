@@ -1,30 +1,51 @@
 ---
 interface NavLink {
-  label: string;
-  href: string;
+    label: string;
+    href: string;
 }
-const { links = [] }: { links?: NavLink[] } = Astro.props;
+
+const links = [
+    { label: "Eventos", href: "/Admin/EventosCRUD" },
+    { label: "Usuarios", href: "/CrudUsuarios" },
+    { label: "Organizadores", href: "/Admin/OrganizadoresCRUD" },
+    { label: "Inscripciones", href: "/Admin/gestionEventos" },
+    { label: "Categorías", href: "/Admin/gestionCategoria" },
+    { label: "Carreras", href: "/Admin/CarrerasCRUD" },
+    { label: "Asignaciones", href: "/Admin/Asignaciones" },
+];
 ---
+
 <nav class="border-b border-gray-300">
-  <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">
-  
+    <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">
+        <input type="checkbox" id="menu-toggle" class="hidden peer" />
+        <label for="menu-toggle" class="md:hidden cursor-pointer">
+            <svg
+                class="w-6 h-6 text-brown-900"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </label>
 
-    <input type="checkbox" id="menu-toggle" class="hidden peer" />
-    <label for="menu-toggle" class="md:hidden cursor-pointer">
-      <svg class="w-6 h-6 text-brown-900" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-    </label>
-
-    <div class="hidden peer-checked:flex flex-col md:flex md:flex-row gap-4 md:gap-10 mt-4 md:mt-0">
-      {links.map(link => (
-        <a
-          href={link.href}
-          class="text-brown-900 font-semibold px-2 py-1 rounded hover:text-red-700 hover:bg-gray-100 transition-colors"
+        <div
+            class="hidden peer-checked:flex flex-col md:flex md:flex-row gap-4 md:gap-10 mt-4 md:mt-0"
         >
-          {link.label}
-        </a>
-      ))}
+            {
+                links.map((link) => (
+                    <a
+                        href={link.href}
+                        class="text-brown-900 font-semibold px-2 py-1 rounded hover:text-red-700 hover:bg-gray-100 transition-colors"
+                    >
+                        {link.label}
+                    </a>
+                ))
+            }
+        </div>
     </div>
-  </div>
 </nav>
