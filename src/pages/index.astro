@@ -11,19 +11,18 @@ import ContenedorInfo from "@/components/ContenedorInfo.astro";
 import prisma from "@/db";
 
 const session = await getSession(Astro.request);
-let esAdmin =false;
+let esAdmin = false;
 
 if (session && session.user) {
-      const user = session.user as CustomUser;
+    const user = session.user as CustomUser;
     const rol = user.rol?.toUpperCase();
     if (rol === "ADMINISTRADOR" || rol === "MASTER") {
-       esAdmin= true;
-    } 
+        esAdmin = true;
+    }
 }
 
-
 const pagina = await prisma.pagina_principal.findUnique({
-  where: { id_pag: 1 },
+    where: { id_pag: 1 },
 });
 ---
 
@@ -33,7 +32,7 @@ const pagina = await prisma.pagina_principal.findUnique({
     <InformacionFacultad
         tituloFacultad="Facultad de Ciencias de la Computación"
         tituloDescripcion="Descripción"
-        contenidoDescripcion= {pagina?.des_pag ?? ""}
+        contenidoDescripcion={pagina?.des_pag ?? ""}
         imagenDescripcion="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
         tituloMision="Misión"
         contenidoMision={pagina?.mis_pag ?? ""}
@@ -41,7 +40,7 @@ const pagina = await prisma.pagina_principal.findUnique({
         tituloVision="Visión"
         contenidoVision={pagina?.vis_pag ?? ""}
         imagenVision="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-       modoAdmin={esAdmin} 
+        modoAdmin={esAdmin}
     />
     <Footer />
 </Layout>
