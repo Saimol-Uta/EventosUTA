@@ -280,10 +280,7 @@ const camposFormulario = [
         }))    },
 ];
 
-console.log("CompletarPerfilUser: Campo carrera opciones:", carreras.map((carrera: any) => ({
-    value: carrera.id_car,
-    text: `${carrera.nom_car}${carrera.cod_car ? ` (${carrera.cod_car})` : ''}`
-})));
+
 
 import { getSession } from "auth-astro/server";
 

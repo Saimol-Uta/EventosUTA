@@ -11,36 +11,44 @@ import { getSession } from "auth-astro/server";
 const session = await getSession(Astro.request);
 
 const { data: cuenta } = await Astro.callAction(
-  actions.getCuentaById,
-  session?.user?.id || ""
+    actions.getCuentaByIdSingle,
+    session?.user?.id || "",
 );
 
 if (!cuenta?.usuarios?.ced_usu) {
-  return Astro.redirect("/User/CompletarPerfilUser");
+    return Astro.redirect("/User/CompletarPerfilUser");
 }
 
 const idUsuario = cuenta?.id_usu_per;
 
-let eventosUsuario = [];
-let upcomingEvents = [];
-let certificates = [];
+let eventosUsuario: any[] = [];
+let upcomingEvents: any[] = [];
+let certificates: any[] = [];
 
 if (idUsuario && typeof idUsuario === "string") {
-  const { data: eventosData } = await Astro.callAction(actions.getEventosPorUsuario, {
-    idUsuario,
-  });
-  eventosUsuario = eventosData?.eventos ?? [];
+    const { data: eventosData } = await Astro.callAction(
+        actions.getEventosPorUsuario,
+        {
+            idUsuario,
+        },
+    );
+    eventosUsuario = eventosData?.eventos ?? [];
 
-  const { data: resultCertificados } = await Astro.callAction(actions.getCertificadosPorUsuario, {
-    idUsuario,
-  });
-  certificates = resultCertificados?.enlaces ?? [];
+    const { data: resultCertificados } = await Astro.callAction(
+        actions.getCertificadosPorUsuario,
+        {
+            idUsuario,
+        },
+    );
+    certificates = resultCertificados?.enlaces ?? [];
 }
 
-const { data: resultProximos } = await Astro.callAction(actions.getEventosProximos, {});
+const { data: resultProximos } = await Astro.callAction(
+    actions.getEventosProximos,
+    {},
+);
 upcomingEvents = resultProximos?.eventos ?? [];
 ---
-
 
 <html lang="es">
     <head>
@@ -50,70 +58,78 @@ upcomingEvents = resultProximos?.eventos ?? [];
         <Header />
         <NavBar />
 
-    <div class="flex flex-col md:flex-row gap-6 p-6">
-      <!-- Perfil del Usuario -->
-      <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
-        <Avatar
-          defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
-          size="w-50 h-50"
-        />
-        <p class="text-red-800 font-semibold text-lg">
-          {session?.user?.name || "Usuario Anónimo"}
-        </p>
-        <Button text="Editar Perfil" href="../PerfilUserDos" />
-        <div class="text-center mt-4 text-red-800">Documentos</div>
-        <div class="flex gap-2 mt-2">
-          <DocumentButton
-            label="Cédula"
-            cuentaId={session?.user?.id}
-            currentImage={cuenta?.enl_ced_cue}
-            fieldName="enl_ced_cue"
-            size="w-24 h-24"
-          />
-          <DocumentButton
-            label="Matrícula"
-            cuentaId={session?.user?.id}
-            currentImage={cuenta?.enl_mat_cue}
-            fieldName="enl_mat_cue"
-            size="w-24 h-24"
-          />
-          <DocumentButton
-            label="Extensión"
-            cuentaId={session?.user?.id}
-            currentImage={cuenta?.enl_ext_cue}
-            fieldName="enl_ext_cue"
-            size="w-24 h-24"
-          />
-        </div>
-      </div>
-
-      <!-- Contenido principal -->
-      <div class="w-full md:w-3/4 flex flex-col gap-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-          <!-- Eventos Próximos -->
-          <Card title="Eventos Próximos">
-            <div class="flex flex-col gap-y-4">
-              {
-                upcomingEvents.slice(0, 4).map((evento) => (
-                  <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                    <strong>{evento.nom_eve}</strong><br />
-                    <span class="text-sm text-gray-600">
-                      Inicio: {new Date(evento.fec_ini_eve).toLocaleDateString()}
-                    </span>
-                  </div>
-                ))
-              }
-              {
-                upcomingEvents.length > 4 && (
-                  <a href="/eventosProximos" class="text-red-800 underline text-sm mt-2">
-                    Ver más...
-                  </a>
-                )
-              }
-
+        <div class="flex flex-col md:flex-row gap-6 p-6">
+            <!-- Perfil del Usuario -->
+            <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
+                <Avatar
+                    defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
+                    size="w-50 h-50"
+                />
+                <p class="text-red-800 font-semibold text-lg">
+                    {session?.user?.name || "Usuario Anónimo"}
+                </p>
+                <Button text="Editar Perfil" href="../PerfilUserDos" />
+                <div class="text-center mt-4 text-red-800">Documentos</div>
+                <div class="flex gap-2 mt-2">
+                    <DocumentButton
+                        label="Cédula"
+                        cuentaId={session?.user?.id}
+                        currentImage={cuenta?.enl_ced_cue}
+                        fieldName="enl_ced_cue"
+                        size="w-24 h-24"
+                    />
+                    <DocumentButton
+                        label="Matrícula"
+                        cuentaId={session?.user?.id}
+                        currentImage={cuenta?.enl_mat_cue}
+                        fieldName="enl_mat_cue"
+                        size="w-24 h-24"
+                    />
+                    <DocumentButton
+                        label="Extensión"
+                        cuentaId={session?.user?.id}
+                        currentImage={cuenta?.enl_ext_cue}
+                        fieldName="enl_ext_cue"
+                        size="w-24 h-24"
+                    />
+                </div>
             </div>
-   </Card>
-                               <!-- Certificados -->
+
+            <!-- Contenido principal -->
+            <div class="w-full md:w-3/4 flex flex-col gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+                    <!-- Eventos Próximos -->
+                    <Card title="Eventos Próximos">
+                        <div class="flex flex-col gap-y-4">
+                            {
+                                upcomingEvents.slice(0, 4).map((evento) => (
+                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
+                                        <>
+                                            <strong>{evento.nom_eve}</strong>
+                                            <br />
+                                        </>
+                                        <span class="text-sm text-gray-600">
+                                            Inicio:{" "}
+                                            {new Date(
+                                                evento.fec_ini_eve,
+                                            ).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                ))
+                            }
+                            {
+                                upcomingEvents.length > 4 && (
+                                    <a
+                                        href="/eventosProximos"
+                                        class="text-red-800 underline text-sm mt-2"
+                                    >
+                                        Ver más...
+                                    </a>
+                                )
+                            }
+                        </div>
+                    </Card>
+                    <!-- Certificados -->
                     <Card title="Certificados">
                         <div class="flex flex-col gap-y-4">
                             {

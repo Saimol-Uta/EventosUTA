@@ -39,7 +39,7 @@ function formatearAsistencia(asiPar: number | null | undefined): {
     if (asiPar === null || asiPar === undefined) {
         return { texto: "Sin registrar", clase: "sin-registrar" };
     }
-    return asiPar === 1
+    return asiPar === 100
         ? { texto: "Asistió", clase: "si" }
         : { texto: "No asistió", clase: "no" };
 }
@@ -186,10 +186,7 @@ const links = [
                         >
                             SVG
                         </button>
-                        <button
-                            class="btn-pdf"
-                            onclick="exportarPDF()"
-                        >
+                        <button class="btn-pdf" onclick="exportarPDF()">
                             PDF
                         </button>
                     </div>
@@ -570,8 +567,8 @@ const links = [
     <script>
         import { actions } from "astro:actions";
         import Swal from "sweetalert2";
-        import jsPDF from 'jspdf';
-        import autoTable from 'jspdf-autotable';
+        import jsPDF from "jspdf";
+        import autoTable from "jspdf-autotable";
 
         // Declarar tipos para funciones globales
         declare global {
@@ -796,68 +793,100 @@ const links = [
             // Esperar a que ambos logos estén listos
             logoFISEI.onload = () => {
                 logoUTA.onload = () => {
-                const doc = new jsPDF();
+                    const doc = new jsPDF();
 
-                const eventoNombre =
-                    document.querySelector(".evento-nombre")?.textContent?.replace("- ", "") || "Evento";
+                    const eventoNombre =
+                        document
+                            .querySelector(".evento-nombre")
+                            ?.textContent?.replace("- ", "") || "Evento";
 
-                // Insertar logos
-                const anchoLogoFISEI = 60;
-                const altoLogoFISEI = 20.4;
-                const anchoLogoUTA = 21.1;
-                const altoLogoUTA = 20.4;
+                    // Insertar logos
+                    const anchoLogoFISEI = 60;
+                    const altoLogoFISEI = 20.4;
+                    const anchoLogoUTA = 21.1;
+                    const altoLogoUTA = 20.4;
 
-                // Logo FISEI izquierda
-                doc.addImage(logoFISEI, "PNG", 14, 10, anchoLogoFISEI, altoLogoFISEI);
-
-                // Logo UTA derecha
-                doc.addImage(logoUTA, "PNG", 172, 10, anchoLogoUTA, altoLogoUTA);
-
-                // Espaciado base
-                const baseY = 40;
-
-                doc.setFontSize(14);
-                doc.text("Calificaciones del Evento:", 14, baseY);
-
-                doc.setFontSize(12);
-                doc.text(eventoNombre, 14, baseY + 4);
-                doc.text(`Fecha de exportación: ${new Date().toLocaleDateString("es-ES")}`, 14, baseY + 16);
-
-                // Tabla
-                const head = [["Nombres", "Apellidos", "Asistencia", "Nota", "Estado"]];
-                const body: string[][] = [];
-
-                const filas = document.querySelectorAll(
-                    '.registro-fila[data-estado]:not([style*="display: none"])'
-                );
-
-                filas.forEach((fila) => {
-                    const celdas = fila.querySelectorAll(".parte-izquierda-registro-fila");
-                    const filaTexto = Array.from(celdas).map(
-                    (celda) => (celda.textContent ?? "").trim()
+                    // Logo FISEI izquierda
+                    doc.addImage(
+                        logoFISEI,
+                        "PNG",
+                        14,
+                        10,
+                        anchoLogoFISEI,
+                        altoLogoFISEI,
                     );
-                    body.push(filaTexto);
-                });
 
-                if (body.length === 0) {
-                    alert("No hay datos visibles para exportar.");
-                    return;
-                }
+                    // Logo UTA derecha
+                    doc.addImage(
+                        logoUTA,
+                        "PNG",
+                        172,
+                        10,
+                        anchoLogoUTA,
+                        altoLogoUTA,
+                    );
 
-                autoTable(doc, {
-                    head,
-                    body,
-                    startY: baseY + 25,
-                    headStyles: { fillColor: [176, 16, 37] },
-                    styles: { fontSize: 10 },
-                });
+                    // Espaciado base
+                    const baseY = 40;
 
-                const fecha = new Date().toISOString().split("T")[0];
-                doc.save(`calificaciones_${eventoNombre.replace(/\s+/g, "_")}_${fecha}.pdf`);
+                    doc.setFontSize(14);
+                    doc.text("Calificaciones del Evento:", 14, baseY);
+
+                    doc.setFontSize(12);
+                    doc.text(eventoNombre, 14, baseY + 4);
+                    doc.text(
+                        `Fecha de exportación: ${new Date().toLocaleDateString("es-ES")}`,
+                        14,
+                        baseY + 16,
+                    );
+
+                    // Tabla
+                    const head = [
+                        [
+                            "Nombres",
+                            "Apellidos",
+                            "Asistencia",
+                            "Nota",
+                            "Estado",
+                        ],
+                    ];
+                    const body: string[][] = [];
+
+                    const filas = document.querySelectorAll(
+                        '.registro-fila[data-estado]:not([style*="display: none"])',
+                    );
+
+                    filas.forEach((fila) => {
+                        const celdas = fila.querySelectorAll(
+                            ".parte-izquierda-registro-fila",
+                        );
+                        const filaTexto = Array.from(celdas).map((celda) =>
+                            (celda.textContent ?? "").trim(),
+                        );
+                        body.push(filaTexto);
+                    });
+
+                    if (body.length === 0) {
+                        alert("No hay datos visibles para exportar.");
+                        return;
+                    }
+
+                    autoTable(doc, {
+                        head,
+                        body,
+                        startY: baseY + 25,
+                        headStyles: { fillColor: [176, 16, 37] },
+                        styles: { fontSize: 10 },
+                    });
+
+                    const fecha = new Date().toISOString().split("T")[0];
+                    doc.save(
+                        `calificaciones_${eventoNombre.replace(/\s+/g, "_")}_${fecha}.pdf`,
+                    );
                 };
 
                 logoUTA.onerror = () => {
-                alert("No se pudo cargar el logo de UTA.");
+                    alert("No se pudo cargar el logo de UTA.");
                 };
             };
 
@@ -866,9 +895,6 @@ const links = [
             };
         };
 
-
-
-        
         // Cerrar modal al hacer clic fuera
         window.addEventListener("click", function (event) {
             const modal = document.getElementById(
