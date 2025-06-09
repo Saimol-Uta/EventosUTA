@@ -180,11 +180,18 @@ const links = [
                             <option value="REPROBADA">Reprobadas</option>
                             <option value="ASISTIO">Solo Asistió</option>
                         </select>
+                        Exportar
                         <button
                             class="btn-exportar"
                             onclick="exportarCalificaciones()"
                         >
-                            Exportar
+                            SVG
+                        </button>
+                        <button
+                            class="btn-pdf"
+                            onclick="exportarCalificaciones()"
+                        >
+                            PDF
                         </button>
                     </div>
                 </div>
@@ -308,231 +315,6 @@ const links = [
         </main>
     </body>
 
-    <style>
-        /* Estilos para badges de asistencia */
-        .badge-asistencia {
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .badge-asistencia.si {
-            background-color: #28a745;
-            color: white;
-        }
-        .badge-asistencia.no {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .badge-asistencia.sin-registrar {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        /* Estilos para badges de estado */
-        .badge-estado {
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .badge-estado.pendiente {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .badge-estado.aprobada {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .badge-estado.reprobada {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .badge-estado.asistio {
-            background-color: #17a2b8;
-            color: white;
-        }
-
-        /* Estilos para la nota */
-        .nota-display {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #333;
-        }
-
-        /* Botón exportar */
-        .btn-exportar {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            margin-left: 0.5rem;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-exportar:hover {
-            background-color: #218838;
-        }
-
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            color: #333;
-        }
-
-        .close {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-        }
-
-        .close:hover {
-            color: #333;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 1.5rem;
-        }
-
-        .btn-cancelar,
-        .btn-guardar {
-            padding: 0.5rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-cancelar {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-guardar {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .btn-calificar {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.25rem;
-        } /* Estilos adicionales para mejorar la apariencia */
-        .sin-participantes {
-            text-align: center;
-            padding: 2rem;
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        .evento-nombre {
-            color: #007bff;
-            font-weight: bold;
-        }
-
-        .total-participantes {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .select-estado {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-right: 0.5rem;
-        }
-
-        .registro-fila[data-estado] {
-            transition: opacity 0.3s ease;
-        }
-
-        .btn-calificar:hover {
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-
-        @media (max-width: 768px) {
-            .modal-content {
-                width: 95%;
-                margin: 1rem;
-            }
-
-            .modal-actions {
-                flex-direction: column;
-            }
-
-            .btn-cancelar,
-            .btn-guardar {
-                width: 100%;
-            }
-        }
-    </style>
     <script>
         import { actions } from "astro:actions";
         import Swal from "sweetalert2";
