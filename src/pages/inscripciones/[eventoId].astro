@@ -318,21 +318,20 @@ const links = [
             currentInscripcionId: string;
             currentInscripcionIdPago: string;
         }
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
+    }    document.addEventListener("DOMContentLoaded", function () {
         const filtroSelect = document.getElementById(
             "filtros",
         ) as HTMLSelectElement;
         const filas = document.querySelectorAll(".registro-fila[data-estado]");
 
-        // Obtener datos de inscripciones del input hidden
+        // Obtener datos de inscripciones del input hidden y hacerlos disponibles globalmente
         const inscripcionesInput = document.getElementById(
             "inscripciones-data",
         ) as HTMLInputElement;
         if (inscripcionesInput && inscripcionesInput.value) {
             try {
                 inscripcionesData = JSON.parse(inscripcionesInput.value);
+                (window as any).inscripcionesData = inscripcionesData; // Hacer disponible globalmente
                 console.log(
                     "Datos de inscripciones cargados:",
                     inscripcionesData,
@@ -344,6 +343,12 @@ const links = [
                         "ID de primera inscripción:",
                         inscripcionesData[0].id_ins,
                     );
+                    console.log("Documentos disponibles:", {
+                        cedula: inscripcionesData[0].usuarios?.cuentas?.[0]?.enl_ced_cue,
+                        matricula: inscripcionesData[0].usuarios?.cuentas?.[0]?.enl_mat_cue,
+                        motivacion: inscripcionesData[0].usuarios?.cuentas?.[0]?.enl_ext_cue,
+                        comprobantePago: inscripcionesData[0].enl_ord_pag_ins
+                    });
                 }
             } catch (e) {
                 console.error("Error al parsear datos de inscripciones:", e);
@@ -374,7 +379,7 @@ const links = [
     // Función para encontrar inscripción por ID
     function findInscripcionById(inscripcionId: string) {
         return inscripcionesData.find((ins) => ins.id_ins === inscripcionId);
-    } // Funciones para modales con parámetros de inscripción
+    }    // Funciones para modales con parámetros de inscripción
     function abrirModalDetallesInscripcion(inscripcionId: string) {
         console.log(
             "Abriendo modal de detalles para inscripción:",
@@ -387,48 +392,20 @@ const links = [
             return;
         }
 
-        // Llenar los datos en el modal
-        const nombreCompleto =
-            `${inscripcion.usuarios?.nom_usu1 || ""} ${inscripcion.usuarios?.nom_usu2 || ""}`.trim();
-        const apellidoCompleto =
-            `${inscripcion.usuarios?.ape_usu1 || ""} ${inscripcion.usuarios?.ape_usu2 || ""}`.trim();
-        const correo =
-            inscripcion.usuarios?.cuentas?.[0]?.cor_cue || "No disponible";
-
-        // Actualizar elementos del modal
+        // Actualizar el título del modal con el nombre del evento
         const modalTitulo = document.querySelector("#modalDetallesReserva h2");
-        const usuarioNombres = document.getElementById("usuario-nombres");
-        const usuarioApellidos = document.getElementById("usuario-apellidos");
-        const usuarioCorreo = document.getElementById("usuario-correo");
-        const usuarioCedula = document.getElementById("usuario-cedula");
-
         if (modalTitulo)
-            modalTitulo.textContent = inscripcion.eventos?.nom_eve || "Evento";
-        if (usuarioNombres) usuarioNombres.textContent = nombreCompleto;
-        if (usuarioApellidos) usuarioApellidos.textContent = apellidoCompleto;
-        if (usuarioCorreo) usuarioCorreo.textContent = correo;
-        if (usuarioCedula)
-            usuarioCedula.textContent =
-                inscripcion.usuarios?.ced_usu || "No disponible";
-
-        // ELIMINAR ESTA PARTE QUE CAUSA LA RECURSIÓN INFINITA:
-        // if (window.abrirModalDetallesInscripcion) {
-        //     window.abrirModalDetallesInscripcion(inscripcionId);
-        // } else {
-        //     // Fallback: abrir modal directamente y establecer datos
-        //     const modal = document.getElementById("modalDetallesReserva");
-        //     if (modal) {
-        //         modal.style.display = "block";
-        //         window.currentInscripcionId = inscripcionId;
-        //     }
-        // }
-
-        // REEMPLAZAR CON ESTO:
-        // Abrir el modal directamente
-        const modal = document.getElementById("modalDetallesReserva");
-        if (modal) {
-            modal.style.display = "block";
-            window.currentInscripcionId = inscripcionId;
+            modalTitulo.textContent = inscripcion.eventos?.nom_eve || "Evento";        // Llamar a la función del modal component para que maneje todo
+        const modalFunction = (window as any).abrirModalDetallesInscripcionComponent;
+        if (modalFunction && typeof modalFunction === 'function') {
+            modalFunction(inscripcionId);
+        } else {
+            // Fallback: abrir modal directamente
+            const modal = document.getElementById("modalDetallesReserva");
+            if (modal) {
+                modal.style.display = "block";
+                window.currentInscripcionId = inscripcionId;
+            }
         }
     }
     function abrirModalPagoInscripcion(inscripcionId: string) {

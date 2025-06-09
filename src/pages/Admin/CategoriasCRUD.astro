@@ -7,83 +7,34 @@ import ModalNuevaCategoria from "../../components/Admin/CategoriasCRUD/ModalNuev
 import "../../styles/Admin/EventosCRUD.css";
 import { actions } from "astro:actions";
 
-const searchParams = Astro.url.searchParams;
-const categoriaFiltro = searchParams.get("categoria");
-
-// Obtener eventos con información relacionada
-const { data, error } = await Astro.callAction(actions.getEventos, {
-    categoria: categoriaFiltro || undefined,
-});
-
-// Obtener categorías para el filtro
-const { data: categoriasData } = await Astro.callAction(actions.getCategorias, {});
-const { data: organizadoresData } = await Astro.callAction(actions.getOrganizadores, {});
+// Obtener categorías
+const { data, error } = await Astro.callAction(actions.getAllCategorias, {});
 
 if (error) {
-    console.error("Error al obtener eventos:", error);
+    console.error("Error al obtener categorías:", error);
 }
 
-const eventos = data?.eventos || [];
-const categorias = categoriasData?.categorias || [];
-const organizadores = organizadoresData?.organizadores || [];
-
-// Obtener información completa de cada evento
-const eventosCompletos = await Promise.all(
-    eventos.map(async (evento: any) => {
-        const organizador = await Astro.callAction(
-            actions.getOrganizadorByEvento,
-            { id_evento: evento.id_eve }
-        );
-
-        const categoria = await Astro.callAction(
-            actions.getCategoriaById,
-            { id_categoria: evento.id_cat_eve }
-        );
-
-        return {
-            ...evento,
-            organizador: organizador.data,
-            categoria: categoria.data,
-        };
-    })
-);
+const categorias = data?.categorias || [];
 
 ---
 
 <Layout>
     <body>
         <Header />
+
         <MenuAdmin />
         <ModalModificarCategoria categorias={categorias} organizadores={organizadores} />
         <ModalNuevaCategoria categorias={categorias} organizadores={organizadores} />
+
 
         <main class="registros">
             <div class="registros-grid">
                 <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Categorías                        <select
-                            id="filtroCategoria"
-                            class="select-estado"
-                            onchange="window.location.href = `?categoria=${this.value}`"
-                        >
-                            <option value="" selected={!categoriaFiltro}>
-                                Todas las categorías
-                            </option>
-                            {categorias.map((categoria: any) => (
-                                <option
-                                    value={categoria.nom_cat}
-                                    selected={categoriaFiltro === categoria.nom_cat}
-                                >
-                                    {categoria.nom_cat}
-                                </option>
-                            ))}
-                        </select>
+                        <h1 class="titulo-principal">Gestión de Categorías</h1>
                     </div>
                     <div class="registros-superior-derecho">
-                        <a
-                            onclick="window.abrirModalNuevaCategoria()"
-                            class="contenedor-boton-nuevo-registro"
-                        >
+                        <a onclick="abrirModalNuevaCategoria()" class="contenedor-boton-nuevo-registro">
                             <button class="boton-nuevo-registro" title="Nuevo">
                                 Nueva Categoría
                             </button>
@@ -95,70 +46,71 @@ const eventosCompletos = await Promise.all(
                 <div class="registros-inferior-titulos">
                     <div class="registro-fila">
                         <div class="parte-izquierda-registro-encabezado">
+                            ID
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
                             Nombre
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
                             Descripción
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
-                            Puntaje de Aprobación
+                            Puntaje Aprobación
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
-                            Asistencia para Aprobación
+                            Asistencia
                         </div>
                         <div class="parte-derecha-registro-encabezado">
                             Opciones
                         </div>
                     </div>
-                </div>
-                <div class="registros-inferior">
-                    {
-                        eventosCompletos.map((evento) => (
-                            <input
-                                type="hidden"
-                                name="evento"
-                                value={JSON.stringify(evento)}
-                            />
-                            <div class="registro-fila">
-                                <div class="parte-izquierda-registro-fila">
-                                    {evento.nom_eve}
-                                </div>
-                                <div class="parte-izquierda-registro-fila">
-                                    {evento.categoria?.data?.nom_cat || "N/A"}
-                                </div>
-                                <div class="parte-izquierda-registro-fila">
-                                    {evento.are_eve || "N/A"}
-                                </div>
-                                <div class="parte-izquierda-registro-fila">
-                                    {new Date(evento.fec_ini_eve)
-                                        .toISOString()
-                                        .split("T")[0]}
-                                </div>
-                                <div class="registro-opciones">                                  
-                                    <button
-                                        title="Eliminar"
-                                        onclick={`eliminarEvento('${evento.id_eve}')`}
-                                    >
-                                        <img
-                                            src="/img/CRUD/eliminar-registro.svg"
-                                            alt="boton eliminar registro"
-                                            class="imagen-boton-registro"
-                                        />
-                                    </button>
-                                    <button
-                                        title="Modificar"
-                                        onclick={`window.abrirModalModificarCategoria('${evento.id_eve}')`}
-                                    >
-                                        <img
-                                            src="/img/CRUD/modificar-registro.svg"
-                                            alt="boton modificar"
-                                            class="imagen-boton-modificar"
-                                        />
-                                    </button>
-                                </div>
+                </div>                <div class="registros-inferior">
+                    {categorias.map((categoria: any) => (
+                        <input
+                            type="hidden"
+                            name="categoria"
+                            value={JSON.stringify(categoria)}
+                        />
+                        <div class="registro-fila">
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.id_cat}
                             </div>
-                        ))
-                    }
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.nom_cat}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.des_cat}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.pun_apr_cat}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.asi_cat}%
+                            </div>
+                            <div class="registro-opciones">
+                                <button
+                                    title="Eliminar"
+                                    onclick={`eliminarCategoria('${categoria.id_cat}')`}
+                                >
+                                    <img
+                                        src="/img/CRUD/eliminar-registro.svg"
+                                        alt="boton eliminar registro"
+                                        class="imagen-boton-registro"
+                                    />
+                                </button>
+                                <button
+                                    title="Modificar"
+                                    onclick={`window.abrirModalModificarCategoria('${categoria.id_cat}')`}
+                                >
+                                    <img
+                                        src="/img/CRUD/modificar-registro.svg"
+                                        alt="boton modificar"
+                                        class="imagen-boton-modificar"
+                                    />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </main>
@@ -168,39 +120,15 @@ const eventosCompletos = await Promise.all(
             import Swal from "sweetalert2";
 
             // Interfaces para tipado
-            interface Organizador {
-                ced_org: string;
-                nom_org1: string;
-                nom_org2?: string;
-                ape_org1: string;
-                ape_org2: string;
-                tit_aca_org: string;
-            }
-
             interface Categoria {
                 id_cat: string;
                 nom_cat: string;
                 des_cat: string;
+                pun_apr_cat: number;
+                asi_cat: number;
             }
 
-            interface Evento {
-                id_eve: string;
-                nom_eve: string;
-                des_eve: string;
-                fec_ini_eve: string;
-                fec_fin_eve?: string;
-                hor_ini_eve: string;
-                hor_fin_eve?: string;
-                dur_eve?: number;
-                are_eve?: string;
-                ubi_eve: string;
-                img_eve?: string;
-                precio: number;
-                organizador?: Organizador;
-                categoria?: Categoria;
-            }
-
-            async function eliminarEvento(eventoId: string) {
+            async function eliminarCategoria(categoriaId: string) {
                 try {
                     const resultado = await Swal.fire({
                         title: "¿Estás seguro?",
@@ -214,22 +142,22 @@ const eventosCompletos = await Promise.all(
                     });
 
                     if (resultado.isConfirmed) {
-                        const { data, error } = await actions.eliminarEvento({
-                            id_evento: eventoId,
+                        const { data, error } = await actions.eliminarCategoria({
+                            id_cat: categoriaId,
                         });
 
                         if (error || !data?.success) {
                             await Swal.fire({
                                 icon: "error",
                                 title: "Error",
-                                text: data?.error || "No se pudo eliminar el evento",
+                                text: data?.message || "No se pudo eliminar la categoría",
                                 confirmButtonColor: "#dc2626",
                             });
                         } else {
                             await Swal.fire({
                                 icon: "success",
                                 title: "Eliminado",
-                                text: "El evento ha sido eliminado correctamente",
+                                text: "La categoría ha sido eliminada correctamente",
                                 confirmButtonColor: "#059669",
                             }).then(() => {
                                 window.location.reload();
@@ -245,17 +173,17 @@ const eventosCompletos = await Promise.all(
                         confirmButtonColor: "#dc2626",
                     });
                 }
-            }            
-
-            // Hacer funciones disponibles globalmente
+            }
+            
             declare global {
                 interface Window {
-                    eliminarEvento: (eventoId: string) => Promise<void>;
-                    mostrarDetallesEvento: (eventoId: string) => void;
+                    eliminarCategoria: (categoriaId: string) => Promise<void>;
+                    abrirModalModificarCategoria: (categoriaId: string) => void;
+                    abrirModalNuevaCategoria: () => void;
                 }
-            }            window.eliminarEvento = eliminarEvento;
-
-
+            }
+            
+            window.eliminarCategoria = eliminarCategoria;
         </script>
     </body>
 </Layout>

@@ -31,12 +31,20 @@ import "../styles/ModalDetallesInscripcion.css";
                     </p>
                 </div>
             </div>
-
             <div class="seccion-detalles">
                 <h3>Documentación</h3>
                 <div class="info-grid">
                     <p class="centrar campo-factura">
-                        <a href="#">Factura o Comprobante de Pago</a>
+                        <strong>Factura o Comprobante de Pago:</strong>
+                        <a
+                            href="#"
+                            id="enlace-comprobante-pago"
+                            target="_blank"
+                            style="display: none;">Ver comprobante</a
+                        >
+                        <span id="sin-comprobante" style="color: #dc2626;"
+                            >No disponible</span
+                        >
                     </p>
                 </div>
             </div>
@@ -75,12 +83,79 @@ import "../styles/ModalDetallesInscripcion.css";
                 const modal = document.getElementById("modalDetallesPago");
                 if (modal) modal.style.display = "none";
             }
-
             function abrirModalPagoInscripcion(inscripcionId: string) {
                 const modal = document.getElementById("modalDetallesPago");
                 if (modal) modal.style.display = "block";
                 currentInscripcionIdPago = inscripcionId;
                 window.currentInscripcionIdPago = inscripcionId;
+
+                // Cargar comprobante de pago dinámicamente
+                cargarComprobantePago(inscripcionId);
+            }
+            function cargarComprobantePago(inscripcionId: string) {
+                try {
+                    // Obtener datos de inscripción desde el contexto global
+                    const inscripcionesData =
+                        (window as any).inscripcionesData || [];
+                    const inscripcion = inscripcionesData.find(
+                        (ins: any) => ins.id_ins === inscripcionId,
+                    );
+
+                    if (!inscripcion) {
+                        console.warn(
+                            "No se encontraron datos de inscripción:",
+                            inscripcionId,
+                        );
+                        mostrarComprobanteNoDisponible();
+                        return;
+                    }
+
+                    // Referencias a elementos DOM
+                    const enlaceComprobante = document.getElementById(
+                        "enlace-comprobante-pago",
+                    ) as HTMLAnchorElement;
+                    const sinComprobante = document.getElementById(
+                        "sin-comprobante",
+                    ) as HTMLSpanElement;
+
+                    // Configurar enlace del comprobante de pago
+                    if (isValidDocumentLink(inscripcion.enl_ord_pag_ins)) {
+                        enlaceComprobante.href = inscripcion.enl_ord_pag_ins;
+                        enlaceComprobante.style.display = "inline";
+                        sinComprobante.style.display = "none";
+                    } else {
+                        enlaceComprobante.style.display = "none";
+                        sinComprobante.style.display = "inline";
+                    }
+                } catch (error) {
+                    console.error(
+                        "Error al cargar comprobante de pago:",
+                        error,
+                    );
+                    mostrarComprobanteNoDisponible();
+                }
+            }
+
+            function isValidDocumentLink(
+                link: string | null | undefined,
+            ): boolean {
+                return (
+                    link !== null &&
+                    link !== undefined &&
+                    link.trim() !== "" &&
+                    link !== "null"
+                );
+            }
+
+            function mostrarComprobanteNoDisponible() {
+                const enlaceComprobante = document.getElementById(
+                    "enlace-comprobante-pago",
+                );
+                const sinComprobante =
+                    document.getElementById("sin-comprobante");
+
+                if (enlaceComprobante) enlaceComprobante.style.display = "none";
+                if (sinComprobante) sinComprobante.style.display = "inline";
             }
             function aprobarInscripcionPago() {
                 if (

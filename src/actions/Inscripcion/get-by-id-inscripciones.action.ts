@@ -13,19 +13,33 @@ export const getByIdInscripcion = defineAction({
                 where: {
                     id_eve_ins: id
                 },
-                include: {
+                select: {
+                    id_ins: true,
+                    id_usu_ins: true,
+                    id_eve_ins: true,
+                    fec_ins: true,
+                    est_ins: true,
+                    est_par: true,
+                    not_par: true,
+                    asi_par: true,
+                    met_pag_ins: true,
+                    enl_ord_pag_ins: true, // Campo de enlace del comprobante de pago
                     usuarios: {
                         select: {
                             id_usu: true,
                             nom_usu1: true,
                             nom_usu2: true,
                             ape_usu1: true,
-                            ape_usu2: true, ced_usu: true,
+                            ape_usu2: true,
+                            ced_usu: true,
                             fec_nac_usu: true,
                             num_tel_usu: true,
                             cuentas: {
                                 select: {
-                                    cor_cue: true
+                                    cor_cue: true,
+                                    enl_ced_cue: true, // Enlace cédula
+                                    enl_mat_cue: true, // Enlace certificado matrícula
+                                    enl_ext_cue: true  // Enlace documento externo/carta motivación
                                 }
                             },
                             carreras: {

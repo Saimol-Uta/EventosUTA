@@ -397,6 +397,118 @@ select {
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
+/* Estilos para botones de confirmación en modales de categorías */
+.contenedor-boton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    padding: 20px 0;
+}
+
+.boton-confirmar {
+    background: linear-gradient(135deg, var(--color-fuerte-uta), var(--color-oscuro-uta));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3);
+    min-width: 180px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.boton-confirmar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.boton-confirmar:hover {
+    background: linear-gradient(135deg, var(--color-oscuro-uta), #6b0d18);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(176, 16, 37, 0.4);
+}
+
+.boton-confirmar:hover::before {
+    left: 100%;
+}
+
+.boton-confirmar:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(176, 16, 37, 0.5);
+}
+
+.boton-confirmar:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(176, 16, 37, 0.3);
+}
+
+/* Animación de carga para el botón */
+.boton-confirmar.loading {
+    pointer-events: none;
+    position: relative;
+}
+
+.boton-confirmar.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive para botones de confirmación */
+@media (max-width: 768px) {
+    .contenedor-boton {
+        margin-top: 20px;
+        padding: 15px 0;
+    }
+
+    .boton-confirmar {
+        padding: 12px 24px;
+        font-size: 15px;
+        min-width: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .boton-confirmar {
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: 140px;
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
 /* Responsive para asignaciones */
 @media (max-width: 600px) {
     .contenedor-botones-asignaciones {
