@@ -534,69 +534,86 @@ const links = [
             window.URL.revokeObjectURL(url);
         };
 
-window.exportarPDF = () => {
-  const img = new Image();
-  const anchoLogo = 60;
-const altoLogo = 20.4;
-  img.src = '/logo-fisei.png'; // debe estar en public/img/
+        window.exportarPDF = () => {
+            const logoFISEI = new Image();
+            const logoUTA = new Image();
 
-  img.onload = () => {
-    const doc = new jsPDF();
+            logoFISEI.src = "/logo-fisei.png";
+            logoUTA.src = "/logo-uta.png";
 
-    const eventoNombre =
-      document.querySelector(".evento-nombre")?.textContent?.replace("- ", "") ||
-      "Evento";
+            // Esperar a que ambos logos estén listos
+            logoFISEI.onload = () => {
+                logoUTA.onload = () => {
+                const doc = new jsPDF();
 
-    // Insertar logo antes de todo
-    doc.addImage(img, 'PNG', 14, 10, anchoLogo, altoLogo); // x, y, width, height
+                const eventoNombre =
+                    document.querySelector(".evento-nombre")?.textContent?.replace("- ", "") || "Evento";
 
-    // Títulos (dejamos espacio bajo el logo)
-    doc.setFontSize(14);
-    doc.text("Calificaciones del Evento:", 14, 40);
-    doc.setFontSize(12);
-    doc.text(eventoNombre, 14, 48);
-    doc.text(
-      `Fecha de exportación: ${new Date().toLocaleDateString("es-ES")}`,
-      14,
-      56
-    );
+                // Insertar logos
+                const anchoLogoFISEI = 60;
+                const altoLogoFISEI = 20.4;
+                const anchoLogoUTA = 21.1;
+                const altoLogoUTA = 20.4;
 
-    const head = [["Nombres", "Apellidos", "Asistencia", "Nota", "Estado"]];
-    const body: string[][] = [];
+                // Logo FISEI izquierda
+                doc.addImage(logoFISEI, "PNG", 14, 10, anchoLogoFISEI, altoLogoFISEI);
 
-    const filas = document.querySelectorAll(
-      '.registro-fila[data-estado]:not([style*="display: none"])'
-    );
+                // Logo UTA derecha
+                doc.addImage(logoUTA, "PNG", 172, 10, anchoLogoUTA, altoLogoUTA);
 
-    filas.forEach((fila) => {
-      const celdas = fila.querySelectorAll(".parte-izquierda-registro-fila");
-      const filaTexto = Array.from(celdas).map(
-        (celda) => (celda.textContent ?? "").trim()
-      );
-      body.push(filaTexto);
-    });
+                // Espaciado base
+                const baseY = 40;
 
-    if (body.length === 0) {
-      alert("No hay datos visibles para exportar.");
-      return;
-    }
+                doc.setFontSize(14);
+                doc.text("Calificaciones del Evento:", 14, baseY);
 
-    autoTable(doc, {
-      head,
-      body,
-      startY: 65, // debajo del texto
-      headStyles: { fillColor: [176, 16, 37] },
-      styles: { fontSize: 10 }
-    });
+                doc.setFontSize(12);
+                doc.text(eventoNombre, 14, baseY + 4);
+                doc.text(`Fecha de exportación: ${new Date().toLocaleDateString("es-ES")}`, 14, baseY + 16);
 
-    const fecha = new Date().toISOString().split("T")[0];
-    doc.save(`calificaciones_${eventoNombre.replace(/\s+/g, "_")}_${fecha}.pdf`);
-  };
+                // Tabla
+                const head = [["Nombres", "Apellidos", "Asistencia", "Nota", "Estado"]];
+                const body: string[][] = [];
 
-  img.onerror = () => {
-    alert("No se pudo cargar el logo para el PDF.");
-  };
-};
+                const filas = document.querySelectorAll(
+                    '.registro-fila[data-estado]:not([style*="display: none"])'
+                );
+
+                filas.forEach((fila) => {
+                    const celdas = fila.querySelectorAll(".parte-izquierda-registro-fila");
+                    const filaTexto = Array.from(celdas).map(
+                    (celda) => (celda.textContent ?? "").trim()
+                    );
+                    body.push(filaTexto);
+                });
+
+                if (body.length === 0) {
+                    alert("No hay datos visibles para exportar.");
+                    return;
+                }
+
+                autoTable(doc, {
+                    head,
+                    body,
+                    startY: baseY + 25,
+                    headStyles: { fillColor: [176, 16, 37] },
+                    styles: { fontSize: 10 },
+                });
+
+                const fecha = new Date().toISOString().split("T")[0];
+                doc.save(`calificaciones_${eventoNombre.replace(/\s+/g, "_")}_${fecha}.pdf`);
+                };
+
+                logoUTA.onerror = () => {
+                alert("No se pudo cargar el logo de UTA.");
+                };
+            };
+
+            logoFISEI.onerror = () => {
+                alert("No se pudo cargar el logo de FISEI.");
+            };
+        };
+
 
 
         
