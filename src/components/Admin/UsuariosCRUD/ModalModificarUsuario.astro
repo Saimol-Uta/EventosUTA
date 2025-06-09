@@ -290,7 +290,7 @@ const carreras = carrerasData?.carreras || [];
                 if (cedulaHidden) cedulaHidden.value = usuario.ced_usu || "";
 
                 // Cargar las cuentas del usuario
-                await cargarCuentasActuales(usuario.ced_usu || "");
+                await cargarCuentasActuales(usuario.id_usu || "");
 
                 modal.style.display = "block";
             }
@@ -314,16 +314,17 @@ const carreras = carrerasData?.carreras || [];
                     const contenedorCuentas =
                         document.getElementById("cuentas-actuales");
                     if (!contenedorCuentas) return;
-
                     if (cuentasData && cuentasData.length > 0) {
                         contenedorCuentas.innerHTML = cuentasData
-                            .map(
-                                (cuenta: any) => `
+                            .map((cuenta: any) => {
+                                const correoMostrar =
+                                    cuenta.cor_cue || cuenta.correo_cue;
+                                return `
                             <div class="asignacion-item" data-cuenta-id="${cuenta.id_cue}">
-                                <span class="asignacion-nombre">${cuenta.cor_cue || cuenta.correo_cue}</span>
+                                <span class="asignacion-nombre">${correoMostrar}</span>
                                 <span class="asignacion-detalle">${cuenta.tip_cue}</span>
                                 <div class="cuenta-acciones">
-                                    <button type="button" class="btn-editar-cuenta" onclick="editarCuenta('${cuenta.id_cue}', '${cuenta.cor_cue || cuenta.correo_cue}', '${cuenta.tip_cue}')">
+                                    <button type="button" class="btn-editar-cuenta" onclick="editarCuenta('${cuenta.id_cue}', '${correoMostrar}', '${cuenta.tip_cue}')">
                                         ✏️ Editar
                                     </button>
                                     <button type="button" class="btn-eliminar-cuenta" onclick="eliminarCuenta('${cuenta.id_cue}', '${cedulaUsuario}')">
@@ -331,8 +332,8 @@ const carreras = carrerasData?.carreras || [];
                                     </button>
                                 </div>
                             </div>
-                        `,
-                            )
+                        `;
+                            })
                             .join("");
                     } else {
                         contenedorCuentas.innerHTML =
@@ -572,12 +573,13 @@ const carreras = carrerasData?.carreras || [];
                             confirmButtonColor: "#059669",
                         });
                     });
-                }
-
-                // Asignar funciones al objeto window
+                } // Asignar funciones al objeto window
                 window.abrirModalModificarUsuario = abrirModalModificarUsuario;
                 window.cerrarModalModificarUsuario =
                     cerrarModalModificarUsuario;
+                window.editarCuenta = editarCuenta;
+                window.eliminarCuenta = eliminarCuenta;
+                window.crearNuevaCuenta = crearNuevaCuenta;
             });
         </script>
     </div>
