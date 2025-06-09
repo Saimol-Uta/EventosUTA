@@ -9,7 +9,9 @@ import "../../styles/Admin/EventosCRUD.css";
 import { actions } from "astro:actions";
 
 // Obtener usuarios con información relacionada
-const { data, error } = await Astro.callAction(actions.getAllUsers, {});
+const { data , error } = await Astro.callAction(actions.getAllUsers, {});
+
+
 
 // Obtener carreras para mostrar el nombre de la carrera
 const { data: carrerasData } = await Astro.callAction(actions.getAllCarreras, {});
@@ -24,11 +26,12 @@ const carreras = carrerasData?.carreras || [];
 // Obtener información completa de cada usuario con carrera y cuentas
 const usuariosCompletos = await Promise.all(
     usuarios.map(async (usuario: any) => {
-        // Buscar carrera del usuario
         const carrera = carreras.find((c: any) => c.id_car === usuario.id_car_per);        // Buscar cuentas del usuario
         let cuentas: any[] = [];
         try {
-            const cuentasResult = await Astro.callAction(actions.getCuentaById, usuario.id_usu.toString());
+        
+            const cuentasResult = await Astro.callAction(actions.getCuentaById, usuario.id_usu);
+            
             if (cuentasResult.data) {
                 cuentas = Array.isArray(cuentasResult.data) ? cuentasResult.data : [cuentasResult.data];
             }

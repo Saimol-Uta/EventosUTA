@@ -1,15 +1,18 @@
 import { defineAction } from 'astro:actions';
-import { z } from 'astro:schema';
+import { z } from 'zod';
 import prisma from '../../db';
 
 export const getAllUsers = defineAction({
     accept: 'json',
+    input: z.object({}), // Esquema vacío ya que no recibes parámetros
     handler: async () => {
         try {
             const users = await prisma.usuarios.findMany({
-                // Puedes agregar filtros, ordenamiento, etc. según tus necesidades
                 orderBy: {
                     id_usu: 'asc'
+                },
+                include: {
+                    cuentas: true, // Incluye la relación con las cuentas si es necesario
                 }
             });
 
