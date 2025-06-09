@@ -214,6 +214,13 @@
 <script>
     import { actions } from "astro:actions";
 
+    type CertificadoVerificado = {
+        nombreUsuario: string;
+        nombreEvento: string;
+        fechaEvento: string;
+        eventoId: string;
+    };
+
     const form = document.getElementById("verify-form") as HTMLFormElement;
     const input = document.getElementById("codigo") as HTMLInputElement;
     const button = document.getElementById(
@@ -237,20 +244,19 @@
             // Llamamos a la action de verificación en segundo plano
             const result = await actions.verificarCertificado({ codigo });
 
-            if (result.data?.success) {
-                const cert = result.data.data;
-                // Si es exitoso, creamos el HTML con los resultados
+            if (result.data?.success && result.data.data) {
+                const cert: CertificadoVerificado = result.data.data;
+
                 resultsContainer.innerHTML = `
-              <div class="resultado-valido">
-                <h4>✓ Certificado Válido</h4>
-                <p><strong>Participante:</strong> ${cert.nombreUsuario}</p>
-                <p><strong>Evento:</strong> ${cert.nombreEvento}</p>
-                <p><strong>Fecha del Evento:</strong> ${cert.fechaEvento}</p>
-                <a href="/historial-eventos?generarCertificado=${cert.eventoId}" class="btn-descargar">Descargar Certificado</a>
-              </div>
-            `;
+          <div class="resultado-valido">
+            <h4>✓ Certificado Válido</h4>
+            <p><strong>Participante:</strong> ${cert.nombreUsuario}</p>
+            <p><strong>Evento:</strong> ${cert.nombreEvento}</p>
+            <p><strong>Fecha del Evento:</strong> ${cert.fechaEvento}</p>
+            <a href="/historial-eventos?generarCertificado=${cert.eventoId}" class="btn-descargar">Descargar Certificado</a>
+          </div>
+        `;
             } else {
-                // Si falla, mostramos el mensaje de error
                 const errorMessage =
                     result.error?.message || "Error desconocido.";
                 resultsContainer.innerHTML = `<div class="resultado-invalido"><p>❌ ${errorMessage}</p></div>`;
@@ -259,7 +265,6 @@
             resultsContainer.innerHTML = `<div class="resultado-invalido"><p>❌ Error al conectar con el servidor.</p></div>`;
             console.error(error);
         } finally {
-            // Restaurar el botón a su estado original
             button.disabled = false;
             button.textContent = "Verificar";
         }
