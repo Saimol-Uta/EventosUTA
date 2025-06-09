@@ -187,5 +187,42 @@ if (accountId) {
         }
       });
     });
+    document.querySelectorAll(".js-download-order").forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        const targetButton = event.currentTarget as HTMLButtonElement;
+        const inscripcionId = targetButton.dataset.inscripcionid;
+
+        if (!inscripcionId) return;
+
+        targetButton.disabled = true;
+        targetButton.textContent = "Generando...";
+
+        try {
+          const response = await fetch(`/api/orden-pago/${inscripcionId}`);
+
+          if (!response.ok) {
+            throw new Error("No se pudo generar la orden de pago.");
+          }
+
+          const pdfBlob = await response.blob();
+
+          const url = window.URL.createObjectURL(pdfBlob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `orden-pago-${inscripcionId}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error(error);
+          alert("Error al descargar la orden de pago.");
+        } finally {
+          targetButton.disabled = false;
+          targetButton.textContent = "Descargar Orden de Pago";
+        }
+      });
+    });
   </script>
 </Layout>
