@@ -9,86 +9,50 @@ import ModalNuevoOrganizador from "../../components/Admin/OrganizadoresCRUD/Moda
 import "../../styles/Admin/EventosCRUD.css";
 import { actions } from "astro:actions";
 
-const searchParams = Astro.url.searchParams;
-const categoriaFiltro = searchParams.get("categoria");
-
-// Obtener eventos con información relacionada
-const { data, error } = await Astro.callAction(actions.getEventos, {
-    categoria: categoriaFiltro || undefined,
-});
-
-// Obtener categorías para el filtro
-const { data: categoriasData } = await Astro.callAction(actions.getCategorias, {});
-const { data: organizadoresData } = await Astro.callAction(actions.getOrganizadores, {});
+// Obtener organizadores
+const { data: organizadoresData, error } = await Astro.callAction(actions.getOrganizadores, {});
 
 if (error) {
-    console.error("Error al obtener eventos:", error);
+    console.error("Error al obtener organizadores:", error);
 }
 
-const eventos = data?.eventos || [];
-const categorias = categoriasData?.categorias || [];
 const organizadores = organizadoresData?.organizadores || [];
 
-// Obtener información completa de cada evento
-const eventosCompletos = await Promise.all(
-    eventos.map(async (evento: any) => {
-        const organizador = await Astro.callAction(
-            actions.getOrganizadorByEvento,
-            { id_evento: evento.id_eve }
-        );
-
-        const categoria = await Astro.callAction(
-            actions.getCategoriaById,
-            { id_categoria: evento.id_cat_eve }
-        );
-
-        return {
-            ...evento,
-            organizador: organizador.data,
-            categoria: categoria.data,
-        };
-    })
-);
-
+// Links de navegación
 const links = [
-    { label: "Eventos", href: "/" },
+    { label: "Eventos", href: "/Admin/EventosCRUD" },
     { label: "Usuarios", href: "/perfil" },
     { label: "Organizadores", href: "/historial" },
     { label: "Inscripciones", href: "/historial" },
     { label: "Categorías", href: "/historial" },
-    { label: "Carreras", href: "/historial" },
+    { label: "Carreras", href: "/Admin/CarrerasCRUD" },
     { label: "Asignaciones", href: "/Admin/Asignaciones" },
 ];
+
+type Organizador = {
+    ced_org: string;
+    nom_org1: string;
+    nom_org2?: string;
+    ape_org1: string;
+    ape_org2?: string;
+    tit_aca_org: string; 
+}
+    
 ---
 
 <Layout>
     <body>
         <Header />
-        <MenuAdmin links={links} />        <ModalDetallesOrganizador />
-        <ModalModificarOrganizador categorias={categorias} organizadores={organizadores} />
-        <ModalNuevoOrganizador categorias={categorias} organizadores={organizadores} />
+        <MenuAdmin links={links} /> 
+        <ModalDetallesOrganizador />
+        <ModalModificarOrganizador organizadores={organizadores} />
+        <ModalNuevoOrganizador organizadores={organizadores} />
 
         <main class="registros">
             <div class="registros-grid">
                 <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Eventos                        <select
-                            id="filtroCategoria"
-                            class="select-estado"
-                            onchange="window.location.href = `?categoria=${this.value}`"
-                        >
-                            <option value="" selected={!categoriaFiltro}>
-                                Todos los eventos
-                            </option>
-                            {categorias.map((categoria: any) => (
-                                <option
-                                    value={categoria.nom_cat}
-                                    selected={categoriaFiltro === categoria.nom_cat}
-                                >
-                                    {categoria.nom_cat}
-                                </option>
-                            ))}
-                        </select>
+                        Organizadores
                     </div>
                     <div class="registros-superior-derecho">
                         <a
@@ -123,42 +87,41 @@ const links = [
                     </div>
                 </div>
                 <div class="registros-inferior">
-                    {
-                        eventosCompletos.map((evento) => (
+                    {organizadores.map((organizador: Organizador) => (
+                        <>
                             <input
                                 type="hidden"
-                                name="evento"
-                                value={JSON.stringify(evento)}
+                                name="organizador"
+                                value={JSON.stringify(organizador)}
+                                data-cedula={organizador.ced_org}
                             />
                             <div class="registro-fila">
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.nom_eve}
+                                    {organizador.ced_org}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.categoria?.data?.nom_cat || "N/A"}
+                                    {organizador.nom_org1} {organizador.nom_org2 || ""}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.are_eve || "N/A"}
+                                    {organizador.ape_org1} {organizador.ape_org2 || ""}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {new Date(evento.fec_ini_eve)
-                                        .toISOString()
-                                        .split("T")[0]}
+                                    {organizador.tit_aca_org}
                                 </div>
                                 <div class="registro-opciones">
                                     <button
                                         title="Detalles"
-                                        onclick={`mostrarDetallesEvento('${evento.id_eve}')`}
+                                        onclick={`window.mostrarDetallesOrganizador('${organizador.ced_org}')`}
                                     >
                                         <img
                                             src="/img/CRUD/mostrar-detalles.svg"
                                             alt="boton mostrar detalles"
                                             class="imagen-boton-registro"
                                         />
-                                    </button>                                    
+                                    </button>
                                     <button
                                         title="Eliminar"
-                                        onclick={`eliminarEvento('${evento.id_eve}')`}
+                                        onclick={`window.eliminarOrganizador('${organizador.ced_org}')`}
                                     >
                                         <img
                                             src="/img/CRUD/eliminar-registro.svg"
@@ -168,7 +131,7 @@ const links = [
                                     </button>
                                     <button
                                         title="Modificar"
-                                        onclick={`window.abrirModalModificarOrganizador('${evento.id_eve}')`}
+                                        onclick={`window.abrirModalModificarOrganizador('${organizador.ced_org}')`}
                                     >
                                         <img
                                             src="/img/CRUD/modificar-registro.svg"
@@ -178,8 +141,8 @@ const links = [
                                     </button>
                                 </div>
                             </div>
-                        ))
-                    }
+                        </>
+                    ))}
                 </div>
             </div>
         </main>
@@ -198,30 +161,8 @@ const links = [
                 tit_aca_org: string;
             }
 
-            interface Categoria {
-                id_cat: string;
-                nom_cat: string;
-                des_cat: string;
-            }
-
-            interface Evento {
-                id_eve: string;
-                nom_eve: string;
-                des_eve: string;
-                fec_ini_eve: string;
-                fec_fin_eve?: string;
-                hor_ini_eve: string;
-                hor_fin_eve?: string;
-                dur_eve?: number;
-                are_eve?: string;
-                ubi_eve: string;
-                img_eve?: string;
-                precio: number;
-                organizador?: Organizador;
-                categoria?: Categoria;
-            }
-
-            async function eliminarEvento(eventoId: string) {
+            // Función para eliminar organizador
+            async function eliminarOrganizador(cedula :string) {
                 try {
                     const resultado = await Swal.fire({
                         title: "¿Estás seguro?",
@@ -235,22 +176,22 @@ const links = [
                     });
 
                     if (resultado.isConfirmed) {
-                        const { data, error } = await actions.eliminarEvento({
-                            id_evento: eventoId,
+                        const { data, error } = await actions.eliminarOrganizador({
+                            cedula,
                         });
 
                         if (error || !data?.success) {
                             await Swal.fire({
                                 icon: "error",
                                 title: "Error",
-                                text: data?.error || "No se pudo eliminar el evento",
+                                text: data?.error || "No se pudo eliminar el organizador",
                                 confirmButtonColor: "#dc2626",
                             });
                         } else {
                             await Swal.fire({
                                 icon: "success",
                                 title: "Eliminado",
-                                text: "El evento ha sido eliminado correctamente",
+                                text: "El organizador ha sido eliminado correctamente",
                                 confirmButtonColor: "#059669",
                             }).then(() => {
                                 window.location.reload();
@@ -266,34 +207,41 @@ const links = [
                         confirmButtonColor: "#dc2626",
                     });
                 }
-            }            
-            function mostrarDetallesEvento(eventoId: string) {
-                const eventos = Array.from(document.querySelectorAll('input[name="evento"]'))
-                    .map(input => JSON.parse((input as HTMLInputElement).value));
-                
-                const evento = eventos.find((e: Evento) => e.id_eve === eventoId);
-                
-                if (!evento) {
-                    console.error('Evento no encontrado:', eventoId);
+            }
+
+            // Función para mostrar detalles del organizador
+            function mostrarDetallesOrganizador(cedula: string) {
+                // Busca el input y asegura el tipo correcto para acceder a .value
+                const input = document.querySelector(`input[name="organizador"][data-cedula="${cedula}"]`);
+                if (!input) {
+                    console.error('Organizador no encontrado:', cedula);
+                    return;
+                }
+                let organizador = null;
+                try {
+                    organizador = JSON.parse((input as HTMLInputElement).value);
+                } catch (e) {
+                    console.error('Error al parsear el organizador:', e);
                     return;
                 }
 
-                // Llamar directamente a la función de abrirModalDetalles del modal
                 if (window.abrirModalDetallesOrganizador) {
-                    window.abrirModalDetallesOrganizador(evento);
+                    window.abrirModalDetallesOrganizador(organizador);
                 } else {
                     console.error('La función abrirModalDetallesOrganizador no está disponible');
                 }
             }
+
             // Hacer funciones disponibles globalmente
             declare global {
                 interface Window {
-                    eliminarEvento: (eventoId: string) => Promise<void>;
-                    mostrarDetallesEvento: (eventoId: string) => void;
+                    eliminarOrganizador: (cedula: string) => Promise<void>;
+                    mostrarDetallesOrganizador: (cedula: string) => void;
                 }
-            }            window.eliminarEvento = eliminarEvento;
-            window.mostrarDetallesEvento = mostrarDetallesEvento;
+            }
 
+            window.eliminarOrganizador = eliminarOrganizador;
+            window.mostrarDetallesOrganizador = mostrarDetallesOrganizador;
         </script>
     </body>
 </Layout>

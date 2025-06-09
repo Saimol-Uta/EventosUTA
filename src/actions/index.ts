@@ -15,6 +15,8 @@ import { GenerarCertificado } from './Certificados/certificado.action';
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 
+import { getOrganizadoresCR } from './Admin/getOrganizadores.action';
+import { eliminarOrganizador } from './Admin/eliminarOrganizador.action';
 
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
@@ -42,6 +44,9 @@ export const server = {
     getCertificadosPorUsuario,
     getEventosProximos,
     getInscripcionesPendientes,
+
+    getOrganizadoresCR,
+    eliminarOrganizador,
 
     getOrganizadorByEvento,
     getOrganizadores,
