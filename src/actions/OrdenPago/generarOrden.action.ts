@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { format } from "date-fns";
 import { z } from 'zod';
+import { getSession } from "auth-astro/server";
 
 const prisma = new PrismaClient();
 
@@ -14,8 +15,10 @@ export const GenerarOrdenDePago = defineAction({
     inscripcionId: z.string().uuid(),
   }),
 
-  handler: async ( input ) => {
+  handler: async ( input, context ) => {
     const { inscripcionId } = input;
+
+    const session = await getSession(context.request);
 
     const inscripcion = await prisma.inscripciones.findUnique({
       where: { id_ins: inscripcionId },
