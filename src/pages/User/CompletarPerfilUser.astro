@@ -1,0 +1,451 @@
+---
+import InformacionUsuario from "@components/InformacionUsuario.astro";
+import Layout from "@layouts/Layout.astro";
+import Header from "@components/Header.astro";
+import Navbar from "@components/Navbar.astro";
+import { actions } from "astro:actions";
+import type { Usuario } from "../../actions/Users/getUserByCedula.action";
+
+// Obtener las carreras disponibles
+const { data: carrerasData } = await Astro.callAction(actions.getCarreras, {});
+const carreras = carrerasData?.carreras || [];
+type SafeResult<T> = {
+    success: boolean;
+    value?: T | null;
+    error?: string;
+};
+
+type ResultadoSetUser = {
+    success?: boolean;
+    created?: boolean;
+    requireReauth?: boolean;
+    error?: string;
+};
+
+type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string };
+let usuario: UsuarioParcial | null = null;
+
+const method = Astro.request.method;
+
+let cedulaIngresada = "";
+let mostrarFormulario = false;
+let mostrarError = false;
+let usuarioExistente = false;
+let mensajeGuardado: string | null = null;
+
+function formatDate(date: string | Date | null): string {
+    if (!date) return "";
+    const d = typeof date === "string" ? new Date(date) : date;
+    return d.toISOString().substring(0, 10);
+}
+
+function validarCedula(cedula: string): boolean {
+    if (!/^\d{10}$/.test(cedula)) return false;
+
+    const provincia = parseInt(cedula.substring(0, 2), 10);
+    if (provincia < 1 || provincia > 24) return false;
+
+    const digitos = cedula.split("").map(Number);
+    const digitoVerificador = digitos[9];
+
+    let suma = 0;
+    for (let i = 0; i < 9; i++) {
+        let val = digitos[i];
+        if (i % 2 === 0) {
+            val *= 2;
+            if (val > 9) val -= 9;
+        }
+        suma += val;
+    }
+    const decenaSuperior = Math.ceil(suma / 10) * 10;
+    const digitoCalculado = decenaSuperior - suma;
+
+    if (digitoCalculado === 10) {
+        return digitoVerificador === 0;
+    } else {
+        return digitoVerificador === digitoCalculado;
+    }
+}
+
+if (method === "POST") {
+    const formData = await Astro.request.formData();
+    const accion = formData.get("action")?.toString();
+
+    switch (accion) {
+        case "guardarInfo":
+            if (formData.has("nom_usu1")) {
+                const resultadoGuardarRaw = await Astro.callAction(
+                    actions.setUser,
+                    formData,
+                );
+                const resultadoGuardar =
+                    resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
+
+                if (resultadoGuardar.success) {
+                    mostrarFormulario = true;
+                    usuarioExistente = true;
+                    mostrarError = false;
+                    mensajeGuardado = resultadoGuardar.value?.created
+                        ? "Se guardó con éxito."
+                        : "Usuario actualizado correctamente.";
+
+                    const fechaString =
+                        formData.get("fec_nac_usu")?.toString() ?? "";
+                    const fecha = new Date(fechaString);
+                    const fechaValida = !isNaN(fecha.getTime())
+                        ? fecha
+                        : new Date("1900-01-01");
+
+                    usuario = {
+                        id_usu: formData.get("id_usu")?.toString() ?? "",
+                        nom_usu1: formData.get("nom_usu1")?.toString() ?? "",
+                        nom_usu2: formData.get("nom_usu2")?.toString() ?? "",
+                        ape_usu1: formData.get("ape_usu1")?.toString() ?? "",
+                        ape_usu2: formData.get("ape_usu2")?.toString() ?? "",
+                        fec_nac_usu: fechaValida,
+                        num_tel_usu:
+                            formData.get("num_tel_usu")?.toString() ?? "",
+                        id_car_per:
+                            formData.get("id_car_per")?.toString() ?? "",
+                        ced_usu: formData.get("ced_usu")?.toString() ?? "",
+                    };
+
+                    // Aquí actualizas la variable global para mantener la cédula visible
+                    cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
+                } else {
+                    mostrarError = true;
+                    mostrarFormulario = true;
+                    mensajeGuardado =
+                        resultadoGuardar.error ||
+                        "No se pudo guardar. Intente de nuevo.";
+                }
+            }
+            break;
+
+        case "cancelar":
+            // Mantener la cédula, limpiar demás campos para nuevo ingreso
+            cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
+            mostrarFormulario = true;
+            mostrarError = false;
+            usuarioExistente = false;
+            usuario = null;
+            mensajeGuardado = null;
+            break;
+
+        case "asociar":
+            if (formData.has("nom_usu1")) {
+                console.log("Datos a guardar:", formData);
+
+                const {data , error } = await Astro.callAction(
+                    actions.setUser,
+                    formData,
+                );
+
+                console.log("Resultado crudo del action:", {data , error });
+
+                // CAMBIO AQUÍ: Los datos están directamente en .data, no en .data.value
+                const resultadoGuardar = data as ResultadoSetUser;
+
+                console.log("Resultado parseado:", resultadoGuardar);
+                console.log("¿Es exitoso?", resultadoGuardar?.success);
+                console.log("¿Requiere reauth?", resultadoGuardar?.requireReauth);
+
+                if (resultadoGuardar?.success) {
+                    console.log("Entrando al bloque de éxito");
+                    
+                    // CAMBIO AQUÍ: Acceder directamente a requireReauth
+                    if (resultadoGuardar.requireReauth) {
+                        console.log("Reautenticación requerida - eliminando cookie");
+                        
+                        Astro.cookies.delete('authjs.session-token', {
+                            path: '/',
+                            httpOnly: true,
+                        });
+                        
+                        console.log("Cookie eliminada, redirigiendo a login");
+                        return Astro.redirect('/login?message=perfil-actualizado');
+                    } else {
+                        console.log("No requiere reauth, redirigiendo a home");
+                        return Astro.redirect("/");
+                    }
+                } else {
+                    console.log("Error en el resultado:", resultadoGuardar?.error);
+                    mostrarError = true;
+                    mostrarFormulario = true;
+                    mensajeGuardado =
+                        resultadoGuardar?.error ||
+                        "No se pudo guardar. Intente de nuevo.";
+                }
+            } else {
+                console.log("No se encontró nom_usu1 en formData");
+            }
+            break;
+
+        case "masTarde":
+            return Astro.redirect("/homeUser");
+
+        default:
+            cedulaIngresada = formData.get("ced_usu")?.toString() ?? "";
+
+            if (!validarCedula(cedulaIngresada)) {
+                mostrarError = true;
+                mostrarFormulario = false;
+                usuarioExistente = false;
+                usuario = null;
+                mensajeGuardado = "Cédula inválida.";
+            } else {
+                mostrarFormulario = true;
+                const resultado = await Astro.callAction(
+                    actions.getUserByCedula,
+                    {
+                        ced_usu: cedulaIngresada,
+                    },
+                );
+
+                const data = resultado.data;
+
+                if (data?.encontrado) {
+                    usuarioExistente = true;
+                    usuario = data.usuario ?? null;
+                } else {
+                    usuarioExistente = false;
+                    usuario = null;
+                }
+
+                mostrarError = false;
+                mensajeGuardado = null;
+            }
+            break;
+    }
+}
+
+const camposFormulario = [
+    { titulo: "Cédula", valor: cedulaIngresada, name: "ced_usu" },
+    {
+        titulo: "Primer nombre",
+        valor: usuario?.nom_usu1 ?? "",
+        name: "nom_usu1",
+        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]+$",
+        title: "Solo letras y espacios permitidos",
+        oninput:
+            "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g, '')",
+    },
+    {
+        titulo: "Segundo nombre",
+        valor: usuario?.nom_usu2 ?? "",
+        name: "nom_usu2",
+        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]*$",
+        title: "Solo letras y espacios permitidos",
+        oninput:
+            "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g, '')",
+    },
+    {
+        titulo: "Primer apellido",
+        valor: usuario?.ape_usu1 ?? "",
+        name: "ape_usu1",
+        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]+$",
+        title: "Solo letras y espacios permitidos",
+        oninput:
+            "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g, '')",
+    },
+    {
+        titulo: "Segundo apellido",
+        valor: usuario?.ape_usu2 ?? "",
+        name: "ape_usu2",
+        pattern: "^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]*$",
+        title: "Solo letras y espacios permitidos",
+        oninput:
+            "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g, '')",
+    },
+    {
+        titulo: "Fecha de nacimiento",
+        valor: formatDate(usuario?.fec_nac_usu ?? null),
+        name: "fec_nac_usu",
+    },
+    {
+        titulo: "Teléfono",
+        valor: usuario?.num_tel_usu ?? "",
+        name: "num_tel_usu",
+        pattern: "^\\d{10}$",
+        title: "Número de teléfono de 10 dígitos",
+        oninput: "this.value = this.value.replace(/[^0-9]/g, '')",
+        maxlength: "10",
+    },    {
+        titulo: "Carrera",
+        valor: usuario?.id_car_per ?? "",
+        name: "id_car_per",
+        opciones: carreras.map((carrera: any) => ({
+            value: carrera.id_car,
+            text: `${carrera.nom_car}${carrera.cod_car ? ` (${carrera.cod_car})` : ''}`
+        }))    },
+];
+
+
+
+import { getSession } from "auth-astro/server";
+
+//seccion del usuario
+const session = await getSession(Astro.request);
+const { user } = session ?? {};
+
+//verificar si el usuario esta logeado
+const { isLoggedIn } = Astro.locals;
+if (!isLoggedIn) {
+    return Astro.redirect("/login");
+}
+
+if (session?.user.ci_pas !== "null") {
+    return Astro.redirect("/");
+}
+
+const textoGuardarInfo = "Guardar Información";
+const textoCancelar = "Cancelar";
+const textoAsociar = "Asociar este usuario a la cuenta";
+const textoMasTarde = "Más Tarde";
+---
+
+<Layout>
+    <Header />
+    <Navbar />
+
+    <div class="bg-gray-100 min-h-screen py-10">
+        <div class="max-w-3xl mx-auto px-4 text-center">
+            {
+                mensajeGuardado && (
+                    <p
+                        class={`mensaje-guardado ${
+                            mostrarError ? "mensaje-error" : "mensaje-exito"
+                        }`}
+                    >
+                        {mensajeGuardado}
+                    </p>
+                )
+            }
+
+            {
+                mostrarFormulario ? (
+                    <InformacionUsuario
+                        camposFormulario={camposFormulario}
+                        cedula={cedulaIngresada}
+                        mostrarBotones={true}
+                        textoBotonGuardarInfo={textoGuardarInfo}
+                        textoBotonCancelar={textoCancelar}
+                        textoBotonAsociar={textoAsociar}
+                        textoBotonMasTarde={textoMasTarde}
+                    />
+                    <input type="hidden" name="id_usu" id="id_usu" value={session?.user.id} />
+                ) : (
+                    <form
+                        method="POST"
+                        class="formulario-container formulario-grid"
+                    >
+
+                        <div class="campo-item">
+                            <label for="ced_usu">
+                                Ingrese su número de Cédula
+                            </label>
+                            <input
+                                type="text"
+                                id="ced_usu"
+                                name="ced_usu"
+                                value={cedulaIngresada}
+                                placeholder="Ej. 0101010101"
+                                required
+                                maxlength="10"
+                                inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            />
+                        </div>
+
+                        <div class="formulario-boton">
+                            <button type="submit">Continuar</button>
+                        </div>
+                    </form>
+                )
+            }
+        </div>
+    </div>
+</Layout>
+
+<style>
+    .formulario-container {
+        background-color: #eee;
+        border-radius: 8px;
+        padding: 2rem;
+        max-width: 500px;
+        margin: 2rem auto;
+        font-family: "Segoe UI", sans-serif;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .formulario-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .campo-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .campo-item label {
+        font-weight: bold;
+        color: #8b0000;
+        font-size: 14px;
+    }
+
+    .campo-item input {
+        padding: 10px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        outline: none;
+    }
+
+    .campo-item input:focus {
+        border-color: #8b0000;
+        box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+    }
+
+    .formulario-boton {
+        text-align: center;
+    }
+
+    .formulario-boton button {
+        background-color: #8b0000;
+        color: white;
+        font-size: 16px;
+        padding: 10px 30px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .formulario-boton button:hover {
+        background-color: #a00;
+    }
+
+    .mensaje-guardado {
+        max-width: 500px;
+        margin: 0 auto 1rem auto;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .mensaje-exito {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+
+    .mensaje-error {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+</style>

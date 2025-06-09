@@ -1,0 +1,276 @@
+---
+import "../../../styles/Admin/ModalDetallesEvento.css";
+import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
+---
+
+<div id="modalDetallesUsuario" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalDetallesUsuario()"
+            >&times;</span
+        >
+        <div class="detalles-reserva">
+            <h2 id="usuario-nombre">Nombre del Usuario</h2>
+
+            <div class="seccion-detalles">
+                <h3>Información General</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Cédula:</strong>
+                        <span id="usuario-cedula">Cargando...</span>
+                    </p>
+                    <p>
+                        <strong>Fecha de Nacimiento:</strong>
+                        <span id="usuario-fec-nac">Cargando...</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="seccion-detalles">
+                <div class="info-grid">
+                    <p>
+                        <strong>Número de Teléfono:</strong>
+                        <span id="usuario-numero">Cargando...</span>
+                    </p>
+                    <p>
+                        <strong>Carrera:</strong>
+                        <span id="usuario-carrera">Cargando...</span>
+                    </p>
+                </div>
+            </div>
+            <div class="seccion-detalles">
+                <p class="texto-centrado texto-roja">Cuentas Asociadas</p>
+
+                <div class="contenedor-dato">
+                    <div id="usuario-cuentas" class="asignaciones-display">
+                        <!-- Aquí se mostrará dinámicamente la lista de cuentas asociadas -->
+                    </div>
+                </div>
+
+                <div class="contenedor-dato" id="botones-cuentas-container">
+                    <!-- Los botones se generarán dinámicamente aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mover ModalDetallesCuenta fuera del contenido principal -->
+    <ModalDetallesCuenta />
+</div>
+
+<style>
+    .cuentas-list {
+        margin-top: 10px;
+    }
+
+    .cuenta-item {
+        padding: 8px 12px;
+        margin: 5px 0;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        border-left: 3px solid #b01025;
+    }
+
+    .cuenta-item strong {
+        color: #b01025;
+        margin-right: 8px;
+    }
+
+    .cuenta-count {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .boton-asignacion {
+        margin: 5px 0;
+        width: 100%;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 6px;
+        background-color: #b01025;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        font-size: 14px;
+    }
+
+    .boton-asignacion:hover {
+        background-color: #880f1f;
+    }
+
+    .contenedor-botones-asignaciones {
+        margin: 5px 0;
+    }
+</style>
+
+<script>
+    declare global {
+        interface Window {
+            cerrarModalDetallesUsuario: () => void;
+            abrirModalDetallesUsuario: (usuario: any) => void;
+            mostrarDetallesCuentaUsuario: (cuentaIndex: number) => void;
+        }
+    }
+
+    // Variable global para almacenar el usuario actual
+    let usuarioActual: any = null;
+
+    function cerrarModalDetallesUsuario() {
+        const modal = document.getElementById("modalDetallesUsuario");
+        if (modal) modal.style.display = "none";
+    }
+
+    function abrirModalDetallesUsuario(usuario: any) {
+        const modal = document.getElementById("modalDetallesUsuario");
+        if (!modal) return;
+
+        // Almacenar el usuario actual globalmente
+        usuarioActual = usuario;
+
+        // Poblar el modal con los datos del usuario
+        poblarModalConDatos(usuario);
+
+        modal.style.display = "block";
+    }
+
+    function mostrarDetallesCuentaUsuario(cuentaIndex: number) {
+        if (
+            !usuarioActual ||
+            !usuarioActual.cuentas ||
+            !usuarioActual.cuentas[cuentaIndex]
+        ) {
+            console.error("No se pudo encontrar la cuenta solicitada");
+            return;
+        }
+
+        const cuenta = usuarioActual.cuentas[cuentaIndex];
+
+        // Llamar a la función del modal de detalles de cuenta
+        if (window.abrirModalDetallesCuenta) {
+            window.abrirModalDetallesCuenta(usuarioActual, cuenta);
+        } else {
+            console.error(
+                "La función abrirModalDetallesCuenta no está disponible",
+            );
+        }
+    }
+
+    function poblarModalConDatos(usuario: any) {
+        const modal = document.getElementById("modalDetallesUsuario");
+        if (!modal) return;
+
+        // Actualizar título del modal
+        const titulo = modal.querySelector("#usuario-nombre");
+        const nombreCompleto =
+            `${usuario.nom_usu1} ${usuario.nom_usu2 || ""} ${usuario.ape_usu1} ${usuario.ape_usu2 || ""}`.trim();
+
+        if (titulo) titulo.textContent = nombreCompleto || "Sin nombre";
+
+        // Información General
+        const cedula = modal.querySelector("#usuario-cedula");
+        if (cedula) {
+            console.log("Cédula del usuario:", usuario.ced_usu); // Para debugging
+            cedula.textContent = usuario.ced_usu || "N/A";
+        }
+
+        const fechaNac = modal.querySelector("#usuario-fec-nac");
+        if (fechaNac) {
+            console.log("Fecha de nacimiento:", usuario.fec_nac_usu); // Para debugging
+            if (usuario.fec_nac_usu) {
+                try {
+                    const fecha = new Date(usuario.fec_nac_usu);
+                    // Verificar si la fecha es válida
+                    if (!isNaN(fecha.getTime())) {
+                        fechaNac.textContent =
+                            fecha.toLocaleDateString("es-ES");
+                    } else {
+                        fechaNac.textContent = "Fecha inválida";
+                    }
+                } catch (error) {
+                    console.error("Error al procesar fecha:", error);
+                    fechaNac.textContent = "Error en fecha";
+                }
+            } else {
+                fechaNac.textContent = "N/A";
+            }
+        }
+
+        const telefono = modal.querySelector("#usuario-numero");
+        if (telefono)
+            telefono.textContent = usuario.num_tel_usu || "No especificado";
+
+        const carrera = modal.querySelector("#usuario-carrera");
+        if (carrera) {
+            carrera.textContent = usuario.carrera?.nom_car || "Sin carrera";
+        } // Mostrar información de cuentas
+        const cuentasContainer = modal.querySelector("#usuario-cuentas");
+        const botonesContainer = modal.querySelector(
+            "#botones-cuentas-container",
+        );
+
+        if (cuentasContainer && botonesContainer) {
+            // Limpiar contenedores
+            cuentasContainer.innerHTML = "";
+            botonesContainer.innerHTML = "";
+
+            if (usuario.cuentas && usuario.cuentas.length > 0) {
+                // Mostrar información general de cuentas
+                cuentasContainer.innerHTML = `
+                    <div class="cuenta-info">
+                        <span class="cuenta-count">Cuentas asociadas: ${usuario.cuentas.length}</span>
+                        <div class="cuentas-list">
+                            ${usuario.cuentas
+                                .map(
+                                    (cuenta: any, index: number) => `
+                                <div class="cuenta-item">
+                                    <strong>Cuenta ${index + 1}:</strong>
+                                    <span>${cuenta.cor_cue || "Sin correo"} - ${cuenta.rol_cue || "Sin rol"}</span>
+                                </div>
+                            `,
+                                )
+                                .join("")}
+                        </div>
+                    </div>
+                `;
+                // Generar botones para cada cuenta
+                const botonesHTML = usuario.cuentas
+                    .map((cuenta: any, index: number) => {
+                        const correo = cuenta.cor_cue || "Sin correo";
+                        const rol = cuenta.rol_cue || "Sin rol";
+
+                        return `
+                        <div class="contenedor-botones-asignaciones">
+                            <button
+                                type="button"
+                                class="boton-asignacion btn-gestionar"
+                                onclick="mostrarDetallesCuentaUsuario(${index})"
+                                title="Ver detalles de ${correo}"
+                            >
+                                📧 ${correo} (${rol})
+                            </button>
+                        </div>
+                    `;
+                    })
+                    .join("");
+
+                botonesContainer.innerHTML = botonesHTML;
+            } else {
+                cuentasContainer.innerHTML = `
+                    <div class="cuenta-info">
+                        <span class="cuenta-count">No hay cuentas asociadas</span>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Cerrar modal al hacer clic fuera de él
+    window.onclick = function (event) {
+        const modal = document.getElementById("modalDetallesUsuario");
+        if (event.target === modal) {
+            cerrarModalDetallesUsuario();
+        }
+    }; // Exponer funciones globalmente
+    window.cerrarModalDetallesUsuario = cerrarModalDetallesUsuario;
+    window.abrirModalDetallesUsuario = abrirModalDetallesUsuario;
+    window.mostrarDetallesCuentaUsuario = mostrarDetallesCuentaUsuario;
+</script>

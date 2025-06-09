@@ -1,0 +1,159 @@
+---
+import InformacionUsuarioItem from "./InformacionUsuarioItem.astro";
+
+interface Campo {
+    titulo: string;
+    valor: string;
+    name: string;
+    pattern?: string;
+    title?: string;
+    oninput?: string;
+    maxlength?: string;
+    opciones?: Array<{ value: string; text: string }>;
+}
+
+interface Props {
+    camposFormulario: Campo[];
+    cedula: string;
+    mostrarBotones?: boolean;
+    textoBotonGuardarInfo?: string;
+    textoBotonCancelar?: string;
+    textoBotonAsociar?: string;
+    textoBotonMasTarde?: string;
+}
+
+const {
+    camposFormulario,
+    cedula,
+    mostrarBotones = true,
+    textoBotonGuardarInfo = "Guardar Información",
+    textoBotonCancelar = "Cancelar",
+    textoBotonAsociar = "Asociar este usuario a la cuenta",
+    textoBotonMasTarde = "Más Tarde",
+} = Astro.props as Props;
+
+const usuarioExiste = camposFormulario.some(
+    (campo) => campo.name !== "ced_usu" && campo.valor.trim() !== "",
+);
+import { getSession } from "auth-astro/server";
+
+//seccion del usuario
+const session = await getSession(Astro.request);
+---
+
+<section class="formulario-container">
+    <h2 class="formulario-titulo">Información del Usuario</h2>
+
+    <form class="formulario-grid" method="POST">
+        <input
+            type="hidden"
+            name="id_usu"
+            id="id_usu"
+            value={session?.user.id}
+        />
+        {
+            camposFormulario.map((campo) => (
+                <InformacionUsuarioItem
+                    titulo={campo.titulo}
+                    valor={campo.valor}
+                    name={campo.name}
+                    pattern={campo.pattern}
+                    title={campo.title}
+                    oninput={campo.oninput}
+                    maxlength={campo.maxlength}
+                    opciones={campo.opciones}
+                />
+            ))
+        }
+
+        {
+            mostrarBotones && (
+                <div class="formulario-boton">
+                    {usuarioExiste ? (
+                        <>
+                            <button type="submit" name="action" value="asociar">
+                                {textoBotonAsociar}
+                            </button>
+                            <button
+                                type="submit"
+                                name="action"
+                                value="cancelar"
+                            >
+                                {textoBotonCancelar}
+                            </button>
+                            <input
+                                type="hidden"
+                                name="ced_usu"
+                                value={cedula}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                type="submit"
+                                name="action"
+                                value="guardarInfo"
+                            >
+                                {textoBotonGuardarInfo}
+                            </button>
+                            <button
+                                type="submit"
+                                name="action"
+                                value="masTarde"
+                            >
+                                {textoBotonMasTarde}
+                            </button>
+                        </>
+                    )}
+                </div>
+            )
+        }
+    </form>
+</section>
+
+<style>
+    .formulario-container {
+        background-color: #eee;
+        border-radius: 8px;
+        padding: 2rem;
+        max-width: 1000px;
+        margin: 2rem auto;
+        font-family: "Segoe UI", sans-serif;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .formulario-titulo {
+        color: #8b0000;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 2rem;
+    }
+
+    .formulario-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .formulario-boton {
+        grid-column: 1 / -1;
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+
+    .formulario-boton button {
+        background-color: #8b0000;
+        color: white;
+        font-size: 16px;
+        padding: 10px 30px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 0 10px;
+    }
+
+    .formulario-boton button:hover {
+        background-color: #a00;
+    }
+</style>

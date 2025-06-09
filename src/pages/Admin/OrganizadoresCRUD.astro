@@ -1,0 +1,256 @@
+---
+import Header from "@components/Header.astro";
+import MenuAdmin from "../../components/MenuAdministrador.astro";
+import Layout from "../../layouts/Layout.astro";
+import ModalDetallesOrganizador from "../../components/Admin/OrganizadoresCRUD/ModalDetallesOrganizador.astro";
+import ModalModificarOrganizador from "../../components/Admin/OrganizadoresCRUD/ModalModificarOrganizador.astro";
+import ModalNuevoOrganizador from "../../components/Admin/OrganizadoresCRUD/ModalNuevoOrganizador.astro";
+import "../../styles/Admin/EventosCRUD.css";
+import { actions } from "astro:actions";
+
+// Obtener organizadores
+const { data: organizadoresData, error } = await Astro.callAction(actions.getOrganizadores, {});
+
+if (error) {
+    console.error("Error al obtener organizadores:", error);
+}
+
+const organizadores = organizadoresData?.organizadores || [];
+
+type Organizador = {
+    ced_org: string;
+    nom_org1: string;
+    nom_org2?: string;
+    ape_org1: string;
+    ape_org2?: string;
+    tit_aca_org: string; 
+}
+    
+---
+
+<Layout>
+    <body>
+        <Header />
+        <MenuAdmin /> 
+        <ModalDetallesOrganizador />
+        <ModalModificarOrganizador />
+        <ModalNuevoOrganizador organizadores={organizadores} />
+
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        Organizadores
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <a
+                            onclick="window.abrirModalNuevoOrganizador()"
+                            class="contenedor-boton-nuevo-registro"
+                        >
+                            <button class="boton-nuevo-registro" title="Nuevo">
+                                Nuevo Organizador
+                            </button>
+                            <p class="anadir-icon">+</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Cédula
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombres
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Apellidos
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Título Académico
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>
+                <div class="registros-inferior">
+                    {organizadores.map((organizador: Organizador) => (
+                        <>
+                            <input
+                                type="hidden"
+                                name="organizador"
+                                value={JSON.stringify(organizador)}
+                                data-cedula={organizador.ced_org}
+                            />
+                            <div class="registro-fila">
+                                <div class="parte-izquierda-registro-fila">
+                                    {organizador.ced_org}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {organizador.nom_org1} {organizador.nom_org2 || ""}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {organizador.ape_org1} {organizador.ape_org2 || ""}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {organizador.tit_aca_org}
+                                </div>
+                                <div class="registro-opciones">
+                                    <button
+                                        title="Detalles"
+                                        onclick={`window.mostrarDetallesOrganizador('${organizador.ced_org}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/mostrar-detalles.svg"
+                                            alt="boton mostrar detalles"
+                                            class="imagen-boton-registro"
+                                        />
+                                    </button>
+                                    <button
+                                        title="Eliminar"
+                                        onclick={`window.eliminarOrganizador('${organizador.ced_org}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/eliminar-registro.svg"
+                                            alt="boton eliminar registro"
+                                            class="imagen-boton-registro"
+                                        />
+                                    </button>
+                                    <button
+                                        title="Modificar"
+                                        onclick={`window.abrirModalModificarOrganizador('${organizador.ced_org}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/modificar-registro.svg"
+                                            alt="boton modificar"
+                                            class="imagen-boton-modificar"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+                        </>
+                    ))}
+                </div>
+            </div>
+        </main>
+
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
+
+            // Interfaces para tipado
+            interface Organizador {
+                ced_org: string;
+                nom_org1: string;
+                nom_org2?: string;
+                ape_org1: string;
+                ape_org2: string;
+                tit_aca_org: string;
+            }
+
+            // Función para eliminar organizador
+            async function eliminarOrganizador(cedula :string) {
+                try {
+                    const resultado = await Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: "No podrás revertir esta acción",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Sí, eliminar",
+                        cancelButtonText: "Cancelar",
+                    });
+
+                    if (resultado.isConfirmed) {
+                        const { data, error } = await actions.eliminarOrganizador({
+                            cedula,
+                        });
+
+                        if (error || !data?.success) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: data?.error || "No se pudo eliminar el organizador",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        } else {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminado",
+                                text: "El organizador ha sido eliminado correctamente",
+                                confirmButtonColor: "#059669",
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }
+
+            // Función para mostrar detalles del organizador
+            function mostrarDetallesOrganizador(cedula: string) {
+                // Busca el input y asegura el tipo correcto para acceder a .value
+                const input = document.querySelector(`input[name="organizador"][data-cedula="${cedula}"]`);
+                if (!input) {
+                    console.error('Organizador no encontrado:', cedula);
+                    return;
+                }
+                let organizador = null;
+                try {
+                    organizador = JSON.parse((input as HTMLInputElement).value);
+                } catch (e) {
+                    console.error('Error al parsear el organizador:', e);
+                    return;
+                }
+
+                if (window.abrirModalDetallesOrganizador) {
+                    window.abrirModalDetallesOrganizador(organizador);
+                } else {
+                    console.error('La función abrirModalDetallesOrganizador no está disponible');
+                }
+            }
+
+            function abrirModalModificarOrganizador(cedula: string) {
+                const input = document.querySelector(`input[name="organizador"][data-cedula="${cedula}"]`);
+                if (!input) {
+                    console.error('Organizador no encontrado:', cedula);
+                    return;
+                }
+                let organizador = null;
+                try {
+                    organizador = JSON.parse((input as HTMLInputElement).value);
+                } catch (e) {
+                    console.error('Error al parsear el organizador:', e);
+                    return;
+                }
+                if (typeof window.abrirModalModificarOrganizador === "function") {
+                    window.abrirModalModificarOrganizador(organizador);
+                } else {
+                    alert('No se encontró la función global abrirModalModificarOrganizador. Revisa el script de ModalModificarOrganizador.astro');
+                }
+            }
+
+            // Hacer funciones disponibles globalmente
+            declare global {
+                interface Window {
+                    eliminarOrganizador: (cedula: string) => Promise<void>;
+                    mostrarDetallesOrganizador: (cedula: string) => void;
+                }
+            }
+
+            window.eliminarOrganizador = eliminarOrganizador;
+            window.mostrarDetallesOrganizador = mostrarDetallesOrganizador;
+            window.abrirModalModificarOrganizador = abrirModalModificarOrganizador;
+        </script>
+    </body>
+</Layout>

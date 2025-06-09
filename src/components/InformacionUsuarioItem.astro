@@ -1,0 +1,88 @@
+---
+interface Props {
+    titulo: string;
+    valor: string;
+    name: string;
+    pattern?: string;
+    title?: string;
+    oninput?: string;
+    maxlength?: string;
+    opciones?: Array<{ value: string; text: string }>;
+}
+
+const { titulo, valor, name, pattern, title, oninput, maxlength, opciones } =
+    Astro.props as Props;
+---
+
+<div class="campo-item">
+    <label for={name}>{titulo}</label>
+    {
+        opciones ? (
+            <select id={name} name={name} value={valor}>
+                <option value="">Selecciona una opción</option>
+                {opciones.map((opcion) => (
+                    <option
+                        value={opcion.value}
+                        selected={opcion.value === valor}
+                    >
+                        {opcion.text}
+                    </option>
+                ))}
+            </select>
+        ) : (
+            <input
+                id={name}
+                name={name}
+                type={
+                    name === "contrasena"
+                        ? "password"
+                        : name.includes("fec")
+                          ? "date"
+                          : "text"
+                }
+                value={valor}
+                pattern={pattern ?? undefined}
+                title={title ?? undefined}
+                oninput={oninput ?? undefined}
+                maxlength={maxlength ?? undefined}
+            />
+        )
+    }
+</div>
+
+<style>
+    .campo-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .campo-item label {
+        font-weight: bold;
+        color: #8b0000;
+        font-size: 14px;
+    }
+
+    .campo-item input {
+        padding: 10px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        outline: none;
+    }
+
+    .campo-item select {
+        padding: 10px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        outline: none;
+        background-color: white;
+    }
+
+    .campo-item input:focus,
+    .campo-item select:focus {
+        border-color: #8b0000;
+        box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+    }
+</style>

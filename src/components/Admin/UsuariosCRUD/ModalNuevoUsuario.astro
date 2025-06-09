@@ -1,0 +1,229 @@
+---
+import "../../../styles/Admin/ModalModificarEvento.css";
+import { actions } from "astro:actions";
+
+// Obtener carreras para el select
+const { data: carrerasData } = await Astro.callAction(
+    actions.getAllCarreras,
+    {},
+);
+const carreras = carrerasData?.carreras || [];
+---
+
+<div id="modalNuevoUsuario" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalNuevoUsuario()">&times;</span>
+        <div class="formulario-completo">
+            <form
+                class="formulario-modificar-registro"
+                method="POST"
+                id="formulario-nuevo-usuario"
+                enctype="multipart/form-data"
+            >
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-roja">Información General</p>
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Cédula</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="ced_usu"
+                                required
+                                maxlength="10"
+                                pattern="[0-9]{10}"
+                                title="Ingrese una cédula válida de 10 dígitos"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Primer Nombre</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="nom_usu1"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Segundo Nombre</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="nom_usu2"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Primer Apellido</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="ape_usu1"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Segundo Apellido</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="ape_usu2"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Fecha de Nacimiento</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="date"
+                                class="input-dato"
+                                name="fec_nac_usu"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Número de Teléfono</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="tel"
+                                class="input-dato"
+                                name="num_tel_usu"
+                                pattern="[0-9]{10}"
+                                title="Ingrese un número de teléfono válido"
+                            />
+                        </div>
+                    </div>
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Carrera</p>
+                        <div class="contenedor-input">
+                            <select class="input-dato" name="id_car_per">
+                                <option value="">Seleccionar carrera</option>
+                                {
+                                    carreras.map((carrera: any) => (
+                                        <option value={carrera.id_car}>
+                                            {carrera.nom_car}
+                                        </option>
+                                    ))
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-boton-modificar">
+                        <button
+                            type="button"
+                            class="boton-modificar"
+                            onclick="cerrarModalNuevoUsuario()"
+                        >
+                            Cancelar
+                        </button>
+                        <button type="submit" class="boton-modificar">
+                            Crear Usuario
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
+    declare global {
+        interface Window {
+            abrirModalNuevoUsuario: () => void;
+            cerrarModalNuevoUsuario: () => void;
+        }
+    }
+
+    function abrirModalNuevoUsuario(): void {
+        console.log("🎯 Abriendo modal nuevo usuario...");
+        const modal = document.getElementById("modalNuevoUsuario");
+        if (modal) {
+            modal.style.display = "block";
+        }
+    }
+
+    function cerrarModalNuevoUsuario(): void {
+        const modal = document.getElementById("modalNuevoUsuario");
+        const form = document.getElementById(
+            "formulario-nuevo-usuario",
+        ) as HTMLFormElement;
+
+        if (modal && form) {
+            modal.style.display = "none";
+            form.reset();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById(
+            "formulario-nuevo-usuario",
+        ) as HTMLFormElement;
+
+        // Manejar envío del formulario
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                try {
+                    const { data, error } = await actions.setUser(formData);
+
+                    if (data?.success) {
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text: "Usuario creado correctamente",
+                            confirmButtonColor: "#059669",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                (data as any)?.error ||
+                                error?.message ||
+                                "No se pudo crear el usuario.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            });
+        }
+
+        // Asignar funciones al objeto window
+        window.abrirModalNuevoUsuario = abrirModalNuevoUsuario;
+        window.cerrarModalNuevoUsuario = cerrarModalNuevoUsuario;
+    });
+</script>

@@ -1,0 +1,250 @@
+---
+const {
+    label = "Subir Imagen",
+    cuentaId,
+    currentImage = null,
+    size = "w-20 h-20",
+    fieldName = "imagen_documento",
+} = Astro.props;
+
+const hasImage = currentImage && currentImage !== null;
+const initialColor = hasImage ? "bg-green-600" : "bg-red-800";
+const initialLabel = hasImage ? "✓ Imagen" : label;
+
+// ✅ Debug props
+---
+
+<!-- ✅ Cambio: Usar un único contenedor con todos los datos -->
+<div
+    class={`relative ${size}`}
+    data-cuenta-id={cuentaId}
+    data-field-name={fieldName}
+    data-current-image={currentImage || ""}
+>
+    <div
+        id="upload-container"
+        class={`${initialColor} text-white rounded-full flex items-center justify-center text-xs text-center p-2 cursor-pointer transition-colors duration-300 hover:opacity-80`}
+    >
+        <span id="upload-label">{initialLabel}</span>
+    </div>
+
+    <input
+        type="file"
+        accept="image/*"
+        class="upload-input absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+    />
+
+    <!-- Indicador de carga -->
+    <div
+        class="loading-indicator absolute inset-0 bg-black bg-opacity-50 rounded-full items-center justify-center hidden"
+    >
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white">
+        </div>
+    </div>
+</div>
+
+<!-- Toast para mensajes -->
+<div
+    class="document-toast fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg hidden transition-all"
+>
+    <span class="document-toast-message"></span>
+</div>
+
+<script>
+    import { actions } from "astro:actions";
+
+    // ✅ Usar event delegation para manejar múltiples instancias
+    document.addEventListener("change", async (event) => {
+        const target = event.target as HTMLInputElement;
+
+        // Solo procesar si es un input de upload de documento
+        if (!target.classList.contains("upload-input")) return;
+
+        const file = target.files?.[0];
+        if (!file) return;
+
+        // Obtener el contenedor padre
+        const container = target.closest("[data-cuenta-id]") as HTMLElement;
+        if (!container) {
+            console.error("❌ No se encontró el contenedor padre");
+            return;
+        }
+
+        // Obtener datos del contenedor
+        const cuentaId = container.getAttribute("data-cuenta-id");
+        const fieldName = container.getAttribute("data-field-name");
+        const currentImage = container.getAttribute("data-current-image");
+
+        // Validar datos
+        if (!cuentaId || !fieldName) {
+            console.error("❌ Datos faltantes:", { cuentaId, fieldName });
+            showToast(
+                container,
+                "Error: Datos de configuración faltantes",
+                "error",
+            );
+            return;
+        }
+
+        // Validaciones del archivo
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/jpg",
+            "image/webp",
+        ];
+
+        if (file.size > maxSize) {
+            showToast(
+                container,
+                "El archivo es demasiado grande. Máximo 5MB.",
+                "error",
+            );
+            return;
+        }
+
+        if (!allowedTypes.includes(file.type)) {
+            showToast(
+                container,
+                "Tipo de archivo no permitido. Solo JPEG, PNG, JPG y WebP.",
+                "error",
+            );
+            return;
+        }
+
+        // Obtener elementos del DOM
+        const uploadLabel = container.querySelector(
+            "#upload-label",
+        ) as HTMLElement;
+        const uploadContainer = container.querySelector(
+            "#upload-container",
+        ) as HTMLElement;
+        const loadingIndicator = container.querySelector(
+            ".loading-indicator",
+        ) as HTMLElement;
+
+        try {
+            // Mostrar estado de carga
+            showLoading(loadingIndicator, true);
+            if (uploadLabel) uploadLabel.textContent = "Subiendo...";
+
+            // Crear FormData
+            const formData = new FormData();
+            formData.append("cuentaId", cuentaId);
+            formData.append("imagen", file);
+            formData.append("fieldName", fieldName);
+
+            console.log("📤 Enviando a uploadDocumentImage...");
+
+            // Llamar a la action
+            const result = await actions.uploadDocumentImage(formData);
+
+            console.log("📥 Respuesta recibida:", result);
+
+            if (result.data?.success) {
+                updateButtonState(
+                    uploadContainer,
+                    uploadLabel,
+                    true,
+                    "✓ Imagen",
+                );
+                showToast(container, "Imagen subida exitosamente", "success");
+
+                // Actualizar el atributo de imagen actual
+                container.setAttribute(
+                    "data-current-image",
+                    result.data.data?.imagen_url || "",
+                );
+
+                // Emitir evento personalizado
+                const customEvent = new CustomEvent("imageUploaded", {
+                    detail: {
+                        fieldName: fieldName,
+                        imageUrl: result.data.data?.imagen_url,
+                        fileName: file.name,
+                    },
+                });
+                document.dispatchEvent(customEvent);
+            } else {
+                updateButtonState(uploadContainer, uploadLabel, false, "Error");
+                showToast(
+                    container,
+                    result.data?.message || "Error al subir la imagen",
+                    "error",
+                );
+            }
+        } catch (error) {
+            console.error("❌ Error al subir imagen:", error);
+            updateButtonState(uploadContainer, uploadLabel, false, "Error");
+            showToast(
+                container,
+                "Error inesperado al subir la imagen",
+                "error",
+            );
+        } finally {
+            showLoading(loadingIndicator, false);
+            target.value = ""; // Limpiar input
+        }
+    });
+
+    function updateButtonState(
+        uploadContainer: HTMLElement,
+        uploadLabel: HTMLElement,
+        hasImage: boolean,
+        label: string,
+    ) {
+        if (uploadLabel) uploadLabel.textContent = label;
+
+        if (uploadContainer) {
+            if (hasImage) {
+                uploadContainer.classList.remove("bg-red-800");
+                uploadContainer.classList.add("bg-green-600");
+            } else {
+                uploadContainer.classList.remove("bg-green-600");
+                uploadContainer.classList.add("bg-red-800");
+            }
+        }
+    }
+
+    function showLoading(loadingIndicator: HTMLElement, show: boolean) {
+        if (!loadingIndicator) return;
+
+        if (show) {
+            loadingIndicator.classList.remove("hidden");
+            loadingIndicator.classList.add("flex");
+        } else {
+            loadingIndicator.classList.add("hidden");
+            loadingIndicator.classList.remove("flex");
+        }
+    }
+
+    function showToast(
+        container: HTMLElement,
+        message: string,
+        type: "success" | "error",
+    ) {
+        const toast = container.querySelector(".document-toast") as HTMLElement;
+        const toastMessage = container.querySelector(
+            ".document-toast-message",
+        ) as HTMLElement;
+
+        if (!toast || !toastMessage) return;
+
+        toastMessage.textContent = message;
+
+        toast.classList.remove("bg-green-500", "bg-red-500", "text-white");
+
+        if (type === "success") {
+            toast.classList.add("bg-green-500", "text-white");
+        } else {
+            toast.classList.add("bg-red-500", "text-white");
+        }
+
+        toast.classList.remove("hidden");
+
+        setTimeout(() => {
+            toast.classList.add("hidden");
+        }, 3000);
+    }
+</script>

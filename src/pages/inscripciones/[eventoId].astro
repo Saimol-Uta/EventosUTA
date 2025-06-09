@@ -1,0 +1,583 @@
+---
+import Header from "@components/Header.astro";
+import NavBar from "../../components/Navbar.astro";
+import MenuAdmin from "../../components/MenuAdministrador.astro";
+import Layout from "../../layouts/Layout.astro";
+import ModalDetallesInscripcion from "../../components/ModalDetallesInscripcion.astro";
+import ModalDetallesPago from "../../components/ModalDetallesPago.astro";
+import "../../styles/AprobacionesInscripciones.css";
+import { actions } from "astro:actions";
+
+const { eventoId } = Astro.params;
+
+const { data: inscripcion, error } = await Astro.callAction(
+    actions.getByIdInscripcion,
+    {
+        id: eventoId || "default-event-id",
+    },
+);
+
+if (error) {
+    console.error("Error al obtener inscripciones:", error);
+}
+
+const inscripciones = inscripcion?.inscripciones || [];
+console.log("Inscripciones obtenidas:", inscripciones.length);
+
+// Función para formatear fecha
+function formatearFecha(fecha: string) {
+    if (!fecha) return "Sin fecha";
+    return new Date(fecha).toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    });
+}
+
+// Función para obtener el estado en español
+function getEstadoTexto(estado: string) {
+    switch (estado) {
+        case "Aprobado":
+            return "✅ Aprobado";
+        case "DPendiente":
+            return "📄 Documentación Pendiente";
+        case "FPendiente":
+            return "💳 Facturación Pendiente";
+        default:
+            return estado;
+    }
+}
+
+const links = [
+    { label: "Eventos", href: "EventosCRUD" },
+    { label: "Usuarios", href: "/perfil" },
+    { label: "Organizadores", href: "/historial" },
+    { label: "Inscripciones", href: "AprobacionInscripciones" },
+    { label: "Categorías", href: "/historial" },
+    { label: "Carreras", href: "/historial" },
+];
+---
+
+<Layout>
+    <body>
+        <Header />
+        <MenuAdmin links={links} />
+        <ModalDetallesInscripcion />
+        <ModalDetallesPago />
+
+        <!-- Script para pasar datos de inscripciones al JavaScript -->
+        <input
+            type="hidden"
+            id="inscripciones-data"
+            value={JSON.stringify(inscripciones)}
+        />
+
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        Inscripciones - {
+                            inscripciones.length > 0
+                                ? inscripciones[0].eventos?.nom_eve
+                                : "Evento"
+                        }
+                        <span class="total-inscripciones"
+                            >({inscripciones.length} inscripciones)</span
+                        >
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <select
+                            name="filtros"
+                            id="filtros"
+                            class="select-estado"
+                        >
+                            <option value="">Todos los estados</option>
+                            <option value="Aprobado">Aprobados</option>
+                            <option value="DPendiente"
+                                >Documentación Pendiente</option
+                            >
+                            <option value="FPendiente"
+                                >Facturación Pendiente</option
+                            >
+                        </select>
+                    </div>
+                </div>
+
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombres
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Apellidos
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Fecha
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Estado
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>
+                <div class="registros-inferior">
+                    {
+                        inscripciones.length > 0 ? (
+                            inscripciones.map((inscripcion: any) => (
+                                <div
+                                    class="registro-fila"
+                                    data-estado={inscripcion.est_ins}
+                                >
+                                    <div class="parte-izquierda-registro-fila">
+                                        {inscripcion.usuarios?.nom_usu1}{" "}
+                                        {inscripcion.usuarios?.nom_usu2 || ""}
+                                    </div>
+                                    <div class="parte-izquierda-registro-fila">
+                                        {inscripcion.usuarios?.ape_usu1}{" "}
+                                        {inscripcion.usuarios?.ape_usu2}
+                                    </div>
+                                    <div class="parte-izquierda-registro-fila">
+                                        {formatearFecha(inscripcion.fec_ins)}
+                                    </div>
+                                    <div class="parte-izquierda-registro-fila">
+                                        <span
+                                            class={`estado-badge ${inscripcion.est_ins.toLowerCase()}`}
+                                        >
+                                            {getEstadoTexto(
+                                                inscripcion.est_ins,
+                                            )}
+                                        </span>
+                                    </div>{" "}
+                                    <div class="registro-opciones">
+                                        <!-- Botón de documentación - siempre habilitado si no está aprobado -->
+                                        <button
+                                            onclick={`window.abrirModalDetallesInscripcion('${inscripcion.id_ins}')`}
+                                            title="Verificar Documentación"
+                                            class={inscripcion.est_ins === "Aprobado" ? "boton-aprobado" : ""}
+                                            disabled={inscripcion.est_ins === "Aprobado"}
+                                        >
+                                            <img
+                                                class="imagen-boton-registro"
+                                                src="/img/documento.svg"
+                                                alt="documento"
+                                            />
+                                        </button>
+
+                                        <!-- Botón de pago - habilitado solo si documentación está aprobada -->
+                                        <button
+                                            onclick={inscripcion.est_ins === "DPendiente" ? 
+                                                "return false;" : 
+                                                `window.abrirModalPagoInscripcion('${inscripcion.id_ins}')`}
+                                            title={inscripcion.est_ins === "DPendiente" ? 
+                                                "Primero debe aprobar la documentación" : 
+                                                "Verificar Facturación"}
+                                            class={`${inscripcion.est_ins === "DPendiente" ? "boton-deshabilitado" : ""} ${inscripcion.est_ins === "Aprobado" ? "boton-aprobado" : ""}`}
+                                            disabled={inscripcion.est_ins === "DPendiente" || inscripcion.est_ins === "Aprobado"}
+                                        >
+                                            <img
+                                                class="imagen-boton-modificar"
+                                                src="/img/factura.svg"
+                                                alt="factura"
+                                            />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )
+                        : (
+                            <div class="sin-inscripciones">
+                                <p>No hay inscripciones para este evento.</p>
+                            </div>
+                        )
+                    }
+                </div>
+            </div>
+        </main>
+    </body>
+</Layout>
+
+<style>
+    .total-inscripciones {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: normal;
+    }
+
+    .estado-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .estado-badge.aprobado {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .estado-badge.dpendiente {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .estado-badge.fpendiente {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* Estilos para botones deshabilitados */
+    .boton-deshabilitado {
+        opacity: 0.4;
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
+
+    .boton-deshabilitado:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Estilos para botones de elementos ya aprobados */
+    .boton-aprobado {
+        opacity: 0.6;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        cursor: default;
+    }
+
+    .boton-aprobado:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Mejoras visuales para los botones de opciones */
+    .registro-opciones button {
+        margin: 0 2px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .registro-opciones button:hover:not(.boton-deshabilitado):not(.boton-aprobado) {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-color: #ad272e;
+    }
+
+    .sin-inscripciones {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    .registro-fila[data-estado="hidden"] {
+        display: none;
+    }
+
+    .select-estado {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+    }
+
+    .select-estado:focus {
+        outline: none;
+        border-color: #ad272e;
+        box-shadow: 0 0 0 2px rgba(173, 39, 46, 0.1);
+    }
+</style>
+
+<script>
+    import Swal from "sweetalert2";
+    import { actions } from "astro:actions"; // Datos de inscripciones globales para uso en modales
+    let inscripcionesData: any[] = []; // Declaraciones globales
+    declare global {
+        interface Window {
+            abrirModalDetallesInscripcion: (inscripcionId: string) => void;
+            abrirModalPagoInscripcion: (inscripcionId: string) => void;
+            aprobarInscripcion: (
+                inscripcionId: string,
+                tipo: "documentacion" | "pago",
+            ) => Promise<void>;
+            rechazarInscripcion: (
+                inscripcionId: string,
+                tipo: "documentacion" | "pago",
+            ) => Promise<void>;
+            currentInscripcionId: string;
+            currentInscripcionIdPago: string;
+        }
+    }    document.addEventListener("DOMContentLoaded", function () {
+        const filtroSelect = document.getElementById(
+            "filtros",
+        ) as HTMLSelectElement;
+        const filas = document.querySelectorAll(".registro-fila[data-estado]");
+
+        // Obtener datos de inscripciones del input hidden y hacerlos disponibles globalmente
+        const inscripcionesInput = document.getElementById(
+            "inscripciones-data",
+        ) as HTMLInputElement;
+        if (inscripcionesInput && inscripcionesInput.value) {
+            try {
+                inscripcionesData = JSON.parse(inscripcionesInput.value);
+                (window as any).inscripcionesData = inscripcionesData; // Hacer disponible globalmente
+                console.log(
+                    "Datos de inscripciones cargados:",
+                    inscripcionesData,
+                );
+                console.log("Total inscripciones:", inscripcionesData.length);
+                if (inscripcionesData.length > 0) {
+                    console.log("Primera inscripción:", inscripcionesData[0]);
+                    console.log(
+                        "ID de primera inscripción:",
+                        inscripcionesData[0].id_ins,
+                    );
+                    console.log("Documentos disponibles:", {
+                        cedula: inscripcionesData[0].usuarios?.cuentas?.[0]?.enl_ced_cue,
+                        matricula: inscripcionesData[0].usuarios?.cuentas?.[0]?.enl_mat_cue,
+                        motivacion: inscripcionesData[0].usuarios?.cuentas?.[0]?.enl_ext_cue,
+                        comprobantePago: inscripcionesData[0].enl_ord_pag_ins
+                    });
+                }
+            } catch (e) {
+                console.error("Error al parsear datos de inscripciones:", e);
+            }
+        } else {
+            console.error("No se encontró el input con datos de inscripciones");
+        }
+
+        if (filtroSelect) {
+            filtroSelect.addEventListener("change", function () {
+                const filtroValor = this.value;
+
+                filas.forEach((fila) => {
+                    const filaElement = fila as HTMLElement;
+                    if (
+                        !filtroValor ||
+                        filaElement.dataset.estado === filtroValor
+                    ) {
+                        filaElement.style.display = "";
+                    } else {
+                        filaElement.style.display = "none";
+                    }
+                });
+            });
+        }
+    });
+
+    // Función para encontrar inscripción por ID
+    function findInscripcionById(inscripcionId: string) {
+        return inscripcionesData.find((ins) => ins.id_ins === inscripcionId);
+    }    // Funciones para modales con parámetros de inscripción
+    function abrirModalDetallesInscripcion(inscripcionId: string) {
+        console.log(
+            "Abriendo modal de detalles para inscripción:",
+            inscripcionId,
+        );
+
+        const inscripcion = findInscripcionById(inscripcionId);
+        if (!inscripcion) {
+            console.error("No se encontró la inscripción:", inscripcionId);
+            return;
+        }
+
+        // Actualizar el título del modal con el nombre del evento
+        const modalTitulo = document.querySelector("#modalDetallesReserva h2");
+        if (modalTitulo)
+            modalTitulo.textContent = inscripcion.eventos?.nom_eve || "Evento";        // Llamar a la función del modal component para que maneje todo
+        const modalFunction = (window as any).abrirModalDetallesInscripcionComponent;
+        if (modalFunction && typeof modalFunction === 'function') {
+            modalFunction(inscripcionId);
+        } else {
+            // Fallback: abrir modal directamente
+            const modal = document.getElementById("modalDetallesReserva");
+            if (modal) {
+                modal.style.display = "block";
+                window.currentInscripcionId = inscripcionId;
+            }
+        }
+    }
+    function abrirModalPagoInscripcion(inscripcionId: string) {
+        console.log("Abriendo modal de pago para inscripción:", inscripcionId);
+
+        const inscripcion = findInscripcionById(inscripcionId);
+        if (!inscripcion) {
+            console.error("No se encontró la inscripción:", inscripcionId);
+            return;
+        }
+
+        // Verificar que la documentación esté aprobada
+        if (inscripcion.est_ins === "DPendiente") {
+            Swal.fire({
+                title: "Documentación Pendiente",
+                text: "Primero debe aprobar la documentación antes de verificar el pago.",
+                icon: "warning",
+                confirmButtonText: "Entendido"
+            });
+            return;
+        }
+
+        // Si ya está completamente aprobado
+        if (inscripcion.est_ins === "Aprobado") {
+            Swal.fire({
+                title: "Inscripción Completada",
+                text: "Esta inscripción ya está completamente aprobada.",
+                icon: "info",
+                confirmButtonText: "Entendido"
+            });
+            return;
+        }
+
+        // Continuar con la lógica normal para estado FPendiente
+        // Llenar los datos en el modal de pago
+        const nombreCompleto =
+            `${inscripcion.usuarios?.nom_usu1 || ""} ${inscripcion.usuarios?.nom_usu2 || ""}`.trim();
+        const apellidoCompleto =
+            `${inscripcion.usuarios?.ape_usu1 || ""} ${inscripcion.usuarios?.ape_usu2 || ""}`.trim();
+        const correo =
+            inscripcion.usuarios?.cuentas?.[0]?.cor_cue || "No disponible";
+
+        // Buscar elementos específicos del modal de pago
+        const modalPago = document.getElementById("modalDetallesPago");
+        if (modalPago) {
+            const modalPagoTitulo = modalPago.querySelector("h2");
+            const pagoNombresModal = modalPago.querySelector("#usuario-nombres");
+            const pagoApellidosModal = modalPago.querySelector("#usuario-apellidos");
+            const pagoCorreoModal = modalPago.querySelector("#usuario-correo");
+            const pagoCedulaModal = modalPago.querySelector("#usuario-cedula");
+
+            if (modalPagoTitulo)
+                modalPagoTitulo.textContent = inscripcion.eventos?.nom_eve || "Evento";
+            if (pagoNombresModal) pagoNombresModal.textContent = nombreCompleto;
+            if (pagoApellidosModal) pagoApellidosModal.textContent = apellidoCompleto;
+            if (pagoCorreoModal) pagoCorreoModal.textContent = correo;
+            if (pagoCedulaModal)
+                pagoCedulaModal.textContent = inscripcion.usuarios?.ced_usu || "No disponible";
+        }
+
+        // Abrir el modal directamente
+        const modal = document.getElementById("modalDetallesPago");
+        if (modal) {
+            modal.style.display = "block";
+            window.currentInscripcionIdPago = inscripcionId;
+        }
+    } // Función para aprobar inscripción
+    async function aprobarInscripcion(
+        inscripcionId: string,
+        tipo: "documentacion" | "pago",
+    ) {
+        try {
+            const result = await Swal.fire({
+                title: "¿Aprobar inscripción?",
+                text: `¿Estás seguro de que deseas aprobar la ${tipo === "documentacion" ? "documentación" : "facturación"} de esta inscripción?`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#10b981",
+                cancelButtonColor: "#ef4444",
+                confirmButtonText: "Sí, aprobar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (result.isConfirmed) {
+                // Llamar a la acción para actualizar el estado de la inscripción
+                const response = await actions.updateEstadoInscripcion({
+                    inscripcionId: inscripcionId,
+                    estado: "Aprobado",
+                    tipo: tipo,
+                });
+
+                if (response.data?.success) {
+                    await Swal.fire({
+                        title: "¡Aprobado!",
+                        text:
+                            response.data.message ||
+                            "La inscripción ha sido aprobada correctamente.",
+                        icon: "success",
+                    });
+
+                    // Recargar la página para mostrar los cambios
+                    window.location.reload();
+                } else {
+                    throw new Error(
+                        response.error?.message || "Error desconocido",
+                    );
+                }
+            }
+        } catch (error) {
+            console.error("Error al aprobar inscripción:", error);
+            await Swal.fire({
+                title: "Error",
+                text: "No se pudo aprobar la inscripción. Inténtalo de nuevo.",
+                icon: "error",
+            });
+        }
+    } // Función para rechazar inscripción
+    async function rechazarInscripcion(
+        inscripcionId: string,
+        tipo: "documentacion" | "pago",
+    ) {
+        try {
+            const result = await Swal.fire({
+                title: "¿Rechazar inscripción?",
+                text: `¿Estás seguro de que deseas rechazar la ${tipo === "documentacion" ? "documentación" : "facturación"} de esta inscripción?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ef4444",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Sí, rechazar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (result.isConfirmed) {
+                // Llamar a la acción para actualizar el estado de la inscripción
+                const response = await actions.updateEstadoInscripcion({
+                    inscripcionId: inscripcionId,
+                    estado: "Rechazado",
+                    tipo: tipo,
+                });
+
+                if (response.data?.success) {
+                    await Swal.fire({
+                        title: "¡Rechazado!",
+                        text:
+                            response.data.message ||
+                            "La inscripción ha sido rechazada.",
+                        icon: "success",
+                    });
+
+                    // Recargar la página para mostrar los cambios
+                    window.location.reload();
+                } else {
+                    throw new Error(
+                        response.error?.message || "Error desconocido",
+                    );
+                }
+            }
+        } catch (error) {
+            console.error("Error al rechazar inscripción:", error);
+            await Swal.fire({
+                title: "Error",
+                text: "No se pudo rechazar la inscripción. Inténtalo de nuevo.",
+                icon: "error",
+            });
+        }
+    }
+
+    // Hacer las funciones disponibles globalmente
+    (window as any).abrirModalDetallesInscripcion =
+        abrirModalDetallesInscripcion;
+    (window as any).abrirModalPagoInscripcion = abrirModalPagoInscripcion;
+    (window as any).aprobarInscripcion = aprobarInscripcion;
+    (window as any).rechazarInscripcion = rechazarInscripcion;
+</script>

@@ -1,0 +1,351 @@
+---
+import "../../styles/FormularioSolicitudCambioUsuario.css";
+import { actions } from "astro:actions";
+import Layout from "../../layouts/Layout.astro";
+import { getSession } from "auth-astro/server";
+
+// Número aleatorio de 3 dígitos, tipo 001 a 999
+const randomNumber = Math.floor(Math.random() * 999 + 1).toString().padStart(3, "0");
+
+// Sección del usuario
+const session = await getSession(Astro.request);
+const { user } = session ?? {};
+
+// Verificar si el usuario está logueado
+const { isLoggedIn } = Astro.locals;
+if (!isLoggedIn) {
+    return Astro.redirect("/login");
+}
+
+// Buscar el usuario en la base de datos
+const { data: userData, error: userError } = await Astro.callAction(
+    actions.getUseById,
+    user?.id ?? "",
+);
+
+// Obtener información del usuario
+const usuario = userData?.user
+    ? `${userData.user.cor_cue}`
+    : "Usuario";
+const fecha = new Date().toLocaleDateString("es-ES");
+---
+
+<Layout>
+    <form id="cambioForm">
+        <div class="container">
+            <div class="header custom-header center-text">
+                SOLICITUD DE CAMBIO
+            </div>
+
+            <div class="info-top">
+                <div><strong>{usuario}</strong></div>
+                <div>{fecha}</div>
+                <div><strong>Nº {randomNumber}</strong></div>
+
+            </div>
+
+            <!-- Campo oculto para el ID del usuario -->
+            <input
+                type="hidden"
+                name="id_usuario"
+                value={userData?.user?.id_cue || ""}
+            />
+
+            <div class="section-title">ROL DEL SOLICITANTE</div>
+            <div class="radio-group center">
+                <label>
+                    <input
+                        type="radio"
+                        name="rol_sol_cam"
+                        value="ESTUDIANTE"
+                        required
+                    />
+                    Estudiante
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="rol_sol_cam"
+                        value="DOCENTE"
+                        required
+                    />
+                    Docente
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="rol_sol_cam"
+                        value="GENERAL"
+                        required
+                    />
+                    Público General
+                </label>
+            </div>
+
+            <div class="section-title">DETALLES DEL CAMBIO</div>
+            <label for="des_cam">DESCRIPCIÓN DEL CAMBIO</label>
+            <textarea id="des_cam" name="des_cam" rows="3" required></textarea>
+
+            <label for="mot_cam">MOTIVO DEL CAMBIO</label>
+            <textarea id="mot_cam" name="mot_cam" rows="3" required></textarea>
+
+            <label>PRIORIDAD DEL CAMBIO</label>
+            <div class="radio-group prioridad">
+                <label>
+                    <input
+                        type="radio"
+                        name="pri_cam"
+                        value="URGENTE"
+                        required
+                    />
+                    Urgente
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="ALTA" required />
+                    Alta
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="MEDIA" required />
+                    Media
+                </label>
+                <label>
+                    <input type="radio" name="pri_cam" value="BAJA" required />
+                    Baja
+                </label>
+            </div>
+
+            <div class="section-title">TIPO DE CAMBIO</div>
+            <div class="radio-group tipo-cambio">
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="PERMISO"
+                        required
+                    />
+                    Permisos o acceso
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="GRAFICO"
+                        required
+                    />
+                    Gráfico
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="CONFIGURACION"
+                        required
+                    />
+                    Configuraciones
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="SEGURIDAD"
+                        required
+                    />
+                    Seguridad y privacidad
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="tip_cam"
+                        value="TECNICO"
+                        required
+                    />
+                    Técnicos
+                </label>
+                <label>
+                    <input type="radio" name="tip_cam" value="OTRO" required />
+                    Otros
+                </label>
+            </div>
+
+            <div class="section-title">ORIGEN DE LA SOLICITUD DE CAMBIO</div>
+            <div class="radio-group center">
+                <label>
+                    <input type="radio" name="ori_cam" value="FALLA" required />
+                    Fallas
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="ori_cam"
+                        value="MEJORA"
+                        required
+                    />
+                    Solicitud de mejora
+                </label>
+            </div>
+
+            <div class="section-title">DOCUMENTOS O INFORMACIÓN ADICIONAL</div>
+            <div class="upload-card" id="uploadCard">
+                <p>Suba su documento</p>
+                <input
+                    type="text"
+                    name="archivo"
+                    id="archivo"
+                    placeholder="Ingrese el nombre del archivo o URL"
+                />
+            </div>
+
+            <div id="message" class="message" style="display: none;"></div>
+
+            <div class="form-buttons">
+                <a href="/">
+                    <button type="button" class="btn-secondary">
+                        Regresar
+                    </button>
+                </a>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    Enviar Solicitud
+                </button>
+            </div>
+        </div>
+    </form>
+</Layout>
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("cambioForm") as HTMLFormElement;
+        const uploadCard = document.getElementById("uploadCard") as HTMLElement;
+        const fileInput = document.getElementById(
+            "archivo",
+        ) as HTMLInputElement;
+        const submitBtn = document.getElementById(
+            "submitBtn",
+        ) as HTMLButtonElement;
+
+        // Manejo del envío del formulario
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Deshabilitar botón de envío
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Enviando...";
+
+            try {
+                // Obtener datos del formulario
+                const formData = new FormData(form);
+
+                // Validar campos requeridos
+                const requiredFields = [
+                    "rol_sol_cam",
+                    "des_cam",
+                    "mot_cam",
+                    "pri_cam",
+                    "tip_cam",
+                    "ori_cam",
+                ];
+
+                for (const field of requiredFields) {
+                    if (!formData.get(field)) {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Campo requerido",
+                            text: `El campo ${field.replace("_", " ")} es obligatorio`,
+                        });
+                        return;
+                    }
+                }
+
+                // Llamar a la acción
+                const { data, error } = await actions.createCambio(formData);
+
+                if (error) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error al enviar la solicitud",
+                        text: error.message || "Ocurrió un error inesperado",
+                    });
+                } else if (data) {
+                    await Swal.fire({
+                        icon: "success",
+                        title: "¡Solicitud enviada!",
+                        text: `Solicitud registrada correctamente. Número: ${data.num_cam}`,
+                        confirmButtonText: "Aceptar",
+                    });
+
+                    form.reset();
+
+                    // Redirigir después del éxito
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 1000);
+                }
+            } catch (error) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Error: " + (error as Error).message,
+                });
+            } finally {
+                // Rehabilitar botón
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Enviar Solicitud";
+            }
+        });
+
+        // Manejo de drag and drop para archivos
+        function handleDragOver(event: DragEvent) {
+            event.preventDefault();
+            uploadCard.classList.add("dragover");
+        }
+
+        function handleDragLeave(event: DragEvent) {
+            uploadCard.classList.remove("dragover");
+        }
+
+        function handleDrop(event: DragEvent) {
+            event.preventDefault();
+            if (event.dataTransfer && fileInput) {
+                fileInput.files = event.dataTransfer.files;
+            }
+            uploadCard.classList.remove("dragover");
+        }
+
+        // Agregar event listeners para drag and drop
+        uploadCard.addEventListener("dragover", handleDragOver);
+        uploadCard.addEventListener("dragleave", handleDragLeave);
+        uploadCard.addEventListener("drop", handleDrop);
+    });
+</script>
+
+<style>
+    .message {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .message.success {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    .message.error {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .dragover {
+        border: 2px dashed #007bff;
+        background-color: #f8f9fa;
+    }
+</style>

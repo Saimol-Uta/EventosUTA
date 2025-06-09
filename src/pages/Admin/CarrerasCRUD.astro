@@ -1,0 +1,786 @@
+---
+import Header from "@components/Header.astro";
+import MenuAdmin from "../../components/MenuAdministrador.astro";
+import Layout from "../../layouts/Layout.astro";
+import ModalDetallesCarrera from "../../components/ModalDetallesCarrera.astro";
+import { actions } from "astro:actions";
+
+// Obtener todas las carreras
+const { data: carrerasData, error: carrerasError } = await Astro.callAction(
+    actions.getAllCarreras,
+    {},
+);
+
+if (carrerasError) {
+    console.error("Error al obtener carreras:", carrerasError);
+}
+
+const carreras = carrerasData?.carreras || [];
+
+---
+
+<Layout>
+    <body class="bg-gray-50 min-h-screen">
+        <Header />
+        <MenuAdmin />
+
+        <!-- Modal para Nueva Carrera -->
+        <div
+            id="modalNuevaCarrera"
+            class="modal fixed inset-0 bg-black bg-opacity-30 hidden items-center justify-center z-50"
+        >
+            <div
+                class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            >
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-900">
+                            Nueva Carrera
+                        </h2>
+                        <button
+                            onclick="cerrarModalNuevaCarrera()"
+                            class="text-gray-400 hover:text-gray-600 focus:outline-none"
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="formNuevaCarrera" class="p-6">
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label
+                                for="nombreCarrera"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Nombre de la Carrera *
+                            </label>
+                            <input
+                                type="text"
+                                id="nombreCarrera"
+                                name="nom_car"
+                                required
+                                maxlength="100"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Ingrese el nombre de la carrera"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="codigoCarrera"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Código de Carrera
+                            </label>
+                            <input
+                                type="text"
+                                id="codigoCarrera"
+                                name="cod_car"
+                                maxlength="10"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Ej: ING001"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="descripcionCarrera"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Descripción *
+                            </label>
+                            <textarea
+                                id="descripcionCarrera"
+                                name="des_car"
+                                required
+                                maxlength="250"
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Descripción de la carrera"
+                            ></textarea>
+                        </div>
+
+                        <div>
+                            <label
+                                for="facultadCarrera"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Facultad *
+                            </label>
+                            <input
+                                type="text"
+                                id="facultadCarrera"
+                                name="nom_fac_per"
+                                required
+                                maxlength="250"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Nombre de la facultad"
+                            />
+                        </div>
+                    </div>
+
+                    <div
+                        class="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200"
+                    >
+                        <button
+                            type="button"
+                            onclick="cerrarModalNuevaCarrera()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            Crear Carrera
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal para Editar Carrera -->
+        <div
+            id="modalEditarCarrera"
+            class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+        >
+            <div
+                class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+            >
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-900">
+                            Editar Carrera
+                        </h2>
+                        <button
+                            onclick="cerrarModalEditarCarrera()"
+                            class="text-gray-400 hover:text-gray-600 focus:outline-none"
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="formEditarCarrera" class="p-6">
+                    <input type="hidden" id="editarCarreraId" name="id_car" />
+
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label
+                                for="editarNombreCarrera"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Nombre de la Carrera *
+                            </label>
+                            <input
+                                type="text"
+                                id="editarNombreCarrera"
+                                name="nom_car"
+                                required
+                                maxlength="100"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="editarCodigoCarrera"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Código de Carrera
+                            </label>
+                            <input
+                                type="text"
+                                id="editarCodigoCarrera"
+                                name="cod_car"
+                                maxlength="10"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                for="editarDescripcionCarrera"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Descripción *
+                            </label>
+                            <textarea
+                                id="editarDescripcionCarrera"
+                                name="des_car"
+                                required
+                                maxlength="250"
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            ></textarea>
+                        </div>
+
+                        <div>
+                            <label
+                                for="editarFacultadCarrera"
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Facultad *
+                            </label>
+                            <input
+                                type="text"
+                                id="editarFacultadCarrera"
+                                name="nom_fac_per"
+                                required
+                                maxlength="250"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                    </div>
+
+                    <div
+                        class="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200"
+                    >
+                        <button
+                            type="button"
+                            onclick="cerrarModalEditarCarrera()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            Actualizar Carrera
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Modal para Ver Detalles de Carrera -->
+        <ModalDetallesCarrera />
+
+        <!-- Contenido Principal -->
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="px-4 py-6 sm:px-0">
+                <!-- Header -->
+                <div class="bg-white shadow rounded-lg mb-6">
+                    <div class="px-6 py-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900">
+                                    Gestión de Carreras
+                                </h1>
+                                <p class="mt-1 text-sm text-gray-600">
+                                    Administra las carreras académicas del
+                                    sistema
+                                </p>
+                            </div>
+                            <button
+                                onclick="abrirModalNuevaCarrera()"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                <svg
+                                    class="w-5 h-5 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Nueva Carrera
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid de Carreras -->
+                <div
+                    class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                >
+                    {
+                        carreras.map((carrera: any) => (
+                            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+                                <div class="p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex-1">
+                                            <h3 class="text-lg font-medium text-gray-900 mb-1">
+                                                {carrera.nom_car}
+                                            </h3>
+                                            {carrera.cod_car && (
+                                                <p class="text-sm text-blue-600 font-medium">
+                                                    Código: {carrera.cod_car}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <p class="text-sm text-gray-600 mb-4 line-clamp-3">
+                                        {carrera.des_car}
+                                    </p>
+
+                                    <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                        <span>
+                                            Facultad: {carrera.nom_fac_per}
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4 mb-4">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-blue-600">
+                                                {carrera.asignaciones?.length ||
+                                                    0}
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                Asignaciones
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-green-600">
+                                                {carrera.usuarios?.length || 0}
+                                            </div>
+                                            <div class="text-xs text-gray-500">
+                                                Estudiantes
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex space-x-2">
+                                        {" "}
+                                        <button
+                                            onclick={`abrirModalDetallesCarrera('${carrera.id_car}')`}
+                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            title="Ver detalles"
+                                        >
+                                            <svg
+                                                class="w-4 h-4 mr-1"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                />
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                                />
+                                            </svg>
+                                            Ver
+                                        </button>
+                                        <button
+                                            onclick={`editarCarrera('${carrera.id_car}')`}
+                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            title="Editar carrera"
+                                        >
+                                            <svg
+                                                class="w-4 h-4 mr-1"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                />
+                                            </svg>
+                                            Editar
+                                        </button>
+                                        <button
+                                            onclick={`eliminarCarrera('${carrera.id_car}')`}
+                                            class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                            title="Eliminar carrera"
+                                        >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+
+                {
+                    carreras.length === 0 && (
+                        <div class="text-center py-12">
+                            <svg
+                                class="mx-auto h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">
+                                No hay carreras registradas
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Comienza creando tu primera carrera.
+                            </p>
+                            <div class="mt-6">
+                                <button
+                                    onclick="abrirModalNuevaCarrera()"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                >
+                                    <svg
+                                        class="w-5 h-5 mr-2"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                        />
+                                    </svg>
+                                    Nueva Carrera
+                                </button>
+                            </div>
+                        </div>
+                    )
+                }
+            </div>
+        </main>
+
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
+
+            // Variables globales
+            let carrerasData: any[] = [];
+
+            document.addEventListener("DOMContentLoaded", () => {
+                // Cargar datos iniciales
+                carrerasData = Array.from(
+                    document.querySelectorAll("[data-carrera-id]"),
+                ).map((el) => ({
+                    id_car: el.getAttribute("data-carrera-id"),
+                    // ... otros datos si es necesario
+                }));
+
+                // Event listeners para formularios
+                const formNuevaCarrera =
+                    document.getElementById("formNuevaCarrera");
+                if (formNuevaCarrera) {
+                    formNuevaCarrera.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        await crearCarrera(e.target as HTMLFormElement);
+                    });
+                }
+
+                const formEditarCarrera =
+                    document.getElementById("formEditarCarrera");
+                if (formEditarCarrera) {
+                    formEditarCarrera.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        await actualizarCarrera(e.target as HTMLFormElement);
+                    });
+                }
+
+                // Event listeners para cerrar modales al hacer clic fuera
+                document.addEventListener("click", (event) => {
+                    const target = event.target as HTMLElement;
+                    if (target.classList.contains("modal")) {
+                        if (target.id === "modalNuevaCarrera")
+                            cerrarModalNuevaCarrera();
+                        if (target.id === "modalEditarCarrera")
+                            cerrarModalEditarCarrera();
+                    }
+                });
+            });
+
+            // Funciones para modales
+            function abrirModalNuevaCarrera() {
+                const modal = document.getElementById("modalNuevaCarrera");
+                if (modal) {
+                    modal.classList.remove("hidden");
+                    modal.classList.add("flex");
+                }
+            }
+
+            function cerrarModalNuevaCarrera() {
+                const modal = document.getElementById("modalNuevaCarrera");
+                const form = document.getElementById(
+                    "formNuevaCarrera",
+                ) as HTMLFormElement;
+
+                if (modal) {
+                    modal.classList.add("hidden");
+                    modal.classList.remove("flex");
+                }
+                if (form) form.reset();
+            }
+
+            function abrirModalEditarCarrera() {
+                const modal = document.getElementById("modalEditarCarrera");
+                if (modal) {
+                    modal.classList.remove("hidden");
+                    modal.classList.add("flex");
+                }
+            }
+
+            function cerrarModalEditarCarrera() {
+                const modal = document.getElementById("modalEditarCarrera");
+                const form = document.getElementById(
+                    "formEditarCarrera",
+                ) as HTMLFormElement;
+
+                if (modal) {
+                    modal.classList.add("hidden");
+                    modal.classList.remove("flex");
+                }
+                if (form) form.reset();
+            }
+
+            // Función para crear carrera
+            async function crearCarrera(form: HTMLFormElement) {
+                try {
+                    const formData = new FormData(form);
+
+                    const { data, error } =
+                        await actions.crearCarrera(formData);
+
+                    if (error || !data?.success) {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                data?.message || "No se pudo crear la carrera",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text: "Carrera creada correctamente",
+                            confirmButtonColor: "#059669",
+                        });
+                        cerrarModalNuevaCarrera();
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }
+
+            // Función para editar carrera
+            async function editarCarrera(carreraId: string) {
+                try {
+                    const { data, error } = await actions.getCarreraById({
+                        id_car: carreraId,
+                    });
+
+                    if (error || !data?.carrera) {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "No se pudo obtener la información de la carrera",
+                            confirmButtonColor: "#dc2626",
+                        });
+                        return;
+                    }
+
+                    const carrera = data.carrera;
+
+                    // Llenar el formulario de edición
+                    const form = document.getElementById(
+                        "formEditarCarrera",
+                    ) as HTMLFormElement;
+                    if (form) {
+                        (
+                            form.querySelector(
+                                "#editarCarreraId",
+                            ) as HTMLInputElement
+                        ).value = carrera.id_car;
+                        (
+                            form.querySelector(
+                                "#editarNombreCarrera",
+                            ) as HTMLInputElement
+                        ).value = carrera.nom_car;
+                        (
+                            form.querySelector(
+                                "#editarCodigoCarrera",
+                            ) as HTMLInputElement
+                        ).value = carrera.cod_car || "";
+                        (
+                            form.querySelector(
+                                "#editarDescripcionCarrera",
+                            ) as HTMLTextAreaElement
+                        ).value = carrera.des_car;
+                        (
+                            form.querySelector(
+                                "#editarFacultadCarrera",
+                            ) as HTMLInputElement
+                        ).value = carrera.nom_fac_per;
+                    }
+
+                    abrirModalEditarCarrera();
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al cargar los datos de la carrera",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }
+
+            // Función para actualizar carrera
+            async function actualizarCarrera(form: HTMLFormElement) {
+                try {
+                    const formData = new FormData(form);
+
+                    const { data, error } =
+                        await actions.modificarCarrera(formData);
+
+                    if (error || !data?.success) {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                data?.message ||
+                                "No se pudo actualizar la carrera",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text: "Carrera actualizada correctamente",
+                            confirmButtonColor: "#059669",
+                        });
+                        cerrarModalEditarCarrera();
+                        window.location.reload();
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }
+
+            // Función para eliminar carrera
+            async function eliminarCarrera(carreraId: string) {
+                try {
+                    const resultado = await Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: "No podrás revertir esta acción",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Sí, eliminar",
+                        cancelButtonText: "Cancelar",
+                    });
+
+                    if (resultado.isConfirmed) {
+                        const { data, error } = await actions.eliminarCarrera({
+                            id_car: carreraId,
+                        });
+
+                        if (error || !data?.success) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text:
+                                    data?.message ||
+                                    "No se pudo eliminar la carrera",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        } else {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminado",
+                                text: "La carrera ha sido eliminada correctamente",
+                                confirmButtonColor: "#059669",
+                            });
+                            window.location.reload();
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            } // Hacer funciones disponibles globalmente
+            declare global {
+                interface Window {
+                    abrirModalNuevaCarrera: () => void;
+                    cerrarModalNuevaCarrera: () => void;
+                    editarCarrera?: (carreraId: string) => Promise<void>;
+                    eliminarCarrera: (carreraId: string) => Promise<void>;
+                }
+            }
+
+            window.abrirModalNuevaCarrera = abrirModalNuevaCarrera;
+            window.cerrarModalNuevaCarrera = cerrarModalNuevaCarrera;
+            window.editarCarrera = editarCarrera;
+            window.eliminarCarrera = eliminarCarrera;
+        </script>
+    </body>
+</Layout>

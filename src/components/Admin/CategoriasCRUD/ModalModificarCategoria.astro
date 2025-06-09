@@ -1,0 +1,223 @@
+---
+import "../../../styles/Admin/ModalModificarEvento.css";
+---
+
+<div id="modalModificarCategoria" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalModificarCategoria()"
+            >&times;</span
+        >
+        <div class="formulario-completo">
+            <form
+                class="formulario-modificar-registro"
+                method="POST"
+                id="formulario-modificar-categoria"
+                enctype="multipart/form-data"
+            >
+                <input type="hidden" name="id_cat" />
+
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-roja">Modificar Categoría</p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Nombre</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="nom_cat"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Descripción</p>
+                        <div class="contenedor-input">
+                            <textarea
+                                class="input-dato"
+                                name="des_cat"
+                                rows="3"
+                                required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Puntaje de Aprobación</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    class="input-dato"
+                                    name="pun_apr_cat"
+                                    min="0"
+                                    max="10"
+                                    step="0.1"
+                                    required
+                                />
+                                <p>/10</p>
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Asistencia para Aprobación</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    class="input-dato"
+                                    name="asi_cat"
+                                    min="0"
+                                    max="100"
+                                    required
+                                />
+                                <p>%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-boton">
+                        <button type="submit" class="boton-confirmar">
+                            Modificar Categoría
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
+    interface Categoria {
+        id_cat: string;
+        nom_cat: string;
+        des_cat: string;
+        pun_apr_cat: number;
+        asi_cat: number;
+    }
+
+    declare global {
+        interface Window {
+            abrirModalModificarCategoria: (categoriaId: string) => void;
+            cerrarModalModificarCategoria: () => void;
+        }
+    }
+
+    async function abrirModalModificarCategoria(
+        categoriaId: string,
+    ): Promise<void> {
+        const modal = document.getElementById("modalModificarCategoria");
+        const form = document.getElementById(
+            "formulario-modificar-categoria",
+        ) as HTMLFormElement;
+
+        if (!modal || !form) return;
+
+        // Obtener todas las categorías del DOM
+        const categoriasInputs = document.querySelectorAll(
+            'input[name="categoria"]',
+        );
+        const categorias = Array.from(categoriasInputs).map((input) =>
+            JSON.parse((input as HTMLInputElement).value),
+        );
+
+        const categoria = categorias.find(
+            (c: Categoria) => c.id_cat === categoriaId,
+        );
+
+        if (!categoria) return;
+
+        // Llenar el formulario con los datos de la categoría
+        const idCat = form.querySelector(
+            'input[name="id_cat"]',
+        ) as HTMLInputElement;
+        const nombre = form.querySelector(
+            'input[name="nom_cat"]',
+        ) as HTMLInputElement;
+        const descripcion = form.querySelector(
+            'textarea[name="des_cat"]',
+        ) as HTMLTextAreaElement;
+        const puntaje = form.querySelector(
+            'input[name="pun_apr_cat"]',
+        ) as HTMLInputElement;
+        const asistencia = form.querySelector(
+            'input[name="asi_cat"]',
+        ) as HTMLInputElement;
+
+        // Asignar valores
+        if (idCat) idCat.value = categoria.id_cat;
+        if (nombre) nombre.value = categoria.nom_cat;
+        if (descripcion) descripcion.value = categoria.des_cat;
+        if (puntaje) puntaje.value = categoria.pun_apr_cat.toString();
+        if (asistencia) asistencia.value = categoria.asi_cat.toString();
+
+        modal.style.display = "block";
+    }
+
+    function cerrarModalModificarCategoria(): void {
+        const modal = document.getElementById("modalModificarCategoria");
+        const form = document.getElementById(
+            "formulario-modificar-categoria",
+        ) as HTMLFormElement;
+
+        if (modal && form) {
+            modal.style.display = "none";
+            form.reset();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById(
+            "formulario-modificar-categoria",
+        ) as HTMLFormElement;
+
+        // Manejar envío del formulario
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                try {
+                    const { data, error } =
+                        await actions.modificarCategoria(formData);
+
+                    if (data?.success) {
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text: "Categoría modificada correctamente.",
+                            confirmButtonColor: "#059669",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                data?.message ||
+                                error?.message ||
+                                "No se pudo modificar la categoría.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            });
+        }
+
+        // Asignar funciones al objeto window
+        window.abrirModalModificarCategoria = abrirModalModificarCategoria;
+        window.cerrarModalModificarCategoria = cerrarModalModificarCategoria;
+    });
+</script>

@@ -10,9 +10,29 @@
   },
   "dependencies": {
     "@astrojs/netlify": "^6.3.3",
+<<<<<<< HEAD
+    "@auth/core": "^0.37.4",
+    "@prisma/client": "^6.8.2",
+    "@tailwindcss/vite": "^4.1.6",
+    "astro": "^5.7.13",
+    "auth-astro": "^4.2.0",
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.6.1",
+    "cookie": "^1.0.2",
+    "date-fns": "^4.1.0",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
+    "next-auth": "^5.0.0-beta.28",
+    "pdf-lib": "^1.17.1",
+    "sweetalert2": "^11.21.2",
+=======
     "@clerk/astro": "^2.7.3",
     "@tailwindcss/vite": "^4.1.6",
     "astro": "^5.7.13",
+>>>>>>> main
     "tailwindcss": "^4.1.6"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.12"
   }
 }

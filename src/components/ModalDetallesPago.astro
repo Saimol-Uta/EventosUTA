@@ -1,0 +1,197 @@
+---
+import "../styles/ModalDetallesInscripcion.css";
+---
+
+<div id="modalDetallesPago" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalPagoInscripcion()"
+            >&times;</span
+        >
+        <div class="detalles-reserva">
+            <h2>Nombre del Evento</h2>
+
+            <div class="seccion-detalles">
+                <h3>Información del Usuario</h3>
+                <div class="descripcion-completa-container">
+                    <p>
+                        <strong>Nombres:</strong>
+                        <span id="usuario-nombres"></span>
+                    </p>
+                    <p>
+                        <strong>Apellidos:</strong>
+                        <span id="usuario-apellidos"></span>
+                    </p>
+                    <p>
+                        <strong>Correo:</strong>
+                        <span id="usuario-correo"></span>
+                    </p>
+                    <p>
+                        <strong>Cédula:</strong>
+                        <span id="usuario-cedula"></span>
+                    </p>
+                </div>
+            </div>
+            <div class="seccion-detalles">
+                <h3>Documentación</h3>
+                <div class="info-grid">
+                    <p class="centrar campo-factura">
+                        <strong>Factura o Comprobante de Pago:</strong>
+                        <a
+                            href="#"
+                            id="enlace-comprobante-pago"
+                            target="_blank"
+                            style="display: none;">Ver comprobante</a
+                        >
+                        <span id="sin-comprobante" style="color: #dc2626;"
+                            >No disponible</span
+                        >
+                    </p>
+                </div>
+            </div>
+            <div class="contenedor-boton-modificar">
+                <button
+                    class="boton-modificar"
+                    onclick="aprobarInscripcionPago()">Aprobar</button
+                >
+                <button
+                    class="boton-modificar"
+                    onclick="rechazarInscripcionPago()">Rechazar</button
+                >
+            </div>
+        </div>
+        <script>
+            declare global {
+                interface Window {
+                    cerrarModalPagoInscripcion: () => void;
+                    abrirModalPagoInscripcion: (inscripcionId: string) => void;
+                    aprobarInscripcionPago: () => void;
+                    rechazarInscripcionPago: () => void;
+                    aprobarInscripcion: (
+                        inscripcionId: string,
+                        tipo: "documentacion" | "pago",
+                    ) => Promise<void>;
+                    rechazarInscripcion: (
+                        inscripcionId: string,
+                        tipo: "documentacion" | "pago",
+                    ) => Promise<void>;
+                    currentInscripcionIdPago: string;
+                }
+            }
+            let currentInscripcionIdPago = "";
+
+            function cerrarModalPagoInscripcion() {
+                const modal = document.getElementById("modalDetallesPago");
+                if (modal) modal.style.display = "none";
+            }
+            function abrirModalPagoInscripcion(inscripcionId: string) {
+                const modal = document.getElementById("modalDetallesPago");
+                if (modal) modal.style.display = "block";
+                currentInscripcionIdPago = inscripcionId;
+                window.currentInscripcionIdPago = inscripcionId;
+
+                // Cargar comprobante de pago dinámicamente
+                cargarComprobantePago(inscripcionId);
+            }
+            function cargarComprobantePago(inscripcionId: string) {
+                try {
+                    // Obtener datos de inscripción desde el contexto global
+                    const inscripcionesData =
+                        (window as any).inscripcionesData || [];
+                    const inscripcion = inscripcionesData.find(
+                        (ins: any) => ins.id_ins === inscripcionId,
+                    );
+
+                    if (!inscripcion) {
+                        console.warn(
+                            "No se encontraron datos de inscripción:",
+                            inscripcionId,
+                        );
+                        mostrarComprobanteNoDisponible();
+                        return;
+                    }
+
+                    // Referencias a elementos DOM
+                    const enlaceComprobante = document.getElementById(
+                        "enlace-comprobante-pago",
+                    ) as HTMLAnchorElement;
+                    const sinComprobante = document.getElementById(
+                        "sin-comprobante",
+                    ) as HTMLSpanElement;
+
+                    // Configurar enlace del comprobante de pago
+                    if (isValidDocumentLink(inscripcion.enl_ord_pag_ins)) {
+                        enlaceComprobante.href = inscripcion.enl_ord_pag_ins;
+                        enlaceComprobante.style.display = "inline";
+                        sinComprobante.style.display = "none";
+                    } else {
+                        enlaceComprobante.style.display = "none";
+                        sinComprobante.style.display = "inline";
+                    }
+                } catch (error) {
+                    console.error(
+                        "Error al cargar comprobante de pago:",
+                        error,
+                    );
+                    mostrarComprobanteNoDisponible();
+                }
+            }
+
+            function isValidDocumentLink(
+                link: string | null | undefined,
+            ): boolean {
+                return (
+                    link !== null &&
+                    link !== undefined &&
+                    link.trim() !== "" &&
+                    link !== "null"
+                );
+            }
+
+            function mostrarComprobanteNoDisponible() {
+                const enlaceComprobante = document.getElementById(
+                    "enlace-comprobante-pago",
+                );
+                const sinComprobante =
+                    document.getElementById("sin-comprobante");
+
+                if (enlaceComprobante) enlaceComprobante.style.display = "none";
+                if (sinComprobante) sinComprobante.style.display = "inline";
+            }
+            function aprobarInscripcionPago() {
+                if (
+                    window.aprobarInscripcion &&
+                    window.currentInscripcionIdPago
+                ) {
+                    window.aprobarInscripcion(
+                        window.currentInscripcionIdPago,
+                        "pago",
+                    );
+                    cerrarModalPagoInscripcion();
+                }
+            }
+
+            function rechazarInscripcionPago() {
+                if (
+                    window.rechazarInscripcion &&
+                    window.currentInscripcionIdPago
+                ) {
+                    window.rechazarInscripcion(
+                        window.currentInscripcionIdPago,
+                        "pago",
+                    );
+                    cerrarModalPagoInscripcion();
+                }
+            }
+
+            window.onclick = function (event) {
+                const modal = document.getElementById("modalDetallesPago");
+                if (event.target === modal) cerrarModalPagoInscripcion();
+            };
+
+            window.cerrarModalPagoInscripcion = cerrarModalPagoInscripcion;
+            window.abrirModalPagoInscripcion = abrirModalPagoInscripcion;
+            window.aprobarInscripcionPago = aprobarInscripcionPago;
+            window.rechazarInscripcionPago = rechazarInscripcionPago;
+        </script>
+    </div>
+</div>

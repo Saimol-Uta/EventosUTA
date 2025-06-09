@@ -1,0 +1,196 @@
+---
+import Header from "@components/Header.astro";
+import MenuAdmin from "../../components/MenuAdministrador.astro";
+import Layout from "../../layouts/Layout.astro";
+import ModalModificarCategoria from "../../components/Admin/CategoriasCRUD/ModalModificarCategoria.astro";
+import ModalNuevaCategoria from "../../components/Admin/CategoriasCRUD/ModalNuevaCategoria.astro";
+import "../../styles/Admin/EventosCRUD.css";
+import { actions } from "astro:actions";
+
+// Obtener categorías
+const { data, error } = await Astro.callAction(actions.getAllCategorias, {});
+
+if (error) {
+    console.error("Error al obtener categorías:", error);
+}
+
+const categorias = data?.categorias || [];
+
+// Obtener organizadores (ajusta la acción según tu backend)
+const { data: dataOrganizadores, error: errorOrganizadores } = await Astro.callAction(actions.getOrganizadores, {});
+if (errorOrganizadores) {
+    console.error("Error al obtener organizadores:", errorOrganizadores);
+}
+const organizadores = dataOrganizadores?.organizadores || [];
+
+---
+
+<Layout>
+    <body>
+        <Header />
+
+        <MenuAdmin />
+        <ModalModificarCategoria categorias={categorias} organizadores={organizadores} />
+        <ModalNuevaCategoria categorias={categorias} organizadores={organizadores} />
+
+
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        <h1 class="titulo-principal">Gestión de Categorías</h1>
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <a onclick="abrirModalNuevaCategoria()" class="contenedor-boton-nuevo-registro">
+                            <button class="boton-nuevo-registro" title="Nuevo">
+                                Nueva Categoría
+                            </button>
+                            <p class="anadir-icon">+</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            ID
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombre
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Descripción
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Puntaje Aprobación
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Asistencia
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>                <div class="registros-inferior">
+                    {categorias.map((categoria: any) => (
+                        <input
+                            type="hidden"
+                            name="categoria"
+                            value={JSON.stringify(categoria)}
+                        />
+                        <div class="registro-fila">
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.id_cat}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.nom_cat}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.des_cat}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.pun_apr_cat}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {categoria.asi_cat}%
+                            </div>
+                            <div class="registro-opciones">
+                                <button
+                                    title="Eliminar"
+                                    onclick={`eliminarCategoria('${categoria.id_cat}')`}
+                                >
+                                    <img
+                                        src="/img/CRUD/eliminar-registro.svg"
+                                        alt="boton eliminar registro"
+                                        class="imagen-boton-registro"
+                                    />
+                                </button>
+                                <button
+                                    title="Modificar"
+                                    onclick={`window.abrirModalModificarCategoria('${categoria.id_cat}')`}
+                                >
+                                    <img
+                                        src="/img/CRUD/modificar-registro.svg"
+                                        alt="boton modificar"
+                                        class="imagen-boton-modificar"
+                                    />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </main>
+
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
+
+            // Interfaces para tipado
+            interface Categoria {
+                id_cat: string;
+                nom_cat: string;
+                des_cat: string;
+                pun_apr_cat: number;
+                asi_cat: number;
+            }
+
+            async function eliminarCategoria(categoriaId: string) {
+                try {
+                    const resultado = await Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: "No podrás revertir esta acción",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Sí, eliminar",
+                        cancelButtonText: "Cancelar",
+                    });
+
+                    if (resultado.isConfirmed) {
+                        const { data, error } = await actions.eliminarCategoria({
+                            id_cat: categoriaId,
+                        });
+
+                        if (error || !data?.success) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: data?.message || "No se pudo eliminar la categoría",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        } else {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminado",
+                                text: "La categoría ha sido eliminada correctamente",
+                                confirmButtonColor: "#059669",
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }
+            
+            declare global {
+                interface Window {
+                    eliminarCategoria: (categoriaId: string) => Promise<void>;
+                    abrirModalModificarCategoria: (categoriaId: string) => void;
+                    abrirModalNuevaCategoria: () => void;
+                }
+            }
+            
+            window.eliminarCategoria = eliminarCategoria;
+        </script>
+    </body>
+</Layout>

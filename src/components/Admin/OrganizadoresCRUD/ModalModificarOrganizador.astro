@@ -1,0 +1,221 @@
+---
+import "../../../styles/Admin/ModalModificarEvento.css";
+---
+
+<div id="modalModificarOrganizador" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalModificarOrganizador()">&times;</span>
+        <div class="formulario-completo">
+            <form
+                class="formulario-modificar-registro"
+                method="POST"
+                id="formulario-modificar-organizador"
+                enctype="multipart/form-data"
+            >
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-roja">Información General</p>
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Cédula</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="ced_org"
+                                id="modificar-ced_org"
+                                required
+                                readonly
+                            />
+                        </div>
+                    </div>
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Primer Nombre</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="nom_org1"
+                                    id="modificar-nom_org1"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Segundo Nombre</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="nom_org2"
+                                    id="modificar-nom_org2"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Primer Apellido</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="ape_org1"
+                                    id="modificar-ape_org1"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Segundo Apellido</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="ape_org2"
+                                    id="modificar-ape_org2"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Título Académico</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="tit_aca_org"
+                                id="modificar-tit_aca_org"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div class="contenedor-boton-modificar">
+                        <button
+                        type="button"
+                        class="boton-modificar"
+                        onclick="cerrarModalModificarOrganizador()"
+                        >
+                        Cancelar
+                        </button>
+                        <button type="submit" class="boton-modificar">
+                        Modificar Organizador
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
+    interface Organizador {
+        ced_org: string;
+        nom_org1: string;
+        nom_org2?: string;
+        ape_org1: string;
+        ape_org2?: string;
+        tit_aca_org: string;
+    }
+
+    declare global {
+        interface Window {
+            abrirModalModificarOrganizador: (cedula: string) => void;
+            cerrarModalModificarOrganizador: () => void;
+            abrirAsignacionesOrganizar: (cedula: string) => void;
+        }
+    }
+
+    // Recibe la cédula, busca el input oculto en el DOM, parsea y muestra los datos en el modal
+    function abrirModalModificarOrganizador(cedula :string) {
+        // Forzar el tipo a HTMLInputElement para acceder a .value
+        const input = document.querySelector(`input[name="organizador"][data-cedula="${cedula}"]`);
+        if (!input) {
+            console.error('Organizador no encontrado:', cedula);
+            return;
+        }
+        let organizador = null;
+        try {
+            organizador = JSON.parse((input instanceof HTMLInputElement ? input.value : ""));
+        } catch (e) {
+            console.error('Error al parsear el organizador:', e);
+            return;
+        }
+
+        const modal = document.getElementById("modalModificarOrganizador");
+        const form = document.getElementById("formulario-modificar-organizador");
+        if (!modal || !form) return;
+
+        
+        (form.querySelector("#modificar-ced_org") as HTMLInputElement).value = organizador.ced_org || "";
+        (form.querySelector("#modificar-nom_org1") as HTMLInputElement).value = organizador.nom_org1 || "";
+        (form.querySelector("#modificar-nom_org2") as HTMLInputElement).value = organizador.nom_org2 || "";
+        (form.querySelector("#modificar-ape_org1") as HTMLInputElement).value = organizador.ape_org1 || "";
+        (form.querySelector("#modificar-ape_org2") as HTMLInputElement).value = organizador.ape_org2 || "";
+        (form.querySelector("#modificar-tit_aca_org") as HTMLInputElement).value = organizador.tit_aca_org || "";
+
+        modal.style.display = "block";
+    }
+
+    function cerrarModalModificarOrganizador() {
+        const modal = document.getElementById("modalModificarOrganizador");
+        const form = document.getElementById("formulario-modificar-organizador") as HTMLFormElement | null;
+        if (modal && form) {
+            modal.style.display = "none";
+            form.reset(); 
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("formulario-modificar-organizador") as HTMLFormElement | null;
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const formData = new FormData(form); 
+
+                const data = {
+                    ced_org: formData.get("ced_org")?.toString() ?? "",
+                    nom_org1: formData.get("nom_org1")?.toString() ?? "",
+                    nom_org2: formData.get("nom_org2")?.toString() ?? "",
+                    ape_org1: formData.get("ape_org1")?.toString() ?? "",
+                    ape_org2: formData.get("ape_org2")?.toString() ?? "",
+                    tit_aca_org: formData.get("tit_aca_org")?.toString() ?? "",
+                };
+
+                try {
+                    const { data: resp, error } = await actions.updateOrganizadores(data);
+                    if (resp?.success) {
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text: "Organizador modificado correctamente.",
+                            confirmButtonColor: "#059669",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: resp?.error || error?.message || "No se pudo modificar el organizador.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            });
+        }
+
+        window.abrirModalModificarOrganizador = abrirModalModificarOrganizador;
+        window.cerrarModalModificarOrganizador = cerrarModalModificarOrganizador;
+    });
+</script>

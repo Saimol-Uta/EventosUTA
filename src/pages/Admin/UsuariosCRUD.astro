@@ -1,0 +1,258 @@
+---
+import Header from "@components/Header.astro";
+import MenuAdmin from "../../components/MenuAdministrador.astro";
+import Layout from "../../layouts/Layout.astro";
+import ModalDetallesUsuario from "../../components/Admin/UsuariosCRUD/ModalDetallesUsuario.astro";
+import ModalModificarUsuario from "../../components/Admin/UsuariosCRUD/ModalModificarUsuario.astro";
+import ModalNuevoUsuario from "../../components/Admin/UsuariosCRUD/ModalNuevoUsuario.astro";
+import "../../styles/Admin/EventosCRUD.css";
+import { actions } from "astro:actions";
+
+// Obtener usuarios con información relacionada
+const { data , error } = await Astro.callAction(actions.getAllUsers, {});
+
+
+
+// Obtener carreras para mostrar el nombre de la carrera
+const { data: carrerasData } = await Astro.callAction(actions.getAllCarreras, {});
+
+if (error) {
+    console.error("Error al obtener usuarios:", error);
+}
+
+const usuarios = data?.data || [];
+const carreras = carrerasData?.carreras || [];
+
+// Obtener información completa de cada usuario con carrera y cuentas
+const usuariosCompletos = await Promise.all(
+    usuarios.map(async (usuario: any) => {
+        const carrera = carreras.find((c: any) => c.id_car === usuario.id_car_per);        // Buscar cuentas del usuario
+        let cuentas: any[] = [];
+        try {
+        
+            const cuentasResult = await Astro.callAction(actions.getCuentaById, usuario.id_usu);
+            
+            if (cuentasResult.data) {
+                cuentas = Array.isArray(cuentasResult.data) ? cuentasResult.data : [cuentasResult.data];
+            }
+        } catch (error) {
+            console.log("No se encontraron cuentas para el usuario:", usuario.id_usu);
+        }
+
+        return {
+            ...usuario,
+            carrera: carrera,
+            cuentas: cuentas,
+            cantidadCuentas: cuentas.length
+        };
+    })
+);
+
+---
+
+<Layout>
+    <body>
+        <Header />
+        <MenuAdmin />        
+        <ModalDetallesUsuario />
+        <ModalModificarUsuario />
+        <ModalNuevoUsuario />
+
+        <main class="registros">
+            <div class="registros-grid">                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        <h1 class="titulo-principal">Gestión de Usuarios</h1>
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <a onclick="abrirModalNuevoUsuario()" class="contenedor-boton-nuevo-registro">
+                            <button class="boton-nuevo-registro" title="Nuevo">
+                                Nuevo Usuario
+                            </button>
+                            <p class="anadir-icon">+</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Cédula
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombres
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Apellidos
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Carrera
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Cantidad de Cuentas
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>                <div class="registros-inferior">
+                    {
+                        usuariosCompletos.map((usuario) => (
+                            <input
+                                type="hidden"
+                                name="usuario"
+                                value={JSON.stringify(usuario)}
+                            />
+                            <div class="registro-fila">
+                                <div class="parte-izquierda-registro-fila">
+                                    {usuario.ced_usu || "N/A"}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {`${usuario.nom_usu1} ${usuario.nom_usu2 || ''}`}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {`${usuario.ape_usu1} ${usuario.ape_usu2 || ''}`}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {usuario.carrera?.nom_car || "Sin carrera"}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {usuario.cantidadCuentas}
+                                </div>
+                                <div class="registro-opciones">                                    <button
+                                        title="Detalles"
+                                        onclick={`mostrarDetallesUsuario('${usuario.id_usu}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/mostrar-detalles.svg"
+                                            alt="boton mostrar detalles"
+                                            class="imagen-boton-registro"
+                                        />
+                                    </button>                                    
+                                    <button
+                                        title="Eliminar"
+                                        onclick={`eliminarUsuario('${usuario.id_usu}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/eliminar-registro.svg"
+                                            alt="boton eliminar registro"
+                                            class="imagen-boton-registro"
+                                        />
+                                    </button>
+                                    <button
+                                        title="Modificar"
+                                        onclick={`window.abrirModalModificarUsuario('${usuario.id_usu}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/modificar-registro.svg"
+                                            alt="boton modificar"
+                                            class="imagen-boton-modificar"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </main>
+
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";            // Interfaces para tipado
+            interface Carrera {
+                id_car: string;
+                nom_car: string;
+                des_car: string;
+            }
+
+            interface Usuario {
+                id_usu: string;
+                ced_usu: string;
+                nom_usu1: string;
+                nom_usu2?: string;
+                ape_usu1: string;
+                ape_usu2?: string;
+                fec_nac_usu: string;
+                num_tel_usu?: string;
+                id_car_per?: string;
+                carrera?: Carrera;
+                cantidadCuentas: number;
+            }
+
+            async function eliminarUsuario(usuarioId: string) {
+                try {
+                    const resultado = await Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: "No podrás revertir esta acción",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Sí, eliminar",
+                        cancelButtonText: "Cancelar",
+                    });
+
+                    if (resultado.isConfirmed) {
+                        const { data, error } = await actions.eliminarUsuario({
+                            id_usuario: usuarioId,
+                        });                        if (error || !data?.success) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: data?.message || "No se pudo eliminar el usuario",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        } else {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminado",
+                                text: "El usuario ha sido eliminado correctamente",
+                                confirmButtonColor: "#059669",
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }            
+            function mostrarDetallesUsuario(usuarioId: string) {
+                const usuarios = Array.from(document.querySelectorAll('input[name="usuario"]'))
+                    .map(input => JSON.parse((input as HTMLInputElement).value));
+                
+                const usuario = usuarios.find((u: Usuario) => u.id_usu === usuarioId);
+                
+                if (!usuario) {
+                    console.error('Usuario no encontrado:', usuarioId);
+                    return;
+                }
+
+                // Llamar directamente a la función de abrirModalDetalles del modal
+                if (window.abrirModalDetallesUsuario) {
+                    window.abrirModalDetallesUsuario(usuario);
+                } else {
+                    console.error('La función abrirModalDetallesUsuario no está disponible');
+                }
+            }            
+            
+            declare global {
+                interface Window {
+                    eliminarUsuario: (usuarioId: string) => Promise<void>;
+                    mostrarDetallesUsuario: (usuarioId: string) => void;
+                    abrirModalDetallesUsuario: (usuario: any) => void;
+                    abrirModalModificarUsuario: (usuarioId: string) => void;
+                }
+            }
+            window.eliminarUsuario = eliminarUsuario;
+            window.mostrarDetallesUsuario = mostrarDetallesUsuario;
+
+        </script>
+    </body>
+</Layout>

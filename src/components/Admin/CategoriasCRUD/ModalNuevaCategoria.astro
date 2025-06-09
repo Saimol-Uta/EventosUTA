@@ -1,0 +1,171 @@
+---
+import "../../../styles/Admin/ModalModificarEvento.css";
+---
+
+<div id="modalNuevaCategoria" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalNuevaCategoria()">&times;</span
+        >
+        <div class="formulario-completo">
+            <form
+                class="formulario-modificar-registro"
+                method="POST"
+                id="formulario-nueva-categoria"
+                enctype="multipart/form-data"
+            >
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-roja">
+                        Información de la Categoría
+                    </p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Nombre</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="nom_cat"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Descripción</p>
+                        <div class="contenedor-input">
+                            <textarea
+                                class="input-dato"
+                                name="des_cat"
+                                rows="3"
+                                required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Puntaje de Aprobación</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    class="input-dato"
+                                    name="pun_apr_cat"
+                                    min="0"
+                                    max="10"
+                                    step="0.1"
+                                    required
+                                />
+                                <p>/10</p>
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Asistencia para Aprobación</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    class="input-dato"
+                                    name="asi_cat"
+                                    min="0"
+                                    max="100"
+                                    required
+                                />
+                                <p>%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-boton">
+                        <button type="submit" class="boton-confirmar">
+                            Crear Categoría
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
+    declare global {
+        interface Window {
+            abrirModalNuevaCategoria: () => void;
+            cerrarModalNuevaCategoria: () => void;
+        }
+    }
+
+    function abrirModalNuevaCategoria(): void {
+        console.log("🎯 Abriendo modal nueva categoría...");
+        const modal = document.getElementById("modalNuevaCategoria");
+        if (modal) {
+            modal.style.display = "block";
+        }
+    }
+
+    function cerrarModalNuevaCategoria(): void {
+        const modal = document.getElementById("modalNuevaCategoria");
+        const form = document.getElementById(
+            "formulario-nueva-categoria",
+        ) as HTMLFormElement;
+
+        if (modal && form) {
+            modal.style.display = "none";
+            form.reset();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById(
+            "formulario-nueva-categoria",
+        ) as HTMLFormElement;
+
+        // Manejar envío del formulario
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                try {
+                    const { data, error } =
+                        await actions.crearCategoria(formData);
+
+                    if (data?.success) {
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text: "Categoría creada correctamente",
+                            confirmButtonColor: "#059669",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                data?.message ||
+                                error?.message ||
+                                "No se pudo crear la categoría.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            });
+        }
+
+        // Asignar funciones al objeto window
+        window.abrirModalNuevaCategoria = abrirModalNuevaCategoria;
+        window.cerrarModalNuevaCategoria = cerrarModalNuevaCategoria;
+    });
+</script>
