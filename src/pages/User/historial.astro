@@ -187,40 +187,33 @@ if (accountId) {
         }
       });
     });
+
     document.querySelectorAll(".js-download-order").forEach((button) => {
       button.addEventListener("click", async (event) => {
-        const targetButton = event.currentTarget as HTMLButtonElement;
-        const inscripcionId = targetButton.dataset.inscripcionid;
+        const targetButton = event.currentTarget;
+        if (!(targetButton instanceof HTMLButtonElement)) return;
 
+        const inscripcionId = targetButton.dataset.inscripcionid;
         if (!inscripcionId) return;
 
         targetButton.disabled = true;
         targetButton.textContent = "Generando...";
 
         try {
-          const response = await fetch(`/api/orden-pago/${inscripcionId}`);
+          const result = await actions.GenerarOrdenDePago({ inscripcionId });
 
-          if (!response.ok) {
-            throw new Error("No se pudo generar la orden de pago.");
+          if (result.data?.success && result.data?.data?.pdfBase64) {
+            descargarPdf(result.data.data.pdfBase64, result.data.data.fileName);
+          } else {
+            const errorMessage = result.error?.message || "Ocurrió un error.";
+            alert(`Error al generar la orden: ${errorMessage}`);
           }
-
-          const pdfBlob = await response.blob();
-
-          const url = window.URL.createObjectURL(pdfBlob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = `orden-pago-${inscripcionId}.pdf`;
-          document.body.appendChild(link);
-          link.click();
-
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
         } catch (error) {
           console.error(error);
-          alert("Error al descargar la orden de pago.");
+          alert("Error inesperado al contactar con el servidor.");
         } finally {
           targetButton.disabled = false;
-          targetButton.textContent = "Descargar Orden de Pago";
+          targetButton.textContent = "Ver Orden de Pago";
         }
       });
     });
