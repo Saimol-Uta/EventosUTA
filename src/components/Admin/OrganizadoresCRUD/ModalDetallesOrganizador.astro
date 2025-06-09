@@ -49,6 +49,13 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
     }
 
     // Definición de la interfaz para el organizador
+    interface EventoOrganizador {
+        id_eve: string; // <--- Agrega el id del evento
+        nom_eve: string;
+        fec_ini_eve?: string;
+        // ...puedes agregar más campos si necesitas mostrar más info...
+    }
+
     interface Organizador {
         ced_org: string;
         nom_org1: string;
@@ -56,7 +63,7 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         ape_org1: string;
         ape_org2?: string;
         tit_aca_org: string;
-        eventos: Array<{ nom_eve: string }>;
+        eventos: Array<EventoOrganizador>;
     }
 
     // Función para cerrar el modal
@@ -67,6 +74,7 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
 
     // Función para abrir el modal y poblar los datos del organizador
     function abrirModalDetallesOrganizador(organizador: Organizador) {
+        console.log("ORGANIZADOR QUE LLEGA:", organizador);
         const modal = document.getElementById("modalDetallesOrganizador");
         if (!modal) return;
 
@@ -76,7 +84,7 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
     }
 
     // Función para poblar los datos del organizador en el modal
-    function poblarModalConDatos(organizador : Organizador) {
+    function poblarModalConDatos(organizador: Organizador) {
         const modal = document.getElementById("modalDetallesOrganizador");
         if (!modal) return;
 
@@ -115,20 +123,25 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         const eventosLista = modal.querySelector("#organizador-eventos-lista");
         if (eventosLista) {
             eventosLista.innerHTML = "";
-            if (organizador.eventos && Array.isArray(organizador.eventos) && organizador.eventos.length > 0) {
-                organizador.eventos.forEach(ev => {
+            let eventos: EventoOrganizador[] = [];
+            if (Array.isArray(organizador.eventos)) {
+                eventos = organizador.eventos;
+            } else if (organizador.eventos && typeof organizador.eventos === "object") {
+                eventos = Object.values(organizador.eventos);
+            }
+            // Filtra eventos válidos (con nombre)
+            eventos = eventos.filter(ev => ev && ev.nom_eve);
+            if (eventos.length > 0) {
+                eventos.forEach((ev: EventoOrganizador) => {
                     const p = document.createElement("p");
-                    // Solo muestra la fecha si existe la propiedad y es string o Date parseable
                     let fecha = "";
-                    if ("fec_ini_eve" in ev && ev.fec_ini_eve) {
+                    if (ev.fec_ini_eve) {
                         try {
-                            const fechaObj = new Date(ev.fec_ini_eve as string);
+                            const fechaObj = new Date(ev.fec_ini_eve);
                             if (!isNaN(fechaObj.getTime())) {
                                 fecha = ` (${fechaObj.toLocaleDateString()})`;
                             }
-                        } catch (_) {
-                            // Si hay error al parsear la fecha, no mostrarla
-                        }
+                        } catch (_) {}
                     }
                     p.textContent = `${ev.nom_eve}${fecha}`;
                     eventosLista.appendChild(p);
