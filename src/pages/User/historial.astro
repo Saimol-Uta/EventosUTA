@@ -93,6 +93,16 @@ if (accountId) {
         )
       }
     </div>
+
+    <div id="pdf-modal-overlay" class="modal-overlay">
+      <div class="modal-content">
+        <button id="pdf-modal-close" class="modal-close-btn" title="Cerrar"
+          >&times;</button
+        >
+        <iframe id="pdf-iframe" src="" frameborder="0" title="Visor de PDF"
+        ></iframe>
+      </div>
+    </div>
   </main>
 
   <style>
@@ -131,93 +141,151 @@ if (accountId) {
       color: #666;
       padding: 3rem;
     }
+
+    .modal-overlay {
+      display: none; /* Oculto por defecto */
+      position: fixed; /* Se queda fijo en la pantalla */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.75); /* Fondo oscuro semitransparente */
+      justify-content: center;
+      align-items: center;
+      z-index: 1000; /* Se asegura de que esté por encima de todo */
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: #fff;
+      padding: 8px;
+      border-radius: 8px;
+      width: 90%;
+      height: 90%;
+      max-width: 900px; /* Ancho máximo del visor */
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      background-color: #4b1818;
+      color: white;
+      border: 2px solid white;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      font-size: 24px;
+      line-height: 30px;
+      text-align: center;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
+    #pdf-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
   <script>
     import { actions } from "astro:actions";
 
-    // Función para descargar el PDF
-    function descargarPdf(base64: string, fileName: string) {
-      const byteCharacters = atob(base64);
-      const byteArrays = [];
-      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-        const slice = byteCharacters.slice(offset, offset + 512);
-        const byteNumbers = new Array(slice.length);
-        for (let i = 0; i < slice.length; i++) {
-          byteNumbers[i] = slice.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        byteArrays.push(byteArray);
+    const modalOverlay = document.getElementById('pdf-modal-overlay');
+  const modalCloseBtn = document.getElementById('pdf-modal-close');
+  const pdfIframe = document.getElementById('pdf-iframe') as HTMLIFrameElement;
+
+  // --- FUNCIÓN PARA MOSTRAR EL PDF EN EL MODAL ---
+  function mostrarPdfEnModal(base64: string, fileName: string) {
+    if (!pdfIframe || !modalOverlay) return;
+
+    const byteCharacters = atob(base64);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+      const slice = byteCharacters.slice(offset, offset + 512);
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
       }
-      const blob = new Blob(byteArrays, { type: "application/pdf" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
     }
+    const blob = new Blob(byteArrays, { type: "application/pdf" });
+    const pdfUrl = URL.createObjectURL(blob);
 
-    document.querySelectorAll(".js-generate-cert").forEach((button) => {
-      button.addEventListener("click", async (event) => {
-        const targetButton = event.currentTarget as HTMLButtonElement;
+    // Cargamos la URL del PDF en el iframe y mostramos el modal
+    pdfIframe.src = pdfUrl;
+    modalOverlay.style.display = 'flex';
+  }
+  
+  // --- LÓGICA PARA CERRAR EL MODAL ---
+  function closeModal() {
+    if (modalOverlay && pdfIframe) {
+      modalOverlay.style.display = 'none';
+      // Limpiamos el iframe para liberar memoria y detener la carga
+      pdfIframe.src = '';
+    }
+  }
 
-        const eventoId = targetButton.dataset.eventoid;
+  // Añadimos los listeners para cerrar el modal
+  modalCloseBtn?.addEventListener('click', closeModal);
+  modalOverlay?.addEventListener('click', (event) => {
+    // Cierra el modal solo si se hace clic en el fondo oscuro
+    if (event.target === modalOverlay) {
+      closeModal();
+    }
+  });
 
-        if (!eventoId) return;
 
-        targetButton.disabled = true;
-        targetButton.textContent = "Generando...";
+  // --- LÓGICA DE LOS BOTONES (Certificado y Orden de Pago) ---
+  // Esta lógica ahora llamará a 'mostrarPdfEnModal'
+  document.querySelectorAll(".js-generate-cert, .js-download-order").forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) return;
 
-        try {
-          const result = await actions.GenerarCertificado({ eventoId });
+    button.addEventListener("click", async (event) => {
+      const isCertificado = button.classList.contains('js-generate-cert');
+      const originalText = button.textContent || '';
+      let result; // Declaramos la variable para el resultado aquí
 
-          if (result.data?.success && result.data?.data?.pdfBase64) {
-            descargarPdf(result.data.data.pdfBase64, result.data.data.fileName);
-          } else {
-            const errorMessage =
-              result.error?.message ||
-              result.data?.error?.message ||
-              "Ocurrió un error.";
-            alert(`Error al generar el certificado: ${errorMessage}`);
-          }
-        } catch (error) {
-          console.error(error);
-          alert("Error inesperado al contactar con el servidor.");
-        } finally {
-          targetButton.disabled = false;
-          targetButton.textContent = "Generar Certificado";
+      button.disabled = true;
+      button.textContent = "Generando...";
+
+      try {
+        // --- CAMBIO CLAVE: Usamos if/else para llamar a la action correcta ---
+        if (isCertificado) {
+          const eventoId = button.dataset.eventoid;
+          if (!eventoId) throw new Error("ID de evento no encontrado.");
+          
+          // Llamada explícita a GenerarCertificado
+          result = await actions.GenerarCertificado({ eventoId });
+
+        } else { // Es una orden de pago
+          const inscripcionId = button.dataset.inscripcionid;
+          if (!inscripcionId) throw new Error("ID de inscripción no encontrado.");
+
+          // Llamada explícita a GenerarOrdenDePago
+          result = await actions.GenerarOrdenDePago({ inscripcionId });
         }
-      });
-    });
 
-    document.querySelectorAll(".js-download-order").forEach((button) => {
-      button.addEventListener("click", async (event) => {
-        const targetButton = event.currentTarget;
-        if (!(targetButton instanceof HTMLButtonElement)) return;
-
-        const inscripcionId = targetButton.dataset.inscripcionid;
-        if (!inscripcionId) return;
-
-        targetButton.disabled = true;
-        targetButton.textContent = "Generando...";
-
-        try {
-          const result = await actions.GenerarOrdenDePago({ inscripcionId });
-
-          if (result.data?.success && result.data?.data?.pdfBase64) {
-            descargarPdf(result.data.data.pdfBase64, result.data.data.fileName);
-          } else {
-            const errorMessage = result.error?.message || "Ocurrió un error.";
-            alert(`Error al generar la orden: ${errorMessage}`);
-          }
-        } catch (error) {
-          console.error(error);
-          alert("Error inesperado al contactar con el servidor.");
-        } finally {
-          targetButton.disabled = false;
-          targetButton.textContent = "Ver Orden de Pago";
+        // El manejo del resultado es el mismo para ambos casos
+        if (result.data?.success && result.data?.data?.pdfBase64) {
+          mostrarPdfEnModal(result.data.data.pdfBase64, result.data.data.fileName);
+        } else {
+          alert(`Error: ${result.error?.message || 'desconocido'}`);
         }
-      });
+
+      } catch (error) {
+        console.error(error);
+        // Mostramos el mensaje del error que lanzamos si no encontramos el ID
+        alert(error instanceof Error ? error.message : "Error inesperado al contactar con el servidor.");
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
     });
+  });
   </script>
 </Layout>
