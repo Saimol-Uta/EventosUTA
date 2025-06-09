@@ -3,15 +3,6 @@ import Header from "@/components/Header.astro";
 import MenuAdministrador from "@/components/MenuAdministrador.astro";
 import { actions } from "astro:actions";
 
-const links = [
-    { label: "Eventos", href: "EventosCRUD" },
-    { label: "Usuarios", href: "/perfil" },
-    { label: "Organizadores", href: "/historial" },
-    { label: "Inscripciones", href: "AprobacionInscripciones" },
-    { label: "Categorías", href: "/historial" },
-    { label: "Carreras", href: "/historial" },
-];
-
 const searchParams = Astro.url.searchParams;
 const activoFiltro = searchParams.get("Activo");
 
@@ -62,7 +53,7 @@ function formatearFecha(fecha: string) {
     </head>
     <body>
         <Header />
-        <MenuAdministrador links={links} />
+        <MenuAdministrador />
 
         <main class="main-content">
             <h2>Gestión de Eventos - FISEI</h2>

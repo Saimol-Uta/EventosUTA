@@ -18,17 +18,6 @@ if (error) {
 
 const organizadores = organizadoresData?.organizadores || [];
 
-// Links de navegación
-const links = [
-    { label: "Eventos", href: "/Admin/EventosCRUD" },
-    { label: "Usuarios", href: "/perfil" },
-    { label: "Organizadores", href: "/historial" },
-    { label: "Inscripciones", href: "/historial" },
-    { label: "Categorías", href: "/historial" },
-    { label: "Carreras", href: "/Admin/CarrerasCRUD" },
-    { label: "Asignaciones", href: "/Admin/Asignaciones" },
-];
-
 type Organizador = {
     ced_org: string;
     nom_org1: string;
@@ -43,7 +32,7 @@ type Organizador = {
 <Layout>
     <body>
         <Header />
-        <MenuAdmin links={links} /> 
+        <MenuAdmin /> 
         <ModalDetallesOrganizador />
         <ModalModificarOrganizador />
         <ModalNuevoOrganizador organizadores={organizadores} />
