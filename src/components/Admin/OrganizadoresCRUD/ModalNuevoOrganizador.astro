@@ -16,7 +16,7 @@ const { organizadores = [] } = Astro.props;
             <form
                 class="formulario-modificar-registro"
                 method="POST"
-                id="formulario-nuevo-evento"
+                id="formulario-nuevo-organizador"
                 enctype="multipart/form-data"
             >
                 <div class="contenedor-superior">
@@ -28,7 +28,7 @@ const { organizadores = [] } = Astro.props;
                             <input
                                 type="text"
                                 class="input-dato"
-                                name="cedula-organizador"
+                                name="ced_org"
                                 required
                             />
                         </div>
@@ -41,7 +41,7 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="nombre1-organizador"
+                                    name="nom_org1"
                                     required
                                 />
                             </div>
@@ -53,8 +53,7 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="nombre2-organizador"
-                                    required
+                                    name="nom_org2"
                                 />
                             </div>
                         </div>
@@ -67,20 +66,19 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="apellido1-organizador"
+                                    name="ape_org1"
                                     required
                                 />
                             </div>
                         </div>
 
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Segundo Nombre</p>
+                            <p class="texto-dato">Segundo Apellido</p>
                             <div class="contenedor-input">
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="apellido2-organizador"
-                                    required
+                                    name="ape_org2"
                                 />
                             </div>
                         </div>
@@ -92,11 +90,24 @@ const { organizadores = [] } = Astro.props;
                             <input
                                 type="text"
                                 class="input-dato"
-                                name="titulo-academico-organizador"
+                                name="tit_aca_org"
                                 required
                             />
                         </div>
                     </div>
+
+                    <div class="contenedor-boton-modificar">
+                        <button
+                        type="button"
+                        class="boton-modificar"
+                        onclick="cerrarModalNuevoOrganizador()"
+                        >
+                        Cancelar
+                        </button>
+                        <button type="submit" class="boton-modificar">
+                        Crear Organizador
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -114,33 +125,14 @@ const { organizadores = [] } = Astro.props;
         }
     }
 
-    async function testearConexionAcciones() {
-        try {
-            console.log("🧪 Probando conexión con acciones...");
-            const resultado = await actions.getAsignacionesPlantilla({});
-            console.log("🧪 Resultado de prueba:", resultado);
-            return resultado;
-        } catch (error) {
-            console.error("🧪 Error en prueba:", error);
-            return null;
-        }
+    function abrirModalNuevoOrganizador() {
+        const modal = document.getElementById("modalNuevoOrganizador");
+        if (modal) modal.style.display = "block";
     }
 
-    function abrirModalNuevoOrganizador(): void {
-        console.log("🎯 Abriendo modal nuevo organizador...");
+    function cerrarModalNuevoOrganizador() {
         const modal = document.getElementById("modalNuevoOrganizador");
-        if (modal) {
-            modal.style.display = "block";
-            testearConexionAcciones();
-        }
-    }
-
-    function cerrarModalNuevoOrganizador(): void {
-        const modal = document.getElementById("modalNuevoOrganizador");
-        const form = document.getElementById(
-            "formulario-nuevo-evento",
-        ) as HTMLFormElement;
-
+        const form = document.getElementById("formulario-nuevo-organizador") as HTMLFormElement | null;
         if (modal && form) {
             modal.style.display = "none";
             form.reset();
@@ -148,66 +140,28 @@ const { organizadores = [] } = Astro.props;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById(
-            "formulario-nuevo-evento",
-        ) as HTMLFormElement;
-
-        // Manejar envío del formulario
+        const form = document.getElementById("formulario-nuevo-organizador") as HTMLFormElement | null;
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
-
                 const formData = new FormData(form);
 
+                const data = {
+                    ced_org: formData.get("ced_org")?.toString() ?? "",
+                    nom_org1: formData.get("nom_org1")?.toString() ?? "",
+                    nom_org2: formData.get("nom_org2")?.toString() ?? "",
+                    ape_org1: formData.get("ape_org1")?.toString() ?? "",
+                    ape_org2: formData.get("ape_org2")?.toString() ?? "",
+                    tit_aca_org: formData.get("tit_aca_org")?.toString() ?? "",
+                };
+
                 try {
-                    const { data, error } = await actions.crearEvento(formData);
-
-                    if (data?.success) {
-                        // Obtener asignaciones seleccionadas
-                        const selectAsignaciones = document.getElementById(
-                            "asignaciones-evento",
-                        ) as HTMLSelectElement;
-                        const asignacionesSeleccionadas = Array.from(
-                            selectAsignaciones.selectedOptions,
-                        )
-                            .map((option) => option.value)
-                            .filter((value) => value !== "");
-
-                        // Si hay asignaciones seleccionadas, duplicarlas al evento
-                        if (
-                            asignacionesSeleccionadas.length > 0 &&
-                            data.data?.id
-                        ) {
-                            await Promise.all(
-                                asignacionesSeleccionadas.map(
-                                    async (idAsignacion) => {
-                                        try {
-                                            await actions.duplicarAsignacionAEvento(
-                                                {
-                                                    id_asignacion_plantilla:
-                                                        idAsignacion,
-                                                    id_evento_destino:
-                                                        data.data.id,
-                                                },
-                                            );
-                                        } catch (error) {
-                                            console.error(
-                                                "Error al duplicar asignación:",
-                                                error,
-                                            );
-                                        }
-                                    },
-                                ),
-                            );
-                        }
-
+                    const { data: resp, error } = await actions.setOrganizadores(data);
+                    if (resp?.success) {
                         await Swal.fire({
                             icon: "success",
                             title: "Éxito",
-                            text:
-                                asignacionesSeleccionadas.length > 0
-                                    ? `Evento creado correctamente con ${asignacionesSeleccionadas.length} asignación(es).`
-                                    : "Evento creado correctamente sin restricciones de inscripción.",
+                            text: "Organizador creado correctamente.",
                             confirmButtonColor: "#059669",
                         }).then(() => {
                             window.location.reload();
@@ -216,10 +170,7 @@ const { organizadores = [] } = Astro.props;
                         await Swal.fire({
                             icon: "error",
                             title: "Error",
-                            text:
-                                data?.message ||
-                                error?.message ||
-                                "No se pudo crear el evento.",
+                            text: resp?.error || error?.message || "No se pudo crear el organizador.",
                             confirmButtonColor: "#dc2626",
                         });
                     }
@@ -235,7 +186,6 @@ const { organizadores = [] } = Astro.props;
             });
         }
 
-        // Asignar funciones al objeto window
         window.abrirModalNuevoOrganizador = abrirModalNuevoOrganizador;
         window.cerrarModalNuevoOrganizador = cerrarModalNuevoOrganizador;
     });
