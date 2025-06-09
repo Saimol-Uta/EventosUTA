@@ -212,42 +212,40 @@
 </style>
 
 <script>
-    import { actions } from "astro:actions";
+  import { actions } from "astro:actions";
 
-    type CertificadoVerificado = {
-        nombreUsuario: string;
-        nombreEvento: string;
-        fechaEvento: string;
-        eventoId: string;
-    };
+  type CertificadoVerificado = {
+    nombreUsuario: string;
+    nombreEvento: string;
+    fechaEvento: string;
+    eventoId: string; // O inscripcionId según tu action de descarga
+  };
 
-    const form = document.getElementById("verify-form") as HTMLFormElement;
-    const input = document.getElementById("codigo") as HTMLInputElement;
-    const button = document.getElementById(
-        "verify-button",
-    ) as HTMLButtonElement;
-    const resultsContainer = document.getElementById("resultado-container");
+  const form = document.getElementById("verify-form") as HTMLFormElement;
+  const input = document.getElementById("codigo") as HTMLInputElement;
+  const button = document.getElementById("verify-button") as HTMLButtonElement;
+  const resultsContainer = document.getElementById("resultado-container");
 
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault(); // Evita que la página se recargue al enviar
-        if (!resultsContainer) return;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!resultsContainer) return;
 
-        const codigo = input.value.trim();
-        if (!codigo) return;
+    const codigo = input.value.trim();
+    if (!codigo) return;
 
-        // Feedback visual para el usuario
-        button.disabled = true;
-        button.textContent = "Verificando...";
-        resultsContainer.innerHTML = ""; // Limpiar resultados anteriores
+    button.disabled = true;
+    button.textContent = "Verificando...";
+    resultsContainer.innerHTML = "";
 
-        try {
-            // Llamamos a la action de verificación en segundo plano
-            const result = await actions.verificarCertificado({ codigo });
+    try {
+      const result = await actions.verificarCertificado({ codigo });
+      console.log("Respuesta recibida de la action:", result);
 
-            if (result.data?.success && result.data.data) {
-                const cert: CertificadoVerificado = result.data.data;
-
-                resultsContainer.innerHTML = `
+      // --- CORRECCIÓN CLAVE AQUÍ ---
+      // Verificamos el 'success' DENTRO de result.data
+      if (result.data?.success && result.data.data) {
+        const cert: CertificadoVerificado = result.data.data;
+        resultsContainer.innerHTML = `
           <div class="resultado-valido">
             <h4>✓ Certificado Válido</h4>
             <p><strong>Participante:</strong> ${cert.nombreUsuario}</p>
@@ -256,17 +254,19 @@
             <a href="/historial-eventos?generarCertificado=${cert.eventoId}" class="btn-descargar">Descargar Certificado</a>
           </div>
         `;
-            } else {
-                const errorMessage =
-                    result.error?.message || "Error desconocido.";
-                resultsContainer.innerHTML = `<div class="resultado-invalido"><p>❌ ${errorMessage}</p></div>`;
-            }
-        } catch (error) {
-            resultsContainer.innerHTML = `<div class="resultado-invalido"><p>❌ Error al conectar con el servidor.</p></div>`;
-            console.error(error);
-        } finally {
-            button.disabled = false;
-            button.textContent = "Verificar";
-        }
-    });
+      } else {
+        // Buscamos el mensaje de error DENTRO de result.data.error
+        const errorMessage =
+          result.data?.error?.message || "Ocurrió un error desconocido.";
+        resultsContainer.innerHTML = `<div class="resultado-invalido"><p>❌ ${errorMessage}</p></div>`;
+      }
+    } catch (error) {
+      // Este catch es para errores de red o si la action falla catastróficamente
+      console.error("Error de red o excepción:", error);
+      resultsContainer.innerHTML = `<div class="resultado-invalido"><p>❌ Error de conexión con el servidor.</p></div>`;
+    } finally {
+      button.disabled = false;
+      button.textContent = "Verificar";
+    }
+  });
 </script>

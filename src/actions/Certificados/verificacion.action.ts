@@ -1,6 +1,7 @@
 import { defineAction } from 'astro:actions';
 import prisma from '../../db';
 import { z } from 'zod';
+import type { Decimal } from '@prisma/client/runtime/library';
 
 export const verificarCertificado = defineAction({
     input: z.object({
@@ -25,11 +26,19 @@ export const verificarCertificado = defineAction({
                 };
             }
 
-            if (inscripcion.est_par !== 'APROBADA') {
+            const asistenciaNum = inscripcion.asi_par ?? 0;
+            const calificacionNum = (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
+            const estadoParticipacion = inscripcion.est_par;
+
+            if (
+                asistenciaNum < 70 ||
+                calificacionNum < 7.0 ||
+                estadoParticipacion !== 'APROBADA'
+            ) {
                 return {
                     success: false,
-                    error: { message: "El participante no ha completado los requisitos para este certificado." }
-                }
+                    error: { message: "El código es correcto, pero el participante no cumple con todos los requisitos para la emisión del certificado." },
+                };
             }
 
             return {
@@ -38,7 +47,6 @@ export const verificarCertificado = defineAction({
                     nombreUsuario: `${inscripcion.usuarios.nom_usu1} ${inscripcion.usuarios.ape_usu1} ${inscripcion.usuarios.ape_usu2 ?? ''}`.trim(),
                     nombreEvento: inscripcion.eventos.nom_eve,
                     fechaEvento: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', { year: 'numeric', month: 'long' }),
-                    // Devolvemos el id_eve_ins para que el botón de descarga sepa qué certificado generar
                     eventoId: inscripcion.id_eve_ins,
                 },
             };

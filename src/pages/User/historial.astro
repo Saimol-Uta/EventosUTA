@@ -198,7 +198,6 @@ if (accountId) {
   const modalCloseBtn = document.getElementById('pdf-modal-close');
   const pdfIframe = document.getElementById('pdf-iframe') as HTMLIFrameElement;
 
-  // --- FUNCIÓN PARA MOSTRAR EL PDF EN EL MODAL ---
   function mostrarPdfEnModal(base64: string, fileName: string) {
     if (!pdfIframe || !modalOverlay) return;
 
@@ -221,11 +220,9 @@ if (accountId) {
     modalOverlay.style.display = 'flex';
   }
   
-  // --- LÓGICA PARA CERRAR EL MODAL ---
   function closeModal() {
     if (modalOverlay && pdfIframe) {
       modalOverlay.style.display = 'none';
-      // Limpiamos el iframe para liberar memoria y detener la carga
       pdfIframe.src = '';
     }
   }
@@ -233,44 +230,36 @@ if (accountId) {
   // Añadimos los listeners para cerrar el modal
   modalCloseBtn?.addEventListener('click', closeModal);
   modalOverlay?.addEventListener('click', (event) => {
-    // Cierra el modal solo si se hace clic en el fondo oscuro
     if (event.target === modalOverlay) {
       closeModal();
     }
   });
 
-
-  // --- LÓGICA DE LOS BOTONES (Certificado y Orden de Pago) ---
-  // Esta lógica ahora llamará a 'mostrarPdfEnModal'
   document.querySelectorAll(".js-generate-cert, .js-download-order").forEach((button) => {
     if (!(button instanceof HTMLButtonElement)) return;
 
     button.addEventListener("click", async (event) => {
       const isCertificado = button.classList.contains('js-generate-cert');
       const originalText = button.textContent || '';
-      let result; // Declaramos la variable para el resultado aquí
+      let result;
 
       button.disabled = true;
       button.textContent = "Generando...";
 
       try {
-        // --- CAMBIO CLAVE: Usamos if/else para llamar a la action correcta ---
         if (isCertificado) {
           const eventoId = button.dataset.eventoid;
           if (!eventoId) throw new Error("ID de evento no encontrado.");
           
-          // Llamada explícita a GenerarCertificado
           result = await actions.GenerarCertificado({ eventoId });
 
-        } else { // Es una orden de pago
+        } else {
           const inscripcionId = button.dataset.inscripcionid;
           if (!inscripcionId) throw new Error("ID de inscripción no encontrado.");
 
-          // Llamada explícita a GenerarOrdenDePago
           result = await actions.GenerarOrdenDePago({ inscripcionId });
         }
 
-        // El manejo del resultado es el mismo para ambos casos
         if (result.data?.success && result.data?.data?.pdfBase64) {
           mostrarPdfEnModal(result.data.data.pdfBase64, result.data.data.fileName);
         } else {
@@ -279,7 +268,6 @@ if (accountId) {
 
       } catch (error) {
         console.error(error);
-        // Mostramos el mensaje del error que lanzamos si no encontramos el ID
         alert(error instanceof Error ? error.message : "Error inesperado al contactar con el servidor.");
       } finally {
         button.disabled = false;
