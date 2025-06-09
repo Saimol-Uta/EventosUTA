@@ -3,120 +3,129 @@ import { getSession } from 'auth-astro/server';
 import prisma from '../../db';
 import { generarCertificadoPDF } from './generateCertificado';
 import { z } from 'zod';
+import type { Decimal } from '@prisma/client/runtime/library';
+import { v2 as cloudinary } from 'cloudinary';
+import { Readable } from 'stream';
+import type { UploadApiResponse } from 'cloudinary';
+
+// Configuración de Cloudinary
+cloudinary.config({
+  cloud_name: import.meta.env.CLOUDINARY_CLOUD_NAME,
+  api_key: import.meta.env.CLOUDINARY_API_KEY,
+  api_secret: import.meta.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
+
+// Función de ayuda para subir el archivo a Cloudinary
+async function uploadToCloudinary(pdfBytes: Uint8Array, publicId: string): Promise<UploadApiResponse> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { public_id: publicId, folder: 'certificados', resource_type: 'raw', overwrite: true },
+      (error, result) => {
+        if (error) return reject(error);
+        if (result) resolve(result);
+      }
+    );
+    Readable.from(Buffer.from(pdfBytes)).pipe(uploadStream);
+  });
+}
 
 export const GenerarCertificado = defineAction({
   input: z.object({
     eventoId: z.string().uuid({ message: 'ID de evento inválido.' }),
   }),
-
-  handler: async (input, context) => {
-    const session = await getSession(context.request);
-    const accountId = session?.user?.id;
-
-    if (!accountId) {
-      return {
-        success: false,
-        error: { message: 'Usuario no autenticado.' },
-      };
-    }
-
+  handler: async ({ eventoId }, context) => {
     try {
-      const cuentaConUsuario = await prisma.cuentas.findUnique({
-        where: {
-          id_cue: accountId,
-        },
-        include: {
-          usuarios: true,
-        },
-      });
+      const session = await getSession(context.request);
+      if (!session?.user?.id) return { success: false, error: { message: 'Usuario no autenticado.' } };
 
-      if (!cuentaConUsuario || !cuentaConUsuario.usuarios) {
-        return {
-          success: false,
-          error: { message: 'No se encontró un perfil de usuario para esta cuenta.' },
-        };
-      }
+      const cuenta = await prisma.cuentas.findUnique({ where: { id_cue: session.user.id } });
+      if (!cuenta?.id_usu_per) return { success: false, error: { message: 'Perfil de usuario no encontrado.' } };
 
-      const userId = cuentaConUsuario.usuarios.id_usu;
-
+      const userId = cuenta.id_usu_per;
       const inscripcion = await prisma.inscripciones.findFirst({
-        where: {
-          id_usu_ins: userId,
-          id_eve_ins: input.eventoId,
-          est_par: 'APROBADA',
-        },
-        include: {
-          usuarios: true,
-          eventos: true,
-        },
+        where: { id_usu_ins: userId, id_eve_ins: eventoId },
+        include: { usuarios: true, eventos: true },
       });
 
       if (!inscripcion) {
+        return { success: false, error: { message: 'Inscripción no encontrada.' } };
+      }
+
+      //LÓGICA DE CACHÉ
+      if (inscripcion.enl_cer_par) {
+        console.log("Recuperando PDF existente desde Cloudinary...");
+
+        // Descargamos el PDF desde la URL guardada
+        const response = await fetch(inscripcion.enl_cer_par);
+        if (!response.ok) throw new Error('No se pudo recuperar el certificado existente desde el enlace.');
+
+        // Lo convertimos a base64 y lo devolvemos
+        const buffer = await response.arrayBuffer();
+        const pdfBase64 = Buffer.from(buffer).toString('base64');
         return {
-          success: false,
-          error: { message: 'No cumples los requisitos para obtener el certificado.' },
+          success: true,
+          data: {
+            pdfBase64,
+            fileName: `certificado-${inscripcion.eventos.nom_eve}.pdf`,
+          },
         };
       }
 
-      const nombreCompleto = `${inscripcion.usuarios.nom_usu1} ${inscripcion.usuarios.nom_usu2 ?? ''} ${inscripcion.usuarios.ape_usu1} ${inscripcion.usuarios.ape_usu2 ?? ''}`.trim();
+      // Generacion del Certificado
+      const esElegible = (inscripcion.asi_par ?? 0) >= 70 && ((inscripcion.not_par as Decimal)?.toNumber() ?? 0.0) >= 7.0 && inscripcion.est_par === 'APROBADA';
+      if (!esElegible) {
+        return { success: false, error: { message: 'No cumples los requisitos para generar este certificado.' } };
+      }
 
-      const nombreCurso = inscripcion.eventos.nom_eve;
+      const fechaParaElCertificado = inscripcion.fec_cer_par ?? new Date();
 
-      // Opciones para formatear las fechas en español
-      const opcionesFechaCorta = { day: 'numeric', month: 'long' } as const;
-      const opcionesFechaLarga = { day: 'numeric', month: 'long', year: 'numeric' } as const;
-      
-      const fechaInicioFmt = inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', opcionesFechaCorta);
-      // Usamos la fecha de fin del evento, o si no existe, usamos la de inicio
-      const fechaFinFmt = (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', opcionesFechaLarga);
-
-      // Usamos 'dur_eve' que parece más apropiado. Si es nulo, ponemos '40' como fallback.
-      const duracionHoras = inscripcion.eventos.dur_eve?.toString() ?? '40';
-      // Si prefieres usar la nota del participante, descomenta la siguiente línea y comenta la de arriba:
-      // const duracionHoras = inscripcion.not_par?.toString() ?? 'Aprobado';
-
-      const fechaGeneracion = (inscripcion.fec_cer_par ?? new Date()).toLocaleDateString('es-EC', opcionesFechaLarga);
-
-      // --- Llamada a la función que genera el PDF ---
-      const pdf = await generarCertificadoPDF({
-        nombreUsuario: nombreCompleto,
-        nombreCurso: nombreCurso,
-        fechaInicio: fechaInicioFmt,
-        fechaFin: fechaFinFmt,
-        duracionHoras: duracionHoras,
-        fechaGeneracion: fechaGeneracion,
+      const pdfBytes = await generarCertificadoPDF({
+        nombreUsuario: `${inscripcion.usuarios.nom_usu1} ${inscripcion.usuarios.nom_usu2 ?? ''} ${inscripcion.usuarios.ape_usu1} ${inscripcion.usuarios.ape_usu2 ?? ''}`.trim(),
+        nombreCurso: inscripcion.eventos.nom_eve,
+        fechaInicio: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', { day: 'numeric', month: 'long' }),
+        fechaFin: (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+        duracionHoras: inscripcion.eventos.dur_eve?.toString() ?? '40',
+        fechaGeneracion: fechaParaElCertificado.toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
       });
 
-      const pdfBase64 = Buffer.from(pdf).toString('base64');
+      const uploadResult = await uploadToCloudinary(pdfBytes, inscripcion.id_ins);
+      const fileUrl = uploadResult.secure_url;
+      if (!fileUrl) throw new Error("La subida a Cloudinary no devolvió una URL.");
 
+      await prisma.inscripciones.update({
+        where: { id_ins: inscripcion.id_ins },
+        data: {
+          enl_cer_par: fileUrl,
+          fec_cer_par: fechaParaElCertificado,
+        },
+      });
+
+      const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
       return {
         success: true,
         data: {
           pdfBase64,
-          fileName: `certificado-${nombreCurso}.pdf`,
+          fileName: `certificado-${inscripcion.eventos.nom_eve}.pdf`,
         },
       };
 
     } catch (error: any) {
       console.error('Error al generar certificado:', error);
-      return {
-        success: false,
-        error: { message: 'Error interno del servidor al generar el certificado.' },
-      };
+      return { success: false, error: { message: 'Error interno del servidor.' } };
     }
   },
 });
 
 export const generarCertificadoPublico = defineAction({
-  // Recibe el ID único de la inscripción (el código)
+  // Recibe el ID único de la inscripción
   input: z.object({
     inscripcionId: z.string().uuid({ message: "El formato del código no es válido." }),
   }),
 
-  // NOTA: No usamos 'context' porque no necesitamos la sesión de usuario
   handler: async ({ inscripcionId }) => {
     try {
-      // 1. Buscamos la inscripción directamente por su ID único
+      //Buscamos la inscripción por su ID único
       const inscripcion = await prisma.inscripciones.findUnique({
         where: { id_ins: inscripcionId },
         include: { usuarios: true, eventos: true },
@@ -125,15 +134,15 @@ export const generarCertificadoPublico = defineAction({
       if (!inscripcion) {
         return { success: false, error: { message: 'No se encontró un certificado con este código.' } };
       }
-      
-      // 2. Realizamos la misma validación de requisitos
+
+      //Realizamos la validación de requisitos
       const asistenciaNum = inscripcion.asi_par ?? 0;
       const calificacionNum = (inscripcion.not_par as any)?.toNumber() ?? 0.0;
       if (inscripcion.est_par !== 'APROBADA' || asistenciaNum < 70 || calificacionNum < 7.0) {
         return { success: false, error: { message: 'El participante no cumple los requisitos para la emisión.' } };
       }
 
-      // 3. Generamos el PDF (misma lógica que tu otra action)
+      //Generacion del PDF
       const pdfBytes = await generarCertificadoPDF({
         nombreUsuario: `${inscripcion.usuarios.nom_usu1} ${inscripcion.usuarios.nom_usu2 ?? ''} ${inscripcion.usuarios.ape_usu1} ${inscripcion.usuarios.ape_usu2 ?? ''}`.trim(),
         nombreCurso: inscripcion.eventos.nom_eve,
