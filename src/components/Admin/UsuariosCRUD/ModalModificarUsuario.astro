@@ -1,20 +1,30 @@
 ---
 import "../../../styles/Admin/ModalModificarEvento.css";
 import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
+import { actions } from "astro:actions";
+
+// Obtener carreras para el select
+const { data: carrerasData } = await Astro.callAction(
+    actions.getAllCarreras,
+    {},
+);
+const carreras = carrerasData?.carreras || [];
 ---
 
 <div id="modalModificarUsuario" class="modal">
     <ModalGestionarCuenta />
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalModificarUsuario()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalModificarUsuario()"
+            >&times;</span
+        >
         <div class="formulario-completo">
             <form
                 class="formulario-modificar-registro"
                 method="POST"
-                id="formulario-modificar-organizador"
+                id="formulario-modificar-usuario"
                 enctype="multipart/form-data"
             >
-                <input type="hidden" name="evento_id" />
+                <input type="hidden" name="usuario_cedula" />
 
                 <div class="contenedor-superior">
                     <p class="texto-centrado texto-roja">Información General</p>
@@ -25,8 +35,8 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                             <input
                                 type="text"
                                 class="input-dato"
-                                name="usaurio-cedula"
-                                required
+                                name="usuario-cedula"
+                                readonly
                             />
                         </div>
                     </div>
@@ -43,7 +53,6 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                                 />
                             </div>
                         </div>
-
                         <div class="contenedor-dato">
                             <p class="texto-dato">Segundo Nombre</p>
                             <div class="contenedor-input">
@@ -51,7 +60,6 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                                     type="text"
                                     class="input-dato"
                                     name="usuario-nombre2"
-                                    required
                                 />
                             </div>
                         </div>
@@ -69,7 +77,6 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                                 />
                             </div>
                         </div>
-
                         <div class="contenedor-dato">
                             <p class="texto-dato">Segundo Apellido</p>
                             <div class="contenedor-input">
@@ -77,7 +84,6 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                                     type="text"
                                     class="input-dato"
                                     name="usuario-apellido2"
-                                    required
                                 />
                             </div>
                         </div>
@@ -94,15 +100,15 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                             />
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Número de Teléfono</p>
                         <div class="contenedor-input">
                             <input
-                                type="number"
+                                type="tel"
                                 class="input-dato"
                                 name="numero-usuario"
-                                required
+                                pattern="[0-9]{10}"
+                                title="Número de teléfono de 10 dígitos"
                             />
                         </div>
                     </div>
@@ -110,10 +116,22 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                     <div class="contenedor-dato">
                         <p class="texto-dato">Carrera</p>
                         <div class="contenedor-input">
-                            <select>
-                                <option value="software">Software</option>
-                                <option value="ti">Tecnologías de la Información</option>
-                                <option value="industrial">Industrial</option>
+                            <select
+                                name="carrera-usuario"
+                                class="input-dato"
+                                required
+                            >
+                                <option value="">Seleccione una carrera</option>
+                                {
+                                    carreras.map((carrera: any) => (
+                                        <option value={carrera.id_car}>
+                                            {carrera.nom_car}{" "}
+                                            {carrera.cod_car
+                                                ? `(${carrera.cod_car})`
+                                                : ""}
+                                        </option>
+                                    ))
+                                }
                             </select>
                         </div>
                     </div>
@@ -121,166 +139,170 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
 
                 <div class="contenedor-inferior">
                     <p class="texto-centrado texto-roja">Cuentas Asociadas</p>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Cuentas Actuales:</p>
                         <div id="cuentas-actuales" class="asignaciones-display">
-                        <!-- Aquí se mostrará dinámicamente la lista de cuentas asociadas -->
+                            <!-- Aquí se mostrará dinámicamente la lista de cuentas asociadas -->
                         </div>
                     </div>
 
                     <div class="contenedor-dato">
                         <div class="contenedor-botones-asignaciones">
                             <button
-                            type="button"
-                            class="boton-asignacion btn-gestionar"
-                            onclick="abrirModalGestionarCuenta('correo@ejemplo.com', 'estudiante')"
+                                type="button"
+                                id="btn-crear-cuenta"
+                                class="boton-asignacion btn-agregar"
                             >
-                            🔧 Gestionar Cuenta
+                                ➕ Crear Nueva Cuenta
+                            </button>
+                            <button
+                                type="button"
+                                id="btn-gestionar-cuentas"
+                                class="boton-asignacion btn-gestionar"
+                            >
+                                🔧 Gestionar Cuentas
                             </button>
                         </div>
                     </div>
 
                     <div class="contenedor-boton-modificar">
                         <button
-                        type="button"
-                        class="boton-modificar"
-                        onclick="cerrarModalModificarUsuario()"
+                            type="button"
+                            class="boton-modificar"
+                            onclick="cerrarModalModificarUsuario()"
                         >
-                        Cancelar
+                            Cancelar
                         </button>
                         <button type="submit" class="boton-modificar">
-                        Modificar Usuario
+                            Modificar Usuario
                         </button>
                     </div>
-            </div>
-
-
+                </div>
             </form>
         </div>
-
         <script>
             import { actions } from "astro:actions";
             import Swal from "sweetalert2";
-            interface Evento {
-                id_eve: string;
-                nom_eve: string;
+
+            interface Usuario {
+                id_usu: string;
+                ced_usu: string;
+                nom_usu1: string;
+                nom_usu2?: string;
+                ape_usu1: string;
+                ape_usu2?: string;
+                fec_nac_usu: string;
+                num_tel_usu?: string;
+                id_car_per?: string;
+                carrera?: {
+                    id_car: string;
+                    nom_car: string;
+                };
+                cantidadCuentas: number;
             }
             declare global {
                 interface Window {
-                    abrirModalModificarUsuario: (eventoId: string) => void;
+                    abrirModalModificarUsuario: (usuarioId: string) => void;
                     cerrarModalModificarUsuario: () => void;
+                    editarCuenta: (
+                        cuentaId: string,
+                        correo: string,
+                        tipo: string,
+                    ) => void;
+                    eliminarCuenta: (
+                        cuentaId: string,
+                        cedulaUsuario: string,
+                    ) => Promise<void>;
+                    crearNuevaCuenta: () => void;
+                    abrirModalGestionarCuenta: (
+                        correo: string,
+                        rol: string,
+                        idCuenta?: string,
+                        idUsuario?: string,
+                    ) => void;
                 }
             }
-            
-            async function abrirModalModificarUsuario(eventoId: string): Promise<void> {
+
+            let usuarioActualId: string = "";
+
+            async function abrirModalModificarUsuario(
+                usuarioId: string,
+            ): Promise<void> {
                 const modal = document.getElementById("modalModificarUsuario");
                 const form = document.getElementById(
-                    "formulario-modificar-organizador",
+                    "formulario-modificar-usuario",
                 ) as HTMLFormElement;
 
-                if (!modal || !form) return; // Cargar categorías y organizadores dinámicamente
+                if (!modal || !form) return;
 
-                // Obtener todos los eventos del DOM
-                const eventosInputs = document.querySelectorAll(
-                    'input[name="evento"]',
+                // Obtener todos los usuarios del DOM
+                const usuariosInputs = document.querySelectorAll(
+                    'input[name="usuario"]',
                 );
-                const eventos = Array.from(eventosInputs).map((input) =>
+                const usuarios = Array.from(usuariosInputs).map((input) =>
                     JSON.parse((input as HTMLInputElement).value),
                 );
-
-                const evento = eventos.find(
-                    (e: Evento) => e.id_eve === eventoId,
+                const usuario = usuarios.find(
+                    (u: Usuario) => u.id_usu === usuarioId,
                 );
 
-                if (!evento) return;
+                if (!usuario) return;
 
-                // Llenar el formulario con los datos del evento
-                const nombre = form.querySelector(
-                    'input[name="nombre"]',
+                // Almacenar el ID del usuario actual
+                usuarioActualId = usuario.id_usu || "";
+
+                // Llenar el formulario con los datos del usuario
+                const cedula = form.querySelector(
+                    'input[name="usuario-cedula"]',
                 ) as HTMLInputElement;
-                const descripcion = form.querySelector(
-                    'textarea[name="descripcion"]',
-                ) as HTMLTextAreaElement;
-                const categoria = form.querySelector(
-                    'select[name="categoria"]',
+                const nombre1 = form.querySelector(
+                    'input[name="usuario-nombre1"]',
+                ) as HTMLInputElement;
+                const nombre2 = form.querySelector(
+                    'input[name="usuario-nombre2"]',
+                ) as HTMLInputElement;
+                const apellido1 = form.querySelector(
+                    'input[name="usuario-apellido1"]',
+                ) as HTMLInputElement;
+                const apellido2 = form.querySelector(
+                    'input[name="usuario-apellido2"]',
+                ) as HTMLInputElement;
+                const fechaNacimiento = form.querySelector(
+                    'input[name="usuario-fecha-nacimiento"]',
+                ) as HTMLInputElement;
+                const telefono = form.querySelector(
+                    'input[name="numero-usuario"]',
+                ) as HTMLInputElement;
+                const carrera = form.querySelector(
+                    'select[name="carrera-usuario"]',
                 ) as HTMLSelectElement;
-                const area = form.querySelector(
-                    'select[name="area"]',
-                ) as HTMLSelectElement;
-                const precio = form.querySelector(
-                    'input[name="precio"]',
-                ) as HTMLInputElement;
-                const fechaInicio = form.querySelector(
-                    'input[name="fecha_inicio"]',
-                ) as HTMLInputElement;
-                const horaInicio = form.querySelector(
-                    'input[name="hora_inicio"]',
-                ) as HTMLInputElement;
-                const fechaFin = form.querySelector(
-                    'input[name="fecha_fin"]',
-                ) as HTMLInputElement;
-                const horaFin = form.querySelector(
-                    'input[name="hora_fin"]',
-                ) as HTMLInputElement;
-                const duracion = form.querySelector(
-                    'input[name="duracion"]',
-                ) as HTMLInputElement;
-                const ubicacion = form.querySelector(
-                    'input[name="ubicacion"]',
-                ) as HTMLInputElement;
-                const cedulaOrganizador = form.querySelector(
-                    'select[name="cedula_organizador"]',
-                ) as HTMLSelectElement;
-                const notaAprobacion = form.querySelector(
-                    'input[name="nota_aprobacion"]',
-                ) as HTMLInputElement;
-                const tiempoRegistro = form.querySelector(
-                    'select[name="tiempo_registro_asignacion"]',
-                ) as HTMLSelectElement;
-                const eventoIdInput = form.querySelector(
-                    'input[name="evento_id"]',
+                const cedulaHidden = form.querySelector(
+                    'input[name="usuario_cedula"]',
                 ) as HTMLInputElement;
 
                 // Asignar valores
-                if (nombre) nombre.value = evento.nom_eve;
-                if (descripcion) descripcion.value = evento.des_eve;
-                if (categoria) categoria.value = evento.id_cat_eve;
-                if (area) area.value = evento.are_eve || "";
-                if (precio) precio.value = evento.precio.toString();
-                if (fechaInicio)
-                    fechaInicio.value = new Date(evento.fec_ini_eve)
-                        .toISOString()
-                        .split("T")[0];
-                if (horaInicio) horaInicio.value = evento.hor_ini_eve;
-                if (fechaFin && evento.fec_fin_eve)
-                    fechaFin.value = new Date(evento.fec_fin_eve)
-                        .toISOString()
-                        .split("T")[0];
-                if (horaFin && evento.hor_fin_eve)
-                    horaFin.value = evento.hor_fin_eve;
-                if (duracion && evento.dur_eve)
-                    duracion.value = evento.dur_eve.toString();
-                if (ubicacion) ubicacion.value = evento.ubi_eve;
-                if (cedulaOrganizador)
-                    cedulaOrganizador.value = evento.ced_org_eve;
-                if (notaAprobacion)
-                    notaAprobacion.value = (
-                        evento.not_apr_eve || 7.0
-                    ).toString();
-                if (tiempoRegistro)
-                    tiempoRegistro.value = (
-                        evento.tie_reg_asi !== false
-                    ).toString();
-                if (eventoIdInput) eventoIdInput.value = evento.id_eve;
+                if (cedula) cedula.value = usuario.ced_usu || "";
+                if (nombre1) nombre1.value = usuario.nom_usu1;
+                if (nombre2) nombre2.value = usuario.nom_usu2 || "";
+                if (apellido1) apellido1.value = usuario.ape_usu1;
+                if (apellido2) apellido2.value = usuario.ape_usu2 || "";
+                if (fechaNacimiento) {
+                    const fecha = new Date(usuario.fec_nac_usu);
+                    fechaNacimiento.value = fecha.toISOString().split("T")[0];
+                }
+                if (telefono) telefono.value = usuario.num_tel_usu || "";
+                if (carrera) carrera.value = usuario.id_car_per || "";
+                if (cedulaHidden) cedulaHidden.value = usuario.ced_usu || "";
+
+                // Cargar las cuentas del usuario
+                await cargarCuentasActuales(usuario.id_usu || "");
 
                 modal.style.display = "block";
             }
-
             function cerrarModalModificarUsuario(): void {
                 const modal = document.getElementById("modalModificarUsuario");
                 const form = document.getElementById(
-                    "formulario-modificar-organizador",
+                    "formulario-modificar-usuario",
                 ) as HTMLFormElement;
 
                 if (modal && form) {
@@ -289,19 +311,200 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                 }
             }
 
+            async function cargarCuentasActuales(cedulaUsuario: string) {
+                try {
+                    const { data: cuentasData } =
+                        await actions.getCuentaById(cedulaUsuario);
+
+                    const contenedorCuentas =
+                        document.getElementById("cuentas-actuales");
+                    if (!contenedorCuentas) return;
+                    if (cuentasData && cuentasData.length > 0) {
+                        contenedorCuentas.innerHTML = cuentasData
+                            .map((cuenta: any) => {
+                                const correoMostrar =
+                                    cuenta.cor_cue || cuenta.correo_cue;
+                                return `
+                            <div class="asignacion-item" data-cuenta-id="${cuenta.id_cue}">
+                                <span class="asignacion-nombre">${correoMostrar}</span>
+                                <span class="asignacion-detalle">${cuenta.tip_cue}</span>
+                                <div class="cuenta-acciones">
+                                    <button type="button" class="btn-editar-cuenta" data-cuenta-id="${cuenta.id_cue}" data-correo="${correoMostrar}" data-tipo="${cuenta.tip_cue}">
+                                        ✏️ Editar
+                                    </button>
+                                    <button type="button" class="btn-eliminar-cuenta" data-cuenta-id="${cuenta.id_cue}" data-cedula="${cedulaUsuario}">
+                                        ❌ Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                            })
+                            .join("");
+
+                        // Agregar event listeners a los botones creados dinámicamente
+                        setTimeout(() => {
+                            const botonesEditar =
+                                document.querySelectorAll(".btn-editar-cuenta");
+                            const botonesEliminar = document.querySelectorAll(
+                                ".btn-eliminar-cuenta",
+                            );
+
+                            botonesEditar.forEach((boton) => {
+                                boton.addEventListener("click", (e) => {
+                                    const target =
+                                        e.target as HTMLButtonElement;
+                                    const cuentaId =
+                                        target.getAttribute("data-cuenta-id");
+                                    const correo =
+                                        target.getAttribute("data-correo");
+                                    const tipo =
+                                        target.getAttribute("data-tipo");
+
+                                    if (cuentaId && correo && tipo) {
+                                        editarCuenta(cuentaId, correo, tipo);
+                                    }
+                                });
+                            });
+
+                            botonesEliminar.forEach((boton) => {
+                                boton.addEventListener("click", (e) => {
+                                    const target =
+                                        e.target as HTMLButtonElement;
+                                    const cuentaId =
+                                        target.getAttribute("data-cuenta-id");
+                                    const cedula =
+                                        target.getAttribute("data-cedula");
+
+                                    if (cuentaId && cedula) {
+                                        eliminarCuenta(cuentaId, cedula);
+                                    }
+                                });
+                            });
+                        }, 100);
+                    } else {
+                        contenedorCuentas.innerHTML =
+                            '<p class="no-cuentas">Este usuario no tiene cuentas asociadas.</p>';
+                    }
+                } catch (error) {
+                    console.error("Error al cargar cuentas actuales:", error);
+                    const contenedorCuentas =
+                        document.getElementById("cuentas-actuales");
+                    if (contenedorCuentas) {
+                        contenedorCuentas.innerHTML =
+                            '<p class="error-cuentas">Error al cargar las cuentas del usuario.</p>';
+                    }
+                }
+            }
+
+            async function eliminarCuenta(
+                cuentaId: string,
+                cedulaUsuario: string,
+            ) {
+                const resultado = await Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "Esta acción eliminará la cuenta del usuario.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#dc2626",
+                    cancelButtonColor: "#6b7280",
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar",
+                });
+
+                if (resultado.isConfirmed) {
+                    try {
+                        const { data, error } = await actions.eliminarCuenta({
+                            id_cue: cuentaId,
+                        });
+
+                        if (data?.success) {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminado",
+                                text: "Cuenta eliminada correctamente.",
+                                confirmButtonColor: "#059669",
+                            });
+
+                            // Recargar cuentas actuales
+                            await cargarCuentasActuales(cedulaUsuario);
+                        } else {
+                            throw new Error(
+                                error?.message ||
+                                    "No se pudo eliminar la cuenta.",
+                            );
+                        }
+                    } catch (error) {
+                        console.error("Error al eliminar cuenta:", error);
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                error instanceof Error
+                                    ? error.message
+                                    : "No se pudo eliminar la cuenta.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                }
+            }
+
+            function editarCuenta(
+                cuentaId: string,
+                correo: string,
+                tipo: string,
+            ) {
+                // Usar la función del modal de gestionar cuenta existente
+                if (window.abrirModalGestionarCuenta) {
+                    window.abrirModalGestionarCuenta(
+                        correo,
+                        tipo,
+                        cuentaId,
+                        usuarioActualId,
+                    );
+                } else {
+                    console.error(
+                        "La función abrirModalGestionarCuenta no está disponible",
+                    );
+                }
+            }
+            function crearNuevaCuenta() {
+                // Obtener la cédula del usuario actual
+                const cedulaInput = document.querySelector(
+                    'input[name="usuario_cedula"]',
+                ) as HTMLInputElement;
+                const cedula = cedulaInput?.value;
+
+                if (!cedula) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pudo obtener la cédula del usuario.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
+                // Crear un correo temporal basado en la cédula
+                const correoTemporal = `${cedula}@uta.edu.ec`;
+                // Usar la función del modal de gestionar cuenta para crear nueva cuenta
+                if (window.abrirModalGestionarCuenta) {
+                    window.abrirModalGestionarCuenta(
+                        correoTemporal,
+                        "estudiante",
+                        "",
+                        usuarioActualId,
+                    );
+                } else {
+                    console.error(
+                        "La función abrirModalGestionarCuenta no está disponible",
+                    );
+                }
+            }
+
             document.addEventListener("DOMContentLoaded", () => {
                 const form = document.getElementById(
-                    "formulario-modificar-organizador",
+                    "formulario-modificar-usuario",
                 ) as HTMLFormElement;
-                const fileInput = document.getElementById(
-                    "file-upload-modificar",
-                ) as HTMLInputElement;
-                const fileNameDisplay = document.querySelector(
-                    ".file-name",
-                ) as HTMLElement;
-                const eventoImagen = document.getElementById(
-                    "evento-imagen",
-                ) as HTMLImageElement;
 
                 // Manejar envío del formulario
                 if (form) {
@@ -310,56 +513,76 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
 
                         const formData = new FormData(form);
 
-                        // Obtener valores y validar área
-                        const areaValue = formData.get("area") as string;
-                        const fechaFin = formData.get("fecha_fin") as string;
-                        const horaFin = formData.get("hora_fin") as string;
-                        const duracionStr = formData.get("duracion") as string;
-                        const notaAprobacionStr = formData.get(
-                            "nota_aprobacion",
-                        ) as string;
-                        const tiempoRegistroStr = formData.get(
-                            "tiempo_registro_asignacion",
-                        ) as string;
-
-                        // Limpiar campos vacíos
-                        if (!fechaFin || fechaFin.trim() === "") {
-                            formData.delete("fecha_fin");
-                        }
-                        if (!horaFin || horaFin.trim() === "") {
-                            formData.delete("hora_fin");
-                        }
-                        if (!duracionStr || duracionStr.trim() === "") {
-                            formData.delete("duracion");
-                        }
-                        if (
-                            !notaAprobacionStr ||
-                            notaAprobacionStr.trim() === ""
-                        ) {
-                            formData.set("nota_aprobacion", "7.0");
-                        }
-                        if (
-                            !tiempoRegistroStr ||
-                            tiempoRegistroStr.trim() === ""
-                        ) {
-                            formData.set("tiempo_registro_asignacion", "true");
-                        }
-
-                        // Verificar si hay imagen seleccionada
-                        const imagenFile = formData.get("imagen") as File;
-                        if (!imagenFile || imagenFile.size === 0) {
-                            formData.delete("imagen");
-                        }
-
+                        // Crear objeto con los datos del usuario
+                        const usuarioData = {
+                            cedula: formData.get("usuario_cedula") as string,
+                            primerNombre: formData.get(
+                                "usuario-nombre1",
+                            ) as string,
+                            segundoNombre:
+                                (formData.get("usuario-nombre2") as string) ||
+                                "",
+                            primerApellido: formData.get(
+                                "usuario-apellido1",
+                            ) as string,
+                            segundoApellido:
+                                (formData.get("usuario-apellido2") as string) ||
+                                "",
+                            telefono:
+                                (formData.get("numero-usuario") as string) ||
+                                "",
+                            carreraId: formData.get(
+                                "carrera-usuario",
+                            ) as string,
+                            fechaNacimiento: formData.get(
+                                "usuario-fecha-nacimiento",
+                            ) as string,
+                        };
                         try {
+                            const formDataForAction = new FormData();
+                            formDataForAction.append(
+                                "cedula",
+                                usuarioData.cedula,
+                            );
+                            formDataForAction.append(
+                                "primerNombre",
+                                usuarioData.primerNombre,
+                            );
+                            formDataForAction.append(
+                                "segundoNombre",
+                                usuarioData.segundoNombre,
+                            );
+                            formDataForAction.append(
+                                "primerApellido",
+                                usuarioData.primerApellido,
+                            );
+                            formDataForAction.append(
+                                "segundoApellido",
+                                usuarioData.segundoApellido,
+                            );
+                            formDataForAction.append(
+                                "telefono",
+                                usuarioData.telefono,
+                            );
+                            formDataForAction.append(
+                                "carreraId",
+                                usuarioData.carreraId,
+                            );
+                            formDataForAction.append(
+                                "fechaNacimiento",
+                                usuarioData.fechaNacimiento,
+                            );
+
                             const { data, error } =
-                                await actions.modificarEvento(formData);
+                                await actions.modificarUsuario(
+                                    formDataForAction,
+                                );
 
                             if (data?.success) {
                                 await Swal.fire({
                                     icon: "success",
                                     title: "Éxito",
-                                    text: "Evento modificado correctamente.",
+                                    text: "Usuario modificado correctamente.",
                                     confirmButtonColor: "#059669",
                                 }).then(() => {
                                     window.location.reload();
@@ -370,7 +593,7 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                                     title: "Error",
                                     text:
                                         error?.message ||
-                                        "No se pudo modificar el evento.",
+                                        "No se pudo modificar el usuario.",
                                     confirmButtonColor: "#dc2626",
                                 });
                             }
@@ -384,10 +607,38 @@ import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
                             });
                         }
                     });
+                }
+
+                // Event listeners para botones de cuentas
+                const btnCrearCuenta =
+                    document.getElementById("btn-crear-cuenta");
+                const btnGestionarCuentas = document.getElementById(
+                    "btn-gestionar-cuentas",
+                );
+
+                if (btnCrearCuenta) {
+                    btnCrearCuenta.addEventListener("click", () => {
+                        crearNuevaCuenta();
+                    });
+                }
+
+                if (btnGestionarCuentas) {
+                    btnGestionarCuentas.addEventListener("click", () => {
+                        // Abrir modal general de gestión de cuentas (funcionalidad futura)
+                        Swal.fire({
+                            icon: "info",
+                            title: "Información",
+                            text: "Usa los botones individuales de cada cuenta para gestionarlas.",
+                            confirmButtonColor: "#059669",
+                        });
+                    });
                 } // Asignar funciones al objeto window
                 window.abrirModalModificarUsuario = abrirModalModificarUsuario;
-                window.cerrarModalModificarUsuario = cerrarModalModificarUsuario;
-
+                window.cerrarModalModificarUsuario =
+                    cerrarModalModificarUsuario;
+                window.editarCuenta = editarCuenta;
+                window.eliminarCuenta = eliminarCuenta;
+                window.crearNuevaCuenta = crearNuevaCuenta;
             });
         </script>
     </div>

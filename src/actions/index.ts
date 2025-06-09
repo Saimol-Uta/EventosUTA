@@ -4,11 +4,18 @@ import { getEventosPorUsuario } from './Eventos/getEventosPorUsuario'
 import { createCambio } from './Cambios';
 import { getUseById } from './auth';
 import { getUserByCedula } from './Users/getUserByCedula.action';
+import { eliminarUsuario } from './Users/eliminar-usuario.action';
+import { modificarUsuario } from './Users/modificar-usuario.action';
 import { setUser } from './Users/setUsers.action';
+import { getAllUsers } from './Admin/get-all-user.action';
+import { getUsersWithAccounts } from './Users/get-users-with-accounts.action';
 
 import { getDatosInscripcion } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+import { crearCuenta } from './Users/crear-cuenta.action';
+import { modificarCuenta } from './Users/modificar-cuenta.action';
+import { eliminarCuenta } from './Users/eliminar-cuenta.action';
 import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
 import { GenerarCertificado } from './Certificados/certificado.action';
 
@@ -29,10 +36,15 @@ export const server = {
     createCambio,
     getUseById,
     getUserByCedula,
-    setUser,
-    uploadImageUser,
-    getCuentaById,
+    setUser, getAllUsers,
+    getUsersWithAccounts,
+    eliminarUsuario,
+    modificarUsuario,
+    uploadImageUser, getCuentaById,
     uploadDocumentImage,
+    crearCuenta,
+    modificarCuenta,
+    eliminarCuenta,
 
     getDatosInscripcion,
     setDatosInscripcion,
