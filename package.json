@@ -18,6 +18,8 @@
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.1",
     "cookie": "^1.0.2",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "next-auth": "^5.0.0-beta.28",
     "sweetalert2": "^11.21.2",
     "tailwindcss": "^4.1.6"

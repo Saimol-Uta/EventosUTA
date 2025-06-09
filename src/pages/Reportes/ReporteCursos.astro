@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import { getParticipantesPorEvento } from "../../actions/Reportes/getParticipantesPorEvento.ts";
 import ReporteCurso from "../../components/Reportes/ReporteCurso.astro";
 
-const eventoId = "ID_REAL_DEL_EVENTO_AQUI";
+const eventoId = "725e6e83-4ff4-47ad-a7bd-639672d96022";
 
 const { data: participantes, error } = await Astro.callAction(getParticipantesPorEvento, eventoId);
 
