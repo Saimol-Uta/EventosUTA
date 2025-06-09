@@ -11,28 +11,37 @@ export const getCertificadosPorUsuario = defineAction({
 
   handler: async ({ idUsuario }) => {
     try {
-      // Buscar inscripciones del usuario y obtener enlaces de certificados
+    
       const certificados = await prisma.inscripciones.findMany({
         where: {
           id_usu_ins: idUsuario,
+          enl_cer_par: {
+            not: null, 
+          },
         },
         select: {
           enl_cer_par: true,
         },
       });
 
-      // Extraer los enlaces como un arreglo plano
-      const enlaces = certificados.map(c => c.enl_cer_par);
+   
+      const enlaces = Array.from(
+        new Set(
+          certificados
+            .map(c => c.enl_cer_par?.trim())
+            .filter(Boolean) 
+        )
+      );
 
       return {
         success: true,
         enlaces,
       };
     } catch (error) {
-      console.error(error);
+      console.error('Error al obtener certificados:', error);
       return {
         success: false,
-        error: 'Error al obtener certificados del usuario',
+        error: 'No se pudieron obtener los certificados del usuario.',
       };
     }
   },
