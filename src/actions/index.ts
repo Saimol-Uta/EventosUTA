@@ -29,6 +29,7 @@ import { setOrganizadores } from './Admin/setOrganizadores.action';
 import { updateOrganizadores } from './Admin/updateOrganizadores.action';
 
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
+import { crearCategoria, modificarCategoria, eliminarCategoria, getAllCategorias } from './Categorias';
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
 import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Admin';
@@ -87,14 +88,20 @@ export const server = {
     duplicarAsignacionAEvento,
     vincularAsignacionAEvento,
 
-    crearAsignacionesPrueba,
-
-    // Nuevas acciones para CRUD de carreras
+    crearAsignacionesPrueba,    // Nuevas acciones para CRUD de carreras
     crearCarrera,
     modificarCarrera,
     eliminarCarrera,
     getAllCarreras,
-    getCarreraById,    // Nuevas acciones para Inscripciones
+    getCarreraById,
+
+    // Nuevas acciones para CRUD de categorías
+    crearCategoria,
+    modificarCategoria,
+    eliminarCategoria,
+    getAllCategorias,
+
+    // Nuevas acciones para Inscripciones
     getEventosINS,
     getByIdInscripcion,
     updateParticipante,

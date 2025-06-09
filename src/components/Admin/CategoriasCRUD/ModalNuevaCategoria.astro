@@ -1,26 +1,22 @@
 ---
 import "../../../styles/Admin/ModalModificarEvento.css";
-
-interface Props {
-    categorias?: any[];
-    organizadores?: any[];
-}
-
-const { organizadores = [] } = Astro.props;
 ---
 
 <div id="modalNuevaCategoria" class="modal">
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalNuevaCategoria()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalNuevaCategoria()">&times;</span
+        >
         <div class="formulario-completo">
             <form
                 class="formulario-modificar-registro"
                 method="POST"
-                id="formulario-nuevo-evento"
+                id="formulario-nueva-categoria"
                 enctype="multipart/form-data"
             >
                 <div class="contenedor-superior">
-                    <p class="texto-centrado texto-roja">Información Categoría</p>
+                    <p class="texto-centrado texto-roja">
+                        Información de la Categoría
+                    </p>
 
                     <div class="contenedor-dato">
                         <p class="texto-dato">Nombre</p>
@@ -28,7 +24,7 @@ const { organizadores = [] } = Astro.props;
                             <input
                                 type="text"
                                 class="input-dato"
-                                name="nombre-categoria"
+                                name="nom_cat"
                                 required
                             />
                         </div>
@@ -39,7 +35,7 @@ const { organizadores = [] } = Astro.props;
                         <div class="contenedor-input">
                             <textarea
                                 class="input-dato"
-                                name="descripcion-categoria"
+                                name="des_cat"
                                 rows="3"
                                 required></textarea>
                         </div>
@@ -52,7 +48,10 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="number"
                                     class="input-dato"
-                                    name="puntaje-categoria"
+                                    name="pun_apr_cat"
+                                    min="0"
+                                    max="10"
+                                    step="0.1"
                                     required
                                 />
                                 <p>/10</p>
@@ -65,16 +64,41 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="number"
                                     class="input-dato"
-                                    name="asistencia-categoria"
+                                    name="asi_cat"
+                                    min="0"
+                                    max="100"
                                     required
                                 />
                                 <p>%</p>
                             </div>
                         </div>
                     </div>
+
+                    <div class="contenedor-boton">
+                        <button type="submit" class="boton-confirmar">
+                            Crear Categoría
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
+    </div>
+</div>
+<div class="contenedor-input">
+    <input type="number" class="input-dato" name="puntaje-categoria" required />
+    <p>/10</p>
+</div>
+
+<div class="contenedor-dato">
+    <p class="texto-dato">Asistencia para Aprobación</p>
+    <div class="contenedor-input">
+        <input
+            type="number"
+            class="input-dato"
+            name="asistencia-categoria"
+            required
+        />
+        <p>%</p>
     </div>
 </div>
 
@@ -90,7 +114,7 @@ const { organizadores = [] } = Astro.props;
     }
 
     function abrirModalNuevaCategoria(): void {
-        console.log("🎯 Abriendo modal nuevo organizador...");
+        console.log("🎯 Abriendo modal nueva categoría...");
         const modal = document.getElementById("modalNuevaCategoria");
         if (modal) {
             modal.style.display = "block";
@@ -100,7 +124,7 @@ const { organizadores = [] } = Astro.props;
     function cerrarModalNuevaCategoria(): void {
         const modal = document.getElementById("modalNuevaCategoria");
         const form = document.getElementById(
-            "formulario-nuevo-evento",
+            "formulario-nueva-categoria",
         ) as HTMLFormElement;
 
         if (modal && form) {
@@ -111,7 +135,7 @@ const { organizadores = [] } = Astro.props;
 
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById(
-            "formulario-nuevo-evento",
+            "formulario-nueva-categoria",
         ) as HTMLFormElement;
 
         // Manejar envío del formulario
@@ -122,54 +146,14 @@ const { organizadores = [] } = Astro.props;
                 const formData = new FormData(form);
 
                 try {
-                    const { data, error } = await actions.crearEvento(formData);
+                    const { data, error } =
+                        await actions.crearCategoria(formData);
 
                     if (data?.success) {
-                        // Obtener asignaciones seleccionadas
-                        const selectAsignaciones = document.getElementById(
-                            "asignaciones-evento",
-                        ) as HTMLSelectElement;
-                        const asignacionesSeleccionadas = Array.from(
-                            selectAsignaciones.selectedOptions,
-                        )
-                            .map((option) => option.value)
-                            .filter((value) => value !== "");
-
-                        // Si hay asignaciones seleccionadas, duplicarlas al evento
-                        if (
-                            asignacionesSeleccionadas.length > 0 &&
-                            data.data?.id
-                        ) {
-                            await Promise.all(
-                                asignacionesSeleccionadas.map(
-                                    async (idAsignacion) => {
-                                        try {
-                                            await actions.duplicarAsignacionAEvento(
-                                                {
-                                                    id_asignacion_plantilla:
-                                                        idAsignacion,
-                                                    id_evento_destino:
-                                                        data.data.id,
-                                                },
-                                            );
-                                        } catch (error) {
-                                            console.error(
-                                                "Error al duplicar asignación:",
-                                                error,
-                                            );
-                                        }
-                                    },
-                                ),
-                            );
-                        }
-
                         await Swal.fire({
                             icon: "success",
                             title: "Éxito",
-                            text:
-                                asignacionesSeleccionadas.length > 0
-                                    ? `Evento creado correctamente con ${asignacionesSeleccionadas.length} asignación(es).`
-                                    : "Evento creado correctamente sin restricciones de inscripción.",
+                            text: "Categoría creada correctamente",
                             confirmButtonColor: "#059669",
                         }).then(() => {
                             window.location.reload();
@@ -181,7 +165,7 @@ const { organizadores = [] } = Astro.props;
                             text:
                                 data?.message ||
                                 error?.message ||
-                                "No se pudo crear el evento.",
+                                "No se pudo crear la categoría.",
                             confirmButtonColor: "#dc2626",
                         });
                     }
