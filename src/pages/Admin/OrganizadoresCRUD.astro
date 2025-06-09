@@ -45,7 +45,7 @@ type Organizador = {
         <Header />
         <MenuAdmin links={links} /> 
         <ModalDetallesOrganizador />
-        <ModalModificarOrganizador organizadores={organizadores} />
+        <ModalModificarOrganizador />
         <ModalNuevoOrganizador organizadores={organizadores} />
 
         <main class="registros">
@@ -232,6 +232,26 @@ type Organizador = {
                 }
             }
 
+            function abrirModalModificarOrganizador(cedula: string) {
+                const input = document.querySelector(`input[name="organizador"][data-cedula="${cedula}"]`);
+                if (!input) {
+                    console.error('Organizador no encontrado:', cedula);
+                    return;
+                }
+                let organizador = null;
+                try {
+                    organizador = JSON.parse((input as HTMLInputElement).value);
+                } catch (e) {
+                    console.error('Error al parsear el organizador:', e);
+                    return;
+                }
+                if (typeof window.abrirModalModificarOrganizador === "function") {
+                    window.abrirModalModificarOrganizador(organizador);
+                } else {
+                    alert('No se encontró la función global abrirModalModificarOrganizador. Revisa el script de ModalModificarOrganizador.astro');
+                }
+            }
+
             // Hacer funciones disponibles globalmente
             declare global {
                 interface Window {
@@ -242,6 +262,7 @@ type Organizador = {
 
             window.eliminarOrganizador = eliminarOrganizador;
             window.mostrarDetallesOrganizador = mostrarDetallesOrganizador;
+            window.abrirModalModificarOrganizador = abrirModalModificarOrganizador;
         </script>
     </body>
 </Layout>
