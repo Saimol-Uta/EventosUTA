@@ -4,3 +4,8 @@ export * from './getUsers';
 export * from './setUsers.action';
 export * from './uploadDocumentImage.action';
 export * from './uploadImgeUser.action';
+export * from './eliminar-usuario.action';
+export * from './modificar-usuario.action';
+export * from './eliminar-cuenta.action';
+export * from './modificar-cuenta.action';
+export * from './crear-cuenta.action';

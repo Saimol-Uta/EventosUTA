@@ -4,104 +4,152 @@ import "../../../styles/Admin/ModalGestionarCuenta.css";
 
 <!-- Modal para gestionar cuentas de usuario -->
 <div id="modalDetallesCuenta" class="modal" style="display: none;">
-  <div class="modal-contenido" style="max-width: 700px; width: 90%;">
-    <span class="cerrar" onclick="cerrarModalDetallesCuenta()">&times;</span>
+    <div class="modal-contenido" style="max-width: 700px; width: 90%;">
+        <span class="cerrar" onclick="cerrarModalDetallesCuenta()">&times;</span
+        >
 
-    <div class="modal-header">
-      <h2>Gestionar Cuenta de Usuario</h2>
-    </div>
+        <div class="modal-header">
+            <h2>Gestionar Cuenta de Usuario</h2>
+        </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <img
-          src="https://static.nationalgeographic.es/files/styles/image_3200/public/75552.ngsversion.1422285553360.jpg?w=1900&h=1267"
-          alt="foto"
-          class="imagen-perfil"
-        />
-      </div>
-    </div>
+        <div class="form-row">
+            <div class="form-group">
+                <img
+                    id="imagen-perfil-cuenta"
+                    src="https://static.nationalgeographic.es/files/styles/image_3200/public/75552.ngsversion.1422285553360.jpg?w=1900&h=1267"
+                    alt="foto"
+                    class="imagen-perfil"
+                />
+            </div>
+        </div>
 
-    <div class="seccion-detalles">
-      <div class="info-grid">
-        <p>
-          <strong>Nombre:</strong>
-          <span id="usuario-cedula"></span>
-        </p>
-      </div>
-    </div>
-    <div class="seccion-detalles">
-      <div class="info-grid">
-        <p>
-          <strong>Correo Electrónico:</strong>
-          <span id="usuario-cedula"></span>
-        </p>
-        <p>
-          <strong>Rol:</strong>
-          <span id="usuario-fec-nac"></span>
-        </p>
-      </div>
-    </div>
+        <div class="seccion-detalles">
+            <div class="info-grid">
+                <p>
+                    <strong>Nombre:</strong>
+                    <span id="cuenta-nombre">Cargando...</span>
+                </p>
+            </div>
+        </div>
+        <div class="seccion-detalles">
+            <div class="info-grid">
+                <p>
+                    <strong>Correo Electrónico:</strong>
+                    <span id="cuenta-correo">Cargando...</span>
+                </p>
+                <p>
+                    <strong>Rol:</strong>
+                    <span id="cuenta-rol">Cargando...</span>
+                </p>
+            </div>
+        </div>
 
-    <div class="seccion-detalles">
-      <h3>Documentación</h3>
-      <div class="info-grid">
-        <p>
-          <a href="#">Cédula y Papeleta de votación</a>
-        </p>
-        <p>
-          <a href="#">Certificado de Matriculación</a>
-        </p>
-
-        <p>
-          <a href="#">Carta de Motivación</a>
-        </p>
-      </div>
+        <div class="seccion-detalles">
+            <h3>Documentación</h3>
+            <div class="info-grid">
+                <p>
+                    <a href="#" id="enlace-cedula"
+                        >Cédula y Papeleta de votación</a
+                    >
+                </p>
+                <p>
+                    <a href="#" id="enlace-certificado"
+                        >Certificado de Matriculación</a
+                    >
+                </p>
+                <p>
+                    <a href="#" id="enlace-carta">Carta de Motivación</a>
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-  declare global {
-    interface Window {
-      abrirModalDetallesCuenta: (correo: string, rol: string) => void;
-      cerrarModalDetallesCuenta: () => void;
-    }
-  }
-
-  function abrirModalDetallesCuenta(correo: string, rol: string): void {
-    const modal = document.getElementById("modalDetallesCuenta");
-    if (!modal) return;
-
-    const correoInput = document.getElementById(
-      "correoCuenta"
-    ) as HTMLInputElement;
-    const rolSelect = document.getElementById("rolCuenta") as HTMLSelectElement;
-
-    if (correoInput && rolSelect) {
-      correoInput.value = correo;
-      rolSelect.value = rol;
+    declare global {
+        interface Window {
+            abrirModalDetallesCuenta: (usuario: any, cuenta: any) => void;
+            cerrarModalDetallesCuenta: () => void;
+        }
     }
 
-    modal.style.display = "block";
-  }
+    function abrirModalDetallesCuenta(usuario: any, cuenta: any): void {
+        const modal = document.getElementById("modalDetallesCuenta");
+        if (!modal) return;
 
-  function cerrarModalDetallesCuenta() {
-    const modal = document.getElementById("modalDetallesCuenta");
-    if (modal) {
-      modal.style.display = "none";
-      (
-        document.getElementById("formGestionCuenta") as HTMLFormElement
-      )?.reset();
+        console.log("Datos del usuario:", usuario);
+        console.log("Datos de la cuenta:", cuenta);
+
+        // Poblar datos del usuario y cuenta
+        poblarDatosCuenta(usuario, cuenta);
+
+        modal.style.display = "block";
     }
-  }
 
-  window.abrirModalDetallesCuenta = abrirModalDetallesCuenta;
-  window.cerrarModalDetallesCuenta = cerrarModalDetallesCuenta;
+    function poblarDatosCuenta(usuario: any, cuenta: any) {
+        // Nombre completo del usuario
+        const nombreElemento = document.getElementById("cuenta-nombre");
+        if (nombreElemento) {
+            const nombreCompleto =
+                `${usuario.nom_usu1} ${usuario.nom_usu2 || ""} ${usuario.ape_usu1} ${usuario.ape_usu2 || ""}`.trim();
+            nombreElemento.textContent = nombreCompleto || "Sin nombre";
+        }
 
-  window.addEventListener("click", (event) => {
-    const modal = document.getElementById("modalDetallesCuenta");
-    if (event.target === modal) {
-      cerrarModalDetallesCuenta();
+        const imagenPerfil = document.getElementById(
+            "imagen-perfil-cuenta",
+        ) as HTMLImageElement;
+        if (imagenPerfil) {
+            imagenPerfil.src =
+                cuenta?.img_user ||
+                "https://static.nationalgeographic.es/files/styles/image_3200/public/75552.ngsversion.1422285553360.jpg?w=1900&h=1267";
+        }
+
+        const correoElemento = document.getElementById("cuenta-correo");
+
+        if (correoElemento) {
+            correoElemento.textContent =
+                cuenta?.cor_cue || cuenta?.correo_cue || "Sin correo";
+        }
+
+        // Rol
+        const rolElemento = document.getElementById("cuenta-rol");
+        if (rolElemento) {
+            rolElemento.textContent = cuenta?.rol_cue || "Sin rol";
+        }
+
+        // Actualizar enlaces de documentación (si tienes rutas específicas)
+        const enlaceCedula = document.getElementById("enlace-cedula");
+        const enlaceCertificado = document.getElementById("enlace-certificado");
+        const enlaceCarta = document.getElementById("enlace-carta");
+
+        if (enlaceCedula) {
+            enlaceCedula.setAttribute("href", cuenta?.documento_cedula || "#");
+        }
+        if (enlaceCertificado) {
+            enlaceCertificado.setAttribute(
+                "href",
+                cuenta?.documento_certificado || "#",
+            );
+        }
+        if (enlaceCarta) {
+            enlaceCarta.setAttribute("href", cuenta?.documento_carta || "#");
+        }
     }
-  });
+
+    function cerrarModalDetallesCuenta() {
+        const modal = document.getElementById("modalDetallesCuenta");
+        if (modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    window.abrirModalDetallesCuenta = abrirModalDetallesCuenta;
+    window.cerrarModalDetallesCuenta = cerrarModalDetallesCuenta;
+
+    window.addEventListener("click", (event) => {
+        const modal = document.getElementById("modalDetallesCuenta");
+        if (event.target === modal) {
+            cerrarModalDetallesCuenta();
+        }
+    });
 </script>

@@ -41,29 +41,37 @@ if (accountId) {
       },
       orderBy: {
         eventos: {
-          fec_ini_eve: 'desc',
+          fec_ini_eve: "desc",
         },
       },
     });
 
-    eventosParaTarjeta = inscripciones.map(inscripcion => {
+    eventosParaTarjeta = inscripciones.map((inscripcion) => {
       const asistenciaNum = inscripcion.asi_par ?? 0;
-      const calificacionNum = (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
-      const esCertificadoDisponible = asistenciaNum >= 70 && calificacionNum >= 7.0;
+      const calificacionNum =
+        (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
+
+      const esCertificadoDisponible =
+        asistenciaNum >= 70 &&
+        calificacionNum >= 7.0 &&
+        inscripcion.est_par === "APROBADA";
+
       const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
 
       return {
         nombre: inscripcion.eventos.nom_eve,
-        fecha: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
+        fecha: inscripcion.eventos.fec_ini_eve.toLocaleDateString("es-EC", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
         }),
         calificacion: calificacionNum.toFixed(1),
         asistencia: asistenciaNum,
         estado: estadoEvento,
         certificadoDisponible: esCertificadoDisponible,
         eventoId: inscripcion.id_eve_ins,
+        inscripcionId: inscripcion.id_ins,
+        estadoPago: inscripcion.est_ins,
       };
     });
   }
@@ -77,11 +85,23 @@ if (accountId) {
   <main class="historial-container">
     <h2 class="titulo">Historial de Eventos</h2>
     <div class="cards-grid">
-      {eventosParaTarjeta.length > 0 ? (
-        eventosParaTarjeta.map(evento => <TarjetaEvento {...evento} />)
-      ) : (
-        <p class="no-eventos">Aún no has participado en ningún evento.</p>
-      )}
+      {
+        eventosParaTarjeta.length > 0 ? (
+          eventosParaTarjeta.map((evento) => <TarjetaEvento {...evento} />)
+        ) : (
+          <p class="no-eventos">Aún no has participado en ningún evento.</p>
+        )
+      }
+    </div>
+
+    <div id="pdf-modal-overlay" class="modal-overlay">
+      <div class="modal-content">
+        <button id="pdf-modal-close" class="modal-close-btn" title="Cerrar"
+          >&times;</button
+        >
+        <iframe id="pdf-iframe" src="" frameborder="0" title="Visor de PDF"
+        ></iframe>
+      </div>
     </div>
   </main>
 
@@ -100,7 +120,11 @@ if (accountId) {
       font-size: 2rem;
       text-align: center;
       margin-bottom: 2rem;
-      background: linear-gradient(90deg, var(--color-oscuro-uta), var(--color-fuerte-uta));
+      background: linear-gradient(
+        90deg,
+        var(--color-oscuro-uta),
+        var(--color-fuerte-uta)
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       font-weight: 800;
@@ -117,12 +141,68 @@ if (accountId) {
       color: #666;
       padding: 3rem;
     }
+
+    .modal-overlay {
+      display: none; /* Oculto por defecto */
+      position: fixed; /* Se queda fijo en la pantalla */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.75); /* Fondo oscuro semitransparente */
+      justify-content: center;
+      align-items: center;
+      z-index: 1000; /* Se asegura de que esté por encima de todo */
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: #fff;
+      padding: 8px;
+      border-radius: 8px;
+      width: 90%;
+      height: 90%;
+      max-width: 900px; /* Ancho máximo del visor */
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      background-color: #4b1818;
+      color: white;
+      border: 2px solid white;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      font-size: 24px;
+      line-height: 30px;
+      text-align: center;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
+    #pdf-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
-    <script>
+  <script>
     import { actions } from "astro:actions";
 
-    // Función para descargar el PDF
-    function descargarPdf(base64: string, fileName: string) {
+    const modalOverlay = document.getElementById("pdf-modal-overlay");
+    const modalCloseBtn = document.getElementById("pdf-modal-close");
+    const pdfIframe = document.getElementById(
+      "pdf-iframe",
+    ) as HTMLIFrameElement;
+
+    function mostrarPdfEnModal(base64: string, fileName: string) {
+      if (!pdfIframe || !modalOverlay) return;
+
       const byteCharacters = atob(base64);
       const byteArrays = [];
       for (let offset = 0; offset < byteCharacters.length; offset += 512) {
@@ -135,42 +215,75 @@ if (accountId) {
         byteArrays.push(byteArray);
       }
       const blob = new Blob(byteArrays, { type: "application/pdf" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const pdfUrl = URL.createObjectURL(blob);
+
+      // Cargamos la URL del PDF en el iframe y mostramos el modal
+      pdfIframe.src = pdfUrl;
+      modalOverlay.style.display = "flex";
     }
 
-    document.querySelectorAll('.js-generate-cert').forEach(button => {
-      button.addEventListener('click', async (event) => {
-        const targetButton = event.currentTarget as HTMLButtonElement;
-        
-        const eventoId = targetButton.dataset.eventoid;
+    function closeModal() {
+      if (modalOverlay && pdfIframe) {
+        modalOverlay.style.display = "none";
+        pdfIframe.src = "";
+      }
+    }
 
-        if (!eventoId) return;
-
-        targetButton.disabled = true;
-        targetButton.textContent = "Generando...";
-
-        try {
-          const result = await actions.GenerarCertificado({ eventoId });
-
-          if (result.data?.success && result.data?.data?.pdfBase64) {
-            descargarPdf(result.data.data.pdfBase64, result.data.data.fileName);
-          } else {
-            const errorMessage = result.error?.message || result.data?.error?.message || 'Ocurrió un error.';
-            alert(`Error al generar el certificado: ${errorMessage}`);
-          }
-        } catch (error) {
-            console.error(error);
-            alert('Error inesperado al contactar con el servidor.');
-        } finally {
-            targetButton.disabled = false;
-            targetButton.textContent = "Generar Certificado";
-        }
-      });
+    // Añadimos los listeners para cerrar el modal
+    modalCloseBtn?.addEventListener("click", closeModal);
+    modalOverlay?.addEventListener("click", (event) => {
+      if (event.target === modalOverlay) {
+        closeModal();
+      }
     });
+
+    document
+      .querySelectorAll(".js-generate-cert, .js-download-order")
+      .forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) return;
+
+        button.addEventListener("click", async (event) => {
+          const isCertificado = button.classList.contains("js-generate-cert");
+          const originalText = button.textContent || "";
+          let result;
+
+          button.disabled = true;
+          button.textContent = "Generando...";
+
+          try {
+            if (isCertificado) {
+              const eventoId = button.dataset.eventoid;
+              if (!eventoId) throw new Error("ID de evento no encontrado.");
+
+              result = await actions.GenerarCertificado({ eventoId });
+            } else {
+              const inscripcionId = button.dataset.inscripcionid;
+              if (!inscripcionId)
+                throw new Error("ID de inscripción no encontrado.");
+
+              result = await actions.GenerarOrdenDePago({ inscripcionId });
+            }
+
+            if (result.data?.success && result.data?.data?.pdfBase64) {
+              mostrarPdfEnModal(
+                result.data.data.pdfBase64,
+                result.data.data.fileName,
+              );
+            } else {
+              alert(`Error: ${result.error?.message || "desconocido"}`);
+            }
+          } catch (error) {
+            console.error(error);
+            alert(
+              error instanceof Error
+                ? error.message
+                : "Error inesperado al contactar con el servidor.",
+            );
+          } finally {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+        });
+      });
   </script>
 </Layout>

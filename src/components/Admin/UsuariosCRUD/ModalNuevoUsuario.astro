@@ -1,12 +1,13 @@
 ---
 import "../../../styles/Admin/ModalModificarEvento.css";
+import { actions } from "astro:actions";
 
-interface Props {
-    categorias?: any[];
-    organizadores?: any[];
-}
-
-const { organizadores = [] } = Astro.props;
+// Obtener carreras para el select
+const { data: carrerasData } = await Astro.callAction(
+    actions.getAllCarreras,
+    {},
+);
+const carreras = carrerasData?.carreras || [];
 ---
 
 <div id="modalNuevoUsuario" class="modal">
@@ -16,20 +17,22 @@ const { organizadores = [] } = Astro.props;
             <form
                 class="formulario-modificar-registro"
                 method="POST"
-                id="formulario-nuevo-evento"
+                id="formulario-nuevo-usuario"
                 enctype="multipart/form-data"
             >
                 <div class="contenedor-superior">
                     <p class="texto-centrado texto-roja">Información General</p>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Cédula</p>
                         <div class="contenedor-input">
                             <input
                                 type="text"
                                 class="input-dato"
-                                name="usaurio-cedula"
+                                name="ced_usu"
                                 required
+                                maxlength="10"
+                                pattern="[0-9]{10}"
+                                title="Ingrese una cédula válida de 10 dígitos"
                             />
                         </div>
                     </div>
@@ -41,7 +44,7 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="usuario-nombre1"
+                                    name="nom_usu1"
                                     required
                                 />
                             </div>
@@ -53,8 +56,7 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="usuario-nombre2"
-                                    required
+                                    name="nom_usu2"
                                 />
                             </div>
                         </div>
@@ -67,7 +69,7 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="usuario-apellido1"
+                                    name="ape_usu1"
                                     required
                                 />
                             </div>
@@ -79,20 +81,18 @@ const { organizadores = [] } = Astro.props;
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="usuario-apellido2"
-                                    required
+                                    name="ape_usu2"
                                 />
                             </div>
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Fecha de Nacimiento</p>
                         <div class="contenedor-input">
                             <input
                                 type="date"
                                 class="input-dato"
-                                name="usuario-fecha-nacimiento"
+                                name="fec_nac_usu"
                                 required
                             />
                         </div>
@@ -102,39 +102,43 @@ const { organizadores = [] } = Astro.props;
                         <p class="texto-dato">Número de Teléfono</p>
                         <div class="contenedor-input">
                             <input
-                                type="number"
+                                type="tel"
                                 class="input-dato"
-                                name="numero-usuario"
-                                required
+                                name="num_tel_usu"
+                                pattern="[0-9]{10}"
+                                title="Ingrese un número de teléfono válido"
                             />
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Carrera</p>
                         <div class="contenedor-input">
-                            <select>
-                                <option value="software">Software</option>
-                                <option value="ti">Tecnologías de la Información</option>
-                                <option value="industrial">Industrial</option>
+                            <select class="input-dato" name="id_car_per">
+                                <option value="">Seleccionar carrera</option>
+                                {
+                                    carreras.map((carrera: any) => (
+                                        <option value={carrera.id_car}>
+                                            {carrera.nom_car}
+                                        </option>
+                                    ))
+                                }
                             </select>
                         </div>
                     </div>
 
                     <div class="contenedor-boton-modificar">
                         <button
-                        type="button"
-                        class="boton-modificar"
-                        onclick="cerrarModalNuevoUsuario()"
+                            type="button"
+                            class="boton-modificar"
+                            onclick="cerrarModalNuevoUsuario()"
                         >
-                        Cancelar
+                            Cancelar
                         </button>
                         <button type="submit" class="boton-modificar">
-                        Crear Usuario
+                            Crear Usuario
                         </button>
                     </div>
                 </div>
-
             </form>
         </div>
     </div>
@@ -151,31 +155,18 @@ const { organizadores = [] } = Astro.props;
         }
     }
 
-    async function testearConexionAcciones() {
-        try {
-            console.log("🧪 Probando conexión con acciones...");
-            const resultado = await actions.getAsignacionesPlantilla({});
-            console.log("🧪 Resultado de prueba:", resultado);
-            return resultado;
-        } catch (error) {
-            console.error("🧪 Error en prueba:", error);
-            return null;
-        }
-    }
-
     function abrirModalNuevoUsuario(): void {
-        console.log("🎯 Abriendo modal nuevo organizador...");
+        console.log("🎯 Abriendo modal nuevo usuario...");
         const modal = document.getElementById("modalNuevoUsuario");
         if (modal) {
             modal.style.display = "block";
-            testearConexionAcciones();
         }
     }
 
     function cerrarModalNuevoUsuario(): void {
         const modal = document.getElementById("modalNuevoUsuario");
         const form = document.getElementById(
-            "formulario-nuevo-evento",
+            "formulario-nuevo-usuario",
         ) as HTMLFormElement;
 
         if (modal && form) {
@@ -186,7 +177,7 @@ const { organizadores = [] } = Astro.props;
 
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById(
-            "formulario-nuevo-evento",
+            "formulario-nuevo-usuario",
         ) as HTMLFormElement;
 
         // Manejar envío del formulario
@@ -197,54 +188,13 @@ const { organizadores = [] } = Astro.props;
                 const formData = new FormData(form);
 
                 try {
-                    const { data, error } = await actions.crearEvento(formData);
+                    const { data, error } = await actions.setUser(formData);
 
                     if (data?.success) {
-                        // Obtener asignaciones seleccionadas
-                        const selectAsignaciones = document.getElementById(
-                            "asignaciones-evento",
-                        ) as HTMLSelectElement;
-                        const asignacionesSeleccionadas = Array.from(
-                            selectAsignaciones.selectedOptions,
-                        )
-                            .map((option) => option.value)
-                            .filter((value) => value !== "");
-
-                        // Si hay asignaciones seleccionadas, duplicarlas al evento
-                        if (
-                            asignacionesSeleccionadas.length > 0 &&
-                            data.data?.id
-                        ) {
-                            await Promise.all(
-                                asignacionesSeleccionadas.map(
-                                    async (idAsignacion) => {
-                                        try {
-                                            await actions.duplicarAsignacionAEvento(
-                                                {
-                                                    id_asignacion_plantilla:
-                                                        idAsignacion,
-                                                    id_evento_destino:
-                                                        data.data.id,
-                                                },
-                                            );
-                                        } catch (error) {
-                                            console.error(
-                                                "Error al duplicar asignación:",
-                                                error,
-                                            );
-                                        }
-                                    },
-                                ),
-                            );
-                        }
-
                         await Swal.fire({
                             icon: "success",
                             title: "Éxito",
-                            text:
-                                asignacionesSeleccionadas.length > 0
-                                    ? `Evento creado correctamente con ${asignacionesSeleccionadas.length} asignación(es).`
-                                    : "Evento creado correctamente sin restricciones de inscripción.",
+                            text: "Usuario creado correctamente",
                             confirmButtonColor: "#059669",
                         }).then(() => {
                             window.location.reload();
@@ -254,9 +204,9 @@ const { organizadores = [] } = Astro.props;
                             icon: "error",
                             title: "Error",
                             text:
-                                data?.message ||
+                                (data as any)?.error ||
                                 error?.message ||
-                                "No se pudo crear el evento.",
+                                "No se pudo crear el usuario.",
                             confirmButtonColor: "#dc2626",
                         });
                     }

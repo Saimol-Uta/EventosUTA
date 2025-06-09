@@ -4,128 +4,452 @@ import "../../../styles/Admin/ModalGestionarCuenta.css";
 
 <!-- Modal para gestionar cuentas de usuario -->
 <div id="modalGestionarCuenta" class="modal" style="display: none;">
-  <div class="modal-contenido" style="max-width: 700px; width: 90%;">
-    <span class="cerrar" onclick="cerrarModalGestionarCuenta()">&times;</span>
+    <div class="modal-contenido" style="max-width: 700px; width: 90%;">
+        <span class="cerrar" onclick="cerrarModalGestionarCuenta()"
+            >&times;</span
+        >
 
-    <div class="modal-header">
-      <h2>Gestionar Cuenta de Usuario</h2>
+        <div class="modal-header">
+            <h2>Gestionar Cuenta de Usuario</h2>
+        </div>
+
+        <form id="formGestionCuenta" class="form-asignacion">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Correo Electrónico:</label>
+                    <div class="contenedor-input">
+                        <input
+                            type="email"
+                            name="correo"
+                            id="correoCuenta"
+                            disabled
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rolCuenta">Rol:</label>
+                    <div class="contenedor-input">
+                        <select name="rol" id="rolCuenta">
+                            <option value="usuario">Usuario</option>
+                            <option value="estudiante">Estudiante</option>
+                            <option value="administrador">Administrador</option>
+                            <option value="master">Master</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cedulaDocumento">Copia de Cédula:</label>
+                    <div class="contenedor-input">
+                        <input
+                            type="file"
+                            name="cedula"
+                            id="cedulaDocumento"
+                            accept=".pdf,.jpg,.png"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="certificadoMatricula"
+                        >Certificado de Matrícula:</label
+                    >
+                    <div class="contenedor-input">
+                        <input
+                            type="file"
+                            name="certificado"
+                            id="certificadoMatricula"
+                            accept=".pdf,.jpg,.png"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cartaCompromiso">Carta de Compromiso:</label>
+                    <div class="contenedor-input">
+                        <input
+                            type="file"
+                            name="carta"
+                            id="cartaCompromiso"
+                            accept=".pdf,.jpg,.png"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="imagenPerfil">Imagen de Perfil:</label>
+                    <div class="contenedor-input">
+                        <input
+                            type="file"
+                            name="imagen"
+                            id="imagenPerfil"
+                            accept="image/*"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <div>
+                    <button type="button" class="btn-eliminar"
+                        >Eliminar Cuenta</button
+                    >
+                </div>
+
+                <div>
+                    <button type="submit" class="btn-principal"
+                        >Guardar Cambios</button
+                    >
+                    <button
+                        type="button"
+                        class="btn-secundario"
+                        onclick="cerrarModalGestionarCuenta()">Cancelar</button
+                    >
+                </div>
+            </div>
+        </form>
     </div>
-
-    <form id="formGestionCuenta" class="form-asignacion">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Correo Electrónico:</label>
-          <div class="contenedor-input">
-            <input type="email" name="correo" id="correoCuenta" disabled />
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="rolCuenta">Rol:</label>
-          <div class="contenedor-input">
-            <select name="rol" id="rolCuenta">
-              <option value="usuario">Usuario</option>
-              <option value="estudiante">Estudiante</option>
-              <option value="administrador">Administrador</option>
-              <option value="master">Master</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="cedulaDocumento">Copia de Cédula:</label>
-          <div class="contenedor-input">
-            <input type="file" name="cedula" id="cedulaDocumento" accept=".pdf,.jpg,.png" />
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="certificadoMatricula">Certificado de Matrícula:</label>
-          <div class="contenedor-input">
-            <input type="file" name="certificado" id="certificadoMatricula" accept=".pdf,.jpg,.png" />
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="cartaCompromiso">Carta de Compromiso:</label>
-          <div class="contenedor-input">
-            <input type="file" name="carta" id="cartaCompromiso" accept=".pdf,.jpg,.png" />
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="imagenPerfil">Imagen de Perfil:</label>
-          <div class="contenedor-input">
-            <input type="file" name="imagen" id="imagenPerfil" accept="image/*" />
-          </div>
-        </div>
-      </div>
-      
-      <div class="form-actions">
-        <div>
-          <button type="button" class="btn-eliminar">Eliminar Cuenta</button>
-          
-        </div>
-        
-        <div>
-          <button type="submit" class="btn-principal">Guardar Cambios</button>
-          <button type="button" class="btn-secundario" onclick="cerrarModalGestionarCuenta()">Cancelar</button>
-        </div>
-
-      </div>
-    </form>
-  </div>
 </div>
 
 <script>
-  declare global {
-    interface Window {
-      abrirModalGestionarCuenta: (correo: string, rol: string) => void;
-      cerrarModalGestionarCuenta: () => void;
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
+    declare global {
+        interface Window {
+            abrirModalGestionarCuenta: (
+                correo: string,
+                rol: string,
+                idCuenta?: string,
+                idUsuario?: string,
+            ) => void;
+            cerrarModalGestionarCuenta: () => void;
+        }
     }
-  }
+    let cuentaActual: any = null;
+    let usuarioIdActual: string | null = null;
 
-  function abrirModalGestionarCuenta(correo: string, rol: string): void {
-    const modal = document.getElementById("modalGestionarCuenta");
-    if (!modal) return;
+    function abrirModalGestionarCuenta(
+        correo: string,
+        rol: string,
+        idCuenta?: string,
+        idUsuario?: string,
+    ): void {
+        const modal = document.getElementById("modalGestionarCuenta");
+        if (!modal) return;
 
-    const correoInput = document.getElementById("correoCuenta") as HTMLInputElement;
-    const rolSelect = document.getElementById("rolCuenta") as HTMLSelectElement;
+        const correoInput = document.getElementById(
+            "correoCuenta",
+        ) as HTMLInputElement;
+        const rolSelect = document.getElementById(
+            "rolCuenta",
+        ) as HTMLSelectElement;
+        const btnEliminar = document.querySelector(
+            ".btn-eliminar",
+        ) as HTMLButtonElement;
+        const submitBtn = document.querySelector(
+            ".btn-principal",
+        ) as HTMLButtonElement;
 
-    if (correoInput && rolSelect) {
-      correoInput.value = correo;
-      rolSelect.value = rol;
+        if (correoInput && rolSelect) {
+            correoInput.value = correo;
+            rolSelect.value = rol;
+        }
+
+        // Configurar el modal basado en si es crear o editar
+        if (!idCuenta || idCuenta === "") {
+            // Modo crear nueva cuenta
+            if (correoInput) correoInput.disabled = false; // Permitir editar correo para nuevas cuentas
+            if (btnEliminar) btnEliminar.style.display = "none"; // Ocultar botón eliminar
+            if (submitBtn) submitBtn.textContent = "Crear Cuenta";
+
+            // Generar correo automático si está vacío
+            if (!correo) {
+                const cedulaInput = document.querySelector(
+                    'input[name="usuario_cedula"]',
+                ) as HTMLInputElement;
+                const cedula = cedulaInput?.value;
+                if (cedula && correoInput) {
+                    correoInput.value = `${cedula}@uta.edu.ec`;
+                }
+            }
+        } else {
+            // Modo editar cuenta existente
+            if (correoInput) correoInput.disabled = true; // No permitir cambiar correo en edición
+            if (btnEliminar) btnEliminar.style.display = "block"; // Mostrar botón eliminar
+            if (submitBtn) submitBtn.textContent = "Guardar Cambios";
+        } // Guardar información de la cuenta actual
+        cuentaActual = {
+            id: idCuenta,
+            correo: correo,
+            rol: rol,
+        };
+        usuarioIdActual = idUsuario || null;
+
+        modal.style.display = "block";
     }
 
-    modal.style.display = "block";
-  }
-
-  function cerrarModalGestionarCuenta() {
-    const modal = document.getElementById("modalGestionarCuenta");
-    if (modal) {
-      modal.style.display = "none";
-      (document.getElementById("formGestionCuenta") as HTMLFormElement)?.reset();
+    function cerrarModalGestionarCuenta() {
+        const modal = document.getElementById("modalGestionarCuenta");
+        if (modal) {
+            modal.style.display = "none";
+            (
+                document.getElementById("formGestionCuenta") as HTMLFormElement
+            )?.reset();
+            cuentaActual = null;
+            usuarioIdActual = null;
+        }
     }
-  }
 
-  window.abrirModalGestionarCuenta = abrirModalGestionarCuenta;
-  window.cerrarModalGestionarCuenta = cerrarModalGestionarCuenta;
+    // Manejar envío del formulario
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById(
+            "formGestionCuenta",
+        ) as HTMLFormElement;
+        const btnEliminar = document.querySelector(
+            ".btn-eliminar",
+        ) as HTMLButtonElement;
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
 
-  window.addEventListener("click", (event) => {
-    const modal = document.getElementById("modalGestionarCuenta");
-    if (event.target === modal) {
-      cerrarModalGestionarCuenta();
-    }
-  });
+                const formData = new FormData(form);
+
+                try {
+                    // Distinguir entre crear nueva cuenta y modificar cuenta existente
+                    if (!cuentaActual?.id || cuentaActual.id === "") {
+                        // Crear nueva cuenta
+                        await crearNuevaCuentaAction(formData);
+                    } else {
+                        // Modificar cuenta existente
+                        await modificarCuentaExistente(formData);
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            });
+        }
+
+        async function crearNuevaCuentaAction(formData: FormData) {
+            const correo = formData.get("correo") as string;
+            const rol = formData.get("rol") as string;
+
+            if (!correo || !rol) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Por favor complete todos los campos requeridos",
+                    confirmButtonColor: "#dc2626",
+                });
+                return;
+            } // Para crear nueva cuenta, necesitamos el ID del usuario
+            let idUsuario = usuarioIdActual;
+
+            // Si no tenemos el ID del usuario, lo obtenemos por cédula
+            if (!idUsuario) {
+                const cedulaInput = document.querySelector(
+                    'input[name="usuario_cedula"]',
+                ) as HTMLInputElement;
+                const cedula = cedulaInput?.value;
+
+                if (!cedula) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pudo obtener la información del usuario",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
+                // Obtener el usuario por cédula para obtener su ID
+                try {
+                    const { data: userData } = await actions.getUserByCedula({
+                        ced_usu: cedula,
+                    });
+
+                    if (!userData?.encontrado || !userData.usuario) {
+                        throw new Error(
+                            "No se pudo obtener la información del usuario",
+                        );
+                    }
+
+                    idUsuario = userData.usuario.id_usu;
+                } catch (error) {
+                    console.error("Error obteniendo usuario:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pudo obtener la información del usuario",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+            }
+
+            // Crear la cuenta con el ID del usuario obtenido
+            try {
+                const createFormData = new FormData();
+                createFormData.append("id_usu_per", idUsuario);
+                createFormData.append("cor_cue", correo);
+                createFormData.append("rol_cue", rol);
+                createFormData.append("cont_cuenta", "TempPass123!"); // Contraseña temporal
+
+                const { data, error } =
+                    await actions.crearCuenta(createFormData);
+
+                if (data?.success) {
+                    await Swal.fire({
+                        icon: "success",
+                        title: "Éxito",
+                        text: "Cuenta creada correctamente",
+                        confirmButtonColor: "#059669",
+                    });
+                    cerrarModalGestionarCuenta();
+                    window.location.reload();
+                } else {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: data?.message || "No se pudo crear la cuenta",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            } catch (error) {
+                console.error("Error creando cuenta:", error);
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Error al crear la cuenta",
+                    confirmButtonColor: "#dc2626",
+                });
+            }
+        }
+
+        async function modificarCuentaExistente(formData: FormData) {
+            if (!cuentaActual?.id) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se puede modificar la cuenta sin un ID válido",
+                    confirmButtonColor: "#dc2626",
+                });
+                return;
+            }
+
+            const updateFormData = new FormData();
+            updateFormData.append("id_cue", cuentaActual.id);
+            updateFormData.append("rol_cue", formData.get("rol") as string);
+
+            const { data, error } =
+                await actions.modificarCuenta(updateFormData);
+
+            if (data?.success) {
+                await Swal.fire({
+                    icon: "success",
+                    title: "Éxito",
+                    text: "Cuenta actualizada correctamente",
+                    confirmButtonColor: "#059669",
+                });
+                cerrarModalGestionarCuenta();
+                window.location.reload();
+            } else {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: data?.message || "No se pudo actualizar la cuenta",
+                    confirmButtonColor: "#dc2626",
+                });
+            }
+        }
+
+        // Manejar eliminación de cuenta
+        if (btnEliminar) {
+            btnEliminar.addEventListener("click", async () => {
+                if (!cuentaActual?.id) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se puede eliminar la cuenta sin un ID válido",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
+                const resultado = await Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "Esta acción eliminará permanentemente la cuenta",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#dc2626",
+                    cancelButtonColor: "#6b7280",
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar",
+                });
+
+                if (resultado.isConfirmed) {
+                    try {
+                        const { data, error } = await actions.eliminarCuenta({
+                            id_cue: cuentaActual.id,
+                        });
+
+                        if (data?.success) {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminada",
+                                text: "La cuenta ha sido eliminada correctamente",
+                                confirmButtonColor: "#059669",
+                            });
+                            cerrarModalGestionarCuenta();
+                            window.location.reload();
+                        } else {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text:
+                                    data?.message ||
+                                    "No se pudo eliminar la cuenta",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error:", error);
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "Error al procesar la solicitud",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                }
+            });
+        }
+    });
+
+    window.abrirModalGestionarCuenta = abrirModalGestionarCuenta;
+    window.cerrarModalGestionarCuenta = cerrarModalGestionarCuenta;
+
+    window.addEventListener("click", (event) => {
+        const modal = document.getElementById("modalGestionarCuenta");
+        if (event.target === modal) {
+            cerrarModalGestionarCuenta();
+        }
+    });
 </script>
-
