@@ -30,11 +30,11 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                 </div>
             </div>
 
-            <div class="seccion-detalles">
+            <!--<div class="seccion-detalles">
                 <h3>Eventos que Organiza</h3>
                 <div class="info-grid" id="organizador-eventos-lista">
-                    <!-- Aquí se listarán los eventos -->
-                </div>
+                     Aquí se listarán los eventos 
+                </div> -->
             </div>
         </div>
     </div>
@@ -120,9 +120,12 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         }
 
         // Eventos que organiza
-        const eventosLista = modal.querySelector("#organizador-eventos-lista");
-        if (eventosLista) {
-            eventosLista.innerHTML = "";
+        //const eventosLista = modal.querySelector("#organizador-eventos-lista");
+        //if (eventosLista) {
+           //eventosLista.innerHTML = "";
+            // Información de eventos oculta por comentario
+            // Si quieres mostrar los eventos, descomenta el siguiente bloque:
+            /*
             let eventos: EventoOrganizador[] = [];
             if (Array.isArray(organizador.eventos)) {
                 eventos = organizador.eventos;
@@ -149,7 +152,10 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             } else {
                 eventosLista.innerHTML = "<p>No tiene eventos asignados.</p>";
             }
-        }
+            */
+            // Solo muestra el mensaje de información
+         //   eventosLista.innerHTML = "<p>Información de eventos asignados oculta por comentario.</p>";
+        //}
     }
 
     // Cerrar modal al hacer clic fuera de él
