@@ -18,21 +18,12 @@ if (asignacionesError) {
 const asignaciones = asignacionesData?.asignaciones || [];
 const carreras = carrerasData?.carreras || [];
 
-const links = [
-    { label: "Eventos", href: "/Admin/EventosCRUD" },
-    { label: "Usuarios", href: "/perfil" },
-    { label: "Organizadores", href: "/historial" },
-    { label: "Inscripciones", href: "/historial" },
-    { label: "Categorías", href: "/historial" },
-    { label: "Carreras", href: "/historial" },
-    { label: "Asignaciones", href: "/Admin/Asignaciones" },
-];
 ---
 
 <Layout>
     <body>
         <Header />
-        <MenuAdmin links={links} />
+        <MenuAdmin />
 
         <!-- Modal para Nueva Asignación -->
         <div id="modalNuevaAsignacion" class="modal" style="display: none;">

@@ -17,20 +17,12 @@ if (carrerasError) {
 
 const carreras = carrerasData?.carreras || [];
 
-const links = [
-    { label: "Eventos", href: "/Admin/EventosCRUD" },
-    { label: "Usuarios", href: "/perfil" },
-    { label: "Organizadores", href: "/historial" },
-    { label: "Categorías", href: "/historial" },
-    { label: "Carreras", href: "/Admin/CarrerasCRUD" },
-    { label: "Asignaciones", href: "/Admin/Asignaciones" },
-];
 ---
 
 <Layout>
     <body class="bg-gray-50 min-h-screen">
         <Header />
-        <MenuAdmin links={links} />
+        <MenuAdmin />
 
         <!-- Modal para Nueva Carrera -->
         <div

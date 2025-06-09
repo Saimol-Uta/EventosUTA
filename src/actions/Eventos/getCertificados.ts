@@ -4,44 +4,33 @@ import { z } from 'astro:schema';
 
 export const getCertificadosPorUsuario = defineAction({
   accept: 'json',
-
   input: z.object({
     idUsuario: z.string().uuid(),
   }),
-
   handler: async ({ idUsuario }) => {
     try {
-    
-      const certificados = await prisma.inscripciones.findMany({
+      const inscripcionesConCertificado = await prisma.inscripciones.findMany({
         where: {
           id_usu_ins: idUsuario,
-          enl_cer_par: {
-            not: null, 
-          },
+          enl_cer_par: { not: null },
+          est_par: 'APROBADA',
         },
-        select: {
-          enl_cer_par: true,
+        include: {
+          eventos: { select: { nom_eve: true } },
         },
+        orderBy: { fec_cer_par: 'desc' }
       });
 
-   
-      const enlaces = Array.from(
-        new Set(
-          certificados
-            .map(c => c.enl_cer_par?.trim())
-            .filter(Boolean) 
-        )
-      );
-
+      // Devolvemos los objetos completos
       return {
         success: true,
-        enlaces,
+        certificados: inscripcionesConCertificado,
       };
     } catch (error) {
       console.error('Error al obtener certificados:', error);
       return {
         success: false,
-        error: 'No se pudieron obtener los certificados del usuario.',
+        error: { message: 'No se pudieron obtener los certificados del usuario.' },
       };
     }
   },

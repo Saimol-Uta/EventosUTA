@@ -31,16 +31,50 @@ const { isAdmin, isMaster } = Astro.locals;
             margin-bottom: 10px;
         }
     }
+
+
+        .btn-nav-gradient {
+        font-family: sans-serif;
+        font-size: 14px;
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+        padding: 8px 16px;
+        border-radius: 6px;
+        background: linear-gradient(to right, #7e1d1d, #b91c1c);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+        display: inline-block;
+        margin-left: 20px; /* reemplaza margin-left: auto */
+        }
+
+        .btn-nav-gradient:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.96;
+            transform: scale(1.02);
+        }
+        }
+
 </style>
 
 <nav>
     <a class="NavGlobal" href="/">Inicio</a>
-    <a class="NavGlobal" href="/cursosCompleto">Cursos</a>
+    <a class="NavGlobal" href="/cursosCompleto">Eventos</a>
     {
         isAdmin && (
             <a
                 href="/homeAdmin"
-                class="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 animate-pulse"
+                class="btn-nav-gradient"
             >
                 Panel Admin
             </a>
@@ -50,7 +84,7 @@ const { isAdmin, isMaster } = Astro.locals;
         isMaster && (
             <a
                 href="/homeAdmin"
-                class="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 animate-pulse"
+                class="btn-nav-gradient"
             >
                 Panel Master
             </a>
