@@ -17,6 +17,7 @@ import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 
 import { getOrganizadoresCR } from './Admin/getOrganizadores.action';
 import { eliminarOrganizador } from './Admin/eliminarOrganizador.action';
+import { setOrganizadores } from './Admin/setOrganizadores.action';
 
 import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCarreraById } from './Carreras';
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
@@ -47,6 +48,7 @@ export const server = {
 
     getOrganizadoresCR,
     eliminarOrganizador,
+    setOrganizadores,
 
     getOrganizadorByEvento,
     getOrganizadores,
