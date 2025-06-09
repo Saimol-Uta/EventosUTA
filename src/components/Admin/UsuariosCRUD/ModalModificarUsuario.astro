@@ -139,7 +139,6 @@ const carreras = carrerasData?.carreras || [];
 
                 <div class="contenedor-inferior">
                     <p class="texto-centrado texto-roja">Cuentas Asociadas</p>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Cuentas Actuales:</p>
                         <div id="cuentas-actuales" class="asignaciones-display">
@@ -151,10 +150,17 @@ const carreras = carrerasData?.carreras || [];
                         <div class="contenedor-botones-asignaciones">
                             <button
                                 type="button"
-                                class="boton-asignacion btn-gestionar"
-                                onclick="abrirModalGestionarCuenta('correo@ejemplo.com', 'estudiante')"
+                                id="btn-crear-cuenta"
+                                class="boton-asignacion btn-agregar"
                             >
-                                🔧 Gestionar Cuenta
+                                ➕ Crear Nueva Cuenta
+                            </button>
+                            <button
+                                type="button"
+                                id="btn-gestionar-cuentas"
+                                class="boton-asignacion btn-gestionar"
+                            >
+                                🔧 Gestionar Cuentas
                             </button>
                         </div>
                     </div>
@@ -194,11 +200,25 @@ const carreras = carrerasData?.carreras || [];
                 };
                 cantidadCuentas: number;
             }
-
             declare global {
                 interface Window {
                     abrirModalModificarUsuario: (usuarioId: string) => void;
                     cerrarModalModificarUsuario: () => void;
+                    editarCuenta: (
+                        cuentaId: string,
+                        correo: string,
+                        tipo: string,
+                    ) => void;
+                    eliminarCuenta: (
+                        cuentaId: string,
+                        cedulaUsuario: string,
+                    ) => Promise<void>;
+                    crearNuevaCuenta: () => void;
+                    abrirModalGestionarCuenta: (
+                        correo: string,
+                        rol: string,
+                        idCuenta?: string,
+                    ) => void;
                 }
             }
 
@@ -269,6 +289,9 @@ const carreras = carrerasData?.carreras || [];
                 if (carrera) carrera.value = usuario.id_car_per || "";
                 if (cedulaHidden) cedulaHidden.value = usuario.ced_usu || "";
 
+                // Cargar las cuentas del usuario
+                await cargarCuentasActuales(usuario.ced_usu || "");
+
                 modal.style.display = "block";
             }
             function cerrarModalModificarUsuario(): void {
@@ -280,6 +303,141 @@ const carreras = carrerasData?.carreras || [];
                 if (modal && form) {
                     modal.style.display = "none";
                     form.reset();
+                }
+            }
+
+            async function cargarCuentasActuales(cedulaUsuario: string) {
+                try {
+                    const { data: cuentasData } =
+                        await actions.getCuentaById(cedulaUsuario);
+
+                    const contenedorCuentas =
+                        document.getElementById("cuentas-actuales");
+                    if (!contenedorCuentas) return;
+
+                    if (cuentasData && cuentasData.length > 0) {
+                        contenedorCuentas.innerHTML = cuentasData
+                            .map(
+                                (cuenta: any) => `
+                            <div class="asignacion-item" data-cuenta-id="${cuenta.id_cue}">
+                                <span class="asignacion-nombre">${cuenta.cor_cue || cuenta.correo_cue}</span>
+                                <span class="asignacion-detalle">${cuenta.tip_cue}</span>
+                                <div class="cuenta-acciones">
+                                    <button type="button" class="btn-editar-cuenta" onclick="editarCuenta('${cuenta.id_cue}', '${cuenta.cor_cue || cuenta.correo_cue}', '${cuenta.tip_cue}')">
+                                        ✏️ Editar
+                                    </button>
+                                    <button type="button" class="btn-eliminar-cuenta" onclick="eliminarCuenta('${cuenta.id_cue}', '${cedulaUsuario}')">
+                                        ❌ Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        `,
+                            )
+                            .join("");
+                    } else {
+                        contenedorCuentas.innerHTML =
+                            '<p class="no-cuentas">Este usuario no tiene cuentas asociadas.</p>';
+                    }
+                } catch (error) {
+                    console.error("Error al cargar cuentas actuales:", error);
+                    const contenedorCuentas =
+                        document.getElementById("cuentas-actuales");
+                    if (contenedorCuentas) {
+                        contenedorCuentas.innerHTML =
+                            '<p class="error-cuentas">Error al cargar las cuentas del usuario.</p>';
+                    }
+                }
+            }
+
+            async function eliminarCuenta(
+                cuentaId: string,
+                cedulaUsuario: string,
+            ) {
+                const resultado = await Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "Esta acción eliminará la cuenta del usuario.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#dc2626",
+                    cancelButtonColor: "#6b7280",
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar",
+                });
+
+                if (resultado.isConfirmed) {
+                    try {
+                        const { data, error } = await actions.eliminarCuenta({
+                            id_cue: cuentaId,
+                        });
+
+                        if (data?.success) {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminado",
+                                text: "Cuenta eliminada correctamente.",
+                                confirmButtonColor: "#059669",
+                            });
+
+                            // Recargar cuentas actuales
+                            await cargarCuentasActuales(cedulaUsuario);
+                        } else {
+                            throw new Error(
+                                error?.message ||
+                                    "No se pudo eliminar la cuenta.",
+                            );
+                        }
+                    } catch (error) {
+                        console.error("Error al eliminar cuenta:", error);
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                error instanceof Error
+                                    ? error.message
+                                    : "No se pudo eliminar la cuenta.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                }
+            }
+
+            function editarCuenta(
+                cuentaId: string,
+                correo: string,
+                tipo: string,
+            ) {
+                // Usar la función del modal de gestionar cuenta existente
+                if (window.abrirModalGestionarCuenta) {
+                    window.abrirModalGestionarCuenta(correo, tipo, cuentaId);
+                } else {
+                    console.error(
+                        "La función abrirModalGestionarCuenta no está disponible",
+                    );
+                }
+            }
+
+            function crearNuevaCuenta() {
+                // Obtener la cédula del usuario actual
+                const cedulaInput = document.querySelector(
+                    'input[name="usuario_cedula"]',
+                ) as HTMLInputElement;
+                const cedula = cedulaInput?.value;
+
+                if (!cedula) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pudo obtener la cédula del usuario.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                } // Usar la función del modal de gestionar cuenta para crear nueva cuenta
+                if (window.abrirModalGestionarCuenta) {
+                    window.abrirModalGestionarCuenta("", "estudiante", "");
+                } else {
+                    console.error(
+                        "La función abrirModalGestionarCuenta no está disponible",
+                    );
                 }
             }
 
@@ -320,10 +478,45 @@ const carreras = carrerasData?.carreras || [];
                                 "usuario-fecha-nacimiento",
                             ) as string,
                         };
-
                         try {
+                            const formDataForAction = new FormData();
+                            formDataForAction.append(
+                                "cedula",
+                                usuarioData.cedula,
+                            );
+                            formDataForAction.append(
+                                "primerNombre",
+                                usuarioData.primerNombre,
+                            );
+                            formDataForAction.append(
+                                "segundoNombre",
+                                usuarioData.segundoNombre,
+                            );
+                            formDataForAction.append(
+                                "primerApellido",
+                                usuarioData.primerApellido,
+                            );
+                            formDataForAction.append(
+                                "segundoApellido",
+                                usuarioData.segundoApellido,
+                            );
+                            formDataForAction.append(
+                                "telefono",
+                                usuarioData.telefono,
+                            );
+                            formDataForAction.append(
+                                "carreraId",
+                                usuarioData.carreraId,
+                            );
+                            formDataForAction.append(
+                                "fechaNacimiento",
+                                usuarioData.fechaNacimiento,
+                            );
+
                             const { data, error } =
-                                await actions.modificarUsuario(usuarioData);
+                                await actions.modificarUsuario(
+                                    formDataForAction,
+                                );
 
                             if (data?.success) {
                                 await Swal.fire({
@@ -353,6 +546,31 @@ const carreras = carrerasData?.carreras || [];
                                 confirmButtonColor: "#dc2626",
                             });
                         }
+                    });
+                }
+
+                // Event listeners para botones de cuentas
+                const btnCrearCuenta =
+                    document.getElementById("btn-crear-cuenta");
+                const btnGestionarCuentas = document.getElementById(
+                    "btn-gestionar-cuentas",
+                );
+
+                if (btnCrearCuenta) {
+                    btnCrearCuenta.addEventListener("click", () => {
+                        crearNuevaCuenta();
+                    });
+                }
+
+                if (btnGestionarCuentas) {
+                    btnGestionarCuentas.addEventListener("click", () => {
+                        // Abrir modal general de gestión de cuentas (funcionalidad futura)
+                        Swal.fire({
+                            icon: "info",
+                            title: "Información",
+                            text: "Usa los botones individuales de cada cuenta para gestionarlas.",
+                            confirmButtonColor: "#059669",
+                        });
                     });
                 }
 
