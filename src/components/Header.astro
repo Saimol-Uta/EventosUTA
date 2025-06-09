@@ -4,8 +4,10 @@ import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
 
 const session = await getSession(Astro.request);
+console.log("Session:", session);
+
 const { data: cuenta } = await Astro.callAction(
-    actions.getCuentaById,
+    actions.getCuentaByIdSingle,
     session?.user?.id || "",
 );
 

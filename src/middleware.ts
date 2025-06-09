@@ -62,10 +62,10 @@ export const onRequest = defineMiddleware(async ({ url, request, locals, redirec
 
     locals.isLoggedIn = isLoggedIn;
     locals.user = user ?? null;
-    locals.isAdmin = user?.rol === 'ADMINISTRADOR';
-    locals.isStudent = user?.rol === 'ESTUDIANTE';
-    locals.isUser = user?.rol === 'USUARIO';
-    locals.isMaster = user?.rol === 'MASTER';
+    locals.isAdmin = user?.rol === 'ADMINISTRADOR' || user?.rol === 'administrador';
+    locals.isStudent = user?.rol === 'ESTUDIANTE' || user?.rol === 'estudiante';
+    locals.isUser = user?.rol === 'USUARIO' || user?.rol === 'usuario';
+    locals.isMaster = user?.rol === 'MASTER' || user?.rol === 'master';
 
     // Si la ruta es pública, permitir acceso
     if (isRouteAllowed(url.pathname, publicRoutes)) {
