@@ -16,6 +16,13 @@ if (error) {
 
 const categorias = data?.categorias || [];
 
+// Obtener organizadores (ajusta la acción según tu backend)
+const { data: dataOrganizadores, error: errorOrganizadores } = await Astro.callAction(actions.getOrganizadores, {});
+if (errorOrganizadores) {
+    console.error("Error al obtener organizadores:", errorOrganizadores);
+}
+const organizadores = dataOrganizadores?.organizadores || [];
+
 ---
 
 <Layout>
