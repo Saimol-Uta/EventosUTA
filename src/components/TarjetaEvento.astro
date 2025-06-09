@@ -7,6 +7,8 @@ const {
   estado,
   certificadoDisponible,
   eventoId,
+  inscripcionId,
+  estadoPago,
 } = Astro.props;
 ---
 
@@ -102,6 +104,39 @@ const {
     font-style: italic;
   }
 
+  .card-footer {
+    display: flex;
+    gap: 10px; /* Espacio entre botones */
+    margin-top: auto; /* Empuja el footer hacia abajo */
+  }
+
+  .btn-pago {
+    flex-grow: 1; /* Para que ocupe el espacio disponible */
+    text-align: center;
+    background-color: #ffc107; /* Amarillo para 'pendiente' */
+    color: #333;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition:
+      background-color 0.3s ease,
+      transform 0.2s ease;
+  }
+  .btn-pago:hover {
+    background-color: #e0a800;
+    transform: scale(1.03);
+  }
+  /* Estilo para botones deshabilitados (mientras se genera el PDF) */
+  .btn-certificado:disabled,
+  .btn-pago:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+
   @media (max-width: 500px) {
     .card-info {
       flex-direction: column;
@@ -111,24 +146,40 @@ const {
 </style>
 
 <div class="evento-card">
-  <div class="card-header">
-    <h3>{nombre}</h3>
-    <span class={`badge ${estado === "completo" ? "completo" : "incompleto"}`}>
-      {estado === "completo" ? "Completo" : "Incompleto"}
-    </span>
+  <div>
+    <div class="card-header">
+      <h3>{nombre}</h3>
+      <span class={`badge ${estado === "completo" ? "completo" : "incompleto"}`}>
+        {estado === "completo" ? "Completo" : "Incompleto"}
+      </span>
+    </div>
+    <p class="fecha">{fecha}</p>
+    <div class="card-info">
+      <div><strong>Calificación:</strong> {calificacion}</div>
+      <div><strong>Asistencia:</strong> {asistencia}%</div>
+    </div>
   </div>
-  <p class="fecha">{fecha}</p>
-  <div class="card-info">
-    <div><strong>Calificación:</strong> {calificacion}</div>
-    <div><strong>Asistencia:</strong> {asistencia}%</div>
+
+  <div class="card-footer">
+    {
+      certificadoDisponible ? (
+        <button class="btn-certificado js-generate-cert" data-eventoid={eventoId}>
+          Generar Certificado
+        </button>
+      ) : (
+        estadoPago !== 'DPendiente' && <p class="texto-inactivo">🚫 Certificado no disponible</p>
+      )
+    }
+
+    {
+      estadoPago === 'DPendiente' && (
+        <button
+          class="btn-pago js-download-order"
+          data-inscripcionid={inscripcionId}
+        >
+          Ver Orden de Pago
+        </button>
+      )
+    }
   </div>
-  {
-    certificadoDisponible ? (
-      <button class="btn-certificado js-generate-cert" data-eventoid={eventoId}>
-        Generar Certificado
-      </button>
-    ) : (
-      <p class="texto-inactivo">🚫 Certificado no disponible</p>
-    )
-  }
 </div>
