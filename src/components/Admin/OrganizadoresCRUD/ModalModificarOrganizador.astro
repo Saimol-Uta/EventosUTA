@@ -89,21 +89,18 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             />
                         </div>
                     </div>
-                    <div class="contenedor-botones-modal">
+                    <div class="contenedor-boton-modificar">
                         <button
-                            type="button"
-                            class="boton-cancelar"
-                            onclick="cerrarModalModificarOrganizador()"
+                        type="button"
+                        class="boton-modificar"
+                        onclick="cerrarModalModificarOrganizador()"
                         >
-                            Cancelar
+                        Cancelar
                         </button>
-                        <button
-                            type="submit"
-                            class="boton-aceptar"
-                        >
-                            Guardar Cambios
+                        <button type="submit" class="boton-modificar">
+                        Modificar Organizador
                         </button>
-                    </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -151,7 +148,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         const form = document.getElementById("formulario-modificar-organizador");
         if (!modal || !form) return;
 
-        // Poblar los campos (asegura el tipo HTMLInputElement)
+        
         (form.querySelector("#modificar-ced_org") as HTMLInputElement).value = organizador.ced_org || "";
         (form.querySelector("#modificar-nom_org1") as HTMLInputElement).value = organizador.nom_org1 || "";
         (form.querySelector("#modificar-nom_org2") as HTMLInputElement).value = organizador.nom_org2 || "";
@@ -167,7 +164,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         const form = document.getElementById("formulario-modificar-organizador") as HTMLFormElement | null;
         if (modal && form) {
             modal.style.display = "none";
-            form.reset(); // <-- .reset() solo existe en HTMLFormElement
+            form.reset(); 
         }
     }
 
@@ -176,7 +173,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
-                const formData = new FormData(form); // <-- FormData espera un HTMLFormElement
+                const formData = new FormData(form); 
 
                 const data = {
                     ced_org: formData.get("ced_org")?.toString() ?? "",
