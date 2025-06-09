@@ -10,7 +10,7 @@ import { getDatosInscripcion } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
 import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
 import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
-import { GenerarCertificado } from './Certificados/certificado.action';
+import { GenerarCertificado, generarCertificadoPublico } from './Certificados/certificado.action';
 import { verificarCertificado } from './Certificados/verificacion.action';
 import { GenerarOrdenDePago } from './OrdenPago/generarOrden.action';
 
@@ -40,6 +40,7 @@ export const server = {
     setDatosInscripcion,
     uploadComprobante,
     GenerarCertificado,
+    generarCertificadoPublico,
     verificarCertificado,
     GenerarOrdenDePago,
 
