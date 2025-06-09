@@ -194,86 +194,96 @@ if (accountId) {
   <script>
     import { actions } from "astro:actions";
 
-    const modalOverlay = document.getElementById('pdf-modal-overlay');
-  const modalCloseBtn = document.getElementById('pdf-modal-close');
-  const pdfIframe = document.getElementById('pdf-iframe') as HTMLIFrameElement;
+    const modalOverlay = document.getElementById("pdf-modal-overlay");
+    const modalCloseBtn = document.getElementById("pdf-modal-close");
+    const pdfIframe = document.getElementById(
+      "pdf-iframe",
+    ) as HTMLIFrameElement;
 
-  function mostrarPdfEnModal(base64: string, fileName: string) {
-    if (!pdfIframe || !modalOverlay) return;
+    function mostrarPdfEnModal(base64: string, fileName: string) {
+      if (!pdfIframe || !modalOverlay) return;
 
-    const byteCharacters = atob(base64);
-    const byteArrays = [];
-    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-      const slice = byteCharacters.slice(offset, offset + 512);
-      const byteNumbers = new Array(slice.length);
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
+      const byteCharacters = atob(base64);
+      const byteArrays = [];
+      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
       }
-      const byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
+      const blob = new Blob(byteArrays, { type: "application/pdf" });
+      const pdfUrl = URL.createObjectURL(blob);
+
+      // Cargamos la URL del PDF en el iframe y mostramos el modal
+      pdfIframe.src = pdfUrl;
+      modalOverlay.style.display = "flex";
     }
-    const blob = new Blob(byteArrays, { type: "application/pdf" });
-    const pdfUrl = URL.createObjectURL(blob);
 
-    // Cargamos la URL del PDF en el iframe y mostramos el modal
-    pdfIframe.src = pdfUrl;
-    modalOverlay.style.display = 'flex';
-  }
-  
-  function closeModal() {
-    if (modalOverlay && pdfIframe) {
-      modalOverlay.style.display = 'none';
-      pdfIframe.src = '';
+    function closeModal() {
+      if (modalOverlay && pdfIframe) {
+        modalOverlay.style.display = "none";
+        pdfIframe.src = "";
+      }
     }
-  }
 
-  // Añadimos los listeners para cerrar el modal
-  modalCloseBtn?.addEventListener('click', closeModal);
-  modalOverlay?.addEventListener('click', (event) => {
-    if (event.target === modalOverlay) {
-      closeModal();
-    }
-  });
-
-  document.querySelectorAll(".js-generate-cert, .js-download-order").forEach((button) => {
-    if (!(button instanceof HTMLButtonElement)) return;
-
-    button.addEventListener("click", async (event) => {
-      const isCertificado = button.classList.contains('js-generate-cert');
-      const originalText = button.textContent || '';
-      let result;
-
-      button.disabled = true;
-      button.textContent = "Generando...";
-
-      try {
-        if (isCertificado) {
-          const eventoId = button.dataset.eventoid;
-          if (!eventoId) throw new Error("ID de evento no encontrado.");
-          
-          result = await actions.GenerarCertificado({ eventoId });
-
-        } else {
-          const inscripcionId = button.dataset.inscripcionid;
-          if (!inscripcionId) throw new Error("ID de inscripción no encontrado.");
-
-          result = await actions.GenerarOrdenDePago({ inscripcionId });
-        }
-
-        if (result.data?.success && result.data?.data?.pdfBase64) {
-          mostrarPdfEnModal(result.data.data.pdfBase64, result.data.data.fileName);
-        } else {
-          alert(`Error: ${result.error?.message || 'desconocido'}`);
-        }
-
-      } catch (error) {
-        console.error(error);
-        alert(error instanceof Error ? error.message : "Error inesperado al contactar con el servidor.");
-      } finally {
-        button.disabled = false;
-        button.textContent = originalText;
+    // Añadimos los listeners para cerrar el modal
+    modalCloseBtn?.addEventListener("click", closeModal);
+    modalOverlay?.addEventListener("click", (event) => {
+      if (event.target === modalOverlay) {
+        closeModal();
       }
     });
-  });
+
+    document
+      .querySelectorAll(".js-generate-cert, .js-download-order")
+      .forEach((button) => {
+        if (!(button instanceof HTMLButtonElement)) return;
+
+        button.addEventListener("click", async (event) => {
+          const isCertificado = button.classList.contains("js-generate-cert");
+          const originalText = button.textContent || "";
+          let result;
+
+          button.disabled = true;
+          button.textContent = "Generando...";
+
+          try {
+            if (isCertificado) {
+              const eventoId = button.dataset.eventoid;
+              if (!eventoId) throw new Error("ID de evento no encontrado.");
+
+              result = await actions.GenerarCertificado({ eventoId });
+            } else {
+              const inscripcionId = button.dataset.inscripcionid;
+              if (!inscripcionId)
+                throw new Error("ID de inscripción no encontrado.");
+
+              result = await actions.GenerarOrdenDePago({ inscripcionId });
+            }
+
+            if (result.data?.success && result.data?.data?.pdfBase64) {
+              mostrarPdfEnModal(
+                result.data.data.pdfBase64,
+                result.data.data.fileName,
+              );
+            } else {
+              alert(`Error: ${result.error?.message || "desconocido"}`);
+            }
+          } catch (error) {
+            console.error(error);
+            alert(
+              error instanceof Error
+                ? error.message
+                : "Error inesperado al contactar con el servidor.",
+            );
+          } finally {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+        });
+      });
   </script>
 </Layout>

@@ -106,3 +106,56 @@ export const GenerarCertificado = defineAction({
     }
   },
 });
+
+export const generarCertificadoPublico = defineAction({
+  // Recibe el ID único de la inscripción (el código)
+  input: z.object({
+    inscripcionId: z.string().uuid({ message: "El formato del código no es válido." }),
+  }),
+
+  // NOTA: No usamos 'context' porque no necesitamos la sesión de usuario
+  handler: async ({ inscripcionId }) => {
+    try {
+      // 1. Buscamos la inscripción directamente por su ID único
+      const inscripcion = await prisma.inscripciones.findUnique({
+        where: { id_ins: inscripcionId },
+        include: { usuarios: true, eventos: true },
+      });
+
+      if (!inscripcion) {
+        return { success: false, error: { message: 'No se encontró un certificado con este código.' } };
+      }
+      
+      // 2. Realizamos la misma validación de requisitos
+      const asistenciaNum = inscripcion.asi_par ?? 0;
+      const calificacionNum = (inscripcion.not_par as any)?.toNumber() ?? 0.0;
+      if (inscripcion.est_par !== 'APROBADA' || asistenciaNum < 70 || calificacionNum < 7.0) {
+        return { success: false, error: { message: 'El participante no cumple los requisitos para la emisión.' } };
+      }
+
+      // 3. Generamos el PDF (misma lógica que tu otra action)
+      const pdfBytes = await generarCertificadoPDF({
+        nombreUsuario: `${inscripcion.usuarios.nom_usu1} ${inscripcion.usuarios.nom_usu2 ?? ''} ${inscripcion.usuarios.ape_usu1} ${inscripcion.usuarios.ape_usu2 ?? ''}`.trim(),
+        nombreCurso: inscripcion.eventos.nom_eve,
+        fechaInicio: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', { day: 'numeric', month: 'long' }),
+        fechaFin: (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+        duracionHoras: inscripcion.eventos.dur_eve?.toString() ?? '40',
+        fechaGeneracion: (inscripcion.fec_cer_par ?? new Date()).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+      });
+
+      const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
+
+      return {
+        success: true,
+        data: {
+          pdfBase64,
+          fileName: `certificado-${inscripcion.eventos.nom_eve}.pdf`,
+        },
+      };
+
+    } catch (error: any) {
+      console.error('Error en generarCertificadoPublico:', error);
+      return { success: false, error: { message: 'Error interno del servidor.' } };
+    }
+  },
+});
