@@ -1,26 +1,17 @@
 ---
 import Header from "@components/Header.astro";
-import NavBar from "../../components/Navbar.astro";
 import MenuAdmin from "../../components/MenuAdministrador.astro";
 import Layout from "../../layouts/Layout.astro";
 import ModalDetallesInscripcion from "../../components/ModalDetallesInscripcion.astro";
 import ModalDetallesPago from "../../components/ModalDetallesPago.astro";
 import "../../styles/AprobacionesInscripciones.css";
 
-const links = [
-    { label: "Eventos", href: "EventosCRUD" },
-    { label: "Usuarios", href: "/perfil" },
-    { label: "Organizadores", href: "/historial" },
-    { label: "Inscripciones", href: "AprobacionInscripciones" },
-    { label: "Categorías", href: "/historial" },
-    { label: "Carreras", href: "/historial" },
-];
 ---
 
 <Layout>
     <body>
         <Header />
-        <MenuAdmin links={links} />
+        <MenuAdmin />
         <ModalDetallesInscripcion />
         <ModalDetallesPago />
 
