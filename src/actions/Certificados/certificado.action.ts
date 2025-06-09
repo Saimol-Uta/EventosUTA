@@ -201,3 +201,41 @@ export const generarCertificadoPublico = defineAction({
     }
   },
 });
+
+export const recuperarCertificadoDesdeUrl = defineAction({
+  input: z.object({
+    url: z.string().url({ message: "La URL proporcionada no es válida." }),
+  }),
+  handler: async ({ url }, context) => {
+    const session = await getSession(context.request);
+    if (!session?.user?.id) {
+      return { success: false, error: { message: "Acceso no autorizado." } };
+    }
+
+    try {
+      console.log(`Recuperando PDF desde la URL: ${url}`);
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('No se pudo recuperar el archivo desde el enlace.');
+      }
+      
+      const buffer = await response.arrayBuffer();
+      const pdfBase64 = Buffer.from(buffer).toString('base64');
+      
+      const fileName = url.split('/').pop() || 'certificado.pdf';
+
+      return {
+        success: true,
+        data: {
+          pdfBase64,
+          fileName,
+        },
+      };
+
+    } catch (error: any) {
+      console.error("Error al recuperar certificado desde URL:", error);
+      return { success: false, error: { message: error.message || "Error interno del servidor." } };
+    }
+  },
+});
