@@ -118,14 +118,14 @@ export const GenerarCertificado = defineAction({
 });
 
 export const generarCertificadoPublico = defineAction({
-  // Recibe el ID único de la inscripción
   input: z.object({
     inscripcionId: z.string().uuid({ message: "El formato del código no es válido." }),
   }),
 
+  // No necesita 'context' porque no hay sesión
   handler: async ({ inscripcionId }) => {
     try {
-      //Buscamos la inscripción por su ID único
+      // Buscamos la inscripción directamente por su ID único
       const inscripcion = await prisma.inscripciones.findUnique({
         where: { id_ins: inscripcionId },
         include: { usuarios: true, eventos: true },
@@ -134,26 +134,59 @@ export const generarCertificadoPublico = defineAction({
       if (!inscripcion) {
         return { success: false, error: { message: 'No se encontró un certificado con este código.' } };
       }
-
-      //Realizamos la validación de requisitos
+      
+      // Validamos los requisitos (nota, asistencia, estado)
       const asistenciaNum = inscripcion.asi_par ?? 0;
       const calificacionNum = (inscripcion.not_par as any)?.toNumber() ?? 0.0;
       if (inscripcion.est_par !== 'APROBADA' || asistenciaNum < 70 || calificacionNum < 7.0) {
         return { success: false, error: { message: 'El participante no cumple los requisitos para la emisión.' } };
       }
 
-      //Generacion del PDF
+      // --- LÓGICA DE CACHÉ Y GENERACIÓN (IDÉNTICA A LA ACTION PRIVADA) ---
+
+      // CASO 2: Si el enlace ya existe, lo recuperamos de Cloudinary.
+      if (inscripcion.enl_cer_par) {
+        console.log("Recuperando PDF existente desde Cloudinary (Público)...");
+        const response = await fetch(inscripcion.enl_cer_par);
+        if (!response.ok) throw new Error('No se pudo recuperar el certificado existente.');
+        
+        const buffer = await response.arrayBuffer();
+        const pdfBase64 = Buffer.from(buffer).toString('base64');
+        return {
+          success: true,
+          data: {
+            pdfBase64,
+            fileName: `certificado-${inscripcion.eventos.nom_eve}.pdf`,
+          },
+        };
+      }
+
+      // CASO 1 y 3: Si no hay enlace, lo generamos.
+      console.log("Generando nuevo certificado (Público)...");
+      const fechaParaElCertificado = inscripcion.fec_cer_par ?? new Date();
+
       const pdfBytes = await generarCertificadoPDF({
         nombreUsuario: `${inscripcion.usuarios.nom_usu1} ${inscripcion.usuarios.nom_usu2 ?? ''} ${inscripcion.usuarios.ape_usu1} ${inscripcion.usuarios.ape_usu2 ?? ''}`.trim(),
         nombreCurso: inscripcion.eventos.nom_eve,
         fechaInicio: inscripcion.eventos.fec_ini_eve.toLocaleDateString('es-EC', { day: 'numeric', month: 'long' }),
         fechaFin: (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
         duracionHoras: inscripcion.eventos.dur_eve?.toString() ?? '40',
-        fechaGeneracion: (inscripcion.fec_cer_par ?? new Date()).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+        fechaGeneracion: fechaParaElCertificado.toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+      });
+      
+      const uploadResult = await uploadToCloudinary(pdfBytes, inscripcion.id_ins);
+      const fileUrl = uploadResult.secure_url;
+      if (!fileUrl) throw new Error("La subida a Cloudinary no devolvió una URL.");
+
+      await prisma.inscripciones.update({
+        where: { id_ins: inscripcion.id_ins },
+        data: {
+          enl_cer_par: fileUrl,
+          fec_cer_par: fechaParaElCertificado,
+        },
       });
 
       const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
-
       return {
         success: true,
         data: {
