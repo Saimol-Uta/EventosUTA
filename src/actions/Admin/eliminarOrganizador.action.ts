@@ -1,5 +1,5 @@
 import { defineAction } from 'astro:actions';
-import prisma from '@/db'; // Ajusta la ruta si es necesario
+import prisma from '@/db';
 import { z } from 'astro:schema';
 
 export const eliminarOrganizador = defineAction({
@@ -9,31 +9,37 @@ export const eliminarOrganizador = defineAction({
   }),
   handler: async ({ cedula }) => {
     try {
-      // Verifica si el organizador existe antes de eliminar
+      // Verifica si el organizador existe
       const existe = await prisma.organizadores.findUnique({
         where: { ced_org: cedula },
       });
+
       if (!existe) {
-        return { success: false, error: "El organizador no existe" };
+        return { success: false, error: "El organizador no existe." };
       }
 
-      // Si hay relaciones (por ejemplo, eventos), elimina o desconecta primero si es necesario
-      // await prisma.eventos.updateMany({
-      //   where: { ced_org: cedula },
-      //   data: { ced_org: null }
-      // });
+      // Verifica si tiene eventos asociados
+      const tieneEventos = await prisma.eventos.findFirst({
+        where: { ced_org_eve: cedula },
+        select: { id_eve: true }, // Solo necesitamos saber si existe
+      });
 
+      if (tieneEventos) {
+        return {
+          success: false,
+          error: "No se puede eliminar: el organizador tiene eventos asociados.",
+        };
+      }
+
+      // Elimina el organizador
       await prisma.organizadores.delete({
         where: { ced_org: cedula },
       });
+
       return { success: true };
     } catch (error: any) {
-      // Si hay error de restricción de clave foránea
-      if (error.code === 'P2003' || error.code === 'P2014') {
-        return { success: false, error: "No se puede eliminar: el organizador tiene registros relacionados." };
-      }
       console.error("Error al eliminar el organizador:", error);
-      return { success: false, error: "No se pudo eliminar el organizador" };
+      return { success: false, error: "No se pudo eliminar el organizador." };
     }
   },
 });
