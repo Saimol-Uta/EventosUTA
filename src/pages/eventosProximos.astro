@@ -1,0 +1,68 @@
+---
+// src/pages/eventosProximos.astro
+import Header from "../components/Header.astro";
+import NavBar from "../components/Navbar.astro";
+import EventoCard from "../components/EventoCard.astro";
+import { actions } from "astro:actions";
+
+
+const { data: resultProximos } = await Astro.callAction(
+    actions.getEventosProximos,
+    {},
+);
+
+const upcomingEvents = resultProximos?.eventos || [];
+
+function formatearFecha(fecha) {
+  const date = new Date(fecha);
+  return date.toLocaleString("es-EC", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+---
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Eventos Próximos</title>
+  </head>
+  <body>
+    <Header />
+    <NavBar />
+
+    <main class="px-6 py-8">
+      <h1 class="text-2xl font-bold text-red-800 text-center mb-6">Eventos Próximos</h1>
+
+      {
+         upcomingEvents.length > 0 ? (
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {
+              upcomingEvents.map(e => {
+                const titulo = e.nom_eve;
+                const slug = titulo.toLowerCase().replace(/\s+/g, '-');
+                const imagen = e.img_eve;
+                const estado = "Próximo";
+                const horas = formatearFecha(e.fec_ini_eve);
+
+                return (
+                  <EventoCard
+                    titulo={titulo}
+                    slug={slug}
+                    imagen={imagen}
+                    estado={estado}
+                    horas={horas}
+                  />
+                );
+              })
+            }
+          </div>
+        ) : (
+          <p class="text-center text-gray-500">No hay eventos próximos disponibles.</p>
+        )
+      }
+    </main>
+  </body>
+</html>
