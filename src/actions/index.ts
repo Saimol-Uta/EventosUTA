@@ -20,7 +20,6 @@ import { crearCarrera, modificarCarrera, eliminarCarrera, getAllCarreras, getCar
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
 import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Admin';
-import { getParticipantesPorEvento } from './Reportes/getParticipantesPorEvento';
 
 export const server = {
     getEventos,
@@ -34,7 +33,6 @@ export const server = {
     uploadImageUser,
     getCuentaById,
     uploadDocumentImage,
-    getParticipantesPorEvento,
 
     getDatosInscripcion,
     setDatosInscripcion,
