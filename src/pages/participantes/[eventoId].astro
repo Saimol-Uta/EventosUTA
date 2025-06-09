@@ -189,7 +189,7 @@ const links = [
                         </button>
                         <button
                             class="btn-pdf"
-                            onclick="exportarCalificaciones()"
+                            onclick="exportarPDF()"
                         >
                             PDF
                         </button>
@@ -318,6 +318,8 @@ const links = [
     <script>
         import { actions } from "astro:actions";
         import Swal from "sweetalert2";
+        import jsPDF from 'jspdf';
+        import autoTable from 'jspdf-autotable';
 
         // Declarar tipos para funciones globales
         declare global {
@@ -327,6 +329,7 @@ const links = [
                     nombreCompleto: string,
                 ) => void;
                 exportarCalificaciones: () => void;
+                exportarPDF: () => void;
             }
         } // Función para abrir modal de calificación
         window.abrirModalCalificacion = function (
@@ -531,6 +534,72 @@ const links = [
             window.URL.revokeObjectURL(url);
         };
 
+window.exportarPDF = () => {
+  const img = new Image();
+  const anchoLogo = 60;
+const altoLogo = 20.4;
+  img.src = '/logo-fisei.png'; // debe estar en public/img/
+
+  img.onload = () => {
+    const doc = new jsPDF();
+
+    const eventoNombre =
+      document.querySelector(".evento-nombre")?.textContent?.replace("- ", "") ||
+      "Evento";
+
+    // Insertar logo antes de todo
+    doc.addImage(img, 'PNG', 14, 10, anchoLogo, altoLogo); // x, y, width, height
+
+    // Títulos (dejamos espacio bajo el logo)
+    doc.setFontSize(14);
+    doc.text("Calificaciones del Evento:", 14, 40);
+    doc.setFontSize(12);
+    doc.text(eventoNombre, 14, 48);
+    doc.text(
+      `Fecha de exportación: ${new Date().toLocaleDateString("es-ES")}`,
+      14,
+      56
+    );
+
+    const head = [["Nombres", "Apellidos", "Asistencia", "Nota", "Estado"]];
+    const body: string[][] = [];
+
+    const filas = document.querySelectorAll(
+      '.registro-fila[data-estado]:not([style*="display: none"])'
+    );
+
+    filas.forEach((fila) => {
+      const celdas = fila.querySelectorAll(".parte-izquierda-registro-fila");
+      const filaTexto = Array.from(celdas).map(
+        (celda) => (celda.textContent ?? "").trim()
+      );
+      body.push(filaTexto);
+    });
+
+    if (body.length === 0) {
+      alert("No hay datos visibles para exportar.");
+      return;
+    }
+
+    autoTable(doc, {
+      head,
+      body,
+      startY: 65, // debajo del texto
+      headStyles: { fillColor: [176, 16, 37] },
+      styles: { fontSize: 10 }
+    });
+
+    const fecha = new Date().toISOString().split("T")[0];
+    doc.save(`calificaciones_${eventoNombre.replace(/\s+/g, "_")}_${fecha}.pdf`);
+  };
+
+  img.onerror = () => {
+    alert("No se pudo cargar el logo para el PDF.");
+  };
+};
+
+
+        
         // Cerrar modal al hacer clic fuera
         window.addEventListener("click", function (event) {
             const modal = document.getElementById(
