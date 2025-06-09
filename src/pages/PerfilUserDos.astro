@@ -1,0 +1,194 @@
+---
+import FormularioRegistroUsuario from "../components/FormularioRegistroUsuario.astro";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Navbar from "../components/Navbar.astro";
+import { actions } from "astro:actions";
+import type { Usuario } from "../actions/Users/getUserByCedula.action";
+import { getSession } from "auth-astro/server";
+
+type SafeResult<T> = {
+  success: boolean;
+  value?: T | null;
+  error?: string;
+};
+type CampoFormulario = {
+  titulo: string;
+  valor: string;
+  name: string;
+  tipo?: "select";
+  opciones?: { valor: string; texto: string }[];
+};
+
+
+type ResultadoSetUser = {
+  success?: boolean;
+  created?: boolean;
+  requireReauth?: boolean;
+  error?: string;
+};
+
+type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string };
+
+let usuario: UsuarioParcial | null = null;
+let mensajeGuardado: string | null = null;
+let mostrarError = false;
+
+const session = await getSession(Astro.request);
+const { isLoggedIn } = Astro.locals;
+const user = session?.user;
+
+if (!isLoggedIn || !user?.id || !user.ci_pas) {
+  return Astro.redirect("/login");
+}
+
+
+
+
+const id_usu = user.id;
+const method = Astro.request.method;
+
+function formatDate(date: string | Date | null): string {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toISOString().substring(0, 10);
+}
+
+if (method === "POST") {
+  const formData = await Astro.request.formData();
+  const accion = formData.get("action")?.toString();
+
+if (accion === "guardarInfo" && formData.has("nom_usu1")) {
+  const errores: string[] = [];
+
+  // Validaciones obligatorias
+  const camposObligatorios = ["ced_usu", "nom_usu1", "ape_usu1", "ape_usu2", "fec_nac_usu", "id_car_per"];
+  for (const campo of camposObligatorios) {
+    if (!formData.get(campo)) {
+      errores.push(`El campo ${campo} es obligatorio.`);
+    }
+  }
+
+  // Validación de cédula: exactamente 10 dígitos
+  const cedula = formData.get("ced_usu")?.toString() ?? "";
+  if (!/^\d{10}$/.test(cedula)) {
+    errores.push("La cédula debe tener exactamente 10 dígitos numéricos.");
+  }
+
+  // Validación de fecha válida y mayor de 16 años
+  const fechaRaw = formData.get("fec_nac_usu")?.toString() ?? "";
+  const fechaNac = new Date(fechaRaw);
+  if (isNaN(fechaNac.getTime())) {
+    errores.push("La fecha de nacimiento no es válida.");
+  } else {
+    const hoy = new Date();
+    const edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const cumpleEsteAño = hoy.getMonth() > fechaNac.getMonth() || 
+                          (hoy.getMonth() === fechaNac.getMonth() && hoy.getDate() >= fechaNac.getDate());
+    const edadFinal = cumpleEsteAño ? edad : edad - 1;
+    if (edadFinal < 16) {
+      errores.push("Debes tener al menos 16 años.");
+    }
+  }
+
+  // Validación de longitud de campos de texto (máximo 20 caracteres)
+  const camposMax20 = ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"];
+  for (const campo of camposMax20) {
+    const valor = formData.get(campo)?.toString() ?? "";
+    if (valor.length > 20) {
+      errores.push(`El campo ${campo} no debe superar los 20 caracteres.`);
+    }
+  }
+
+  // Validación de teléfono: exactamente 10 dígitos
+  const telefono = formData.get("num_tel_usu")?.toString() ?? "";
+  if (!/^\d{10}$/.test(telefono)) {
+    errores.push("El número de teléfono debe tener exactamente 10 dígitos.");
+  }
+
+  // Validación de carrera seleccionada
+  const carrera = formData.get("id_car_per")?.toString() ?? "";
+  if (!carrera) {
+    errores.push("Debes seleccionar una carrera.");
+  }
+
+  // Mostrar errores o guardar
+  if (errores.length > 0) {
+    mostrarError = true;
+    mensajeGuardado = errores.join(" ");
+  } else {
+    formData.set("id_usu", id_usu);
+    const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
+    const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
+
+    if (resultadoGuardar.success) {
+      mensajeGuardado = resultadoGuardar.value?.created
+        ? "Se guardó con éxito."
+        : "Usuario actualizado correctamente.";
+    } else {
+      mostrarError = true;
+      mensajeGuardado = resultadoGuardar.error || "No se pudo guardar.";
+    }
+  }
+}
+
+
+}
+
+// Simula obtener datos del usuario actual (como se hace en CompletarPerfilUser)
+const resultadoUsuario = await Astro.callAction(actions.getUserByCedula, { ced_usu: user?.ci_pas });
+usuario = resultadoUsuario?.data?.usuario ?? null;
+// Obtener carreras desde la base de datos
+const resultadoCarreras = await Astro.callAction(actions.getCarreras, {});
+const listaCarreras = resultadoCarreras?.data?.carreras ?? [];
+
+
+const camposFormulario: CampoFormulario[] = [
+  { titulo: "Cédula", valor: usuario?.ced_usu ?? "", name: "ced_usu" },
+  { titulo: "Primer nombre", valor: usuario?.nom_usu1 ?? "", name: "nom_usu1" },
+  { titulo: "Segundo nombre", valor: usuario?.nom_usu2 ?? "", name: "nom_usu2" },
+  { titulo: "Primer apellido", valor: usuario?.ape_usu1 ?? "", name: "ape_usu1" },
+  { titulo: "Segundo apellido", valor: usuario?.ape_usu2 ?? "", name: "ape_usu2" },
+  { titulo: "Fecha de nacimiento", valor: formatDate(usuario?.fec_nac_usu ?? null), name: "fec_nac_usu" },
+  { titulo: "Teléfono", valor: usuario?.num_tel_usu ?? "", name: "num_tel_usu" },
+  {
+    titulo: "Carrera",
+    valor: usuario?.id_car_per ?? "",
+    name: "id_car_per",
+    tipo: "select",
+    opciones: listaCarreras.map((car: any) => ({
+      valor: car.id_car,
+      texto: car.nom_car,
+    })),
+  },
+];
+
+
+const textoGuardarInfo = "Guardar Información";
+const textoCancelar = "Cancelar";
+const textoMasTarde = "Más Tarde";
+const textoAsociar = "Asociar este usuario a la cuenta";
+---
+
+<Layout>
+  <Header />
+  <Navbar />
+  <div class="bg-gray-100 min-h-screen py-10">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      {mensajeGuardado && (
+        <p class={`mensaje-guardado ${mostrarError ? "mensaje-error" : "mensaje-exito"}`}>
+          {mensajeGuardado}
+        </p>
+      )}
+      <FormularioRegistroUsuario
+        camposFormulario={camposFormulario}
+        cedula={usuario?.ced_usu ?? ""}
+        mostrarBotones={true}
+        textoBotonGuardarInfo={textoGuardarInfo}
+        textoBotonCancelar={textoCancelar}
+        textoBotonMasTarde={textoMasTarde}
+        textoBotonAsociar={textoAsociar}
+      />
+    </div>
+  </div>
+</Layout>
