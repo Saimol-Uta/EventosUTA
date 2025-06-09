@@ -62,7 +62,8 @@ const links = [
 <Layout>
     <body>
         <Header />
-        <MenuAdmin links={links} />        <ModalDetallesUsuario />
+        <MenuAdmin links={links} />        
+        <ModalDetallesUsuario />
         <ModalModificarUsuario />
         <ModalNuevoUsuario />
 
@@ -248,7 +249,8 @@ const links = [
                 } else {
                     console.error('La función abrirModalDetallesUsuario no está disponible');
                 }
-            }            // Hacer funciones disponibles globalmente
+            }            
+            
             declare global {
                 interface Window {
                     eliminarUsuario: (usuarioId: string) => Promise<void>;

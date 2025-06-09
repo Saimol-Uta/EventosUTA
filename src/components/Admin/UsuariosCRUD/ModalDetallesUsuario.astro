@@ -4,7 +4,6 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
 ---
 
 <div id="modalDetallesUsuario" class="modal">
-    <ModalDetallesCuenta />
     <div class="modal-contenido">
         <span class="cerrar" onclick="cerrarModalDetallesUsuario()"
             >&times;</span
@@ -17,11 +16,11 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
                 <div class="info-grid">
                     <p>
                         <strong>Cédula:</strong>
-                        <span id="usuario-cedula"></span>
+                        <span id="usuario-cedula">Cargando...</span>
                     </p>
                     <p>
                         <strong>Fecha de Nacimiento:</strong>
-                        <span id="usuario-fec-nac"></span>
+                        <span id="usuario-fec-nac">Cargando...</span>
                     </p>
                 </div>
             </div>
@@ -30,11 +29,11 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
                 <div class="info-grid">
                     <p>
                         <strong>Número de Teléfono:</strong>
-                        <span id="usuario-numero"></span>
+                        <span id="usuario-numero">Cargando...</span>
                     </p>
                     <p>
                         <strong>Carrera:</strong>
-                        <span id="usuario-carrera"></span>
+                        <span id="usuario-carrera">Cargando...</span>
                     </p>
                 </div>
             </div>
@@ -62,6 +61,9 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
             </div>
         </div>
     </div>
+
+    <!-- Mover ModalDetallesCuenta fuera del contenido principal -->
+    <ModalDetallesCuenta />
 </div>
 
 <script>
@@ -95,17 +97,38 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
         const titulo = modal.querySelector("#usuario-nombre");
         const nombreCompleto =
             `${usuario.nom_usu1} ${usuario.nom_usu2 || ""} ${usuario.ape_usu1} ${usuario.ape_usu2 || ""}`.trim();
+
         if (titulo) titulo.textContent = nombreCompleto || "Sin nombre";
 
         // Información General
         const cedula = modal.querySelector("#usuario-cedula");
-        if (cedula) cedula.textContent = usuario.ced_usu || "N/A";
+        if (cedula) {
+            console.log("Cédula del usuario:", usuario.ced_usu); // Para debugging
+            cedula.textContent = usuario.ced_usu || "N/A";
+        }
 
         const fechaNac = modal.querySelector("#usuario-fec-nac");
         if (fechaNac) {
-            const fecha = new Date(usuario.fec_nac_usu);
-            fechaNac.textContent = fecha.toLocaleDateString("es-ES") || "N/A";
+            console.log("Fecha de nacimiento:", usuario.fec_nac_usu); // Para debugging
+            if (usuario.fec_nac_usu) {
+                try {
+                    const fecha = new Date(usuario.fec_nac_usu);
+                    // Verificar si la fecha es válida
+                    if (!isNaN(fecha.getTime())) {
+                        fechaNac.textContent =
+                            fecha.toLocaleDateString("es-ES");
+                    } else {
+                        fechaNac.textContent = "Fecha inválida";
+                    }
+                } catch (error) {
+                    console.error("Error al procesar fecha:", error);
+                    fechaNac.textContent = "Error en fecha";
+                }
+            } else {
+                fechaNac.textContent = "N/A";
+            }
         }
+
         const telefono = modal.querySelector("#usuario-numero");
         if (telefono)
             telefono.textContent = usuario.num_tel_usu || "No especificado";
