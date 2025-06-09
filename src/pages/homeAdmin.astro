@@ -19,21 +19,26 @@ const links = [
     { label: "Carreras", href: "/historial" },
 ];
 
-const { data: resultProximos } = await Astro.callAction(actions.getEventosProximos, {});
+const { data: resultProximos } = await Astro.callAction(
+    actions.getEventosProximos,
+    {},
+);
 
 const upcomingEvents = resultProximos?.eventos || [];
 
-const  { data: resultInscripciones } = await Astro.callAction(actions.getInscripcionesPendientes, {});
+const { data: resultInscripciones } = await Astro.callAction(
+    actions.getInscripcionesPendientes,
+    {},
+);
 
 const inscripciones = resultInscripciones?.inscripciones || [];
 
 const session = await getSession(Astro.request);
 
 const { data: cuenta } = await Astro.callAction(
-    actions.getCuentaById,
+    actions.getCuentaByIdSingle,
     session?.user?.id || "",
 );
-
 
 console.log("🔍 Debug homeAdmin:");
 console.log("Session user ID:", session?.user?.id);
@@ -112,44 +117,49 @@ if (session && session.user) {
 
             <div class="w-full md:w-3/4 flex flex-col gap-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
-                    
                     <Card title="Inscripciones Pendientes">
-                     <div class="flex flex-col gap-y-4">
-    {
-        inscripciones
-            .slice(0, 4)
-            .map((c) => (
-                <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                    <p><strong>Estudiante:</strong> {c.usuarios.nom_usu1}</p>
-                    <p><strong>Evento:</strong> {c.eventos.nom_eve}</p>
-                </div>
-            ))
-    }
-    {
-        inscripciones.length > 4 && (
-            <a
-                href="/Admin/gestionEventos"
-                class="text-red-800 underline text-sm mt-2"
-            >
-                Ver más...
-            </a>
-        )
-    }
-</div>
-
+                        <div class="flex flex-col gap-y-4">
+                            {
+                                inscripciones.slice(0, 4).map((c) => (
+                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
+                                        <p>
+                                            <strong>Estudiante:</strong>{" "}
+                                            {c.usuarios.nom_usu1}
+                                        </p>
+                                        <p>
+                                            <strong>Evento:</strong>{" "}
+                                            {c.eventos.nom_eve}
+                                        </p>
+                                    </div>
+                                ))
+                            }
+                            {
+                                inscripciones.length > 4 && (
+                                    <a
+                                        href="/Admin/gestionEventos"
+                                        class="text-red-800 underline text-sm mt-2"
+                                    >
+                                        Ver más...
+                                    </a>
+                                )
+                            }
+                        </div>
                     </Card>
 
                     <Card title="Eventos Próximos">
                         <div class="flex flex-col gap-y-4">
                             {
-                                upcomingEvents
-                                    .slice(0, 4)
-                                    .map((e) => (
-                                        <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                  <p><strong>Evento:</strong> {e.nom_eve}</p>
-                                     <p><strong>Fecha de inicio:</strong> {e.fec_ini_eve}</p>
-                                  </div>
-                                    ))
+                                upcomingEvents.slice(0, 4).map((e) => (
+                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
+                                        <p>
+                                            <strong>Evento:</strong> {e.nom_eve}
+                                        </p>
+                                        <p>
+                                            <strong>Fecha de inicio:</strong>{" "}
+                                            {e.fec_ini_eve}
+                                        </p>
+                                    </div>
+                                ))
                             }
                             {
                                 upcomingEvents.length > 4 && (

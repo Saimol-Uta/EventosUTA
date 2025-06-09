@@ -12,7 +12,7 @@ import { getUsersWithAccounts } from './Users/get-users-with-accounts.action';
 
 import { getDatosInscripcion } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
-import { getCuentaById, uploadDocumentImage, uploadImageUser } from './Users';
+import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser } from './Users';
 import { crearCuenta } from './Users/crear-cuenta.action';
 import { modificarCuenta } from './Users/modificar-cuenta.action';
 import { eliminarCuenta } from './Users/eliminar-cuenta.action';
@@ -102,6 +102,8 @@ export const server = {
 
     //description
     updatePaginaPrincipal,
-    getInfo
+    getInfo,
+    getCuentaByIdSingle
+
 };
 

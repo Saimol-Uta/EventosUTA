@@ -35,11 +35,20 @@ export const updateParticipante = defineAction({
                 });
             }
 
+            let asistenciaCompleta: number = 0;
+
+            if (asistencia === 1) {
+                asistenciaCompleta = 100
+            }
+            else {
+                asistenciaCompleta = 0
+            }
+
             // Actualizar la inscripción con los nuevos datos de participación
             const inscripcionActualizada = await db.inscripciones.update({
                 where: { id_ins: inscripcionId },
                 data: {
-                    asi_par: asistencia,
+                    asi_par: asistenciaCompleta,
                     not_par: nota,
                     est_par: estado,
                 },
