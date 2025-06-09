@@ -17,7 +17,7 @@ import { crearCuenta } from './Users/crear-cuenta.action';
 import { modificarCuenta } from './Users/modificar-cuenta.action';
 import { eliminarCuenta } from './Users/eliminar-cuenta.action';
 import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
-import { GenerarCertificado, generarCertificadoPublico } from './Certificados/certificado.action';
+import { GenerarCertificado, generarCertificadoPublico, recuperarCertificadoDesdeUrl } from './Certificados/certificado.action';
 import { GenerarOrdenDePago } from './OrdenPago/generarOrden.action';
 
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
@@ -56,6 +56,7 @@ export const server = {
     uploadComprobante,
     GenerarCertificado,
     generarCertificadoPublico,
+    recuperarCertificadoDesdeUrl,
     GenerarOrdenDePago,
 
     getCertificadosPorUsuario,
