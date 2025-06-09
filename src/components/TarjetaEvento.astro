@@ -7,8 +7,58 @@ const {
   estado,
   certificadoDisponible,
   eventoId,
+  inscripcionId,
+  estadoPago,
 } = Astro.props;
 ---
+
+<div class="evento-card">
+  <div>
+    <div class="card-header">
+      <h3>{nombre}</h3>
+      <span
+        class={`badge ${estado === "completo" ? "completo" : "incompleto"}`}
+      >
+        {estado === "completo" ? "Completo" : "Incompleto"}
+      </span>
+    </div>
+    <p class="fecha">{fecha}</p>
+    <div class="card-info">
+      <div><strong>Calificación:</strong> {calificacion} / 10.0</div>
+      <div><strong>Asistencia:</strong> {asistencia}%</div>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    {
+      certificadoDisponible && (
+        <button
+          class="btn-certificado js-generate-cert"
+          data-eventoid={eventoId}
+        >
+          Generar Certificado
+        </button>
+      )
+    }
+
+    {
+      estadoPago === "DPendiente" && (
+        <button
+          class="btn-pago js-download-order"
+          data-inscripcionid={inscripcionId}
+        >
+          Ver Orden de Pago
+        </button>
+      )
+    }
+
+    {
+      !certificadoDisponible && estadoPago !== "DPendiente" && (
+        <p class="texto-inactivo">🚫 Sin acciones disponibles</p>
+      )
+    }
+  </div>
+</div>
 
 <style>
   .evento-card {
@@ -24,50 +74,42 @@ const {
       box-shadow 0.3s ease;
     border: 2px solid transparent;
   }
-
   .evento-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
     border-color: #8a1538;
   }
-
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.8rem;
   }
-
   .card-header h3 {
     font-size: 1.1rem;
     margin: 0;
     font-weight: 700;
     color: #333;
   }
-
   .badge {
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
   }
-
   .completo {
     background-color: #dff5e1;
     color: #2e7d32;
   }
-
   .incompleto {
     background-color: #ffe4e1;
     color: #c62828;
   }
-
   .fecha {
     color: #666;
     font-size: 0.9rem;
     margin-bottom: 0.8rem;
   }
-
   .card-info {
     display: flex;
     justify-content: space-between;
@@ -75,8 +117,13 @@ const {
     margin-bottom: 1rem;
     color: #444;
   }
-
+  .card-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: auto; 
+  }
   .btn-certificado {
+    flex-grow: 1;
     text-align: center;
     background-color: #9f1a1a;
     color: white;
@@ -85,23 +132,48 @@ const {
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
+    border: none;
+    cursor: pointer;
     transition:
       background-color 0.3s ease,
       transform 0.2s ease;
   }
-
   .btn-certificado:hover {
     background-color: #a00000;
     transform: scale(1.03);
   }
-
+  .btn-pago {
+    flex-grow: 1;
+    text-align: center;
+    background-color: #ffc107; 
+    color: #333;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition:
+      background-color 0.3s ease,
+      transform 0.2s ease;
+  }
+  .btn-pago:hover {
+    background-color: #e0a800;
+    transform: scale(1.03);
+  }
   .texto-inactivo {
+    width: 100%;
     text-align: center;
     font-size: 0.85rem;
     color: #999;
     font-style: italic;
   }
-
+  .btn-certificado:disabled,
+  .btn-pago:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
   @media (max-width: 500px) {
     .card-info {
       flex-direction: column;
@@ -109,26 +181,3 @@ const {
     }
   }
 </style>
-
-<div class="evento-card">
-  <div class="card-header">
-    <h3>{nombre}</h3>
-    <span class={`badge ${estado === "completo" ? "completo" : "incompleto"}`}>
-      {estado === "completo" ? "Completo" : "Incompleto"}
-    </span>
-  </div>
-  <p class="fecha">{fecha}</p>
-  <div class="card-info">
-    <div><strong>Calificación:</strong> {calificacion}</div>
-    <div><strong>Asistencia:</strong> {asistencia}%</div>
-  </div>
-  {
-    certificadoDisponible ? (
-      <button class="btn-certificado js-generate-cert" data-eventoid={eventoId}>
-        Generar Certificado
-      </button>
-    ) : (
-      <p class="texto-inactivo">🚫 Certificado no disponible</p>
-    )
-  }
-</div>
