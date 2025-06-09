@@ -105,50 +105,15 @@ upcomingEvents = resultProximos?.eventos ?? [];
               }
               {
                 upcomingEvents.length > 4 && (
-                  <a href="/eventos" class="text-red-800 underline text-sm mt-2">
+                  <a href="/eventosProximos" class="text-red-800 underline text-sm mt-2">
                     Ver más...
                   </a>
                 )
               }
 
             </div>
-
-            <!-- Contenido principal -->
-            <div class="w-full md:w-3/4 flex flex-col gap-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-                    <!-- Eventos Próximos -->
-                    <Card title="Eventos Próximos">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                upcomingEvents.slice(0, 4).map((evento) => (
-                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                        <>
-                                            <strong>{evento.nom_eve}</strong>
-                                            <br />
-                                        </>
-                                        <span class="text-sm text-gray-600">
-                                            Inicio:{" "}
-                                            {new Date(
-                                                evento.fec_ini_eve,
-                                            ).toLocaleDateString()}
-                                        </span>
-                                    </div>
-                                ))
-                            }
-                            {
-                                upcomingEvents.length > 4 && (
-                                    <a
-                                        href="/eventosProximos"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
-                    </Card>
-
-                    <!-- Certificados -->
+   </Card>
+                               <!-- Certificados -->
                     <Card title="Certificados">
                         <div class="flex flex-col gap-y-4">
                             {
