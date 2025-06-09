@@ -6,7 +6,7 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
     <div class="modal-contenido">
         <span class="cerrar" onclick="cerrarModalDetallesOrganizador()">&times;</span>
         <div class="detalles-reserva">
-            <h2 id="organizador-nombre">Nombre del Evento</h2>
+            <h2 id="organizador-nombre">Nombre del Organizador</h2>
 
             <div class="seccion-detalles">
                 <h3>Información General</h3>
@@ -15,20 +15,27 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                         <strong>Cédula:</strong>
                         <span id="organizador-cedula"></span>
                     </p>
-                    <p><strong>Título Académico:</strong> <span id="organizador-titulo"></span></p>
+                    <p>
+                        <strong>Nombres:</strong>
+                        <span id="organizador-nombres"></span>
+                    </p>
+                    <p>
+                        <strong>Apellidos:</strong>
+                        <span id="organizador-apellidos"></span>
+                    </p>
+                    <p>
+                        <strong>Título Académico:</strong>
+                        <span id="organizador-titulo"></span>
+                    </p>
                 </div>
             </div>
 
             <div class="seccion-detalles">
                 <h3>Eventos que Organiza</h3>
-                <div class="info-grid">
-                    <p>
-                        <span id="evento-nombre"></span>
-                    </p>
+                <div class="info-grid" id="organizador-eventos-lista">
+                    <!-- Aquí se listarán los eventos -->
                 </div>
             </div>
-
-            
         </div>
     </div>
 </div>
@@ -37,98 +44,110 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
     declare global {
         interface Window {
             cerrarModalDetallesOrganizador: () => void;
-            abrirModalDetallesOrganizador: (evento: any) => void;
+            abrirModalDetallesOrganizador: (organizador: any) => void;
         }
     }
 
+    // Definición de la interfaz para el organizador
+    interface Organizador {
+        ced_org: string;
+        nom_org1: string;
+        nom_org2?: string;
+        ape_org1: string;
+        ape_org2?: string;
+        tit_aca_org: string;
+        eventos: Array<{ nom_eve: string }>;
+    }
+
+    // Función para cerrar el modal
     function cerrarModalDetallesOrganizador() {
         const modal = document.getElementById("modalDetallesOrganizador");
         if (modal) modal.style.display = "none";
     }
 
-    function abrirModalDetallesOrganizador(evento: any) {
+    // Función para abrir el modal y poblar los datos del organizador
+    function abrirModalDetallesOrganizador(organizador: Organizador) {
         const modal = document.getElementById("modalDetallesOrganizador");
         if (!modal) return;
 
-        // Poblar el modal con los datos del evento
-        poblarModalConDatos(evento);
+        poblarModalConDatos(organizador);
 
         modal.style.display = "block";
     }
 
-    function poblarModalConDatos(evento: any) {
+    // Función para poblar los datos del organizador en el modal
+    function poblarModalConDatos(organizador : Organizador) {
         const modal = document.getElementById("modalDetallesOrganizador");
         if (!modal) return;
 
-        // Actualizar título del modal
-        const titulo = modal.querySelector("#evento-nombre");
-        if (titulo) titulo.textContent = evento.nom_eve || "Sin nombre";
-
-        // Información General
-        const categoria = modal.querySelector("#evento-categoria");
-        if (categoria) {
-            // Manejar tanto evento.categoria.data como evento.categoria directamente
-            const categoriaData = evento.categoria?.data || evento.categoria;
-            categoria.textContent = categoriaData?.nom_cat || "Sin categoría";
+        // Nombre completo
+        const nombre = modal.querySelector("#organizador-nombre");
+        if (nombre && organizador) {
+            const nombreCompleto = `${organizador.nom_org1 || ""} ${organizador.nom_org2 || ""} ${organizador.ape_org1 || ""} ${organizador.ape_org2 || ""}`.replace(/\s+/g, " ").trim();
+            nombre.textContent = nombreCompleto || "No especificado";
         }
 
-        const area = modal.querySelector("#evento-area");
-        if (area) area.textContent = evento.are_eve || "No especificada";
-
-        const precio = modal.querySelector("#evento-precio");
-        if (precio) precio.textContent = `$${evento.precio || 0}`;
-
-        // Organizador - Cédula
-        const organizadorCedula = modal.querySelector("#organizador-cedula");
-        if (organizadorCedula) {
-            const orgData = evento.organizador?.data || evento.organizador;
-            organizadorCedula.textContent =
-                orgData?.ced_org || "No especificada";
+        // Cédula
+        const cedula = modal.querySelector("#organizador-cedula");
+        if (cedula) {
+            cedula.textContent = organizador.ced_org || "No especificada";
         }
 
-        // Organizador - Nombre
-        const organizadorNombre = modal.querySelector("#organizador-nombre");
-        if (organizadorNombre) {
-            const orgData = evento.organizador?.data || evento.organizador;
-            if (orgData) {
-                const nombreCompleto =
-                    `${orgData.nom_org1} ${orgData.nom_org2 || ""} ${orgData.ape_org1} ${orgData.ape_org2 || ""}`.trim();
-                organizadorNombre.textContent = nombreCompleto;
+        // Nombres
+        const nombres = modal.querySelector("#organizador-nombres");
+        if (nombres) {
+            nombres.textContent = [organizador.nom_org1, organizador.nom_org2].filter(Boolean).join(" ");
+        }
+
+        // Apellidos
+        const apellidos = modal.querySelector("#organizador-apellidos");
+        if (apellidos) {
+            apellidos.textContent = [organizador.ape_org1, organizador.ape_org2].filter(Boolean).join(" ");
+        }
+
+        // Título académico
+        const titulo = modal.querySelector("#organizador-titulo");
+        if (titulo) {
+            titulo.textContent = organizador.tit_aca_org || "No especificado";
+        }
+
+        // Eventos que organiza
+        const eventosLista = modal.querySelector("#organizador-eventos-lista");
+        if (eventosLista) {
+            eventosLista.innerHTML = "";
+            if (organizador.eventos && Array.isArray(organizador.eventos) && organizador.eventos.length > 0) {
+                organizador.eventos.forEach(ev => {
+                    const p = document.createElement("p");
+                    // Solo muestra la fecha si existe la propiedad y es string o Date parseable
+                    let fecha = "";
+                    if ("fec_ini_eve" in ev && ev.fec_ini_eve) {
+                        try {
+                            const fechaObj = new Date(ev.fec_ini_eve as string);
+                            if (!isNaN(fechaObj.getTime())) {
+                                fecha = ` (${fechaObj.toLocaleDateString()})`;
+                            }
+                        } catch (_) {
+                            // Si hay error al parsear la fecha, no mostrarla
+                        }
+                    }
+                    p.textContent = `${ev.nom_eve}${fecha}`;
+                    eventosLista.appendChild(p);
+                });
             } else {
-                organizadorNombre.textContent = "No especificado";
+                eventosLista.innerHTML = "<p>No tiene eventos asignados.</p>";
             }
-        } 
-        
-        // Organizador - Título
-        const organizadorTitulo = modal.querySelector("#organizador-titulo");
-        if (organizadorTitulo) {
-            const orgData = evento.organizador?.data || evento.organizador;
-            organizadorTitulo.textContent =
-                orgData?.tit_aca_org || "No especificado";
         }
+    }
 
-        // Configuración del Evento - Nota de Aprobación
-        const notaAprobacion = modal.querySelector("#evento-nota-aprobacion");
-        if (notaAprobacion) {
-            notaAprobacion.textContent =
-                (evento.not_apr_eve || 7.0).toString() + " puntos";
-        }
-
-        // Configuración del Evento - Tiempo de Registro
-        const tiempoRegistro = modal.querySelector("#evento-tiempo-registro");
-        if (tiempoRegistro) {
-            tiempoRegistro.textContent =
-                evento.tie_reg_asi !== false
-                    ? "Permitir registro en cualquier momento"
-                    : "Restringir tiempo de registro";
-        }
-    } // Cerrar modal al hacer clic fuera de él
+    // Cerrar modal al hacer clic fuera de él
     window.onclick = function (event) {
         const modal = document.getElementById("modalDetallesOrganizador");
         if (event.target === modal) {
             cerrarModalDetallesOrganizador();
         }
-    }; // Exponer funciones globalmente
+    };
+
+    // Exponer funciones globalmente para que se puedan llamar desde otros scripts
     window.cerrarModalDetallesOrganizador = cerrarModalDetallesOrganizador;
     window.abrirModalDetallesOrganizador = abrirModalDetallesOrganizador;
 </script>
