@@ -2,12 +2,14 @@
 import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
-import clerk from "@clerk/astro";
+
 import netlify from '@astrojs/netlify';
+
+import auth from 'auth-astro';
 
 // https://astro.build/config
 export default defineConfig({
-    integrations: [clerk()],
+    integrations: [auth()],
     vite: {
         plugins: [tailwindcss()]
     },
