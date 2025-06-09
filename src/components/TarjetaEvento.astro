@@ -106,14 +106,14 @@ const {
 
   .card-footer {
     display: flex;
-    gap: 10px; /* Espacio entre botones */
-    margin-top: auto; /* Empuja el footer hacia abajo */
+    gap: 10px; 
+    margin-top: auto; 
   }
 
   .btn-pago {
-    flex-grow: 1; /* Para que ocupe el espacio disponible */
+    flex-grow: 1; 
     text-align: center;
-    background-color: #ffc107; /* Amarillo para 'pendiente' */
+    background-color: #ffc107; 
     color: #333;
     padding: 10px;
     border-radius: 8px;
@@ -149,7 +149,9 @@ const {
   <div>
     <div class="card-header">
       <h3>{nombre}</h3>
-      <span class={`badge ${estado === "completo" ? "completo" : "incompleto"}`}>
+      <span
+        class={`badge ${estado === "completo" ? "completo" : "incompleto"}`}
+      >
         {estado === "completo" ? "Completo" : "Incompleto"}
       </span>
     </div>
@@ -163,16 +165,21 @@ const {
   <div class="card-footer">
     {
       certificadoDisponible ? (
-        <button class="btn-certificado js-generate-cert" data-eventoid={eventoId}>
+        <button
+          class="btn-certificado js-generate-cert"
+          data-eventoid={eventoId}
+        >
           Generar Certificado
         </button>
       ) : (
-        estadoPago !== 'DPendiente' && <p class="texto-inactivo">🚫 Certificado no disponible</p>
+        estadoPago !== "DPendiente" && (
+          <p class="texto-inactivo">🚫 Certificado no disponible</p>
+        )
       )
     }
 
     {
-      estadoPago === 'DPendiente' && (
+      estadoPago === "DPendiente" && (
         <button
           class="btn-pago js-download-order"
           data-inscripcionid={inscripcionId}
