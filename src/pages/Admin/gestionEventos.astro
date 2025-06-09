@@ -2,6 +2,7 @@
 import Header from "@/components/Header.astro";
 import MenuAdministrador from "@/components/MenuAdministrador.astro";
 import { actions } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
 
 const searchParams = Astro.url.searchParams;
 const activoFiltro = searchParams.get("Activo");
@@ -44,17 +45,11 @@ function formatearFecha(fecha: string) {
     });
 }
 ---
+<Layout>
 
-<html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Gestión de Eventos - FISEI</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    </head>
     <body>
         <Header />
         <MenuAdministrador />
-
         <main class="main-content">
             <h2>Gestión de Eventos - FISEI</h2>
 
@@ -169,12 +164,11 @@ function formatearFecha(fecha: string) {
             </div>
         </main>
     </body>
-</html>
 
 <style>
     body {
         margin: 0;
-        font-family: Arial, sans-serif;
+
         background-color: #fff;
         display: flex;
         flex-direction: column;
@@ -211,6 +205,8 @@ function formatearFecha(fecha: string) {
         text-align: center;
         margin-bottom: 2rem;
         color: #333;
+        font-size: 25px;
+        font-weight: 500;
     }
 
     /* Filtros */
@@ -429,3 +425,5 @@ function formatearFecha(fecha: string) {
         }
     }
 </style>
+
+</Layout>
