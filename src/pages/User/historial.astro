@@ -15,8 +15,6 @@ type TarjetaEventoProps = {
   estado: string;
   certificadoDisponible: boolean;
   eventoId: string;
-  inscripcionId: string; // <-- Prop recibida
-  estadoPago: string; // <-- Prop recibida
 };
 
 const session = await getSession(Astro.request);
@@ -52,8 +50,12 @@ if (accountId) {
       const asistenciaNum = inscripcion.asi_par ?? 0;
       const calificacionNum =
         (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
+
       const esCertificadoDisponible =
-        asistenciaNum >= 70 && calificacionNum >= 7.0;
+        asistenciaNum >= 70 &&
+        calificacionNum >= 7.0 &&
+        inscripcion.est_par === "APROBADA";
+
       const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
 
       return {
@@ -68,8 +70,8 @@ if (accountId) {
         estado: estadoEvento,
         certificadoDisponible: esCertificadoDisponible,
         eventoId: inscripcion.id_eve_ins,
-        inscripcionId: inscripcion.id_ins, // El ID que necesita nuestra API de orden de pago
-        estadoPago: inscripcion.est_ins, // Para saber si mostramos el botón (Ej: "DPendiente")
+        inscripcionId: inscripcion.id_ins,
+        estadoPago: inscripcion.est_ins,
       };
     });
   }
