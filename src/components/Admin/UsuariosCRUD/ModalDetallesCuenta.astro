@@ -95,10 +95,20 @@ import "../../../styles/Admin/ModalGestionarCuenta.css";
             nombreElemento.textContent = nombreCompleto || "Sin nombre";
         }
 
-        // Correo electrónico
+        const imagenPerfil = document.getElementById(
+            "imagen-perfil-cuenta",
+        ) as HTMLImageElement;
+        if (imagenPerfil) {
+            imagenPerfil.src =
+                cuenta?.img_user ||
+                "https://static.nationalgeographic.es/files/styles/image_3200/public/75552.ngsversion.1422285553360.jpg?w=1900&h=1267";
+        }
+
         const correoElemento = document.getElementById("cuenta-correo");
+
         if (correoElemento) {
-            correoElemento.textContent = cuenta?.correo_cue || "Sin correo";
+            correoElemento.textContent =
+                cuenta?.cor_cue || cuenta?.correo_cue || "Sin correo";
         }
 
         // Rol
