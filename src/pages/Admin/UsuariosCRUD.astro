@@ -8,43 +8,39 @@ import ModalNuevoUsuario from "../../components/Admin/UsuariosCRUD/ModalNuevoUsu
 import "../../styles/Admin/EventosCRUD.css";
 import { actions } from "astro:actions";
 
-const searchParams = Astro.url.searchParams;
-const categoriaFiltro = searchParams.get("categoria");
+// Obtener usuarios con información relacionada
+const { data, error } = await Astro.callAction(actions.getAllUsers, {});
 
-// Obtener eventos con información relacionada
-const { data, error } = await Astro.callAction(actions.getEventos, {
-    categoria: categoriaFiltro || undefined,
-});
-
-// Obtener categorías para el filtro
-const { data: categoriasData } = await Astro.callAction(actions.getCategorias, {});
-const { data: organizadoresData } = await Astro.callAction(actions.getOrganizadores, {});
+// Obtener carreras para mostrar el nombre de la carrera
+const { data: carrerasData } = await Astro.callAction(actions.getAllCarreras, {});
 
 if (error) {
-    console.error("Error al obtener eventos:", error);
+    console.error("Error al obtener usuarios:", error);
 }
 
-const eventos = data?.eventos || [];
-const categorias = categoriasData?.categorias || [];
-const organizadores = organizadoresData?.organizadores || [];
+const usuarios = data?.data || [];
+const carreras = carrerasData?.carreras || [];
 
-// Obtener información completa de cada evento
-const eventosCompletos = await Promise.all(
-    eventos.map(async (evento: any) => {
-        const organizador = await Astro.callAction(
-            actions.getOrganizadorByEvento,
-            { id_evento: evento.id_eve }
-        );
-
-        const categoria = await Astro.callAction(
-            actions.getCategoriaById,
-            { id_categoria: evento.id_cat_eve }
-        );
+// Obtener información completa de cada usuario con carrera y cuentas
+const usuariosCompletos = await Promise.all(
+    usuarios.map(async (usuario: any) => {
+        // Buscar carrera del usuario
+        const carrera = carreras.find((c: any) => c.id_car === usuario.id_car_per);        // Buscar cuentas del usuario
+        let cuentas: any[] = [];
+        try {
+            const cuentasResult = await Astro.callAction(actions.getCuentaById, usuario.id_usu.toString());
+            if (cuentasResult.data) {
+                cuentas = Array.isArray(cuentasResult.data) ? cuentasResult.data : [cuentasResult.data];
+            }
+        } catch (error) {
+            console.log("No se encontraron cuentas para el usuario:", usuario.id_usu);
+        }
 
         return {
-            ...evento,
-            organizador: organizador.data,
-            categoria: categoria.data,
+            ...usuario,
+            carrera: carrera,
+            cuentas: cuentas,
+            cantidadCuentas: cuentas.length
         };
     })
 );
@@ -64,30 +60,13 @@ const links = [
     <body>
         <Header />
         <MenuAdmin links={links} />        <ModalDetallesUsuario />
-        <ModalModificarUsuario categorias={categorias} organizadores={organizadores} />
-        <ModalNuevoUsuario categorias={categorias} organizadores={organizadores} />
+        <ModalModificarUsuario />
+        <ModalNuevoUsuario />
 
         <main class="registros">
-            <div class="registros-grid">
-                <div class="registros-superior">
+            <div class="registros-grid">                <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Usuarios                        <select
-                            id="filtroCategoria"
-                            class="select-estado"
-                            onchange="window.location.href = `?categoria=${this.value}`"
-                        >
-                            <option value="" selected={!categoriaFiltro}>
-                                Todos los usuarios
-                            </option>
-                            {categorias.map((categoria: any) => (
-                                <option
-                                    value={categoria.nom_cat}
-                                    selected={categoriaFiltro === categoria.nom_cat}
-                                >
-                                    {categoria.nom_cat}
-                                </option>
-                            ))}
-                        </select>
+                        <h1 class="titulo-principal">Gestión de Usuarios</h1>
                     </div>
                     <div class="registros-superior-derecho">
                         <a onclick="abrirModalNuevoUsuario()" class="contenedor-boton-nuevo-registro">
@@ -120,37 +99,33 @@ const links = [
                             Opciones
                         </div>
                     </div>
-                </div>
-                <div class="registros-inferior">
+                </div>                <div class="registros-inferior">
                     {
-                        eventosCompletos.map((evento) => (
+                        usuariosCompletos.map((usuario) => (
                             <input
                                 type="hidden"
-                                name="evento"
-                                value={JSON.stringify(evento)}
+                                name="usuario"
+                                value={JSON.stringify(usuario)}
                             />
                             <div class="registro-fila">
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.nom_eve}
+                                    {usuario.ced_usu || "N/A"}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.categoria?.data?.nom_cat || "N/A"}
+                                    {`${usuario.nom_usu1} ${usuario.nom_usu2 || ''}`}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.are_eve || "N/A"}
+                                    {`${usuario.ape_usu1} ${usuario.ape_usu2 || ''}`}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.are_eve || "N/A"}
+                                    {usuario.carrera?.nom_car || "Sin carrera"}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {new Date(evento.fec_ini_eve)
-                                        .toISOString()
-                                        .split("T")[0]}
+                                    {usuario.cantidadCuentas}
                                 </div>
-                                <div class="registro-opciones">
-                                    <button
+                                <div class="registro-opciones">                                    <button
                                         title="Detalles"
-                                        onclick={`abrirModalDetallesUsuario('${evento.id_eve}')`}
+                                        onclick={`mostrarDetallesUsuario('${usuario.id_usu}')`}
                                     >
                                         <img
                                             src="/img/CRUD/mostrar-detalles.svg"
@@ -160,7 +135,7 @@ const links = [
                                     </button>                                    
                                     <button
                                         title="Eliminar"
-                                        onclick={`eliminarEvento('${evento.id_eve}')`}
+                                        onclick={`eliminarUsuario('${usuario.id_usu}')`}
                                     >
                                         <img
                                             src="/img/CRUD/eliminar-registro.svg"
@@ -170,7 +145,7 @@ const links = [
                                     </button>
                                     <button
                                         title="Modificar"
-                                        onclick={`window.abrirModalModificarUsuario('${evento.id_eve}')`}
+                                        onclick={`window.abrirModalModificarUsuario('${usuario.id_usu}')`}
                                     >
                                         <img
                                             src="/img/CRUD/modificar-registro.svg"
@@ -188,42 +163,28 @@ const links = [
 
         <script>
             import { actions } from "astro:actions";
-            import Swal from "sweetalert2";
-
-            // Interfaces para tipado
-            interface Organizador {
-                ced_org: string;
-                nom_org1: string;
-                nom_org2?: string;
-                ape_org1: string;
-                ape_org2: string;
-                tit_aca_org: string;
+            import Swal from "sweetalert2";            // Interfaces para tipado
+            interface Carrera {
+                id_car: string;
+                nom_car: string;
+                des_car: string;
             }
 
-            interface Categoria {
-                id_cat: string;
-                nom_cat: string;
-                des_cat: string;
+            interface Usuario {
+                id_usu: string;
+                ced_usu: string;
+                nom_usu1: string;
+                nom_usu2?: string;
+                ape_usu1: string;
+                ape_usu2?: string;
+                fec_nac_usu: string;
+                num_tel_usu?: string;
+                id_car_per?: string;
+                carrera?: Carrera;
+                cantidadCuentas: number;
             }
 
-            interface Evento {
-                id_eve: string;
-                nom_eve: string;
-                des_eve: string;
-                fec_ini_eve: string;
-                fec_fin_eve?: string;
-                hor_ini_eve: string;
-                hor_fin_eve?: string;
-                dur_eve?: number;
-                are_eve?: string;
-                ubi_eve: string;
-                img_eve?: string;
-                precio: number;
-                organizador?: Organizador;
-                categoria?: Categoria;
-            }
-
-            async function eliminarEvento(eventoId: string) {
+            async function eliminarUsuario(usuarioId: string) {
                 try {
                     const resultado = await Swal.fire({
                         title: "¿Estás seguro?",
@@ -237,22 +198,20 @@ const links = [
                     });
 
                     if (resultado.isConfirmed) {
-                        const { data, error } = await actions.eliminarEvento({
-                            id_evento: eventoId,
-                        });
-
-                        if (error || !data?.success) {
+                        const { data, error } = await actions.eliminarUsuario({
+                            id_usuario: usuarioId,
+                        });                        if (error || !data?.success) {
                             await Swal.fire({
                                 icon: "error",
                                 title: "Error",
-                                text: data?.error || "No se pudo eliminar el evento",
+                                text: data?.message || "No se pudo eliminar el usuario",
                                 confirmButtonColor: "#dc2626",
                             });
                         } else {
                             await Swal.fire({
                                 icon: "success",
                                 title: "Eliminado",
-                                text: "El evento ha sido eliminado correctamente",
+                                text: "El usuario ha sido eliminado correctamente",
                                 confirmButtonColor: "#059669",
                             }).then(() => {
                                 window.location.reload();
@@ -269,32 +228,34 @@ const links = [
                     });
                 }
             }            
-            function mostrarDetallesEvento(eventoId: string) {
-                const eventos = Array.from(document.querySelectorAll('input[name="evento"]'))
+            function mostrarDetallesUsuario(usuarioId: string) {
+                const usuarios = Array.from(document.querySelectorAll('input[name="usuario"]'))
                     .map(input => JSON.parse((input as HTMLInputElement).value));
                 
-                const evento = eventos.find((e: Evento) => e.id_eve === eventoId);
+                const usuario = usuarios.find((u: Usuario) => u.id_usu === usuarioId);
                 
-                if (!evento) {
-                    console.error('Evento no encontrado:', eventoId);
+                if (!usuario) {
+                    console.error('Usuario no encontrado:', usuarioId);
                     return;
                 }
 
                 // Llamar directamente a la función de abrirModalDetalles del modal
-                if (window.abrirModalDetallesOrganizador) {
-                    window.abrirModalDetallesOrganizador(evento);
+                if (window.abrirModalDetallesUsuario) {
+                    window.abrirModalDetallesUsuario(usuario);
                 } else {
-                    console.error('La función abrirModalDetallesOrganizador no está disponible');
+                    console.error('La función abrirModalDetallesUsuario no está disponible');
                 }
-            }
-            // Hacer funciones disponibles globalmente
+            }            // Hacer funciones disponibles globalmente
             declare global {
                 interface Window {
-                    eliminarEvento: (eventoId: string) => Promise<void>;
-                    mostrarDetallesEvento: (eventoId: string) => void;
+                    eliminarUsuario: (usuarioId: string) => Promise<void>;
+                    mostrarDetallesUsuario: (usuarioId: string) => void;
+                    abrirModalDetallesUsuario: (usuario: any) => void;
+                    abrirModalModificarUsuario: (usuarioId: string) => void;
                 }
-            }            window.eliminarEvento = eliminarEvento;
-            window.mostrarDetallesEvento = mostrarDetallesEvento;
+            }
+            window.eliminarUsuario = eliminarUsuario;
+            window.mostrarDetallesUsuario = mostrarDetallesUsuario;
 
         </script>
     </body>
