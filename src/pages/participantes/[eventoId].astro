@@ -156,11 +156,10 @@ const links = [
             <div class="registros-grid">
                 <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Participantes del Evento
-                        {
+                        Participantes - {
                             participantes.length > 0 && (
                                 <span class="evento-nombre">
-                                    - {participantes[0].eventos?.nom_eve}
+                                    {participantes[0].eventos?.nom_eve}
                                 </span>
                             )
                         }
@@ -488,16 +487,27 @@ const links = [
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.2s ease;
         }
 
         .btn-cancelar {
-            background-color: #6c757d;
+            background-color: #a3a9ae;
             color: white;
         }
 
         .btn-guardar {
-            background-color: #007bff;
+            background-color: #b01025;
             color: white;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #6c757d;
+            transform: translateY(-2px);
+        }
+
+        .btn-guardar:hover {
+            background-color: #880f1f;
+            transform: translateY(-2px);
         }
 
         .btn-calificar {
@@ -513,10 +523,12 @@ const links = [
             font-style: italic;
         }
 
+        /*
         .evento-nombre {
             color: #007bff;
             font-weight: bold;
         }
+        */
 
         .total-participantes {
             color: #6c757d;
