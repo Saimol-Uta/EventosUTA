@@ -3,17 +3,17 @@ import "../styles/global.css";
 const { imagen, estado, horas, titulo, slug } = Astro.props;
 ---
 
-<a class="card" href={`/Eventos/${slug}`}>
-    <div class="card" data-titulo={titulo.toLowerCase()}>
-        <img src={imagen} alt="Imagen del evento" />
-        <div class="info">
-            <div class="row">
-                <span>{estado}</span>
-                <span>{horas}</span>
-            </div>
-            <div class="titulo">{titulo}</div>
-        </div>
+<a class="card" data-titulo={titulo.toLowerCase()} href={`/Eventos/${slug}`}>
+  <div>
+    <img src={imagen} alt="Imagen del evento" />
+    <div class="info">
+      <div class="row">
+        <span>{estado}</span>
+        <span>{horas}</span>
+      </div>
+      <div class="titulo">{titulo}</div>
     </div>
+  </div>
 </a>
 
 <style>

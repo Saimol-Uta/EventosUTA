@@ -1,0 +1,129 @@
+---
+import "../styles/ModalDetallesInscripcion.css";
+---
+
+<div id="modalDetallesReserva" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalDetallesInscripcion()"
+            >&times;</span
+        >
+        <div class="detalles-reserva">
+            <h2>Nombre del Evento</h2>
+
+            <div class="seccion-detalles">
+                <h3>Información del Usuario</h3>
+                <div class="descripcion-completa-container">
+                    <p class="descripcion-completa">
+                        <strong>Nombres:</strong>
+                        <span id="usuario-nombres"></span>
+                    </p>
+                    <p class="descripcion-completa">
+                        <strong>Apellidos:</strong>
+                        <span id="usuario-apellidos"></span>
+                    </p>
+                    <p class="descripcion-completa">
+                        <strong>Correo:</strong>
+                        <span id="usuario-correo"></span>
+                    </p>
+                    <p class="descripcion-completa">
+                        <strong>Cédula:</strong>
+                        <span id="usuario-cedula"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="seccion-detalles">
+                <h3>Documentación</h3>
+                <div class="info-grid">
+                    <p>
+                        <a href="#">Cédula y Papeleta de votación</a>
+                    </p>
+                    <p>
+                        <a href="#">Certificado de Matriculación</a>
+                    </p>
+
+                    <p>
+                        <a href="#">Carta de Motivación</a>
+                    </p>
+                </div>
+            </div>
+            <div class="contenedor-boton-modificar">
+                <button
+                    class="boton-modificar"
+                    onclick="aprobarInscripcionDocumentacion()">Aprobar</button
+                >
+                <button
+                    class="boton-modificar"
+                    onclick="rechazarInscripcionDocumentacion()"
+                    >Rechazar</button
+                >
+            </div>
+        </div>
+        <script>
+            declare global {
+                interface Window {
+                    cerrarModalDetallesInscripcion: () => void;
+                    abrirModalDetallesInscripcion: (
+                        inscripcionId: string,
+                    ) => void;
+                    aprobarInscripcionDocumentacion: () => void;
+                    rechazarInscripcionDocumentacion: () => void;
+                    aprobarInscripcion: (
+                        inscripcionId: string,
+                        tipo: "documentacion" | "pago",
+                    ) => Promise<void>;
+                    rechazarInscripcion: (
+                        inscripcionId: string,
+                        tipo: "documentacion" | "pago",
+                    ) => Promise<void>;
+                    currentInscripcionId: string;
+                }
+            }
+            let currentInscripcionId = "";
+
+            function cerrarModalDetallesInscripcion() {
+                const modal = document.getElementById("modalDetallesReserva");
+                if (modal) modal.style.display = "none";
+            }
+
+            function abrirModalDetallesInscripcion(inscripcionId: string) {
+                const modal = document.getElementById("modalDetallesReserva");
+                if (modal) modal.style.display = "block";
+                currentInscripcionId = inscripcionId;
+                window.currentInscripcionId = inscripcionId;
+            }
+            function aprobarInscripcionDocumentacion() {
+                if (window.aprobarInscripcion && window.currentInscripcionId) {
+                    window.aprobarInscripcion(
+                        window.currentInscripcionId,
+                        "documentacion",
+                    );
+                    cerrarModalDetallesInscripcion();
+                }
+            }
+            function rechazarInscripcionDocumentacion() {
+                if (window.rechazarInscripcion && window.currentInscripcionId) {
+                    window.rechazarInscripcion(
+                        window.currentInscripcionId,
+                        "documentacion",
+                    );
+                    cerrarModalDetallesInscripcion();
+                }
+            }
+
+            window.onclick = function (event) {
+                const modal = document.getElementById("modalDetallesReserva");
+                if (event.target === modal) cerrarModalDetallesInscripcion();
+            };
+
+            window.cerrarModalDetallesInscripcion =
+                cerrarModalDetallesInscripcion;
+            window.abrirModalDetallesInscripcion =
+                abrirModalDetallesInscripcion;
+            window.aprobarInscripcionDocumentacion =
+                aprobarInscripcionDocumentacion;
+            window.rechazarInscripcionDocumentacion =
+                rechazarInscripcionDocumentacion;
+        </script>
+    </div>
+</div>

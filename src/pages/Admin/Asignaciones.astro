@@ -1,0 +1,852 @@
+---
+import Header from "@components/Header.astro";
+import MenuAdmin from "@components/MenuAdministrador.astro";
+import Layout from "@layouts/Layout.astro";
+import "@styles/Admin/EventosCRUD.css";
+import { actions } from "astro:actions";
+
+// Obtener todas las asignaciones
+const { data: asignacionesData, error: asignacionesError } = await Astro.callAction(actions.getAllAsignaciones, {});
+
+// Obtener carreras para el formulario
+const { data: carrerasData } = await Astro.callAction(actions.getCarreras, {});
+
+if (asignacionesError) {
+    console.error("Error al obtener asignaciones:", asignacionesError);
+}
+
+const asignaciones = asignacionesData?.asignaciones || [];
+const carreras = carrerasData?.carreras || [];
+
+const links = [
+    { label: "Eventos", href: "/Admin/EventosCRUD" },
+    { label: "Usuarios", href: "/perfil" },
+    { label: "Organizadores", href: "/historial" },
+    { label: "Inscripciones", href: "/historial" },
+    { label: "Categorías", href: "/historial" },
+    { label: "Carreras", href: "/historial" },
+    { label: "Asignaciones", href: "/Admin/Asignaciones" },
+];
+---
+
+<Layout>
+    <body>
+        <Header />
+        <MenuAdmin links={links} />
+
+        <!-- Modal para Nueva Asignación -->
+        <div id="modalNuevaAsignacion" class="modal" style="display: none;">
+            <div class="modal-contenido" style="max-width: 800px;">
+                <span class="cerrar" onclick="cerrarModalNuevaAsignacion()">&times;</span>
+                
+                <div class="modal-header">
+                    <h2>Nueva Asignación</h2>
+                </div>
+
+                <form id="formNuevaAsignacion" class="form-asignacion">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombreAsignacion">Nombre de la Asignación:</label>
+                            <input type="text" id="nombreAsignacion" name="nombreAsignacion" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="descripcionAsignacion">Descripción:</label>
+                            <textarea id="descripcionAsignacion" name="descripcionAsignacion" rows="3" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="carreraAsignacion">Carrera (opcional):</label>
+                            <select id="carreraAsignacion" name="carreraAsignacion">
+                                <option value="">Todas las carreras</option>
+                                {carreras.map((carrera: any) => (
+                                    <option value={carrera.id_car}>
+                                        {carrera.nom_car} ({carrera.cod_car})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row opciones-checkbox">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="esPublicoGeneral" name="esPublicoGeneral">
+                                Dirigido al público en general
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="esGratuito" name="esGratuito">
+                                Es gratuito
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="requiereValidacion" name="requiereValidacion">
+                                Requiere validación manual
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sección de requisitos -->
+                    <div class="seccion-requisitos">
+                        <h4>Requisitos</h4>
+                        <div id="listaRequisitos">
+                            <!-- Los requisitos se añadirán dinámicamente aquí -->
+                        </div>
+                        <button type="button" id="btnAgregarRequisito" class="btn-secundario">
+                            + Agregar Requisito
+                        </button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-principal">Crear Asignación</button>
+                        <button type="button" onclick="cerrarModalNuevaAsignacion()" class="btn-secundario">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal para Editar Asignación -->
+        <div id="modalEditarAsignacion" class="modal" style="display: none;">
+            <div class="modal-contenido" style="max-width: 800px;">
+                <span class="cerrar" onclick="cerrarModalEditarAsignacion()">&times;</span>
+                
+                <div class="modal-header">
+                    <h2>Editar Asignación</h2>
+                </div>
+
+                <form id="formEditarAsignacion" class="form-asignacion">
+                    <input type="hidden" id="editarAsignacionId" name="asignacionId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editarNombreAsignacion">Nombre de la Asignación:</label>
+                            <input type="text" id="editarNombreAsignacion" name="nombreAsignacion" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editarDescripcionAsignacion">Descripción:</label>
+                            <textarea id="editarDescripcionAsignacion" name="descripcionAsignacion" rows="3" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editarCarreraAsignacion">Carrera (opcional):</label>
+                            <select id="editarCarreraAsignacion" name="carreraAsignacion">
+                                <option value="">Todas las carreras</option>
+                                {carreras.map((carrera: any) => (
+                                    <option value={carrera.id_car}>
+                                        {carrera.nom_car} ({carrera.cod_car})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row opciones-checkbox">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="editarEsPublicoGeneral" name="esPublicoGeneral">
+                                Dirigido al público en general
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="editarEsGratuito" name="esGratuito">
+                                Es gratuito
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="editarRequiereValidacion" name="requiereValidacion">
+                                Requiere validación manual
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sección de requisitos para editar -->
+                    <div class="seccion-requisitos">
+                        <h4>Requisitos</h4>
+                        <div id="editarListaRequisitos">
+                            <!-- Los requisitos se cargarán dinámicamente aquí -->
+                        </div>
+                        <button type="button" id="btnAgregarRequisitoEditar" class="btn-secundario">
+                            + Agregar Requisito
+                        </button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-principal">Actualizar Asignación</button>
+                        <button type="button" onclick="cerrarModalEditarAsignacion()" class="btn-secundario">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        Asignaciones
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <a
+                            onclick="abrirModalNuevaAsignacion()"
+                            class="contenedor-boton-nuevo-registro"
+                        >
+                            <button class="boton-nuevo-registro" title="Nueva Asignación">
+                                Nueva Asignación
+                            </button>
+                            <p class="anadir-icon">+</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombre
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Descripción
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Carrera
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Configuración
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Requisitos
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="registros-inferior">
+                    {asignaciones.map((asignacion: any) => (
+                        <input
+                            type="hidden"
+                            name="asignacion"
+                            value={JSON.stringify(asignacion)}
+                        />
+                        <div class="registro-fila">
+                            <div class="parte-izquierda-registro-fila">
+                                {asignacion.nom_asi}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {asignacion.des_asi?.slice(0, 50)}...
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {asignacion.carreras?.nom_car || "Todas"}
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                <div class="config-badges">
+                                    {asignacion.es_publico_general && <span class="badge badge-info">Público</span>}
+                                    {asignacion.es_gratuito && <span class="badge badge-success">Gratuito</span>}
+                                    {asignacion.requiere_validacion && <span class="badge badge-warning">Validación</span>}
+                                </div>
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                {asignacion.requisitos?.length || 0} requisito(s)
+                            </div>
+                            <div class="registro-opciones">
+                                <button
+                                    title="Editar"
+                                    onclick={`editarAsignacion('${asignacion.id_asi}')`}
+                                >
+                                    <img
+                                        src="/img/CRUD/modificar-registro.svg"
+                                        alt="boton editar"
+                                        class="imagen-boton-registro"
+                                    />
+                                </button>
+                                <button
+                                    title="Eliminar"
+                                    onclick={`eliminarAsignacion('${asignacion.id_asi}')`}
+                                >
+                                    <img
+                                        src="/img/CRUD/eliminar-registro.svg"
+                                        alt="boton eliminar"
+                                        class="imagen-boton-registro"
+                                    />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </main>
+
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
+
+            // Función para abrir modal de nueva asignación
+            function abrirModalNuevaAsignacion() {
+                const modal = document.getElementById("modalNuevaAsignacion");
+                if (modal) modal.style.display = "block";
+            }
+
+            // Función para cerrar modal de nueva asignación
+            function cerrarModalNuevaAsignacion() {
+                const modal = document.getElementById("modalNuevaAsignacion");
+                const form = document.getElementById("formNuevaAsignacion") as HTMLFormElement;
+                
+                if (modal) modal.style.display = "none";
+                if (form) form.reset();
+                
+                // Limpiar requisitos
+                const listaRequisitos = document.getElementById("listaRequisitos");
+                if (listaRequisitos) listaRequisitos.innerHTML = "";
+            }
+
+            // Función para abrir modal de editar asignación
+            function abrirModalEditarAsignacion() {
+                const modal = document.getElementById("modalEditarAsignacion");
+                if (modal) modal.style.display = "block";
+            }
+
+            // Función para cerrar modal de editar asignación
+            function cerrarModalEditarAsignacion() {
+                const modal = document.getElementById("modalEditarAsignacion");
+                const form = document.getElementById("formEditarAsignacion") as HTMLFormElement;
+                
+                if (modal) modal.style.display = "none";
+                if (form) form.reset();
+                
+                // Limpiar requisitos de edición
+                const listaRequisitos = document.getElementById("editarListaRequisitos");
+                if (listaRequisitos) listaRequisitos.innerHTML = "";
+            }
+
+            // Función para agregar requisito
+            function agregarRequisito(contenedorId = "listaRequisitos") {
+                const listaRequisitos = document.getElementById(contenedorId);
+                if (!listaRequisitos) return;
+                
+                const requisitoDiv = document.createElement('div');
+                requisitoDiv.className = 'requisito-item';
+                requisitoDiv.innerHTML = `
+                    <input type="text" placeholder="Nombre del requisito" required>
+                    <input type="text" placeholder="Descripción del requisito" required>
+                    <select>
+                        <option value="DOCUMENTO">Documento</option>
+                        <option value="CERTIFICADO">Certificado</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                    <label>
+                        <input type="checkbox" checked> Obligatorio
+                    </label>
+                    <button type="button" class="btn-eliminar-requisito" onclick="eliminarRequisito(this)">
+                        Eliminar
+                    </button>
+                `;
+                
+                listaRequisitos.appendChild(requisitoDiv);
+            }
+
+            // Función para eliminar requisito
+            function eliminarRequisito(button: HTMLButtonElement) {
+                const requisito = button.closest('.requisito-item');
+                if (requisito) {
+                    requisito.remove();
+                }
+            }
+
+            // Función para editar asignación
+            async function editarAsignacion(asignacionId: string) {
+                const asignaciones = Array.from(document.querySelectorAll('input[name="asignacion"]'))
+                    .map(input => JSON.parse((input as HTMLInputElement).value));
+                
+                const asignacion = asignaciones.find((a: any) => a.id_asi === asignacionId);
+                
+                if (!asignacion) {
+                    console.error('Asignación no encontrada:', asignacionId);
+                    return;
+                }
+
+                // Llenar el formulario de edición
+                const form = document.getElementById("formEditarAsignacion") as HTMLFormElement;
+                if (!form) return;
+
+                (document.getElementById("editarAsignacionId") as HTMLInputElement).value = asignacion.id_asi;
+                (document.getElementById("editarNombreAsignacion") as HTMLInputElement).value = asignacion.nom_asi;
+                (document.getElementById("editarDescripcionAsignacion") as HTMLTextAreaElement).value = asignacion.des_asi;
+                (document.getElementById("editarCarreraAsignacion") as HTMLSelectElement).value = asignacion.id_car_asi || "";
+                (document.getElementById("editarEsPublicoGeneral") as HTMLInputElement).checked = asignacion.es_publico_general;
+                (document.getElementById("editarEsGratuito") as HTMLInputElement).checked = asignacion.es_gratuito;
+                (document.getElementById("editarRequiereValidacion") as HTMLInputElement).checked = asignacion.requiere_validacion;
+
+                // Cargar requisitos existentes
+                const listaRequisitos = document.getElementById("editarListaRequisitos");
+                if (listaRequisitos && asignacion.requisitos) {
+                    listaRequisitos.innerHTML = "";
+                    asignacion.requisitos.forEach((req: any) => {
+                        const requisitoDiv = document.createElement('div');
+                        requisitoDiv.className = 'requisito-item';
+                        requisitoDiv.innerHTML = `
+                            <input type="text" value="${req.nom_req}" required>
+                            <input type="text" value="${req.des_req}" required>
+                            <select>
+                                <option value="DOCUMENTO" ${req.tipo_req === 'DOCUMENTO' ? 'selected' : ''}>Documento</option>
+                                <option value="CERTIFICADO" ${req.tipo_req === 'CERTIFICADO' ? 'selected' : ''}>Certificado</option>
+                                <option value="OTRO" ${req.tipo_req === 'OTRO' ? 'selected' : ''}>Otro</option>
+                            </select>
+                            <label>
+                                <input type="checkbox" ${req.obligatorio ? 'checked' : ''}> Obligatorio
+                            </label>
+                            <button type="button" class="btn-eliminar-requisito" onclick="eliminarRequisito(this)">
+                                Eliminar
+                            </button>
+                        `;
+                        listaRequisitos.appendChild(requisitoDiv);
+                    });
+                }
+
+                abrirModalEditarAsignacion();
+            }
+
+            // Función para eliminar asignación
+            async function eliminarAsignacion(asignacionId: string) {
+                try {
+                    const resultado = await Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: "No podrás revertir esta acción",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Sí, eliminar",
+                        cancelButtonText: "Cancelar",
+                    });                    if (resultado.isConfirmed) {
+                        const { data, error } = await actions.eliminarAsignacionCompleta({
+                            id_asignacion: asignacionId,
+                        });
+
+                        if (error || !data?.success) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: data?.error || "No se pudo eliminar la asignación",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        } else {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminado",
+                                text: "La asignación ha sido eliminada correctamente",
+                                confirmButtonColor: "#059669",
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }
+
+            // Función para recopilar requisitos del formulario
+            function recopilarRequisitos(contenedorId: string) {
+                const requisitos: any[] = [];
+                const listaRequisitos = document.getElementById(contenedorId);
+                
+                if (listaRequisitos) {
+                    const requisitosItems = listaRequisitos.querySelectorAll('.requisito-item');
+                    requisitosItems.forEach(item => {
+                        const inputs = item.querySelectorAll('input[type="text"]');
+                        const select = item.querySelector('select');
+                        const checkbox = item.querySelector('input[type="checkbox"]');
+                        
+                        if (inputs.length >= 2) {
+                            requisitos.push({
+                                nom_req: (inputs[0] as HTMLInputElement).value,
+                                des_req: (inputs[1] as HTMLInputElement).value,
+                                tipo_req: select ? (select as HTMLSelectElement).value : 'DOCUMENTO',
+                                obligatorio: checkbox ? (checkbox as HTMLInputElement).checked : true
+                            });
+                        }
+                    });
+                }
+                
+                return requisitos;
+            }
+
+            // Event listeners
+            document.addEventListener('DOMContentLoaded', () => {
+                // Agregar requisito en modal de nueva asignación
+                const btnAgregarRequisito = document.getElementById('btnAgregarRequisito');
+                if (btnAgregarRequisito) {
+                    btnAgregarRequisito.addEventListener('click', () => agregarRequisito('listaRequisitos'));
+                }
+
+                // Agregar requisito en modal de editar
+                const btnAgregarRequisitoEditar = document.getElementById('btnAgregarRequisitoEditar');
+                if (btnAgregarRequisitoEditar) {
+                    btnAgregarRequisitoEditar.addEventListener('click', () => agregarRequisito('editarListaRequisitos'));
+                }
+
+                // Formulario de nueva asignación
+                const formNuevaAsignacion = document.getElementById('formNuevaAsignacion');
+                if (formNuevaAsignacion) {
+                    formNuevaAsignacion.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(formNuevaAsignacion as HTMLFormElement);
+                        const requisitos = recopilarRequisitos('listaRequisitos');
+                        
+                        const asignacionData = {
+                            nom_asi: formData.get('nombreAsignacion') as string,
+                            des_asi: formData.get('descripcionAsignacion') as string,
+                            id_car_asi: formData.get('carreraAsignacion') as string || null,
+                            es_publico_general: formData.has('esPublicoGeneral'),
+                            es_gratuito: formData.has('esGratuito'),
+                            requiere_validacion: formData.has('requiereValidacion'),
+                            requisitos: requisitos
+                        };
+                        
+                        try {
+                            const { data, error } = await actions.crearAsignacionCompleta(asignacionData);
+                            
+                            if (error || !data?.success) {
+                                await Swal.fire({
+                                    icon: "error",
+                                    title: "Error",
+                                    text: data?.error || "No se pudo crear la asignación",
+                                    confirmButtonColor: "#dc2626",
+                                });
+                            } else {
+                                await Swal.fire({
+                                    icon: "success",
+                                    title: "Éxito",
+                                    text: "Asignación creada correctamente",
+                                    confirmButtonColor: "#059669",
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Error:", error);
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "Error al procesar la solicitud",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        }
+                    });
+                }
+
+                // Formulario de editar asignación
+                const formEditarAsignacion = document.getElementById('formEditarAsignacion');
+                if (formEditarAsignacion) {
+                    formEditarAsignacion.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        
+                        const formData = new FormData(formEditarAsignacion as HTMLFormElement);
+                        const requisitos = recopilarRequisitos('editarListaRequisitos');
+                        
+                        const asignacionData = {
+                            id_asignacion: formData.get('asignacionId') as string,
+                            nom_asi: formData.get('nombreAsignacion') as string,
+                            des_asi: formData.get('descripcionAsignacion') as string,
+                            id_car_asi: formData.get('carreraAsignacion') as string || null,
+                            es_publico_general: formData.has('esPublicoGeneral'),
+                            es_gratuito: formData.has('esGratuito'),
+                            requiere_validacion: formData.has('requiereValidacion'),
+                            requisitos: requisitos
+                        };
+                        
+                        try {
+                            const { data, error } = await actions.modificarAsignacionCompleta(asignacionData);
+                            
+                            if (error || !data?.success) {
+                                await Swal.fire({
+                                    icon: "error",
+                                    title: "Error",
+                                    text: data?.error || "No se pudo actualizar la asignación",
+                                    confirmButtonColor: "#dc2626",
+                                });
+                            } else {
+                                await Swal.fire({
+                                    icon: "success",
+                                    title: "Éxito",
+                                    text: "Asignación actualizada correctamente",
+                                    confirmButtonColor: "#059669",
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Error:", error);
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "Error al procesar la solicitud",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        }
+                    });
+                }
+
+                // Cerrar modales al hacer clic fuera
+                window.addEventListener('click', (event) => {
+                    const modalNueva = document.getElementById('modalNuevaAsignacion');
+                    const modalEditar = document.getElementById('modalEditarAsignacion');
+                    
+                    if (event.target === modalNueva) {
+                        cerrarModalNuevaAsignacion();
+                    }
+                    if (event.target === modalEditar) {
+                        cerrarModalEditarAsignacion();
+                    }
+                });
+            });
+
+            // Hacer funciones disponibles globalmente
+            declare global {
+                interface Window {
+                    abrirModalNuevaAsignacion: () => void;
+                    cerrarModalNuevaAsignacion: () => void;
+                    abrirModalEditarAsignacion: () => void;
+                    cerrarModalEditarAsignacion: () => void;
+                    editarAsignacion: (asignacionId: string) => Promise<void>;
+                    eliminarAsignacion: (asignacionId: string) => Promise<void>;
+                    agregarRequisito: (contenedorId?: string) => void;
+                    eliminarRequisito: (button: HTMLButtonElement) => void;
+                }
+            }
+
+            window.abrirModalNuevaAsignacion = abrirModalNuevaAsignacion;
+            window.cerrarModalNuevaAsignacion = cerrarModalNuevaAsignacion;
+            window.abrirModalEditarAsignacion = abrirModalEditarAsignacion;
+            window.cerrarModalEditarAsignacion = cerrarModalEditarAsignacion;
+            window.editarAsignacion = editarAsignacion;
+            window.eliminarAsignacion = eliminarAsignacion;
+            window.agregarRequisito = agregarRequisito;
+            window.eliminarRequisito = eliminarRequisito;
+        </script>
+
+        <style>
+            /* Estilos específicos para la página de asignaciones */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+
+            .modal-contenido {
+                background-color: #fefefe;
+                margin: 2% auto;
+                padding: 20px;
+                border: 1px solid #888;
+                border-radius: 10px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .modal-header {
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 15px;
+            }
+
+            .form-asignacion {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .form-row {
+                display: flex;
+                gap: 15px;
+            }
+
+            .form-group {
+                flex: 1;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+            .opciones-checkbox {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .opciones-checkbox .form-group label {
+                display: flex;
+                align-items: center;
+                font-weight: normal;
+            }
+
+            .opciones-checkbox input[type="checkbox"] {
+                width: auto;
+                margin-right: 8px;
+            }
+
+            .seccion-requisitos {
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 15px;
+                background: white;
+            }
+
+            .requisito-item {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 10px;
+                padding: 10px;
+                background: #f5f5f5;
+                border-radius: 4px;
+                align-items: center;
+            }
+
+            .requisito-item input {
+                flex: 1;
+            }
+
+            .btn-eliminar-requisito {
+                background: #dc2626;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+
+            .form-actions {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                margin-top: 20px;
+            }
+
+            .btn-principal,
+            .btn-secundario {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            .btn-principal {
+                background: #059669;
+                color: white;
+            }
+
+            .btn-secundario {
+                background: #6b7280;
+                color: white;
+            }
+
+            .btn-principal:hover {
+                background: #047857;
+            }
+
+            .btn-secundario:hover {
+                background: #4b5563;
+            }
+
+            .config-badges {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .badge {
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: bold;
+            }
+
+            .badge-info {
+                background: #3b82f6;
+                color: white;
+            }
+
+            .badge-success {
+                background: #10b981;
+                color: white;
+            }
+
+            .badge-warning {
+                background: #f59e0b;
+                color: white;
+            }
+
+            .cerrar {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .cerrar:hover {
+                color: #000;
+            }
+
+            @media (max-width: 768px) {
+                .form-row {
+                    flex-direction: column;
+                }
+                
+                .modal-contenido {
+                    width: 95%;
+                    margin: 5% auto;
+                }
+
+                .requisito-item {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+            }
+        </style>
+    </body>
+</Layout>

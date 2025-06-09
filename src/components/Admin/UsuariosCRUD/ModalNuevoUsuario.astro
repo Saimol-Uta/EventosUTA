@@ -1,0 +1,279 @@
+---
+import "../../../styles/Admin/ModalModificarEvento.css";
+
+interface Props {
+    categorias?: any[];
+    organizadores?: any[];
+}
+
+const { organizadores = [] } = Astro.props;
+---
+
+<div id="modalNuevoUsuario" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModalNuevoUsuario()">&times;</span>
+        <div class="formulario-completo">
+            <form
+                class="formulario-modificar-registro"
+                method="POST"
+                id="formulario-nuevo-evento"
+                enctype="multipart/form-data"
+            >
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-roja">Información General</p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Cédula</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="text"
+                                class="input-dato"
+                                name="usaurio-cedula"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Primer Nombre</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="usuario-nombre1"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Segundo Nombre</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="usuario-nombre2"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Primer Apellido</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="usuario-apellido1"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Segundo Apellido</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="text"
+                                    class="input-dato"
+                                    name="usuario-apellido2"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Fecha de Nacimiento</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="date"
+                                class="input-dato"
+                                name="usuario-fecha-nacimiento"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Número de Teléfono</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="number"
+                                class="input-dato"
+                                name="numero-usuario"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Carrera</p>
+                        <div class="contenedor-input">
+                            <select>
+                                <option value="software">Software</option>
+                                <option value="ti">Tecnologías de la Información</option>
+                                <option value="industrial">Industrial</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-boton-modificar">
+                        <button
+                        type="button"
+                        class="boton-modificar"
+                        onclick="cerrarModalNuevoUsuario()"
+                        >
+                        Cancelar
+                        </button>
+                        <button type="submit" class="boton-modificar">
+                        Crear Usuario
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
+    declare global {
+        interface Window {
+            abrirModalNuevoUsuario: () => void;
+            cerrarModalNuevoUsuario: () => void;
+        }
+    }
+
+    async function testearConexionAcciones() {
+        try {
+            console.log("🧪 Probando conexión con acciones...");
+            const resultado = await actions.getAsignacionesPlantilla({});
+            console.log("🧪 Resultado de prueba:", resultado);
+            return resultado;
+        } catch (error) {
+            console.error("🧪 Error en prueba:", error);
+            return null;
+        }
+    }
+
+    function abrirModalNuevoUsuario(): void {
+        console.log("🎯 Abriendo modal nuevo organizador...");
+        const modal = document.getElementById("modalNuevoUsuario");
+        if (modal) {
+            modal.style.display = "block";
+            testearConexionAcciones();
+        }
+    }
+
+    function cerrarModalNuevoUsuario(): void {
+        const modal = document.getElementById("modalNuevoUsuario");
+        const form = document.getElementById(
+            "formulario-nuevo-evento",
+        ) as HTMLFormElement;
+
+        if (modal && form) {
+            modal.style.display = "none";
+            form.reset();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById(
+            "formulario-nuevo-evento",
+        ) as HTMLFormElement;
+
+        // Manejar envío del formulario
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                try {
+                    const { data, error } = await actions.crearEvento(formData);
+
+                    if (data?.success) {
+                        // Obtener asignaciones seleccionadas
+                        const selectAsignaciones = document.getElementById(
+                            "asignaciones-evento",
+                        ) as HTMLSelectElement;
+                        const asignacionesSeleccionadas = Array.from(
+                            selectAsignaciones.selectedOptions,
+                        )
+                            .map((option) => option.value)
+                            .filter((value) => value !== "");
+
+                        // Si hay asignaciones seleccionadas, duplicarlas al evento
+                        if (
+                            asignacionesSeleccionadas.length > 0 &&
+                            data.data?.id
+                        ) {
+                            await Promise.all(
+                                asignacionesSeleccionadas.map(
+                                    async (idAsignacion) => {
+                                        try {
+                                            await actions.duplicarAsignacionAEvento(
+                                                {
+                                                    id_asignacion_plantilla:
+                                                        idAsignacion,
+                                                    id_evento_destino:
+                                                        data.data.id,
+                                                },
+                                            );
+                                        } catch (error) {
+                                            console.error(
+                                                "Error al duplicar asignación:",
+                                                error,
+                                            );
+                                        }
+                                    },
+                                ),
+                            );
+                        }
+
+                        await Swal.fire({
+                            icon: "success",
+                            title: "Éxito",
+                            text:
+                                asignacionesSeleccionadas.length > 0
+                                    ? `Evento creado correctamente con ${asignacionesSeleccionadas.length} asignación(es).`
+                                    : "Evento creado correctamente sin restricciones de inscripción.",
+                            confirmButtonColor: "#059669",
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text:
+                                data?.message ||
+                                error?.message ||
+                                "No se pudo crear el evento.",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            });
+        }
+
+        // Asignar funciones al objeto window
+        window.abrirModalNuevoUsuario = abrirModalNuevoUsuario;
+        window.cerrarModalNuevoUsuario = cerrarModalNuevoUsuario;
+    });
+</script>

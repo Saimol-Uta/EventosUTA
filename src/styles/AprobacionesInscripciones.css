@@ -1,0 +1,180 @@
+:root {
+    --color-fuerte-uta: #b01025;
+    --color-oscuro-uta: #880f1f;
+    --color-ligero-uta: #ed5267;
+}
+
+.anadir-icon {
+    font-weight: 800;
+    font-size: 22px;
+}
+
+.registros {
+    position: fixed;
+    left: 200px;
+    right: 200px;
+    top: 200px;
+    bottom: 50px;
+}
+
+.fade {
+  opacity: 0.8;
+}
+
+.registros-grid {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    
+}
+
+.registros-superior {
+    display: flex;
+    height: 32px;
+    margin-bottom: 20px;
+}
+
+.registros-superior-izquierdo {
+    display: flex;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.select-estado {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+  color: #333;
+  width: 200px; /* Tamaño fijo */
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  appearance: none; /* Elimina el estilo por defecto del navegador */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath fill='%23333' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+.select-estado:focus {
+  outline: none;
+  border-color: var(--color-fuerte-uta);
+  box-shadow: 0 0 0 2px #b010254c;
+}
+
+.registros-superior-derecho {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Opcional: para que el contenedor superior no ocupe todo el ancho */
+.registros-superior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.registros-inferior, .registros-inferior-titulos {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    flex: 1;
+    border-top: 2px solid black;
+    padding: 20px 5px 20px 5px;
+}
+
+.registros-inferior-titulos {
+    flex: 0;
+    height: auto;
+    padding: 10px 5px;
+}
+
+.registros-inferior {
+    overflow-y: auto;
+    border-bottom: 2px solid black;
+    max-height: calc(100vh - 350px);
+}
+
+.registros-inferior::-webkit-scrollbar {
+    width: 8px;
+}
+
+.registros-inferior::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.registros-inferior::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.registros-inferior::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.registro-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.registro-opciones {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.imagen-boton-registro,
+.imagen-boton-modificar {
+    width: 100%;
+    height: auto;
+    max-height: 30px;
+    transition: opacity 0.15;
+}
+
+.imagen-boton-registro {
+    max-width: 30px;
+}
+
+.imagen-boton-modificar {
+    max-width: 20px;
+}
+
+.imagen-boton-registro:hover,
+.imagen-boton-modificar:hover {
+    opacity: 0.8;
+}
+
+.imagen-boton-registro:active,
+.imagen-boton-modificar:active {
+    opacity: 0.4;
+}
+
+.parte-izquierda-registro-encabezado,
+.parte-izquierda-registro-fila {
+    flex: 1;
+}
+
+.parte-derecha-registro-encabezado,
+.registro-opciones {
+    width: 150px;
+}
+
+.parte-izquierda-registro-encabezado,
+.parte-derecha-registro-encabezado {
+    font-size: 16px;
+    font-weight: 500;
+    border-right: 2px solid black;
+    text-align: center;
+    color: var(--color-fuerte-uta);
+}
+
+.parte-izquierda-registro-fila {
+    padding: 0 10px 0 10px;
+}

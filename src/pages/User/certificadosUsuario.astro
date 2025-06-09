@@ -1,0 +1,62 @@
+---
+import Header from "@/components/Header.astro";
+import NavBar from "@/components/Navbar.astro";
+import { actions } from "astro:actions";
+import { getSession } from "auth-astro/server";
+
+const session = await getSession(Astro.request);
+
+if (!session?.user?.id) {
+  return Astro.redirect("/"); 
+}
+
+const { data: certificadosData } = await Astro.callAction(
+  actions.getCertificadosPorUsuario,
+  { idUsuario: session.user.id }
+);
+
+const certificados = certificadosData?.enlaces ?? [];
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mis Certificados</title>
+  </head>
+  <body class="bg-gray-100">
+    <Header />
+    <NavBar />
+
+    <main class="max-w-6xl mx-auto p-6">
+      <h1 class="text-3xl font-bold text-red-800 mb-6 text-center">Mis Certificados</h1>
+
+      {
+        certificados.length > 0 ? (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {
+              certificados.map((enlace, i) => (
+                <div class="bg-white rounded-xl shadow-lg p-4 border border-gray-200">
+                  <h2 class="text-xl font-semibold text-gray-800 mb-2">
+                    Certificado #{i + 1}
+                  </h2>
+                  <p class="text-sm text-gray-600 mb-4">
+                    Curso o evento completado exitosamente.
+                  </p>
+                  <a
+                    href={enlace}
+                    target="_blank"
+                    class="text-red-700 hover:underline font-medium"
+                  >
+                    Ver certificado
+                  </a>
+                </div>
+              ))
+            }
+          </div>
+        ) : (
+          <p class="text-gray-500 text-center">No tienes certificados disponibles aún.</p>
+        )
+      }
+    </main>
+  </body>
+</html>

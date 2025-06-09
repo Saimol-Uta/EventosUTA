@@ -1,0 +1,131 @@
+---
+import "../../../styles/Admin/ModalGestionarCuenta.css";
+---
+
+<!-- Modal para gestionar cuentas de usuario -->
+<div id="modalGestionarCuenta" class="modal" style="display: none;">
+  <div class="modal-contenido" style="max-width: 700px; width: 90%;">
+    <span class="cerrar" onclick="cerrarModalGestionarCuenta()">&times;</span>
+
+    <div class="modal-header">
+      <h2>Gestionar Cuenta de Usuario</h2>
+    </div>
+
+    <form id="formGestionCuenta" class="form-asignacion">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Correo Electrónico:</label>
+          <div class="contenedor-input">
+            <input type="email" name="correo" id="correoCuenta" disabled />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="rolCuenta">Rol:</label>
+          <div class="contenedor-input">
+            <select name="rol" id="rolCuenta">
+              <option value="usuario">Usuario</option>
+              <option value="estudiante">Estudiante</option>
+              <option value="administrador">Administrador</option>
+              <option value="master">Master</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cedulaDocumento">Copia de Cédula:</label>
+          <div class="contenedor-input">
+            <input type="file" name="cedula" id="cedulaDocumento" accept=".pdf,.jpg,.png" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="certificadoMatricula">Certificado de Matrícula:</label>
+          <div class="contenedor-input">
+            <input type="file" name="certificado" id="certificadoMatricula" accept=".pdf,.jpg,.png" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cartaCompromiso">Carta de Compromiso:</label>
+          <div class="contenedor-input">
+            <input type="file" name="carta" id="cartaCompromiso" accept=".pdf,.jpg,.png" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="imagenPerfil">Imagen de Perfil:</label>
+          <div class="contenedor-input">
+            <input type="file" name="imagen" id="imagenPerfil" accept="image/*" />
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <div>
+          <button type="button" class="btn-eliminar">Eliminar Cuenta</button>
+          
+        </div>
+        
+        <div>
+          <button type="submit" class="btn-principal">Guardar Cambios</button>
+          <button type="button" class="btn-secundario" onclick="cerrarModalGestionarCuenta()">Cancelar</button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  declare global {
+    interface Window {
+      abrirModalGestionarCuenta: (correo: string, rol: string) => void;
+      cerrarModalGestionarCuenta: () => void;
+    }
+  }
+
+  function abrirModalGestionarCuenta(correo: string, rol: string): void {
+    const modal = document.getElementById("modalGestionarCuenta");
+    if (!modal) return;
+
+    const correoInput = document.getElementById("correoCuenta") as HTMLInputElement;
+    const rolSelect = document.getElementById("rolCuenta") as HTMLSelectElement;
+
+    if (correoInput && rolSelect) {
+      correoInput.value = correo;
+      rolSelect.value = rol;
+    }
+
+    modal.style.display = "block";
+  }
+
+  function cerrarModalGestionarCuenta() {
+    const modal = document.getElementById("modalGestionarCuenta");
+    if (modal) {
+      modal.style.display = "none";
+      (document.getElementById("formGestionCuenta") as HTMLFormElement)?.reset();
+    }
+  }
+
+  window.abrirModalGestionarCuenta = abrirModalGestionarCuenta;
+  window.cerrarModalGestionarCuenta = cerrarModalGestionarCuenta;
+
+  window.addEventListener("click", (event) => {
+    const modal = document.getElementById("modalGestionarCuenta");
+    if (event.target === modal) {
+      cerrarModalGestionarCuenta();
+    }
+  });
+</script>
+

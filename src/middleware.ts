@@ -2,21 +2,24 @@ import { defineMiddleware } from 'astro:middleware';
 import { getSession } from "auth-astro/server";
 
 // Rutas específicas por rol
-const adminRoutes = ['/homeAdmin', '/admin/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD']; // Añadir más rutas de admin aquí
-const studentRoutes = ['/homeUser', '/student/*', '/Eventos/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de estudiante aquí
-const userRoutes = ['/homeUser', '/user/*', '/Eventos/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de usuario aquí
-const masterRoutes = ['/homeAdmin', '/master/*', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD']; // Añadir más rutas de master aquí
+const adminRoutes = ['/homeAdmin', '/admin/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD', '/Admin/Asignaciones']; // Añadir más rutas de admin aquí
+const studentRoutes = ['/homeUser', '/student/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de estudiante aquí
+const userRoutes = ['/homeUser', '/user/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de usuario aquí
+const masterRoutes = ['/homeAdmin', '/master/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD', '/Admin/Asignaciones']; // Añadir más rutas de master aquí
+
 
 // Rutas que no requieren autenticación
 const noAuthRoutes = ['/login', '/register', '/'];
 
 // Rutas públicas accesibles por todos (autenticados y no autenticados)
 const publicRoutes = [
-    '/',
+    '/*',
+    '/Admin/*',
     '/img/usuario.png',
     '/default-avatar.png',
     '/favicon.ico',
     '/about',
+    '/Eventos/historial',
     '/contact',
     // Añadir aquí todas las rutas que deben ser accesibles por usuarios autenticados
 ];

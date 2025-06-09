@@ -1,0 +1,301 @@
+---
+import Header from "@components/Header.astro";
+import MenuAdmin from "../../components/MenuAdministrador.astro";
+import Layout from "../../layouts/Layout.astro";
+import ModalDetallesUsuario from "../../components/Admin/UsuariosCRUD/ModalDetallesUsuario.astro";
+import ModalModificarUsuario from "../../components/Admin/UsuariosCRUD/ModalModificarUsuario.astro";
+import ModalNuevoUsuario from "../../components/Admin/UsuariosCRUD/ModalNuevoUsuario.astro";
+import "../../styles/Admin/EventosCRUD.css";
+import { actions } from "astro:actions";
+
+const searchParams = Astro.url.searchParams;
+const categoriaFiltro = searchParams.get("categoria");
+
+// Obtener eventos con información relacionada
+const { data, error } = await Astro.callAction(actions.getEventos, {
+    categoria: categoriaFiltro || undefined,
+});
+
+// Obtener categorías para el filtro
+const { data: categoriasData } = await Astro.callAction(actions.getCategorias, {});
+const { data: organizadoresData } = await Astro.callAction(actions.getOrganizadores, {});
+
+if (error) {
+    console.error("Error al obtener eventos:", error);
+}
+
+const eventos = data?.eventos || [];
+const categorias = categoriasData?.categorias || [];
+const organizadores = organizadoresData?.organizadores || [];
+
+// Obtener información completa de cada evento
+const eventosCompletos = await Promise.all(
+    eventos.map(async (evento: any) => {
+        const organizador = await Astro.callAction(
+            actions.getOrganizadorByEvento,
+            { id_evento: evento.id_eve }
+        );
+
+        const categoria = await Astro.callAction(
+            actions.getCategoriaById,
+            { id_categoria: evento.id_cat_eve }
+        );
+
+        return {
+            ...evento,
+            organizador: organizador.data,
+            categoria: categoria.data,
+        };
+    })
+);
+
+const links = [
+    { label: "Eventos", href: "/" },
+    { label: "Usuarios", href: "/perfil" },
+    { label: "Organizadores", href: "/historial" },
+    { label: "Inscripciones", href: "/historial" },
+    { label: "Categorías", href: "/historial" },
+    { label: "Carreras", href: "/historial" },
+    { label: "Asignaciones", href: "/Admin/Asignaciones" },
+];
+---
+
+<Layout>
+    <body>
+        <Header />
+        <MenuAdmin links={links} />        <ModalDetallesUsuario />
+        <ModalModificarUsuario categorias={categorias} organizadores={organizadores} />
+        <ModalNuevoUsuario categorias={categorias} organizadores={organizadores} />
+
+        <main class="registros">
+            <div class="registros-grid">
+                <div class="registros-superior">
+                    <div class="registros-superior-izquierdo">
+                        Usuarios                        <select
+                            id="filtroCategoria"
+                            class="select-estado"
+                            onchange="window.location.href = `?categoria=${this.value}`"
+                        >
+                            <option value="" selected={!categoriaFiltro}>
+                                Todos los usuarios
+                            </option>
+                            {categorias.map((categoria: any) => (
+                                <option
+                                    value={categoria.nom_cat}
+                                    selected={categoriaFiltro === categoria.nom_cat}
+                                >
+                                    {categoria.nom_cat}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div class="registros-superior-derecho">
+                        <a onclick="abrirModalNuevoUsuario()" class="contenedor-boton-nuevo-registro">
+                            <button class="boton-nuevo-registro" title="Nuevo">
+                                Nuevo Usuario
+                            </button>
+                            <p class="anadir-icon">+</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="registros-inferior-titulos">
+                    <div class="registro-fila">
+                        <div class="parte-izquierda-registro-encabezado">
+                            Cédula
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Nombres
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Apellidos
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Carrera
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Cantidad de Cuentas
+                        </div>
+                        <div class="parte-derecha-registro-encabezado">
+                            Opciones
+                        </div>
+                    </div>
+                </div>
+                <div class="registros-inferior">
+                    {
+                        eventosCompletos.map((evento) => (
+                            <input
+                                type="hidden"
+                                name="evento"
+                                value={JSON.stringify(evento)}
+                            />
+                            <div class="registro-fila">
+                                <div class="parte-izquierda-registro-fila">
+                                    {evento.nom_eve}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {evento.categoria?.data?.nom_cat || "N/A"}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {evento.are_eve || "N/A"}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {evento.are_eve || "N/A"}
+                                </div>
+                                <div class="parte-izquierda-registro-fila">
+                                    {new Date(evento.fec_ini_eve)
+                                        .toISOString()
+                                        .split("T")[0]}
+                                </div>
+                                <div class="registro-opciones">
+                                    <button
+                                        title="Detalles"
+                                        onclick={`abrirModalDetallesUsuario('${evento.id_eve}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/mostrar-detalles.svg"
+                                            alt="boton mostrar detalles"
+                                            class="imagen-boton-registro"
+                                        />
+                                    </button>                                    
+                                    <button
+                                        title="Eliminar"
+                                        onclick={`eliminarEvento('${evento.id_eve}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/eliminar-registro.svg"
+                                            alt="boton eliminar registro"
+                                            class="imagen-boton-registro"
+                                        />
+                                    </button>
+                                    <button
+                                        title="Modificar"
+                                        onclick={`window.abrirModalModificarUsuario('${evento.id_eve}')`}
+                                    >
+                                        <img
+                                            src="/img/CRUD/modificar-registro.svg"
+                                            alt="boton modificar"
+                                            class="imagen-boton-modificar"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+        </main>
+
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
+
+            // Interfaces para tipado
+            interface Organizador {
+                ced_org: string;
+                nom_org1: string;
+                nom_org2?: string;
+                ape_org1: string;
+                ape_org2: string;
+                tit_aca_org: string;
+            }
+
+            interface Categoria {
+                id_cat: string;
+                nom_cat: string;
+                des_cat: string;
+            }
+
+            interface Evento {
+                id_eve: string;
+                nom_eve: string;
+                des_eve: string;
+                fec_ini_eve: string;
+                fec_fin_eve?: string;
+                hor_ini_eve: string;
+                hor_fin_eve?: string;
+                dur_eve?: number;
+                are_eve?: string;
+                ubi_eve: string;
+                img_eve?: string;
+                precio: number;
+                organizador?: Organizador;
+                categoria?: Categoria;
+            }
+
+            async function eliminarEvento(eventoId: string) {
+                try {
+                    const resultado = await Swal.fire({
+                        title: "¿Estás seguro?",
+                        text: "No podrás revertir esta acción",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Sí, eliminar",
+                        cancelButtonText: "Cancelar",
+                    });
+
+                    if (resultado.isConfirmed) {
+                        const { data, error } = await actions.eliminarEvento({
+                            id_evento: eventoId,
+                        });
+
+                        if (error || !data?.success) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: data?.error || "No se pudo eliminar el evento",
+                                confirmButtonColor: "#dc2626",
+                            });
+                        } else {
+                            await Swal.fire({
+                                icon: "success",
+                                title: "Eliminado",
+                                text: "El evento ha sido eliminado correctamente",
+                                confirmButtonColor: "#059669",
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al procesar la solicitud",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }            
+            function mostrarDetallesEvento(eventoId: string) {
+                const eventos = Array.from(document.querySelectorAll('input[name="evento"]'))
+                    .map(input => JSON.parse((input as HTMLInputElement).value));
+                
+                const evento = eventos.find((e: Evento) => e.id_eve === eventoId);
+                
+                if (!evento) {
+                    console.error('Evento no encontrado:', eventoId);
+                    return;
+                }
+
+                // Llamar directamente a la función de abrirModalDetalles del modal
+                if (window.abrirModalDetallesOrganizador) {
+                    window.abrirModalDetallesOrganizador(evento);
+                } else {
+                    console.error('La función abrirModalDetallesOrganizador no está disponible');
+                }
+            }
+            // Hacer funciones disponibles globalmente
+            declare global {
+                interface Window {
+                    eliminarEvento: (eventoId: string) => Promise<void>;
+                    mostrarDetallesEvento: (eventoId: string) => void;
+                }
+            }            window.eliminarEvento = eliminarEvento;
+            window.mostrarDetallesEvento = mostrarDetallesEvento;
+
+        </script>
+    </body>
+</Layout>
