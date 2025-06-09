@@ -132,17 +132,19 @@ import "../../../styles/Admin/ModalGestionarCuenta.css";
                 correo: string,
                 rol: string,
                 idCuenta?: string,
+                idUsuario?: string,
             ) => void;
             cerrarModalGestionarCuenta: () => void;
         }
     }
-
     let cuentaActual: any = null;
+    let usuarioIdActual: string | null = null;
 
     function abrirModalGestionarCuenta(
         correo: string,
         rol: string,
         idCuenta?: string,
+        idUsuario?: string,
     ): void {
         const modal = document.getElementById("modalGestionarCuenta");
         if (!modal) return;
@@ -153,18 +155,47 @@ import "../../../styles/Admin/ModalGestionarCuenta.css";
         const rolSelect = document.getElementById(
             "rolCuenta",
         ) as HTMLSelectElement;
+        const btnEliminar = document.querySelector(
+            ".btn-eliminar",
+        ) as HTMLButtonElement;
+        const submitBtn = document.querySelector(
+            ".btn-principal",
+        ) as HTMLButtonElement;
 
         if (correoInput && rolSelect) {
             correoInput.value = correo;
             rolSelect.value = rol;
         }
 
-        // Guardar información de la cuenta actual
+        // Configurar el modal basado en si es crear o editar
+        if (!idCuenta || idCuenta === "") {
+            // Modo crear nueva cuenta
+            if (correoInput) correoInput.disabled = false; // Permitir editar correo para nuevas cuentas
+            if (btnEliminar) btnEliminar.style.display = "none"; // Ocultar botón eliminar
+            if (submitBtn) submitBtn.textContent = "Crear Cuenta";
+
+            // Generar correo automático si está vacío
+            if (!correo) {
+                const cedulaInput = document.querySelector(
+                    'input[name="usuario_cedula"]',
+                ) as HTMLInputElement;
+                const cedula = cedulaInput?.value;
+                if (cedula && correoInput) {
+                    correoInput.value = `${cedula}@uta.edu.ec`;
+                }
+            }
+        } else {
+            // Modo editar cuenta existente
+            if (correoInput) correoInput.disabled = true; // No permitir cambiar correo en edición
+            if (btnEliminar) btnEliminar.style.display = "block"; // Mostrar botón eliminar
+            if (submitBtn) submitBtn.textContent = "Guardar Cambios";
+        } // Guardar información de la cuenta actual
         cuentaActual = {
             id: idCuenta,
             correo: correo,
             rol: rol,
         };
+        usuarioIdActual = idUsuario || null;
 
         modal.style.display = "block";
     }
@@ -177,6 +208,7 @@ import "../../../styles/Admin/ModalGestionarCuenta.css";
                 document.getElementById("formGestionCuenta") as HTMLFormElement
             )?.reset();
             cuentaActual = null;
+            usuarioIdActual = null;
         }
     }
 
@@ -188,46 +220,20 @@ import "../../../styles/Admin/ModalGestionarCuenta.css";
         const btnEliminar = document.querySelector(
             ".btn-eliminar",
         ) as HTMLButtonElement;
-
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
-                if (!cuentaActual?.id) {
-                    await Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: "No se puede modificar la cuenta sin un ID válido",
-                        confirmButtonColor: "#dc2626",
-                    });
-                    return;
-                }
-
                 const formData = new FormData(form);
-                formData.append("id_cue", cuentaActual.id);
 
                 try {
-                    const { data, error } =
-                        await actions.modificarCuenta(formData);
-
-                    if (data?.success) {
-                        await Swal.fire({
-                            icon: "success",
-                            title: "Éxito",
-                            text: "Cuenta actualizada correctamente",
-                            confirmButtonColor: "#059669",
-                        });
-                        cerrarModalGestionarCuenta();
-                        window.location.reload();
+                    // Distinguir entre crear nueva cuenta y modificar cuenta existente
+                    if (!cuentaActual?.id || cuentaActual.id === "") {
+                        // Crear nueva cuenta
+                        await crearNuevaCuentaAction(formData);
                     } else {
-                        await Swal.fire({
-                            icon: "error",
-                            title: "Error",
-                            text:
-                                data?.message ||
-                                "No se pudo actualizar la cuenta",
-                            confirmButtonColor: "#dc2626",
-                        });
+                        // Modificar cuenta existente
+                        await modificarCuentaExistente(formData);
                     }
                 } catch (error) {
                     console.error("Error:", error);
@@ -239,6 +245,139 @@ import "../../../styles/Admin/ModalGestionarCuenta.css";
                     });
                 }
             });
+        }
+
+        async function crearNuevaCuentaAction(formData: FormData) {
+            const correo = formData.get("correo") as string;
+            const rol = formData.get("rol") as string;
+
+            if (!correo || !rol) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Por favor complete todos los campos requeridos",
+                    confirmButtonColor: "#dc2626",
+                });
+                return;
+            } // Para crear nueva cuenta, necesitamos el ID del usuario
+            let idUsuario = usuarioIdActual;
+
+            // Si no tenemos el ID del usuario, lo obtenemos por cédula
+            if (!idUsuario) {
+                const cedulaInput = document.querySelector(
+                    'input[name="usuario_cedula"]',
+                ) as HTMLInputElement;
+                const cedula = cedulaInput?.value;
+
+                if (!cedula) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pudo obtener la información del usuario",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
+                // Obtener el usuario por cédula para obtener su ID
+                try {
+                    const { data: userData } = await actions.getUserByCedula({
+                        ced_usu: cedula,
+                    });
+
+                    if (!userData?.encontrado || !userData.usuario) {
+                        throw new Error(
+                            "No se pudo obtener la información del usuario",
+                        );
+                    }
+
+                    idUsuario = userData.usuario.id_usu;
+                } catch (error) {
+                    console.error("Error obteniendo usuario:", error);
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "No se pudo obtener la información del usuario",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+            }
+
+            // Crear la cuenta con el ID del usuario obtenido
+            try {
+                const createFormData = new FormData();
+                createFormData.append("id_usu_per", idUsuario);
+                createFormData.append("cor_cue", correo);
+                createFormData.append("rol_cue", rol);
+                createFormData.append("cont_cuenta", "TempPass123!"); // Contraseña temporal
+
+                const { data, error } =
+                    await actions.crearCuenta(createFormData);
+
+                if (data?.success) {
+                    await Swal.fire({
+                        icon: "success",
+                        title: "Éxito",
+                        text: "Cuenta creada correctamente",
+                        confirmButtonColor: "#059669",
+                    });
+                    cerrarModalGestionarCuenta();
+                    window.location.reload();
+                } else {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: data?.message || "No se pudo crear la cuenta",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            } catch (error) {
+                console.error("Error creando cuenta:", error);
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Error al crear la cuenta",
+                    confirmButtonColor: "#dc2626",
+                });
+            }
+        }
+
+        async function modificarCuentaExistente(formData: FormData) {
+            if (!cuentaActual?.id) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se puede modificar la cuenta sin un ID válido",
+                    confirmButtonColor: "#dc2626",
+                });
+                return;
+            }
+
+            const updateFormData = new FormData();
+            updateFormData.append("id_cue", cuentaActual.id);
+            updateFormData.append("rol_cue", formData.get("rol") as string);
+
+            const { data, error } =
+                await actions.modificarCuenta(updateFormData);
+
+            if (data?.success) {
+                await Swal.fire({
+                    icon: "success",
+                    title: "Éxito",
+                    text: "Cuenta actualizada correctamente",
+                    confirmButtonColor: "#059669",
+                });
+                cerrarModalGestionarCuenta();
+                window.location.reload();
+            } else {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: data?.message || "No se pudo actualizar la cuenta",
+                    confirmButtonColor: "#dc2626",
+                });
+            }
         }
 
         // Manejar eliminación de cuenta

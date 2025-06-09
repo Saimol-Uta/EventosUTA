@@ -218,9 +218,12 @@ const carreras = carrerasData?.carreras || [];
                         correo: string,
                         rol: string,
                         idCuenta?: string,
+                        idUsuario?: string,
                     ) => void;
                 }
             }
+
+            let usuarioActualId: string = "";
 
             async function abrirModalModificarUsuario(
                 usuarioId: string,
@@ -239,12 +242,14 @@ const carreras = carrerasData?.carreras || [];
                 const usuarios = Array.from(usuariosInputs).map((input) =>
                     JSON.parse((input as HTMLInputElement).value),
                 );
-
                 const usuario = usuarios.find(
                     (u: Usuario) => u.id_usu === usuarioId,
                 );
 
                 if (!usuario) return;
+
+                // Almacenar el ID del usuario actual
+                usuarioActualId = usuario.id_usu || "";
 
                 // Llenar el formulario con los datos del usuario
                 const cedula = form.querySelector(
@@ -324,10 +329,10 @@ const carreras = carrerasData?.carreras || [];
                                 <span class="asignacion-nombre">${correoMostrar}</span>
                                 <span class="asignacion-detalle">${cuenta.tip_cue}</span>
                                 <div class="cuenta-acciones">
-                                    <button type="button" class="btn-editar-cuenta" onclick="editarCuenta('${cuenta.id_cue}', '${correoMostrar}', '${cuenta.tip_cue}')">
+                                    <button type="button" class="btn-editar-cuenta" data-cuenta-id="${cuenta.id_cue}" data-correo="${correoMostrar}" data-tipo="${cuenta.tip_cue}">
                                         ✏️ Editar
                                     </button>
-                                    <button type="button" class="btn-eliminar-cuenta" onclick="eliminarCuenta('${cuenta.id_cue}', '${cedulaUsuario}')">
+                                    <button type="button" class="btn-eliminar-cuenta" data-cuenta-id="${cuenta.id_cue}" data-cedula="${cedulaUsuario}">
                                         ❌ Eliminar
                                     </button>
                                 </div>
@@ -335,6 +340,47 @@ const carreras = carrerasData?.carreras || [];
                         `;
                             })
                             .join("");
+
+                        // Agregar event listeners a los botones creados dinámicamente
+                        setTimeout(() => {
+                            const botonesEditar =
+                                document.querySelectorAll(".btn-editar-cuenta");
+                            const botonesEliminar = document.querySelectorAll(
+                                ".btn-eliminar-cuenta",
+                            );
+
+                            botonesEditar.forEach((boton) => {
+                                boton.addEventListener("click", (e) => {
+                                    const target =
+                                        e.target as HTMLButtonElement;
+                                    const cuentaId =
+                                        target.getAttribute("data-cuenta-id");
+                                    const correo =
+                                        target.getAttribute("data-correo");
+                                    const tipo =
+                                        target.getAttribute("data-tipo");
+
+                                    if (cuentaId && correo && tipo) {
+                                        editarCuenta(cuentaId, correo, tipo);
+                                    }
+                                });
+                            });
+
+                            botonesEliminar.forEach((boton) => {
+                                boton.addEventListener("click", (e) => {
+                                    const target =
+                                        e.target as HTMLButtonElement;
+                                    const cuentaId =
+                                        target.getAttribute("data-cuenta-id");
+                                    const cedula =
+                                        target.getAttribute("data-cedula");
+
+                                    if (cuentaId && cedula) {
+                                        eliminarCuenta(cuentaId, cedula);
+                                    }
+                                });
+                            });
+                        }, 100);
                     } else {
                         contenedorCuentas.innerHTML =
                             '<p class="no-cuentas">Este usuario no tiene cuentas asociadas.</p>';
@@ -409,14 +455,18 @@ const carreras = carrerasData?.carreras || [];
             ) {
                 // Usar la función del modal de gestionar cuenta existente
                 if (window.abrirModalGestionarCuenta) {
-                    window.abrirModalGestionarCuenta(correo, tipo, cuentaId);
+                    window.abrirModalGestionarCuenta(
+                        correo,
+                        tipo,
+                        cuentaId,
+                        usuarioActualId,
+                    );
                 } else {
                     console.error(
                         "La función abrirModalGestionarCuenta no está disponible",
                     );
                 }
             }
-
             function crearNuevaCuenta() {
                 // Obtener la cédula del usuario actual
                 const cedulaInput = document.querySelector(
@@ -432,9 +482,18 @@ const carreras = carrerasData?.carreras || [];
                         confirmButtonColor: "#dc2626",
                     });
                     return;
-                } // Usar la función del modal de gestionar cuenta para crear nueva cuenta
+                }
+
+                // Crear un correo temporal basado en la cédula
+                const correoTemporal = `${cedula}@uta.edu.ec`;
+                // Usar la función del modal de gestionar cuenta para crear nueva cuenta
                 if (window.abrirModalGestionarCuenta) {
-                    window.abrirModalGestionarCuenta("", "estudiante", "");
+                    window.abrirModalGestionarCuenta(
+                        correoTemporal,
+                        "estudiante",
+                        "",
+                        usuarioActualId,
+                    );
                 } else {
                     console.error(
                         "La función abrirModalGestionarCuenta no está disponible",
