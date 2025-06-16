@@ -46,10 +46,23 @@ export default defineConfig({
                         return null;
                     } const isValid = await bcrypt.compare(credentials.password, user.cont_cuenta);
 
-                    if (!isValid) {
+                    // Fallback para contraseñas en texto plano (temporal durante migración)
+                    const isPlainTextValid = !isValid && credentials.password === user.cont_cuenta;
+
+                    if (!isValid && !isPlainTextValid) {
                         console.log('[authorize] Contraseña incorrecta. Contraseña ingresada:', credentials.password);
                         console.log('[authorize] Hash almacenado:', user.cont_cuenta);
                         return null;
+                    }
+
+                    // Si la contraseña era texto plano y es válida, hashearla para futuras autenticaciones
+                    if (isPlainTextValid) {
+                        console.log('[authorize] Actualizando contraseña de texto plano a hash...');
+                        const hashedPassword = await bcrypt.hash(credentials.password, 10);
+                        await prisma.usuarios.update({
+                            where: { cor_cue: user.cor_cue },
+                            data: { cont_cuenta: hashedPassword }
+                        });
                     }
 
                     //Devolver usuario válido

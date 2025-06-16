@@ -48,13 +48,8 @@ const organizadores = dataOrganizadores?.organizadores || [];
                             <p class="anadir-icon">+</p>
                         </a>
                     </div>
-                </div>
-
-                <div class="registros-inferior-titulos">
+                </div>                <div class="registros-inferior-titulos">
                     <div class="registro-fila">
-                        <div class="parte-izquierda-registro-encabezado">
-                            ID
-                        </div>
                         <div class="parte-izquierda-registro-encabezado">
                             Nombre
                         </div>
@@ -62,10 +57,19 @@ const organizadores = dataOrganizadores?.organizadores || [];
                             Descripción
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
-                            Puntaje Aprobación
+                            Puntaje Aprob.
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
-                            Asistencia
+                            Asistencia %
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Req. Puntaje
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Req. Asistencia
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Certificado
                         </div>
                         <div class="parte-derecha-registro-encabezado">
                             Opciones
@@ -80,19 +84,31 @@ const organizadores = dataOrganizadores?.organizadores || [];
                         />
                         <div class="registro-fila">
                             <div class="parte-izquierda-registro-fila">
-                                {categoria.id_cat}
-                            </div>
-                            <div class="parte-izquierda-registro-fila">
                                 {categoria.nom_cat}
                             </div>
-                            <div class="parte-izquierda-registro-fila">
-                                {categoria.des_cat}
+                            <div class="parte-izquierda-registro-fila" title={categoria.des_cat}>
+                                {categoria.des_cat.length > 30 ? categoria.des_cat.substring(0, 30) + '...' : categoria.des_cat}
                             </div>
                             <div class="parte-izquierda-registro-fila">
-                                {categoria.pun_apr_cat}
+                                {categoria.pun_apr_cat}/10
                             </div>
                             <div class="parte-izquierda-registro-fila">
                                 {categoria.asi_cat}%
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                <span class={`badge ${categoria.requiere_puntaje ? 'badge-si' : 'badge-no'}`}>
+                                    {categoria.requiere_puntaje ? 'SÍ' : 'NO'}
+                                </span>
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                <span class={`badge ${categoria.requiere_asistencia ? 'badge-si' : 'badge-no'}`}>
+                                    {categoria.requiere_asistencia ? 'SÍ' : 'NO'}
+                                </span>
+                            </div>
+                            <div class="parte-izquierda-registro-fila">
+                                <span class={`badge ${categoria.brinda_certificado ? 'badge-si' : 'badge-no'}`}>
+                                    {categoria.brinda_certificado ? 'SÍ' : 'NO'}
+                                </span>
                             </div>
                             <div class="registro-opciones">
                                 <button
@@ -192,5 +208,31 @@ const organizadores = dataOrganizadores?.organizadores || [];
             
             window.eliminarCategoria = eliminarCategoria;
         </script>
+
+        <style>
+            .badge {
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+                text-align: center;
+                min-width: 30px;
+                display: inline-block;
+            }
+            
+            .badge-si {
+                background-color: #10b981;
+                color: white;
+            }
+            
+            .badge-no {
+                background-color: #ef4444;
+                color: white;
+            }
+            
+            .parte-izquierda-registro-fila {
+                min-width: 120px;
+            }
+        </style>
     </body>
 </Layout>
