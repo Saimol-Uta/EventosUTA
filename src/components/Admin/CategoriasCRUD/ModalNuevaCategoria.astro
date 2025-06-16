@@ -58,7 +58,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             />
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Descripción</p>
                         <div class="contenedor-input">
@@ -67,40 +66,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 name="des_cat"
                                 rows="3"
                                 required></textarea>
-                        </div>
-                    </div>
-                    <div class="contenedor-nombre">
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Puntaje de Aprobación</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="number"
-                                    class="input-dato"
-                                    name="pun_apr_cat"
-                                    min="0"
-                                    max="10"
-                                    step="0.1"
-                                    value="7.0"
-                                    required
-                                />
-                                <p>/10</p>
-                            </div>
-                        </div>
-
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Asistencia para Aprobación</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="number"
-                                    class="input-dato"
-                                    name="asi_cat"
-                                    min="0"
-                                    max="100"
-                                    value="80"
-                                    required
-                                />
-                                <p>%</p>
-                            </div>
                         </div>
                     </div>
 
@@ -146,6 +111,47 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         </div>
                     </div>
 
+                    <div class="contenedor-nombre">
+                        <div
+                            class="contenedor-dato"
+                            id="contenedor-puntaje"
+                            style="display: none;"
+                        >
+                            <p class="texto-dato">Puntaje de Aprobación</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    class="input-dato"
+                                    name="pun_apr_cat"
+                                    min="0"
+                                    max="10"
+                                    step="0.1"
+                                    value="7.0"
+                                />
+                                <p>/10</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="contenedor-dato"
+                            id="contenedor-asistencia"
+                            style="display: none;"
+                        >
+                            <p class="texto-dato">Asistencia para Aprobación</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    class="input-dato"
+                                    name="asi_cat"
+                                    min="0"
+                                    max="100"
+                                    value="80"
+                                />
+                                <p>%</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="contenedor-boton">
                         <button type="submit" class="boton-confirmar">
                             Crear Categoría
@@ -175,7 +181,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
             modal.style.display = "block";
         }
     }
-
     function cerrarModalNuevaCategoria(): void {
         const modal = document.getElementById("modalNuevaCategoria");
         const form = document.getElementById(
@@ -185,13 +190,72 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         if (modal && form) {
             modal.style.display = "none";
             form.reset();
+            // Resetear visibilidad de campos
+            const contenedorPuntaje = document.getElementById(
+                "contenedor-puntaje",
+            ) as HTMLElement;
+            const contenedorAsistencia = document.getElementById(
+                "contenedor-asistencia",
+            ) as HTMLElement;
+            if (contenedorPuntaje) contenedorPuntaje.style.display = "none";
+            if (contenedorAsistencia)
+                contenedorAsistencia.style.display = "none";
         }
     }
-
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById(
             "formulario-nueva-categoria",
         ) as HTMLFormElement;
+
+        // Referencias a los checkboxes y contenedores
+        const requierePuntajeCheckbox = document.getElementById(
+            "requiere_puntaje",
+        ) as HTMLInputElement;
+        const requiereAsistenciaCheckbox = document.getElementById(
+            "requiere_asistencia",
+        ) as HTMLInputElement;
+        const contenedorPuntaje = document.getElementById(
+            "contenedor-puntaje",
+        ) as HTMLElement;
+        const contenedorAsistencia = document.getElementById(
+            "contenedor-asistencia",
+        ) as HTMLElement;
+        const inputPuntaje = document.querySelector(
+            'input[name="pun_apr_cat"]',
+        ) as HTMLInputElement;
+        const inputAsistencia = document.querySelector(
+            'input[name="asi_cat"]',
+        ) as HTMLInputElement;
+
+        // Función para toggle de campos
+        function toggleCampoPuntaje() {
+            if (requierePuntajeCheckbox?.checked) {
+                contenedorPuntaje.style.display = "block";
+                inputPuntaje.required = true;
+            } else {
+                contenedorPuntaje.style.display = "none";
+                inputPuntaje.required = false;
+                inputPuntaje.value = "7.0"; // Reset al valor por defecto
+            }
+        }
+
+        function toggleCampoAsistencia() {
+            if (requiereAsistenciaCheckbox?.checked) {
+                contenedorAsistencia.style.display = "block";
+                inputAsistencia.required = true;
+            } else {
+                contenedorAsistencia.style.display = "none";
+                inputAsistencia.required = false;
+                inputAsistencia.value = "80"; // Reset al valor por defecto
+            }
+        }
+
+        // Event listeners para los checkboxes
+        requierePuntajeCheckbox?.addEventListener("change", toggleCampoPuntaje);
+        requiereAsistenciaCheckbox?.addEventListener(
+            "change",
+            toggleCampoAsistencia,
+        );
 
         // Manejar envío del formulario
         if (form) {
