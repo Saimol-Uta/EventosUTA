@@ -195,21 +195,16 @@ import "../styles/ModalDetallesInscripcion.css";
                         mostrarDocumentosNoDisponibles();
                         return;
                     }
-
-                    if (
-                        !inscripcion.usuarios ||
-                        !inscripcion.usuarios.cuentas ||
-                        inscripcion.usuarios.cuentas.length === 0
-                    ) {
+                    if (!inscripcion.usuarios) {
                         console.warn(
-                            "No se encontraron datos de cuenta para la inscripción:",
+                            "No se encontraron datos de usuario para la inscripción:",
                             inscripcionId,
                         );
                         mostrarDocumentosNoDisponibles();
                         return;
                     }
 
-                    const cuenta = inscripcion.usuarios.cuentas[0];
+                    const usuario = inscripcion.usuarios;
 
                     // Referencias a elementos DOM
                     const enlaceCedula = document.getElementById(
@@ -229,11 +224,9 @@ import "../styles/ModalDetallesInscripcion.css";
                     ) as HTMLAnchorElement;
                     const sinMotivacion = document.getElementById(
                         "sin-motivacion",
-                    ) as HTMLSpanElement;
-
-                    // Configurar enlace de cédula
-                    if (isValidDocumentLink(cuenta.enl_ced_cue)) {
-                        enlaceCedula.href = cuenta.enl_ced_cue;
+                    ) as HTMLSpanElement; // Configurar enlace de cédula
+                    if (isValidDocumentLink(usuario.enl_ced_cue)) {
+                        enlaceCedula.href = usuario.enl_ced_cue;
                         enlaceCedula.style.display = "inline";
                         sinCedula.style.display = "none";
                     } else {
@@ -242,25 +235,20 @@ import "../styles/ModalDetallesInscripcion.css";
                     }
 
                     // Configurar enlace de matrícula
-                    if (isValidDocumentLink(cuenta.enl_mat_cue)) {
-                        enlaceMatricula.href = cuenta.enl_mat_cue;
+                    if (isValidDocumentLink(usuario.enl_mat_cue)) {
+                        enlaceMatricula.href = usuario.enl_mat_cue;
                         enlaceMatricula.style.display = "inline";
                         sinMatricula.style.display = "none";
                     } else {
                         enlaceMatricula.style.display = "none";
                         sinMatricula.style.display = "inline";
-                    } // Configurar enlace de carta de motivación
-                    if (isValidDocumentLink(cuenta.enl_ext_cue)) {
-                        enlaceMotivacion.href = cuenta.enl_ext_cue;
-                        enlaceMotivacion.style.display = "inline";
-                        sinMotivacion.style.display = "none";
-                    } else {
-                        enlaceMotivacion.style.display = "none";
-                        sinMotivacion.style.display = "inline";
-                    }
+                    } // Configurar enlace de carta de motivación (campo no existe en nuevo schema, usando un campo disponible)
+                    // En el nuevo schema no existe enl_ext_cue, así que ocultamos esta sección
+                    enlaceMotivacion.style.display = "none";
+                    sinMotivacion.style.display = "inline";
 
                     // Actualizar badge de estado
-                    actualizarBadgeDocumentos(cuenta);
+                    actualizarBadgeDocumentos(usuario);
                 } catch (error) {
                     console.error(
                         "Error al cargar documentos de inscripción:",
