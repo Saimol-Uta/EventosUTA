@@ -24,13 +24,8 @@ export default defineConfig({
                     if (!credentials?.email || typeof credentials.password !== 'string') {
                         console.log('Faltan credenciales o formato inválido.');
                         return null;
-                    }
-
-                    const user = await prisma.cuentas.findFirst({
+                    } const user = await prisma.usuarios.findFirst({
                         where: { cor_cue: credentials.email },
-                        include: {
-                            usuarios: true, // incluir relación con la tabla usuarios
-                        },
                     });
 
                     if (!user || typeof user.cont_cuenta !== 'string') {
@@ -46,11 +41,11 @@ export default defineConfig({
 
                     //Devolver usuario válido
                     return {
-                        id: user.id_cue,
+                        id: user.cor_cue,
                         email: user.cor_cue,
                         rol: user.rol_cue,
-                        ci_pas: `${user.usuarios.ced_usu}`,
-                        name: `${user.usuarios.nom_usu1} ${user.usuarios.nom_usu2 ?? ''} ${user.usuarios.ape_usu1} ${user.usuarios.ape_usu2 ?? ''}`.trim(),
+                        ci_pas: user.ced_usu || '',
+                        name: `${user.nom_usu1} ${user.nom_usu2 ?? ''} ${user.ape_usu1} ${user.ape_usu2 ?? ''}`.trim(),
                     };
 
                 } catch (error) {

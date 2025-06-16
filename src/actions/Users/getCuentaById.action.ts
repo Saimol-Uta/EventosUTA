@@ -5,14 +5,14 @@ import prisma from '../../db';
 export const getCuentaById = defineAction({
     accept: 'json',
     input: z.string(),
-    handler: async (id_cuenta) => {
-        // Acción
-        const cuenta = await prisma.cuentas.findMany({
-            where: { id_usu_per: id_cuenta },
+    handler: async (correo_usuario) => {
+        // Obtener usuario por correo (que es la clave primaria)
+        const usuario = await prisma.usuarios.findUnique({
+            where: { cor_cue: correo_usuario },
             include: {
-                usuarios: true
+                carreras: true
             }
         });
-        return cuenta;
+        return usuario;
     },
 });

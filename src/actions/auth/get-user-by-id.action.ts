@@ -6,14 +6,14 @@ export const getUseById = defineAction({
     accept: 'json',
     input: z.string(),
     handler: async (idUser) => {
-        const user = await prisma.cuentas.findUnique({
+        const user = await prisma.usuarios.findUnique({
             where: {
-                id_cue: idUser,
+                cor_cue: idUser,
             },
         });
 
         if (!user) {
-            throw new Error("El vehículo no existe");
+            throw new Error("El usuario no existe");
         }
 
         return {

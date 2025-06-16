@@ -5,14 +5,14 @@ import prisma from '../../db';
 export const getCuentaByIdSingle = defineAction({
     accept: 'json',
     input: z.string(),
-    handler: async (id_cuenta) => {
-        // Acción
-        const cuenta = await prisma.cuentas.findFirst({
-            where: { id_cue: id_cuenta },
+    handler: async (correo_usuario) => {
+        // Obtener usuario por correo electrónico
+        const usuario = await prisma.usuarios.findFirst({
+            where: { cor_cue: correo_usuario },
             include: {
-                usuarios: true
+                carreras: true
             }
         });
-        return cuenta;
+        return usuario;
     },
 });
