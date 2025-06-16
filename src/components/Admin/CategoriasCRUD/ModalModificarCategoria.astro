@@ -2,6 +2,35 @@
 import "../../../styles/Admin/ModalModificarEvento.css";
 ---
 
+<style>
+    .contenedor-checkboxes {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .contenedor-checkbox {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .contenedor-checkbox input[type="checkbox"] {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+        accent-color: #dc2626;
+    }
+
+    .contenedor-checkbox label {
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+    }
+</style>
+
 <div id="modalModificarCategoria" class="modal">
     <div class="modal-contenido">
         <span class="cerrar" onclick="cerrarModalModificarCategoria()"
@@ -41,7 +70,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 required></textarea>
                         </div>
                     </div>
-
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
                             <p class="texto-dato">Puntaje de Aprobación</p>
@@ -75,6 +103,48 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         </div>
                     </div>
 
+                    <div class="contenedor-checkboxes">
+                        <p class="texto-centrado texto-roja">
+                            Configuración de Validación
+                        </p>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="requiere_puntaje_mod"
+                                name="requiere_puntaje"
+                                value="true"
+                            />
+                            <label for="requiere_puntaje_mod"
+                                >Requiere puntaje de aprobación</label
+                            >
+                        </div>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="requiere_asistencia_mod"
+                                name="requiere_asistencia"
+                                value="true"
+                            />
+                            <label for="requiere_asistencia_mod"
+                                >Requiere asistencia mínima</label
+                            >
+                        </div>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="brinda_certificado_mod"
+                                name="brinda_certificado"
+                                value="true"
+                            />
+                            <label for="brinda_certificado_mod"
+                                >Brinda certificado</label
+                            >
+                        </div>
+                    </div>
+
                     <div class="contenedor-boton">
                         <button type="submit" class="boton-confirmar">
                             Modificar Categoría
@@ -89,13 +159,15 @@ import "../../../styles/Admin/ModalModificarEvento.css";
 <script>
     import { actions } from "astro:actions";
     import Swal from "sweetalert2";
-
     interface Categoria {
         id_cat: string;
         nom_cat: string;
         des_cat: string;
         pun_apr_cat: number;
         asi_cat: number;
+        requiere_puntaje?: boolean;
+        requiere_asistencia?: boolean;
+        brinda_certificado?: boolean;
     }
 
     declare global {
@@ -127,9 +199,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
             (c: Categoria) => c.id_cat === categoriaId,
         );
 
-        if (!categoria) return;
-
-        // Llenar el formulario con los datos de la categoría
+        if (!categoria) return; // Llenar el formulario con los datos de la categoría
         const idCat = form.querySelector(
             'input[name="id_cat"]',
         ) as HTMLInputElement;
@@ -145,6 +215,15 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         const asistencia = form.querySelector(
             'input[name="asi_cat"]',
         ) as HTMLInputElement;
+        const requierePuntaje = form.querySelector(
+            'input[name="requiere_puntaje"]',
+        ) as HTMLInputElement;
+        const requiereAsistencia = form.querySelector(
+            'input[name="requiere_asistencia"]',
+        ) as HTMLInputElement;
+        const brindaCertificado = form.querySelector(
+            'input[name="brinda_certificado"]',
+        ) as HTMLInputElement;
 
         // Asignar valores
         if (idCat) idCat.value = categoria.id_cat;
@@ -152,6 +231,12 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         if (descripcion) descripcion.value = categoria.des_cat;
         if (puntaje) puntaje.value = categoria.pun_apr_cat.toString();
         if (asistencia) asistencia.value = categoria.asi_cat.toString();
+        if (requierePuntaje)
+            requierePuntaje.checked = categoria.requiere_puntaje || false;
+        if (requiereAsistencia)
+            requiereAsistencia.checked = categoria.requiere_asistencia || false;
+        if (brindaCertificado)
+            brindaCertificado.checked = categoria.brinda_certificado || false;
 
         modal.style.display = "block";
     }
