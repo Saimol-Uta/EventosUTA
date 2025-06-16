@@ -27,16 +27,15 @@ export const SignIn = defineAction({
 
         const { nombre, apellido, correo, contrasena, fechNac } = input;
 
-        const correoLimpio = correo.trim().toLowerCase();
-        try {
+        const correoLimpio = correo.trim().toLowerCase(); try {
             // Verificar si el correo ya existe antes de crear.
-            const cuentaExistente = await prisma.cuentas.findUnique({
+            const usuarioExistente = await prisma.usuarios.findUnique({
                 where: {
                     cor_cue: correoLimpio,
                 },
             });
 
-            if (cuentaExistente) {
+            if (usuarioExistente) {
                 throw new Error('El correo electrónico ya está registrado.');
             }
 
@@ -53,43 +52,30 @@ export const SignIn = defineAction({
             const [nom_usu1, ...nom_usu2Rest] = nombre.split(' ');
             const nom_usu2 = nom_usu2Rest.join(' ');
             const [ape_usu1, ...ape_usu2Rest] = apellido.split(' ');
-            const ape_usu2 = ape_usu2Rest.join(' ');
-
-            const hashedPassword = await bcrypt.hash(contrasena, 10);
+            const ape_usu2 = ape_usu2Rest.join(' '); const hashedPassword = await bcrypt.hash(contrasena, 10);
             const rolAsignado = correoLimpio.endsWith('@uta.edu.ec') ? 'ESTUDIANTE' : 'USUARIO';
 
-            // Transacción para crear usuario y cuenta asegurando atomicidad.
-            const result = await prisma.$transaction(async (tx) => {
-                const usuario = await tx.usuarios.create({
-                    data: {
-                        nom_usu1,
-                        nom_usu2: nom_usu2 || '',
-                        ape_usu1,
-                        ape_usu2: ape_usu2 || '',
-                        fec_nac_usu: new Date(fechNac),
-                        // Campos opcionales o a completar después:
-                        // ced_usu: null, 
-                        // num_tel_usu: null,
-                        // id_car_per: null, 
-                    },
-                });
-
-                await tx.cuentas.create({
-                    data: {
-                        cor_cue: correoLimpio,
-                        cont_cuenta: hashedPassword,
-                        rol_cue: rolAsignado,
-                        id_usu_per: usuario.id_usu,
-                        // Campos opcionales o a completar después:
-                        // enl_ced_cue: usuario.ced_usu,
-                        // enl_ext_cue: null,
-                        // enl_mat_cue: null,
-                    },
-                });
-                return usuario; // Devuelve el usuario creado para obtener su ID.
+            // Crear usuario directamente en la tabla usuarios con toda la información
+            const usuario = await prisma.usuarios.create({
+                data: {
+                    cor_cue: correoLimpio,
+                    cont_cuenta: hashedPassword,
+                    rol_cue: rolAsignado,
+                    ced_usu: '', // Se completará después en el perfil
+                    nom_usu1,
+                    nom_usu2: nom_usu2 || null,
+                    ape_usu1,
+                    ape_usu2: ape_usu2 || null,
+                    fec_nac_usu: new Date(fechNac),
+                    num_tel_usu: null,
+                    id_car_per: null,
+                    enl_ced_cue: null,
+                    enl_mat_cue: null,
+                    img_user: null,
+                },
             });
 
-            return { success: true, userId: result.id_usu };
+            return { success: true, userId: usuario.cor_cue };
 
         } catch (error: any) {
             console.error('Error en registro (action):', error);

@@ -24,16 +24,7 @@ export interface CategoriasEventos {
     eventos: Eventos[];
 }
 
-export interface Cuentas {
-    id_cue: string;
-    cor_cue: string;
-    rol_cue: string;
-    enl_ced_cue?: string;
-    enl_mat_cue?: string;
-    enl_ext_cue?: string;
-    id_usu_per: string;
-    usuarios: Usuarios;
-}
+
 
 export interface Eventos {
     id_eve: string;
@@ -104,17 +95,36 @@ export interface Requisitos {
 }
 
 export interface Usuarios {
-    id_usu: string;
-    ced_usu?: string;
+    cor_cue: string; // Primary key - correo electrónico
+    ced_usu: string;
     nom_usu1: string;
     nom_usu2?: string;
     ape_usu1: string;
-    ape_usu2: string;
+    ape_usu2?: string;
     fec_nac_usu: Date;
     num_tel_usu?: string;
-    contrasena: string;
     id_car_per?: string;
-    cuentas: Cuentas[];
+    rol_cue: string;
+    cont_cuenta: string;
+    enl_ced_cue?: string;
+    enl_mat_cue?: string;
+    img_user?: string;
     inscripciones: Inscripciones[];
     carreras?: Carreras;
+    cambios: Cambios[];
+}
+
+export interface Cambios {
+    num_cam: number;
+    fec_cam: Date;
+    rol_sol_cam?: string;
+    des_cam: string;
+    mot_cam: string;
+    pri_cam?: string;
+    tip_cam?: string;
+    ori_cam?: string;
+    enl_doc_cam?: string;
+    est_cam?: string;
+    id_cue_sol: string;
+    cuentas: Usuarios;
 }
