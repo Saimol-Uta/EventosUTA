@@ -24,18 +24,31 @@ export default defineConfig({
                     if (!credentials?.email || typeof credentials.password !== 'string') {
                         console.log('Faltan credenciales o formato inválido.');
                         return null;
-                    } const user = await prisma.usuarios.findFirst({
+                    }
+
+                    console.log('[authorize] Buscando usuario con email:', credentials.email);
+
+                    const user = await prisma.usuarios.findFirst({
                         where: { cor_cue: credentials.email },
                     });
+
+                    console.log('[authorize] Usuario encontrado:', user ? 'SÍ' : 'NO');
+                    if (user) {
+                        console.log('[authorize] Datos del usuario:', {
+                            cor_cue: user.cor_cue,
+                            rol_cue: user.rol_cue,
+                            tieneContrasena: !!user.cont_cuenta
+                        });
+                    }
 
                     if (!user || typeof user.cont_cuenta !== 'string') {
                         console.log('Usuario no encontrado o contraseña inválida.');
                         return null;
-                    }
+                    } const isValid = await bcrypt.compare(credentials.password, user.cont_cuenta);
 
-                    const isValid = await bcrypt.compare(credentials.password, user.cont_cuenta);
                     if (!isValid) {
-                        console.log('[authorize] Contraseña incorrecta');
+                        console.log('[authorize] Contraseña incorrecta. Contraseña ingresada:', credentials.password);
+                        console.log('[authorize] Hash almacenado:', user.cont_cuenta);
                         return null;
                     }
 
