@@ -142,66 +142,70 @@ upcomingEvents = resultProximos?.eventos ?? [];
         <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
           <!-- Eventos Próximos -->
           <Card title="Eventos Próximos">
-            <div class="flex flex-col gap-y-4">
-              {
-                upcomingEvents.slice(0, 4).map((evento) => (
-                  <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                    <>
-                      <strong>{evento.nom_eve}</strong>
-                      <br />
-                    </>
-                    <span class="text-sm text-gray-600">
-                      Inicio:{" "}
-                      {new Date(evento.fec_ini_eve).toLocaleDateString()}
-                    </span>
-                  </div>
-                ))
-              }
-              {
-                upcomingEvents.length > 4 && (
-                  <a
-                    href="/eventosProximos"
-                    class="text-red-800 underline text-sm mt-2"
-                  >
-                    Ver más...
-                  </a>
-                )
-              }
-            </div>
+          <div class="flex flex-col gap-y-4">
+  {
+    upcomingEvents.slice(0, 4).map((evento) => (
+      <div class="bg-white/60 border border-gray-300 rounded-xl shadow-sm p-4 backdrop-blur-sm hover:shadow-lg hover:bg-white/80 transition-all duration-300 group text-gray-800">
+        <>
+          <strong class="text-blue-950 group-hover:text-blue-800 transition-colors duration-300">
+            {evento.nom_eve}
+          </strong>
+          <br />
+        </>
+        <span class="text-sm text-gray-700">
+         <b > Inicio: </b> {new Date(evento.fec_ini_eve).toLocaleDateString()}
+        </span>
+      </div>
+    ))
+  }
+
+  {
+    upcomingEvents.length > 4 && (
+      <a
+        href="/eventosProximos"
+        class="text-red-800 underline text-sm mt-2 hover:text-red-600 transition-colors duration-300"
+      >
+        Ver más...
+      </a>
+    )
+  }
+</div>
+
           </Card>
           <!-- Certificados -->
           <Card title="Certificados">
             <div class="flex flex-col gap-y-4">
-              {
-                certificates.length > 0 ? (
-                  certificates.slice(0, 4).map((certificado) => (
-                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                      <a
-                        href={certificado.enl_cer_par}
-                        class="text-red-800 underline js-view-cert"
-                      >
-                        {certificado.eventos.nom_eve}
-                      </a>
-                    </div>
-                  ))
-                ) : (
-                  <p class="text-sm text-gray-500">
-                    No tienes certificados para mostrar.
-                  </p>
-                )
-              }
+  {
+    certificates.length > 0 ? (
+      certificates.slice(0, 4).map((certificado) => (
+        <div class="bg-white/60 border border-gray-300 rounded-xl shadow-sm p-4 backdrop-blur-sm hover:shadow-lg hover:bg-white/80 transition-all duration-300 group">
+          <a
+            href={certificado.enl_cer_par}
+            class="red-800 font-semibold underline group-hover:text-red-950 transition-colors duration-300"
+          >
+            {certificado.eventos.nom_eve}
+          </a>
+        </div>
+      ))
+    ) : (
+      <p class="text-sm text-gray-600">
+       Actualmente no tienes certificados
+      </p>
+    )
+  }
 
-              {
-                certificates.length > 4 && (
-                  <a
-                    href="/User/certificadosUsuario"
-                    class="text-red-800 underline text-sm mt-2"
-                  >
-                    Ver más...
-                  </a>
-                )
-              }
-            </div>
+  {
+    certificates.length > 4 && (
+      <a
+        href="/User/certificadosUsuario"
+        class="text-purple-700 underline text-sm mt-2 hover:text-purple-900 transition-colors duration-300"
+      >
+        Ver más...
+      </a>
+    )
+  }
+</div>
+
           </Card>
         </div>
 
