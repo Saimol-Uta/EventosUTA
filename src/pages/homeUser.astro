@@ -15,10 +15,6 @@ const { data: cuenta } = await Astro.callAction(
   session?.user?.id || "",
 );
 
-if (!cuenta?.usuarios?.ced_usu) {
-  return Astro.redirect("/User/CompletarPerfilUser");
-}
-
 const idUsuario = cuenta?.id_usu_per;
 
 let eventosUsuario: any[] = [];
