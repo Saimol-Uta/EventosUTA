@@ -44,6 +44,39 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     </p>
                 </div>
             </div>
+
+            <!-- Información de la Categoría -->
+            <div
+                class="seccion-detalles"
+                id="seccion-info-categoria"
+                style="display: none;"
+            >
+                <h3>Información de la Categoría</h3>
+                <div class="info-categoria-contenido">
+                    <div id="info-puntaje-detalle" style="display: none;">
+                        <p class="info-item">
+                            <strong>Puntaje de aprobación:</strong>
+                            <span id="valor-puntaje-detalle">-</span> puntos
+                        </p>
+                    </div>
+
+                    <div id="info-asistencia-detalle" style="display: none;">
+                        <p class="info-item">
+                            <strong>Requiere asistencia:</strong>
+                            <span id="valor-porcentaje-asistencia-detalle"
+                                >-</span
+                            >% mínimo
+                        </p>
+                    </div>
+
+                    <div id="info-certificado-detalle" style="display: none;">
+                        <p class="info-item">
+                            <strong>Brinda certificado:</strong> Sí
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <div class="seccion-detalles">
                 <h3>
                     Fechas de Inscripción
@@ -169,9 +202,38 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         max-width: 100%;
         box-sizing: border-box;
     }
-
     .info-detalle {
         margin-bottom: 16px;
+    }
+
+    /* Estilos para información de categoría */
+    .info-categoria-contenido {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 8px;
+    }
+
+    .info-item {
+        margin: 6px 0;
+        font-size: 14px;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-item strong {
+        color: #1f2937;
+        min-width: 140px;
+    }
+
+    #seccion-info-categoria {
+        border-left: 3px solid #3b82f6;
+        padding-left: 12px;
+        background-color: #f0f9ff;
+        border-radius: 0 6px 6px 0;
     }
     .estado-badge {
         padding: 4px 12px;
@@ -465,6 +527,9 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                 evento.categoria?.data ||
                 evento.categoria;
             categoria.textContent = categoriaData?.nom_cat || "Sin categoría";
+
+            // Mostrar información adicional de la categoría
+            mostrarInformacionCategoria(categoriaData);
         }
 
         const area = modal.querySelector("#evento-area");
@@ -741,7 +806,103 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             estadoInscripcionesBadge.textContent = estadoInsc;
             estadoInscripcionesBadge.className = `estado-badge ${claseCSS}`;
         }
-    } // Función para expandir imagen
+    }
+
+    // Función para mostrar información de categoría
+    function mostrarInformacionCategoria(categoriaData: any) {
+        const seccionInfoCategoria = document.getElementById(
+            "seccion-info-categoria",
+        ) as HTMLElement;
+        const infoPuntajeDetalle = document.getElementById(
+            "info-puntaje-detalle",
+        ) as HTMLElement;
+        const infoAsistenciaDetalle = document.getElementById(
+            "info-asistencia-detalle",
+        ) as HTMLElement;
+        const infoCertificadoDetalle = document.getElementById(
+            "info-certificado-detalle",
+        ) as HTMLElement;
+        const valorPuntajeDetalle = document.getElementById(
+            "valor-puntaje-detalle",
+        ) as HTMLElement;
+        const valorPorcentajeAsistenciaDetalle = document.getElementById(
+            "valor-porcentaje-asistencia-detalle",
+        ) as HTMLElement;
+
+        if (!categoriaData) {
+            if (seccionInfoCategoria)
+                seccionInfoCategoria.style.display = "none";
+            return;
+        }
+
+        // Obtener datos de la categoría
+        const puntajeApr = categoriaData.pun_apr_cat;
+        const porcentajeAsistencia = categoriaData.porcentaje_asistencia;
+        const requierePuntaje = categoriaData.requiere_puntaje === true;
+        const requiereAsistencia = categoriaData.requiere_asistencia === true;
+        const brindaCertificado = categoriaData.brinda_certificado === true;
+
+        // Verificar si hay alguna información para mostrar
+        const tieneInfoPuntaje = requierePuntaje && puntajeApr;
+        const tieneInfoAsistencia = requiereAsistencia;
+        const tieneInfoCertificado = brindaCertificado;
+
+        const hayInformacion =
+            tieneInfoPuntaje || tieneInfoAsistencia || tieneInfoCertificado;
+
+        // Solo mostrar el contenedor si hay información que mostrar
+        if (seccionInfoCategoria) {
+            if (hayInformacion) {
+                seccionInfoCategoria.style.display = "block";
+
+                // Mostrar/ocultar información según los atributos
+                if (infoPuntajeDetalle && valorPuntajeDetalle) {
+                    if (tieneInfoPuntaje) {
+                        infoPuntajeDetalle.style.display = "block";
+                        valorPuntajeDetalle.textContent = puntajeApr;
+                    } else {
+                        infoPuntajeDetalle.style.display = "none";
+                    }
+                }
+
+                if (infoAsistenciaDetalle && valorPorcentajeAsistenciaDetalle) {
+                    if (tieneInfoAsistencia) {
+                        infoAsistenciaDetalle.style.display = "block";
+                        // Mostrar el porcentaje de asistencia si está disponible, sino un valor por defecto
+                        valorPorcentajeAsistenciaDetalle.textContent =
+                            porcentajeAsistencia || "80";
+                    } else {
+                        infoAsistenciaDetalle.style.display = "none";
+                    }
+                }
+
+                if (infoCertificadoDetalle) {
+                    if (tieneInfoCertificado) {
+                        infoCertificadoDetalle.style.display = "block";
+                    } else {
+                        infoCertificadoDetalle.style.display = "none";
+                    }
+                }
+            } else {
+                // Si no hay información, ocultar todo el contenedor
+                seccionInfoCategoria.style.display = "none";
+            }
+        }
+
+        console.log("📊 Información de categoría en detalles actualizada:", {
+            requierePuntaje,
+            requiereAsistencia,
+            brindaCertificado,
+            puntajeApr,
+            porcentajeAsistencia,
+            hayInformacion,
+            tieneInfoPuntaje,
+            tieneInfoAsistencia,
+            tieneInfoCertificado,
+        });
+    }
+
+    // Función para expandir imagen
     function expandirImagen(img: HTMLImageElement) {
         if (!img.src || img.src.includes("placeholder")) return;
 
