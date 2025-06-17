@@ -11,11 +11,24 @@ export const modificarCategoria = defineAction({
         des_cat: z.string().min(1, 'La descripción de la categoría es requerida'),
         pun_apr_cat: z.preprocess(
             val => Number(val),
-            z.number().min(0).max(10, 'El puntaje debe estar entre 0 y 10')
-        ), asi_cat: z.preprocess(
+            z.number().min(0, 'El puntaje mínimo es 0').max(10, 'El puntaje máximo es 10')
+        ),
+        asi_cat: z.preprocess(
             val => Number(val),
-            z.number().min(0).max(100, 'La asistencia debe estar entre 0 y 100')
-        )
+            z.number().min(0, 'La asistencia mínima es 0%').max(100, 'La asistencia máxima es 100%')
+        ),
+        requiere_puntaje: z.preprocess(
+            val => val === 'true' || val === true,
+            z.boolean()
+        ).optional().default(false),
+        requiere_asistencia: z.preprocess(
+            val => val === 'true' || val === true,
+            z.boolean()
+        ).optional().default(false),
+        brinda_certificado: z.preprocess(
+            val => val === 'true' || val === true,
+            z.boolean()
+        ).optional().default(false)
     }),
     handler: async (input) => {
         try {
@@ -34,11 +47,15 @@ export const modificarCategoria = defineAction({
 
             // Actualizar la categoría
             const categoriaActualizada = await prisma.categorias_eventos.update({
-                where: { id_cat: input.id_cat }, data: {
+                where: { id_cat: input.id_cat },
+                data: {
                     nom_cat: input.nom_cat,
                     des_cat: input.des_cat,
                     pun_apr_cat: input.pun_apr_cat,
-                    asi_cat: input.asi_cat
+                    asi_cat: input.asi_cat,
+                    requiere_puntaje: input.requiere_puntaje,
+                    requiere_asistencia: input.requiere_asistencia,
+                    brinda_certificado: input.brinda_certificado
                 }
             });
 

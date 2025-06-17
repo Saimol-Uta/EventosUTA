@@ -1,4 +1,28 @@
-import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras, getAsignacionesByEvento, crearAsignacion, eliminarAsignacion, modificarAsignacion, getAllAsignaciones, crearAsignacionCompleta, modificarAsignacionCompleta, eliminarAsignacionCompleta, getAsignacionesPlantilla, duplicarAsignacionAEvento, vincularAsignacionAEvento, crearAsignacionesPrueba } from './Eventos';
+
+import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras } from './Eventos';
+
+// Importaciones de Asignaciones
+import {
+    getAllAsignaciones,
+    crearAsignacionCompleta,
+    modificarAsignacionCompleta,
+    eliminarAsignacionCompleta,
+    getAsignacionById
+} from './Asignaciones/crud-asignaciones';
+import {
+    getAsignacionesByEvento,
+    crearAsignacion,
+    eliminarAsignacion,
+    modificarAsignacion
+} from './Asignaciones/evento-asignaciones';
+import {
+    getAsignacionesPlantilla,
+    vincularAsignacionAEvento,
+    duplicarAsignacionesAEvento as duplicarAsignacionAEvento,
+    crearAsignacionesPrueba,
+    desvincularAsignacionDeEvento
+} from './Asignaciones/plantillas-asignaciones';
+
 import { SignIn } from './auth/registerUser.action';
 import { getEventosPorUsuario } from './Eventos/getEventosPorUsuario'
 import { createCambio } from './Cambios';

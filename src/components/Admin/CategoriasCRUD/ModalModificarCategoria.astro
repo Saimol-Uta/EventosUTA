@@ -2,6 +2,35 @@
 import "../../../styles/Admin/ModalModificarEvento.css";
 ---
 
+<style>
+    .contenedor-checkboxes {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .contenedor-checkbox {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .contenedor-checkbox input[type="checkbox"] {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+        accent-color: #dc2626;
+    }
+
+    .contenedor-checkbox label {
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+    }
+</style>
+
 <div id="modalModificarCategoria" class="modal">
     <div class="modal-contenido">
         <span class="cerrar" onclick="cerrarModalModificarCategoria()"
@@ -30,7 +59,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             />
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Descripción</p>
                         <div class="contenedor-input">
@@ -42,8 +70,54 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         </div>
                     </div>
 
+                    <div class="contenedor-checkboxes">
+                        <p class="texto-centrado texto-roja">
+                            Configuración de Validación
+                        </p>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="requiere_puntaje_mod"
+                                name="requiere_puntaje"
+                                value="true"
+                            />
+                            <label for="requiere_puntaje_mod"
+                                >Requiere puntaje de aprobación</label
+                            >
+                        </div>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="requiere_asistencia_mod"
+                                name="requiere_asistencia"
+                                value="true"
+                            />
+                            <label for="requiere_asistencia_mod"
+                                >Requiere asistencia mínima</label
+                            >
+                        </div>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="brinda_certificado_mod"
+                                name="brinda_certificado"
+                                value="true"
+                            />
+                            <label for="brinda_certificado_mod"
+                                >Brinda certificado</label
+                            >
+                        </div>
+                    </div>
+
                     <div class="contenedor-nombre">
-                        <div class="contenedor-dato">
+                        <div
+                            class="contenedor-dato"
+                            id="contenedor-puntaje-mod"
+                            style="display: none;"
+                        >
                             <p class="texto-dato">Puntaje de Aprobación</p>
                             <div class="contenedor-input">
                                 <input
@@ -53,13 +127,16 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                     min="0"
                                     max="10"
                                     step="0.1"
-                                    required
                                 />
                                 <p>/10</p>
                             </div>
                         </div>
 
-                        <div class="contenedor-dato">
+                        <div
+                            class="contenedor-dato"
+                            id="contenedor-asistencia-mod"
+                            style="display: none;"
+                        >
                             <p class="texto-dato">Asistencia para Aprobación</p>
                             <div class="contenedor-input">
                                 <input
@@ -68,7 +145,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                     name="asi_cat"
                                     min="0"
                                     max="100"
-                                    required
                                 />
                                 <p>%</p>
                             </div>
@@ -89,13 +165,15 @@ import "../../../styles/Admin/ModalModificarEvento.css";
 <script>
     import { actions } from "astro:actions";
     import Swal from "sweetalert2";
-
     interface Categoria {
         id_cat: string;
         nom_cat: string;
         des_cat: string;
         pun_apr_cat: number;
         asi_cat: number;
+        requiere_puntaje?: boolean;
+        requiere_asistencia?: boolean;
+        brinda_certificado?: boolean;
     }
 
     declare global {
@@ -127,9 +205,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
             (c: Categoria) => c.id_cat === categoriaId,
         );
 
-        if (!categoria) return;
-
-        // Llenar el formulario con los datos de la categoría
+        if (!categoria) return; // Llenar el formulario con los datos de la categoría
         const idCat = form.querySelector(
             'input[name="id_cat"]',
         ) as HTMLInputElement;
@@ -145,17 +221,47 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         const asistencia = form.querySelector(
             'input[name="asi_cat"]',
         ) as HTMLInputElement;
-
-        // Asignar valores
+        const requierePuntaje = form.querySelector(
+            'input[name="requiere_puntaje"]',
+        ) as HTMLInputElement;
+        const requiereAsistencia = form.querySelector(
+            'input[name="requiere_asistencia"]',
+        ) as HTMLInputElement;
+        const brindaCertificado = form.querySelector(
+            'input[name="brinda_certificado"]',
+        ) as HTMLInputElement; // Asignar valores
         if (idCat) idCat.value = categoria.id_cat;
         if (nombre) nombre.value = categoria.nom_cat;
         if (descripcion) descripcion.value = categoria.des_cat;
         if (puntaje) puntaje.value = categoria.pun_apr_cat.toString();
         if (asistencia) asistencia.value = categoria.asi_cat.toString();
+        if (requierePuntaje)
+            requierePuntaje.checked = categoria.requiere_puntaje || false;
+        if (requiereAsistencia)
+            requiereAsistencia.checked = categoria.requiere_asistencia || false;
+        if (brindaCertificado)
+            brindaCertificado.checked = categoria.brinda_certificado || false;
+
+        // Mostrar/ocultar campos según checkboxes
+        const contenedorPuntajeMod = document.getElementById(
+            "contenedor-puntaje-mod",
+        ) as HTMLElement;
+        const contenedorAsistenciaMod = document.getElementById(
+            "contenedor-asistencia-mod",
+        ) as HTMLElement;
+
+        if (contenedorPuntajeMod) {
+            contenedorPuntajeMod.style.display = categoria.requiere_puntaje
+                ? "block"
+                : "none";
+        }
+        if (contenedorAsistenciaMod) {
+            contenedorAsistenciaMod.style.display =
+                categoria.requiere_asistencia ? "block" : "none";
+        }
 
         modal.style.display = "block";
     }
-
     function cerrarModalModificarCategoria(): void {
         const modal = document.getElementById("modalModificarCategoria");
         const form = document.getElementById(
@@ -165,13 +271,74 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         if (modal && form) {
             modal.style.display = "none";
             form.reset();
+            // Resetear visibilidad de campos
+            const contenedorPuntajeMod = document.getElementById(
+                "contenedor-puntaje-mod",
+            ) as HTMLElement;
+            const contenedorAsistenciaMod = document.getElementById(
+                "contenedor-asistencia-mod",
+            ) as HTMLElement;
+            if (contenedorPuntajeMod)
+                contenedorPuntajeMod.style.display = "none";
+            if (contenedorAsistenciaMod)
+                contenedorAsistenciaMod.style.display = "none";
         }
     }
-
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById(
             "formulario-modificar-categoria",
         ) as HTMLFormElement;
+
+        // Referencias a los checkboxes y contenedores para modificar
+        const requierePuntajeCheckboxMod = document.getElementById(
+            "requiere_puntaje_mod",
+        ) as HTMLInputElement;
+        const requiereAsistenciaCheckboxMod = document.getElementById(
+            "requiere_asistencia_mod",
+        ) as HTMLInputElement;
+        const contenedorPuntajeMod = document.getElementById(
+            "contenedor-puntaje-mod",
+        ) as HTMLElement;
+        const contenedorAsistenciaMod = document.getElementById(
+            "contenedor-asistencia-mod",
+        ) as HTMLElement;
+        const inputPuntajeMod = form?.querySelector(
+            'input[name="pun_apr_cat"]',
+        ) as HTMLInputElement;
+        const inputAsistenciaMod = form?.querySelector(
+            'input[name="asi_cat"]',
+        ) as HTMLInputElement;
+
+        // Función para toggle de campos en modificar
+        function toggleCampoPuntajeMod() {
+            if (requierePuntajeCheckboxMod?.checked) {
+                contenedorPuntajeMod.style.display = "block";
+                inputPuntajeMod.required = true;
+            } else {
+                contenedorPuntajeMod.style.display = "none";
+                inputPuntajeMod.required = false;
+            }
+        }
+
+        function toggleCampoAsistenciaMod() {
+            if (requiereAsistenciaCheckboxMod?.checked) {
+                contenedorAsistenciaMod.style.display = "block";
+                inputAsistenciaMod.required = true;
+            } else {
+                contenedorAsistenciaMod.style.display = "none";
+                inputAsistenciaMod.required = false;
+            }
+        }
+
+        // Event listeners para los checkboxes
+        requierePuntajeCheckboxMod?.addEventListener(
+            "change",
+            toggleCampoPuntajeMod,
+        );
+        requiereAsistenciaCheckboxMod?.addEventListener(
+            "change",
+            toggleCampoAsistenciaMod,
+        );
 
         // Manejar envío del formulario
         if (form) {

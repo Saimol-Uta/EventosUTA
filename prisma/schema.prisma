@@ -11,79 +11,59 @@ model asignaciones {
   id_asi               String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   nom_asi              String                 @db.VarChar(100)
   des_asi              String                 @db.VarChar(500)
-  id_car_asi           String?                @db.Uuid
-  es_publico_general   Boolean?               @default(false)
-  es_gratuito          Boolean?               @default(false)
-  requiere_validacion  Boolean?               @default(false)
-  carreras             carreras?              @relation(fields: [id_car_asi], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
-  eventos_asignaciones eventos_asignaciones[]
-  requisitos           requisitos[]
-
-  @@index([id_car_asi], map: "idx_asignaciones_carrera")
+  tip_asi              String                 @db.VarChar(20)
+  detalle_asignaciones detalle_asignaciones[]
+  eventos              eventos[]
 }
 
 model carreras {
-  id_car       String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_car      String         @db.VarChar(100)
-  des_car      String         @db.VarChar(250)
-  nom_fac_per  String         @db.VarChar(250)
-  cod_car      String?        @unique @db.VarChar(10)
-  asignaciones asignaciones[]
-  usuarios     usuarios[]
+  id_car               String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_car              String                 @db.VarChar(100)
+  des_car              String                 @db.VarChar(250)
+  id_fac_per           String                 @db.Uuid
+  cod_car              String?                @unique @db.VarChar(10)
+  facultades           facultades             @relation(fields: [id_fac_per], references: [id_fac], onDelete: NoAction, onUpdate: NoAction)
+  detalle_asignaciones detalle_asignaciones[]
+  usuarios             usuarios[]
 }
 
 model categorias_eventos {
-  id_cat      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_cat     String    @unique @db.VarChar(100)
-  des_cat     String    @db.VarChar(250)
-  pun_apr_cat Decimal?  @db.Decimal(4, 1)
-  asi_cat     Int       @db.SmallInt
-  eventos     eventos[]
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model cuentas {
-  id_cue      String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  cor_cue     String    @unique @db.VarChar(150)
-  rol_cue     String    @db.VarChar(15)
-  enl_ced_cue String?
-  enl_mat_cue String?
-  enl_ext_cue String?
-  id_usu_per  String    @db.Uuid
-  cont_cuenta String?
-  img_user    String?
-  cambios     cambios[]
-  usuarios    usuarios  @relation(fields: [id_usu_per], references: [id_usu], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([cor_cue], map: "idx_cuentas_correo")
-  @@index([id_usu_per], map: "idx_cuentas_usuario")
+  id_cat              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_cat             String    @unique @db.VarChar(50)
+  des_cat             String    @db.VarChar(250)
+  pun_apr_cat         Decimal?  @default(7.00) @db.Decimal(4, 2)
+  asi_cat             Int?
+  requiere_puntaje    Boolean?  @default(false)
+  requiere_asistencia Boolean?  @default(false)
+  brinda_certificado  Boolean?  @default(false)
+  eventos             eventos[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model eventos {
-  id_eve               String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_eve              String                 @db.VarChar(250)
-  des_eve              String                 @db.VarChar(500)
-  id_cat_eve           String                 @db.Uuid
-  fec_ini_eve          DateTime               @db.Date
-  fec_fin_eve          DateTime?              @db.Date
-  hor_ini_eve          DateTime               @db.Time(6)
-  hor_fin_eve          DateTime?              @db.Time(6)
-  dur_eve              Int?                   @db.SmallInt
-  are_eve              String?                @db.VarChar(50)
-  ubi_eve              String                 @db.VarChar(150)
-  ced_org_eve          String                 @db.VarChar(10)
-  img_eve              String?
-  precio               Decimal                @default(0.00) @db.Decimal(8, 2)
-  not_apr_eve          Decimal?               @default(7.0) @db.Decimal(4, 1)
-  tie_reg_asi          Boolean?               @default(true)
-  organizadores        organizadores          @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
-  categorias_eventos   categorias_eventos     @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
-  eventos_asignaciones eventos_asignaciones[]
-  inscripciones        inscripciones[]
-
-  @@index([id_cat_eve], map: "idx_eventos_categoria")
-  @@index([fec_ini_eve], map: "idx_eventos_fecha_ini")
+  id_eve             String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_eve            String             @db.VarChar(250)
+  des_eve            String             @db.VarChar(500)
+  id_cat_eve         String             @db.Uuid
+  fec_ini_eve        DateTime           @db.Date
+  fec_fin_eve        DateTime?          @db.Date
+  fec_ini_ins_eve    DateTime           @db.Date
+  fec_fin_ins_eve    DateTime           @db.Date
+  img_eve            String?
+  dur_eve            Int?               @db.SmallInt
+  are_eve            String?            @db.VarChar(50)
+  ubi_eve            String             @db.VarChar(150)
+  ced_org_eve        String             @db.VarChar(10)
+  precio             Decimal?           @default(0.00) @db.Decimal(8, 2)
+  car_mot_eve        String?
+  es_gratuito        Boolean?           @default(false)
+  requiere_carta     Boolean?           @default(false)
+  es_destacado       Boolean?           @default(false)
+  id_asi_eve         String?            @db.Uuid
+  organizadores      organizadores      @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
+  asignaciones       asignaciones?      @relation(fields: [id_asi_eve], references: [id_asi], onDelete: NoAction, onUpdate: NoAction)
+  categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
+  inscripciones      inscripciones[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -91,21 +71,20 @@ model inscripciones {
   id_ins          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   fec_ins         DateTime  @default(now()) @db.Timestamptz(6)
   met_pag_ins     String?   @db.VarChar(20)
-  enl_ord_pag_ins String?
-  id_usu_ins      String    @db.Uuid
+  est_ins         String    @default("DPendiente") @db.VarChar(12)
+  id_usu_ins      String    @db.VarChar(150)
   id_eve_ins      String    @db.Uuid
   est_par         String    @default("PENDIENTE") @db.VarChar(15)
-  asi_par         Int?      @db.SmallInt
-  not_par         Decimal?  @db.Decimal(4, 1)
+  asi_par         Int?
+  not_par         Decimal?  @default(7.00) @db.Decimal(4, 2)
   enl_cer_par     String?
   fec_cer_par     DateTime? @db.Date
-  est_ins         String    @default("DPendiente") @db.VarChar(12)
+  cod_cer         String?   @db.VarChar(10)
+  enl_ord_pag_ins String?
   eventos         eventos   @relation(fields: [id_eve_ins], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
-  usuarios        usuarios  @relation(fields: [id_usu_ins], references: [id_usu], onDelete: NoAction, onUpdate: NoAction)
+  usuarios        usuarios  @relation(fields: [id_usu_ins], references: [cor_cue], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([id_usu_ins, id_eve_ins], map: "uq_usuario_evento")
-  @@index([id_eve_ins], map: "idx_inscripciones_evento")
-  @@index([id_usu_ins], map: "idx_inscripciones_usuario")
 }
 
 model organizadores {
@@ -113,46 +92,29 @@ model organizadores {
   nom_org1    String    @db.VarChar(20)
   nom_org2    String?   @db.VarChar(20)
   ape_org1    String    @db.VarChar(20)
-  ape_org2    String    @db.VarChar(20)
+  ape_org2    String?   @db.VarChar(20)
   tit_aca_org String    @db.VarChar(250)
   eventos     eventos[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model pagina_principal {
-  id_pag  Int     @id @default(1) @db.SmallInt
-  des_pag String?
-  mis_pag String?
-  vis_pag String?
-}
-
-model requisitos {
-  id_req       String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_req      String       @db.VarChar(100)
-  des_req      String       @db.VarChar(500)
-  id_asi_per   String       @db.Uuid
-  obligatorio  Boolean?     @default(true)
-  tipo_req     String?      @default("DOCUMENTO") @db.VarChar(20)
-  asignaciones asignaciones @relation(fields: [id_asi_per], references: [id_asi], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([id_asi_per], map: "idx_requisitos_asignacion")
-}
-
 model usuarios {
-  id_usu        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  ced_usu       String?         @unique @db.VarChar(20)
+  cor_cue       String          @id @db.VarChar(150)
+  ced_usu       String          @unique @db.VarChar(10)
   nom_usu1      String          @db.VarChar(20)
   nom_usu2      String?         @db.VarChar(20)
   ape_usu1      String          @db.VarChar(20)
   ape_usu2      String?         @db.VarChar(20)
   fec_nac_usu   DateTime        @db.Date
-  num_tel_usu   String?         @db.VarChar(20)
+  num_tel_usu   String?         @db.VarChar(10)
   id_car_per    String?         @db.Uuid
-  cuentas       cuentas[]
+  rol_cue       String          @db.VarChar(15)
+  cont_cuenta   String
+  enl_ced_cue   String?
+  enl_mat_cue   String?
+  img_user      String?
+  cambios       cambios[]
   inscripciones inscripciones[]
   carreras      carreras?       @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
-
-  @@index([ced_usu], map: "idx_usuarios_cedula")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -167,16 +129,37 @@ model cambios {
   ori_cam     String?  @db.VarChar(10)
   enl_doc_cam String?
   est_cam     String?  @default("PENDIENTE") @db.VarChar(12)
-  id_cue_sol  String   @db.Uuid
-  cuentas     cuentas  @relation(fields: [id_cue_sol], references: [id_cue], onDelete: Cascade, onUpdate: NoAction)
+  id_cue_sol  String   @db.VarChar(150)
+  cuentas     usuarios @relation(fields: [id_cue_sol], references: [cor_cue], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model eventos_asignaciones {
-  id_eve_asi   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  id_eve       String       @db.Uuid
+model detalle_asignaciones {
+  id_det_asi   String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   id_asi       String       @db.Uuid
+  id_car       String       @db.Uuid
   asignaciones asignaciones @relation(fields: [id_asi], references: [id_asi], onDelete: Cascade, onUpdate: NoAction)
-  eventos      eventos      @relation(fields: [id_eve], references: [id_eve], onDelete: Cascade, onUpdate: NoAction)
+  carreras     carreras     @relation(fields: [id_car], references: [id_car], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([id_eve, id_asi], map: "uk_eve_asi")
+  @@unique([id_asi, id_car], map: "uk_asi_car")
+}
+
+model facultades {
+  id_fac   String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_fac  String     @db.VarChar(250)
+  des_fac  String?
+  mis_fac  String?
+  vis_fac  String?
+  img_des  String?
+  img_mis  String?
+  img_vis  String?
+  dir_fac  String?
+  cor_fac  String?
+  dec_fac  String?
+  dec_img  String?
+  sub_fac  String?
+  sub_img  String?
+  twit_fac String?
+  face_fac String?
+  inst_fac String?
+  carreras carreras[]
 }

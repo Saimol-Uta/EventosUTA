@@ -26,31 +26,52 @@ export default defineConfig({
                         return null;
                     }
 
-                    const user = await prisma.cuentas.findFirst({
+                    console.log('[authorize] Buscando usuario con email:', credentials.email);
+
+                    const user = await prisma.usuarios.findFirst({
                         where: { cor_cue: credentials.email },
-                        include: {
-                            usuarios: true, // incluir relación con la tabla usuarios
-                        },
                     });
+
+                    console.log('[authorize] Usuario encontrado:', user ? 'SÍ' : 'NO');
+                    if (user) {
+                        console.log('[authorize] Datos del usuario:', {
+                            cor_cue: user.cor_cue,
+                            rol_cue: user.rol_cue,
+                            tieneContrasena: !!user.cont_cuenta
+                        });
+                    }
 
                     if (!user || typeof user.cont_cuenta !== 'string') {
                         console.log('Usuario no encontrado o contraseña inválida.');
                         return null;
+                    } const isValid = await bcrypt.compare(credentials.password, user.cont_cuenta);
+
+                    // Fallback para contraseñas en texto plano (temporal durante migración)
+                    const isPlainTextValid = !isValid && credentials.password === user.cont_cuenta;
+
+                    if (!isValid && !isPlainTextValid) {
+                        console.log('[authorize] Contraseña incorrecta. Contraseña ingresada:', credentials.password);
+                        console.log('[authorize] Hash almacenado:', user.cont_cuenta);
+                        return null;
                     }
 
-                    const isValid = await bcrypt.compare(credentials.password, user.cont_cuenta);
-                    if (!isValid) {
-                        console.log('[authorize] Contraseña incorrecta');
-                        return null;
+                    // Si la contraseña era texto plano y es válida, hashearla para futuras autenticaciones
+                    if (isPlainTextValid) {
+                        console.log('[authorize] Actualizando contraseña de texto plano a hash...');
+                        const hashedPassword = await bcrypt.hash(credentials.password, 10);
+                        await prisma.usuarios.update({
+                            where: { cor_cue: user.cor_cue },
+                            data: { cont_cuenta: hashedPassword }
+                        });
                     }
 
                     //Devolver usuario válido
                     return {
-                        id: user.id_cue,
+                        id: user.cor_cue,
                         email: user.cor_cue,
                         rol: user.rol_cue,
-                        ci_pas: `${user.usuarios.ced_usu}`,
-                        name: `${user.usuarios.nom_usu1} ${user.usuarios.nom_usu2 ?? ''} ${user.usuarios.ape_usu1} ${user.usuarios.ape_usu2 ?? ''}`.trim(),
+                        ci_pas: user.ced_usu || '',
+                        name: `${user.nom_usu1} ${user.nom_usu2 ?? ''} ${user.ape_usu1} ${user.ape_usu2 ?? ''}`.trim(),
                     };
 
                 } catch (error) {
