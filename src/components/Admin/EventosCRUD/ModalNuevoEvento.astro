@@ -53,18 +53,104 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                     name="categoria"
                                     class="input-dato"
                                     required
+                                    onchange="mostrarInfoCategoria(this)"
                                 >
                                     <option value="">Elija una Categoría</option
                                     >
                                     {
                                         categorias.map((categoria) => (
-                                            <option value={categoria.id_cat}>
+                                            <option
+                                                value={categoria.id_cat}
+                                                data-puntaje={
+                                                    categoria.pun_apr_cat
+                                                }
+                                                data-asignacion={
+                                                    categoria.asi_cat
+                                                }
+                                                data-requiere-puntaje={
+                                                    categoria.requiere_puntaje
+                                                }
+                                                data-requiere-asistencia={
+                                                    categoria.requiere_asistencia
+                                                }
+                                                data-brinda-certificado={
+                                                    categoria.brinda_certificado
+                                                }
+                                                data-porcentaje-asistencia={
+                                                    categoria.porcentaje_asistencia
+                                                }
+                                            >
                                                 {categoria.nom_cat}
                                             </option>
                                         ))
                                     }
                                 </select>
                             </div>
+                        </div>
+
+                        <!-- Información dinámica de la categoría -->
+                        <div
+                            id="info-categoria"
+                            class="contenedor-dato"
+                            style="display: none;"
+                        >
+                            <p class="texto-dato">
+                                Información de la Categoría
+                            </p>
+                            <div class="info-categoria-contenido">
+                                <div id="info-puntaje" style="display: none;">
+                                    <p class="info-item">
+                                        <strong>Puntaje de aprobación:</strong>
+                                        <span id="valor-puntaje">-</span> puntos
+                                    </p>
+                                </div>
+                                <div
+                                    id="info-asistencia"
+                                    style="display: none;"
+                                >
+                                    <p class="info-item">
+                                        <strong>Requiere asistencia:</strong>
+                                        <span id="valor-porcentaje-asistencia"
+                                            >-</span
+                                        >% mínimo
+                                    </p>
+                                </div>
+
+                                <div
+                                    id="info-certificado"
+                                    style="display: none;"
+                                >
+                                    <p class="info-item">
+                                        <strong>Brinda certificado:</strong> Sí
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Campos adicionales basados en categoría - OCULTOS -->
+                        <div
+                            id="campos-puntaje"
+                            class="contenedor-dato"
+                            style="display: none;"
+                        >
+                            <!-- Campo oculto para mantener funcionalidad -->
+                            <input
+                                type="hidden"
+                                name="puntaje_aprobacion"
+                                value=""
+                            />
+                        </div>
+
+                        <div
+                            id="campos-asistencia"
+                            class="contenedor-dato"
+                            style="display: none;"
+                        >
+                            <!-- Campo oculto para mantener funcionalidad -->
+                            <input
+                                type="hidden"
+                                name="porcentaje_asistencia"
+                                value=""
+                            />
                         </div>
 
                         <div class="contenedor-dato">
@@ -88,20 +174,6 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                     <option value="REDES">Redes</option>
                                 </select>
                             </div>
-                        </div>
-                    </div>
-                    <div class="contenedor-dato">
-                        <p class="texto-dato">Precio (USD):</p>
-                        <div class="contenedor-input">
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                class="input-dato"
-                                name="precio"
-                                value="0"
-                                onchange="toggleGratuito(this)"
-                            />
                         </div>
                     </div>
 
@@ -138,28 +210,38 @@ const { categorias = [], organizadores = [] } = Astro.props;
                             </div>
                         </div>
                     </div>
+                    <!-- Campo oculto para es_destacado con valor por defecto false -->
+                    <input type="hidden" name="es_destacado" value="false" />
 
-                    <div class="contenedor-nombre">
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">¿Es evento destacado?</p>
-                            <div class="contenedor-input">
-                                <select name="es_destacado" class="input-dato">
-                                    <option value="false">No</option>
-                                    <option value="true">Sí</option>
-                                </select>
-                            </div>
+                    <div class="contenedor-dato" style="display: none;">
+                        <p class="texto-dato">Carta de motivación:</p>
+                        <div class="contenedor-input">
+                            <textarea
+                                class="input-dato"
+                                name="carta_motivacion"
+                                rows="2"
+                                placeholder="Texto opcional para carta de motivación"
+                                >Es un evento</textarea
+                            >
                         </div>
+                    </div>
 
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Carta de motivación:</p>
-                            <div class="contenedor-input">
-                                <textarea
-                                    class="input-dato"
-                                    name="carta_motivacion"
-                                    rows="2"
-                                    placeholder="Texto opcional para carta de motivación"
-                                ></textarea>
-                            </div>
+                    <div
+                        class="contenedor-dato"
+                        id="contenedor-precio"
+                        style="display: none;"
+                    >
+                        <p class="texto-dato">Precio (USD):</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="input-dato"
+                                name="precio"
+                                value="0"
+                                onchange="toggleGratuito(this)"
+                            />
                         </div>
                     </div>
                 </div>
@@ -223,7 +305,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                     </div>
 
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Duración (minutos)</p>
+                        <p class="texto-dato">Duración (Horas)</p>
                         <div class="contenedor-input">
                             <input
                                 type="number"
@@ -231,7 +313,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                 step="15"
                                 class="input-dato"
                                 name="duracion"
-                                placeholder="Ej: 120 para 2 horas"
+                                placeholder="Ej: 1 para 24 horas"
                             />
                         </div>
                     </div>
@@ -301,6 +383,37 @@ const { categorias = [], organizadores = [] } = Astro.props;
                             </p>
                         </div>
                     </div>
+                    <div class="contenedor-imagen">
+                        <img
+                            id="nueva-evento-imagen"
+                            class="imagen-evento"
+                            style="display: none;"
+                            alt="Imagen del nuevo evento"
+                        />
+                        <div class="contenedor-file">
+                            <label
+                                for="file-upload-nuevo"
+                                class="custom-file-upload"
+                            >
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    alt="Subir imagen"
+                                    class="upload-icon"
+                                />
+                                <span>Seleccionar imagen</span>
+                            </label>
+                            <input
+                                id="file-upload-nuevo"
+                                type="file"
+                                name="imagen"
+                                class="input-file"
+                                accept="image/*"
+                            />
+                            <p class="file-name">
+                                No se ha seleccionado ningún archivo
+                            </p>
+                        </div>
+                    </div>
 
                     <div class="contenedor-boton-modificar">
                         <button
@@ -311,38 +424,6 @@ const { categorias = [], organizadores = [] } = Astro.props;
                         <button type="submit" class="boton-modificar"
                             >Crear Evento</button
                         >
-                    </div>
-                </div>
-
-                <div class="contenedor-imagen">
-                    <img
-                        id="nueva-evento-imagen"
-                        class="imagen-evento"
-                        style="display: none;"
-                        alt="Imagen del nuevo evento"
-                    />
-                    <div class="contenedor-file">
-                        <label
-                            for="file-upload-nuevo"
-                            class="custom-file-upload"
-                        >
-                            <img
-                                src="/img/CRUD/upload.png"
-                                alt="Subir imagen"
-                                class="upload-icon"
-                            />
-                            <span>Seleccionar imagen</span>
-                        </label>
-                        <input
-                            id="file-upload-nuevo"
-                            type="file"
-                            name="imagen"
-                            class="input-file"
-                            accept="image/*"
-                        />
-                        <p class="file-name">
-                            No se ha seleccionado ningún archivo
-                        </p>
                     </div>
                 </div>
             </form>
@@ -390,49 +471,191 @@ const { categorias = [], organizadores = [] } = Astro.props;
     .input-dato[name="precio"] {
         padding-left: 25px;
     }
+
+    /* Estilos para información de categoría */
+    .info-categoria-contenido {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 8px;
+    }
+
+    .info-item {
+        margin: 6px 0;
+        font-size: 14px;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-item strong {
+        color: #1f2937;
+        min-width: 140px;
+    }
+
+    #info-categoria {
+        border-left: 3px solid #3b82f6;
+        padding-left: 12px;
+        background-color: #f0f9ff;
+        border-radius: 0 6px 6px 0;
+    }
+
+    #campos-puntaje,
+    #campos-asistencia {
+        border-left: 3px solid #10b981;
+        padding-left: 12px;
+        background-color: #f0fdf4;
+        border-radius: 0 6px 6px 0;
+    }
+
+    .categoria-destacada {
+        background-color: #eff6ff !important;
+        border: 2px solid #3b82f6 !important;
+    }
 </style>
 
 <script>
     import { actions } from "astro:actions";
     import Swal from "sweetalert2";
-
     declare global {
         interface Window {
             abrirModalNuevoEvento: () => void;
             cerrarModalNuevoEvento: () => void;
             toggleGratuito: (input: HTMLInputElement) => void;
             togglePrecio: (select: HTMLSelectElement) => void;
+            mostrarInfoCategoria: (select: HTMLSelectElement) => void;
         }
     }
 
     let asignacionesDisponibles: any[] = [];
+
+    // Función para mostrar información de categoría
+    function mostrarInfoCategoria(select: HTMLSelectElement): void {
+        const selectedOption = select.selectedOptions[0];
+
+        // Elementos de información
+        const infoCategoria = document.getElementById(
+            "info-categoria",
+        ) as HTMLElement;
+        const infoPuntaje = document.getElementById(
+            "info-puntaje",
+        ) as HTMLElement;
+        const infoAsistencia = document.getElementById(
+            "info-asistencia",
+        ) as HTMLElement;
+        const infoCertificado = document.getElementById(
+            "info-certificado",
+        ) as HTMLElement;
+        const valorPuntaje = document.getElementById(
+            "valor-puntaje",
+        ) as HTMLElement;
+        const valorPorcentajeAsistencia = document.getElementById(
+            "valor-porcentaje-asistencia",
+        ) as HTMLElement;
+
+        if (!selectedOption || !selectedOption.value) {
+            // Ocultar todo si no hay selección
+            if (infoCategoria) infoCategoria.style.display = "none";
+            return;
+        }
+
+        // Obtener datos de la categoría
+        const puntajeApr = selectedOption.getAttribute("data-puntaje");
+        const porcentajeAsistencia = selectedOption.getAttribute(
+            "data-porcentaje-asistencia",
+        );
+        const requierePuntaje =
+            selectedOption.getAttribute("data-requiere-puntaje") === "true";
+        const requiereAsistencia =
+            selectedOption.getAttribute("data-requiere-asistencia") === "true";
+        const brindaCertificado =
+            selectedOption.getAttribute("data-brinda-certificado") === "true";
+
+        // Mostrar información de la categoría
+        if (infoCategoria) {
+            infoCategoria.style.display = "block";
+
+            // Mostrar/ocultar información según los atributos
+            if (infoPuntaje && valorPuntaje) {
+                if (requierePuntaje && puntajeApr) {
+                    infoPuntaje.style.display = "block";
+                    valorPuntaje.textContent = puntajeApr;
+                } else {
+                    infoPuntaje.style.display = "none";
+                }
+            }
+
+            if (infoAsistencia && valorPorcentajeAsistencia) {
+                if (requiereAsistencia) {
+                    infoAsistencia.style.display = "block";
+                    // Mostrar el porcentaje de asistencia si está disponible, sino un valor por defecto
+                    valorPorcentajeAsistencia.textContent =
+                        porcentajeAsistencia || "80";
+                } else {
+                    infoAsistencia.style.display = "none";
+                }
+            }
+
+            if (infoCertificado) {
+                infoCertificado.style.display = brindaCertificado
+                    ? "block"
+                    : "none";
+            }
+        }
+
+        console.log("📊 Información de categoría actualizada:", {
+            requierePuntaje,
+            requiereAsistencia,
+            brindaCertificado,
+            puntajeApr,
+            porcentajeAsistencia,
+        });
+    }
 
     // Función para manejar el toggle de precio gratuito
     function toggleGratuito(input: HTMLInputElement): void {
         const esGratuitoSelect = document.querySelector(
             'select[name="es_gratuito"]',
         ) as HTMLSelectElement;
+        const contenedorPrecio = document.getElementById(
+            "contenedor-precio",
+        ) as HTMLElement;
+
         if (parseFloat(input.value) === 0) {
             esGratuitoSelect.value = "true";
             input.disabled = true;
+            if (contenedorPrecio) contenedorPrecio.style.display = "none";
         } else {
             esGratuitoSelect.value = "false";
             input.disabled = false;
+            if (contenedorPrecio) contenedorPrecio.style.display = "block";
         }
-    }
-
-    // Función para manejar el toggle desde el select gratuito
+    } // Función para manejar el toggle desde el select gratuito
     function togglePrecio(select: HTMLSelectElement): void {
         const precioInput = document.querySelector(
             'input[name="precio"]',
         ) as HTMLInputElement;
+        const contenedorPrecio = document.getElementById(
+            "contenedor-precio",
+        ) as HTMLElement;
+
         if (select.value === "true") {
-            precioInput.value = "0";
-            precioInput.disabled = true;
+            // Es gratuito - ocultar precio
+            if (contenedorPrecio) contenedorPrecio.style.display = "none";
+            if (precioInput) {
+                precioInput.value = "0";
+                precioInput.disabled = true;
+            }
         } else {
-            precioInput.disabled = false;
-            if (precioInput.value === "0") {
-                precioInput.value = "";
+            // No es gratuito - mostrar precio
+            if (contenedorPrecio) contenedorPrecio.style.display = "block";
+            if (precioInput) {
+                precioInput.disabled = false;
+                if (precioInput.value === "0") {
+                    precioInput.value = "";
+                }
             }
         }
     }
@@ -517,7 +740,6 @@ const { categorias = [], organizadores = [] } = Astro.props;
             cargarAsignaciones();
         }
     }
-
     function cerrarModalNuevoEvento(): void {
         const modal = document.getElementById("modalNuevoEvento");
         const form = document.getElementById(
@@ -539,16 +761,34 @@ const { categorias = [], organizadores = [] } = Astro.props;
             if (fileName)
                 fileName.textContent = "No se ha seleccionado ningún archivo";
 
-            // Resetear precio
+            // Resetear precio y su contenedor
             const precioInput = document.querySelector(
                 'input[name="precio"]',
             ) as HTMLInputElement;
+            const contenedorPrecio = document.getElementById(
+                "contenedor-precio",
+            ) as HTMLElement;
             if (precioInput) {
                 precioInput.disabled = false;
                 precioInput.value = "0";
             }
+            if (contenedorPrecio) {
+                contenedorPrecio.style.display = "none";
+            } // Resetear información de categoría
+            const infoCategoria = document.getElementById(
+                "info-categoria",
+            ) as HTMLElement;
+
+            if (infoCategoria) infoCategoria.style.display = "none";
         }
     }
+
+    // Asignar funciones al objeto window
+    window.abrirModalNuevoEvento = abrirModalNuevoEvento;
+    window.cerrarModalNuevoEvento = cerrarModalNuevoEvento;
+    window.toggleGratuito = toggleGratuito;
+    window.togglePrecio = togglePrecio;
+    window.mostrarInfoCategoria = mostrarInfoCategoria;
 
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById(
@@ -673,11 +913,5 @@ const { categorias = [], organizadores = [] } = Astro.props;
                 }
             });
         }
-
-        // Asignar funciones al objeto window
-        window.abrirModalNuevoEvento = abrirModalNuevoEvento;
-        window.cerrarModalNuevoEvento = cerrarModalNuevoEvento;
-        window.toggleGratuito = toggleGratuito;
-        window.togglePrecio = togglePrecio;
     });
 </script>

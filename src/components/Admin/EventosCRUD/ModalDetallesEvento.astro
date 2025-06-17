@@ -44,9 +44,12 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     </p>
                 </div>
             </div>
-
             <div class="seccion-detalles">
-                <h3>Fechas de Inscripción</h3>
+                <h3>
+                    Fechas de Inscripción
+                    <span id="estado-inscripciones-badge" class="estado-badge"
+                    ></span>
+                </h3>
                 <div class="info-grid">
                     <p>
                         <strong>Inicio de Inscripción:</strong>
@@ -58,9 +61,11 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     </p>
                 </div>
             </div>
-
             <div class="seccion-detalles">
-                <h3>Programación</h3>
+                <h3>
+                    Programación
+                    <span id="estado-evento-badge" class="estado-badge"></span>
+                </h3>
                 <div class="info-grid">
                     <p>
                         <strong>Fecha de Inicio:</strong>
@@ -143,21 +148,6 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     </p>
                 </div>
             </div>
-            <div class="seccion-detalles">
-                <h3>Estado del Evento</h3>
-                <div class="info-grid">
-                    <p>
-                        <strong>Estado:</strong>
-                        <span id="evento-estado" class="estado-badge"></span>
-                    </p>
-                    <p>
-                        <strong>Inscripciones:</strong>
-                        <span
-                            id="evento-estado-inscripciones"
-                            class="estado-badge"></span>
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -170,44 +160,251 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         padding: 12px;
         margin-top: 8px;
         font-style: italic;
-        line-height: 1.5;
+        line-height: 1.6;
+        text-align: justify;
+        border-left: 4px solid var(--color-fuerte-uta);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .info-detalle {
         margin-bottom: 16px;
     }
-
     .estado-badge {
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        font-weight: bold;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
         background-color: #f3f4f6;
+        color: #6b7280;
         display: inline-block;
+        margin-left: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+        animation: fadeInBadge 0.3s ease-in;
+        white-space: nowrap;
+        flex-shrink: 0;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
+    @keyframes fadeInBadge {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .estado-badge.abierto {
+        background-color: #dcfce7;
+        color: #166534;
+        box-shadow: 0 1px 3px rgba(34, 197, 94, 0.2);
+    }
+
+    .estado-badge.cerrado {
+        background-color: #fee2e2;
+        color: #991b1b;
+        box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
+    }
+
+    .estado-badge.proximo {
+        background-color: #fef3c7;
+        color: #92400e;
+        box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
+    }
+
+    .estado-badge.en-curso {
+        background-color: #dbeafe;
+        color: #1e40af;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .estado-badge.finalizado {
+        background-color: #f1f5f9;
+        color: #475569;
+        box-shadow: 0 1px 3px rgba(100, 116, 139, 0.2);
+    }
+
+    .seccion-detalles {
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .seccion-detalles:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
     .seccion-detalles h3 {
         color: #374151;
         border-bottom: 2px solid #e5e7eb;
         padding-bottom: 8px;
         margin-bottom: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
-
     .info-grid p {
         margin-bottom: 8px;
-        display: flex;
+
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
+        transition: background-color 0.2s ease;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        min-height: 0;
+    }
+
+    .info-grid p:hover {
+        background-color: #f8fafc;
     }
 
     .info-grid p strong {
         color: #374151;
-        min-width: 150px;
+        min-width: 120px;
+        max-width: 140px;
+        font-weight: 600;
+        flex-shrink: 0;
+        margin-right: 8px;
     }
 
     .info-grid p span {
         text-align: right;
         flex: 1;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        min-width: 0;
+        max-width: 100%;
+    }
+    .imagen-curso {
+        transition: transform 0.3s ease;
+        cursor: pointer;
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    .imagen-curso:hover {
+        transform: scale(1.02);
+    }
+
+    .centrar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 100%;
+        box-sizing: border-box;
+    } /* Mejorar el contenedor de descripción */
+    .descripcion-completa-container {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .descripcion-completa-container p {
+        line-height: 1.6;
+        text-align: justify;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .descripcion-completa span {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    } /* Mejoras generales para evitar desbordamiento */
+    .modal-contenido {
+        box-sizing: border-box;
+        max-width: 900px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .detalles-reserva {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 0;
+    }
+
+    .seccion-detalles {
+        box-sizing: border-box;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .modal-contenido {
+            width: 95%;
+            margin: 10px auto;
+            max-height: 95vh;
+        }
+
+        .estado-badge {
+            margin-left: 5px;
+            margin-top: 5px;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+        }
+
+        .info-grid p strong {
+            min-width: 100px;
+            max-width: 120px;
+            font-size: 0.9rem;
+        }
+
+        .info-grid p span {
+            font-size: 0.9rem;
+        }
+
+        .seccion-detalles h3 {
+            font-size: 1rem;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .info-grid p {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-grid p strong {
+            min-width: auto;
+            max-width: 100%;
+            margin-bottom: 4px;
+        }
+
+        .info-grid p span {
+            text-align: left;
+            width: 100%;
+        }
+
+        .estado-badge {
+            margin-left: 0;
+            margin-top: 8px;
+        }
     }
 </style>
 
@@ -245,9 +442,7 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         // Actualizar descripción
         const descripcion = modal.querySelector("#evento-descripcion");
         if (descripcion)
-            descripcion.textContent = evento.des_eve || "Sin descripción";
-
-        // Actualizar imagen
+            descripcion.textContent = evento.des_eve || "Sin descripción"; // Actualizar imagen
         const imagen = modal.querySelector(
             "#evento-imagen-detalle",
         ) as HTMLImageElement;
@@ -256,6 +451,11 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                 evento.img_eve ||
                 "https://via.placeholder.com/300x200?text=Sin+Imagen";
             imagen.alt = `Imagen de ${evento.nom_eve}`;
+
+            // Agregar evento de clic para expandir imagen
+            imagen.onclick = () => expandirImagen(imagen);
+            imagen.style.cursor = "pointer";
+            imagen.title = "Clic para ampliar imagen";
         } // Información General
         const categoria = modal.querySelector("#evento-categoria");
         if (categoria) {
@@ -306,17 +506,16 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             requiereCarta.style.color = evento.requiere_carta
                 ? "#dc2626"
                 : "#6b7280";
-        }
-
-        // Fechas de Inscripción
+        } // Fechas de Inscripción
         const fechaInicioInscripcion = modal.querySelector(
             "#evento-fecha-inicio-inscripcion",
         );
         if (fechaInicioInscripcion) {
             if (evento.fec_ini_ins_eve) {
                 const fecha = new Date(evento.fec_ini_ins_eve);
+                const diasRestantes = calcularDiasRestantes(fecha);
                 fechaInicioInscripcion.textContent =
-                    fecha.toLocaleDateString("es-ES");
+                    formatearFechaAmigable(fecha) + diasRestantes;
             } else {
                 fechaInicioInscripcion.textContent = "No especificada";
             }
@@ -328,8 +527,9 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         if (fechaFinInscripcion) {
             if (evento.fec_fin_ins_eve) {
                 const fecha = new Date(evento.fec_fin_ins_eve);
+                const diasRestantes = calcularDiasRestantes(fecha);
                 fechaFinInscripcion.textContent =
-                    fecha.toLocaleDateString("es-ES");
+                    formatearFechaAmigable(fecha) + diasRestantes;
             } else {
                 fechaFinInscripcion.textContent = "No especificada";
             }
@@ -339,18 +539,19 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         const fechaInicio = modal.querySelector("#evento-fecha-inicio");
         if (fechaInicio) {
             const fecha = new Date(evento.fec_ini_eve);
-            fechaInicio.textContent = fecha.toLocaleDateString("es-ES");
+            const diasRestantes = calcularDiasRestantes(fecha);
+            fechaInicio.textContent =
+                formatearFechaAmigable(fecha) + diasRestantes;
         }
 
         const horaInicio = modal.querySelector("#evento-hora-inicio");
         if (horaInicio)
             horaInicio.textContent = evento.hor_ini_eve || "No especificada";
-
         const fechaFin = modal.querySelector("#evento-fecha-fin");
         if (fechaFin) {
             if (evento.fec_fin_eve) {
                 const fecha = new Date(evento.fec_fin_eve);
-                fechaFin.textContent = fecha.toLocaleDateString("es-ES");
+                fechaFin.textContent = formatearFechaAmigable(fecha);
             } else {
                 fechaFin.textContent = "No especificada";
             }
@@ -474,13 +675,11 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                 evento.organizador;
             organizadorTelefono.textContent =
                 orgData?.tel_org || "No especificado";
-        }
-
-        // Estado del Evento
-        const estadoEvento = modal.querySelector(
-            "#evento-estado",
+        } // Estado del Evento
+        const estadoEventoBadge = modal.querySelector(
+            "#estado-evento-badge",
         ) as HTMLElement;
-        if (estadoEvento) {
+        if (estadoEventoBadge) {
             const fechaHoy = new Date();
             const fechaInicio = new Date(evento.fec_ini_eve);
             const fechaFin = evento.fec_fin_eve
@@ -488,32 +687,31 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                 : fechaInicio;
 
             let estado = "";
-            let color = "";
+            let claseCSS = "";
 
             if (fechaFin < fechaHoy) {
                 estado = "Finalizado";
-                color = "#6b7280";
+                claseCSS = "finalizado";
             } else if (fechaInicio <= fechaHoy && fechaFin >= fechaHoy) {
                 estado = "En Curso";
-                color = "#059669";
+                claseCSS = "en-curso";
             } else {
                 estado = "Próximo";
-                color = "#3b82f6";
+                claseCSS = "proximo";
             }
 
-            estadoEvento.textContent = estado;
-            estadoEvento.style.color = color;
-            estadoEvento.style.fontWeight = "bold";
+            estadoEventoBadge.textContent = estado;
+            estadoEventoBadge.className = `estado-badge ${claseCSS}`;
         }
 
         // Estado de Inscripciones
-        const estadoInscripciones = modal.querySelector(
-            "#evento-estado-inscripciones",
+        const estadoInscripcionesBadge = modal.querySelector(
+            "#estado-inscripciones-badge",
         ) as HTMLElement;
-        if (estadoInscripciones) {
+        if (estadoInscripcionesBadge) {
             const fechaHoy = new Date();
             let estadoInsc = "";
-            let colorInsc = "";
+            let claseCSS = "";
 
             if (evento.fec_ini_ins_eve && evento.fec_fin_ins_eve) {
                 const fechaInicioInsc = new Date(evento.fec_ini_ins_eve);
@@ -521,29 +719,74 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
 
                 if (fechaFinInsc < fechaHoy) {
                     estadoInsc = "Cerradas";
-                    colorInsc = "#6b7280";
+                    claseCSS = "cerrado";
                 } else if (
                     fechaInicioInsc <= fechaHoy &&
                     fechaFinInsc >= fechaHoy
                 ) {
                     estadoInsc = "Abiertas";
-                    colorInsc = "#059669";
+                    claseCSS = "abierto";
                 } else if (fechaInicioInsc > fechaHoy) {
                     estadoInsc = "Próximamente";
-                    colorInsc = "#f59e0b";
+                    claseCSS = "proximo";
                 } else {
                     estadoInsc = "No definidas";
-                    colorInsc = "#6b7280";
+                    claseCSS = "";
                 }
             } else {
                 estadoInsc = "No definidas";
-                colorInsc = "#6b7280";
+                claseCSS = "";
             }
 
-            estadoInscripciones.textContent = estadoInsc;
-            estadoInscripciones.style.color = colorInsc;
-            estadoInscripciones.style.fontWeight = "bold";
+            estadoInscripcionesBadge.textContent = estadoInsc;
+            estadoInscripcionesBadge.className = `estado-badge ${claseCSS}`;
         }
+    } // Función para expandir imagen
+    function expandirImagen(img: HTMLImageElement) {
+        if (!img.src || img.src.includes("placeholder")) return;
+
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        `;
+
+        const expandedImg = document.createElement("img");
+        expandedImg.src = img.src;
+        expandedImg.alt = img.alt;
+        expandedImg.style.cssText = `
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        `;
+
+        overlay.appendChild(expandedImg);
+        document.body.appendChild(overlay);
+
+        // Cerrar al hacer clic
+        overlay.addEventListener("click", () => {
+            document.body.removeChild(overlay);
+        });
+
+        // Cerrar con Escape
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                document.body.removeChild(overlay);
+                document.removeEventListener("keydown", handleEscape);
+            }
+        };
+        document.addEventListener("keydown", handleEscape);
     } // Cerrar modal al hacer clic fuera de él
     window.onclick = function (event) {
         const modal = document.getElementById("modalDetallesReserva");
@@ -553,4 +796,27 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
     }; // Exponer funciones globalmente
     window.cerrarModalDetallesEvento = cerrarModalDetallesEvento;
     window.abrirModalDetallesEvento = abrirModalDetallesEvento;
+
+    // Función helper para formatear fechas de manera más amigable
+    function formatearFechaAmigable(fecha: Date): string {
+        const opciones: Intl.DateTimeFormatOptions = {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        };
+        return fecha.toLocaleDateString("es-ES", opciones);
+    }
+
+    // Función helper para calcular días restantes
+    function calcularDiasRestantes(fecha: Date): string {
+        const hoy = new Date();
+        const diferencia = fecha.getTime() - hoy.getTime();
+        const dias = Math.ceil(diferencia / (1000 * 3600 * 24));
+
+        if (dias < 0) return "";
+        if (dias === 0) return " (Hoy)";
+        if (dias === 1) return " (Mañana)";
+        return ` (En ${dias} días)`;
+    }
 </script>

@@ -1,4 +1,5 @@
 ---
+import "../../styles/global.css";
 import Header from "@components/Header.astro";
 import MenuAdmin from "../../components/MenuAdministrador.astro";
 import Layout from "../../layouts/Layout.astro";
@@ -6,6 +7,7 @@ import ModalDetallesEvento from "../../components/Admin/EventosCRUD/ModalDetalle
 import ModalModificarEvento from "../../components/Admin/EventosCRUD/ModalModificarEvento.astro";
 import ModalNuevoEvento from "../../components/Admin/EventosCRUD/ModalNuevoEvento.astro";
 import "../../styles/Admin/EventosCRUD.css";
+
 import { actions } from "astro:actions";
 
 const searchParams = Astro.url.searchParams;
