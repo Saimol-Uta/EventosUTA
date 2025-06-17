@@ -185,7 +185,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                             <p class="texto-dato">¿Es gratuito?</p>
                             <div class="contenedor-input">
                                 <select
-                                    name="es_gratuito"
+                                    name="es_gratuito-nuevo"
                                     class="input-dato"
                                     onchange="togglePrecioNuevo(this)"
                                 >
@@ -231,7 +231,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
 
                     <div
                         class="contenedor-dato"
-                        id="contenedor-precio"
+                        id="contenedor-precio-nuevo"
                         style="display: none;"
                     >
                         <p class="texto-dato">Precio (USD):</p>
@@ -615,10 +615,10 @@ const { categorias = [], organizadores = [] } = Astro.props;
     } // Función para manejar el toggle de precio gratuito
     function toggleGratuitoNuevo(input: HTMLInputElement): void {
         const esGratuitoSelect = document.querySelector(
-            'select[name="es_gratuito"]',
+            'select[name="es_gratuito-nuevo"]',
         ) as HTMLSelectElement;
         const contenedorPrecio = document.getElementById(
-            "contenedor-precio",
+            "contenedor-precio-nuevo",
         ) as HTMLElement;
 
         if (parseFloat(input.value) === 0) {
@@ -636,7 +636,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
             'input[name="precio"]',
         ) as HTMLInputElement;
         const contenedorPrecio = document.getElementById(
-            "contenedor-precio",
+            "contenedor-precio-nuevo",
         ) as HTMLElement;
 
         if (select.value === "true") {
@@ -763,7 +763,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                 'input[name="precio"]',
             ) as HTMLInputElement;
             const contenedorPrecio = document.getElementById(
-                "contenedor-precio",
+                "contenedor-precio-nuevo",
             ) as HTMLElement;
             if (precioInput) {
                 precioInput.disabled = false;
