@@ -53,7 +53,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                     name="categoria"
                                     class="input-dato"
                                     required
-                                    onchange="mostrarInfoCategoria(this)"
+                                    onchange="mostrarInfoCategoriaNuevo(this)"
                                 >
                                     <option value="">Elija una Categoría</option
                                     >
@@ -86,11 +86,9 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                     }
                                 </select>
                             </div>
-                        </div>
-
-                        <!-- Información dinámica de la categoría -->
+                        </div>                        <!-- Información dinámica de la categoría -->
                         <div
-                            id="info-categoria"
+                            id="info-categoria-nuevo"
                             class="contenedor-dato"
                             style="display: none;"
                         >
@@ -98,26 +96,26 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                 Información de la Categoría
                             </p>
                             <div class="info-categoria-contenido">
-                                <div id="info-puntaje" style="display: none;">
+                                <div id="info-puntaje-nuevo" style="display: none;">
                                     <p class="info-item">
                                         <strong>Puntaje de aprobación:</strong>
-                                        <span id="valor-puntaje">-</span> puntos
+                                        <span id="valor-puntaje-nuevo">-</span> puntos
                                     </p>
                                 </div>
                                 <div
-                                    id="info-asistencia"
+                                    id="info-asistencia-nuevo"
                                     style="display: none;"
                                 >
                                     <p class="info-item">
                                         <strong>Requiere asistencia:</strong>
-                                        <span id="valor-porcentaje-asistencia"
+                                        <span id="valor-porcentaje-asistencia-nuevo"
                                             >-</span
                                         >% mínimo
                                     </p>
                                 </div>
 
                                 <div
-                                    id="info-certificado"
+                                    id="info-certificado-nuevo"
                                     style="display: none;"
                                 >
                                     <p class="info-item">
@@ -125,10 +123,9 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                     </p>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Campos adicionales basados en categoría - OCULTOS -->
+                        </div>                        <!-- Campos adicionales basados en categoría - OCULTOS -->
                         <div
-                            id="campos-puntaje"
+                            id="campos-puntaje-nuevo"
                             class="contenedor-dato"
                             style="display: none;"
                         >
@@ -141,7 +138,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                         </div>
 
                         <div
-                            id="campos-asistencia"
+                            id="campos-asistencia-nuevo"
                             class="contenedor-dato"
                             style="display: none;"
                         >
@@ -184,7 +181,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                 <select
                                     name="es_gratuito"
                                     class="input-dato"
-                                    onchange="togglePrecio(this)"
+                                    onchange="togglePrecioNuevo(this)"
                                 >
                                     <option value="true">Sí, es gratuito</option
                                     >
@@ -240,7 +237,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                 class="input-dato"
                                 name="precio"
                                 value="0"
-                                onchange="toggleGratuito(this)"
+                                onchange="toggleGratuitoNuevo(this)"
                             />
                         </div>
                     </div>
@@ -303,17 +300,16 @@ const { categorias = [], organizadores = [] } = Astro.props;
                             </div>
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Duración (Horas)</p>
                         <div class="contenedor-input">
                             <input
                                 type="number"
-                                min="15"
-                                step="15"
+                                min="0.1"
+                                step="0.1"
                                 class="input-dato"
                                 name="duracion"
-                                placeholder="Ej: 1 para 24 horas"
+                                placeholder="Ej: 2.5 horas"
                             />
                         </div>
                     </div>
@@ -364,9 +360,8 @@ const { categorias = [], organizadores = [] } = Astro.props;
                         <p class="texto-centrado texto-rojo">Dirigido a</p>
                         <div class="contenedor-dato">
                             <p class="texto-dato">Asignación (opcional):</p>
-                            <div class="contenedor-input">
-                                <select
-                                    id="asignacion-evento"
+                            <div class="contenedor-input">                                <select
+                                    id="asignacion-evento-nuevo"
                                     name="asignacion_id"
                                     class="input-dato"
                                 >
@@ -493,17 +488,15 @@ const { categorias = [], organizadores = [] } = Astro.props;
     .info-item strong {
         color: #1f2937;
         min-width: 140px;
-    }
-
-    #info-categoria {
+    }    #info-categoria-nuevo {
         border-left: 3px solid #3b82f6;
         padding-left: 12px;
         background-color: #f0f9ff;
         border-radius: 0 6px 6px 0;
     }
 
-    #campos-puntaje,
-    #campos-asistencia {
+    #campos-puntaje-nuevo,
+    #campos-asistencia-nuevo {
         border-left: 3px solid #10b981;
         padding-left: 12px;
         background-color: #f0fdf4;
@@ -523,36 +516,35 @@ const { categorias = [], organizadores = [] } = Astro.props;
         interface Window {
             abrirModalNuevoEvento: () => void;
             cerrarModalNuevoEvento: () => void;
-            toggleGratuito: (input: HTMLInputElement) => void;
-            togglePrecio: (select: HTMLSelectElement) => void;
-            mostrarInfoCategoria: (select: HTMLSelectElement) => void;
+            toggleGratuitoNuevo: (input: HTMLInputElement) => void;
+            togglePrecioNuevo: (select: HTMLSelectElement) => void;
+            mostrarInfoCategoriaNuevo: (select: HTMLSelectElement) => void;
         }
     }
 
-    let asignacionesDisponibles: any[] = [];
-
-    // Función para mostrar información de categoría
-    function mostrarInfoCategoria(select: HTMLSelectElement): void {
+    let asignacionesDisponibles: any[] = [];    // Función para mostrar información de categoría
+    function mostrarInfoCategoriaNuevo(select: HTMLSelectElement): void {
+        console.log("🔍 Ejecutando mostrarInfoCategoriaNuevo");
         const selectedOption = select.selectedOptions[0];
 
         // Elementos de información
         const infoCategoria = document.getElementById(
-            "info-categoria",
+            "info-categoria-nuevo",
         ) as HTMLElement;
         const infoPuntaje = document.getElementById(
-            "info-puntaje",
+            "info-puntaje-nuevo",
         ) as HTMLElement;
         const infoAsistencia = document.getElementById(
-            "info-asistencia",
+            "info-asistencia-nuevo",
         ) as HTMLElement;
         const infoCertificado = document.getElementById(
-            "info-certificado",
+            "info-certificado-nuevo",
         ) as HTMLElement;
         const valorPuntaje = document.getElementById(
-            "valor-puntaje",
+            "valor-puntaje-nuevo",
         ) as HTMLElement;
         const valorPorcentajeAsistencia = document.getElementById(
-            "valor-porcentaje-asistencia",
+            "valor-porcentaje-asistencia-nuevo",
         ) as HTMLElement;
 
         if (!selectedOption || !selectedOption.value) {
@@ -612,10 +604,8 @@ const { categorias = [], organizadores = [] } = Astro.props;
             puntajeApr,
             porcentajeAsistencia,
         });
-    }
-
-    // Función para manejar el toggle de precio gratuito
-    function toggleGratuito(input: HTMLInputElement): void {
+    } // Función para manejar el toggle de precio gratuito
+    function toggleGratuitoNuevo(input: HTMLInputElement): void {
         const esGratuitoSelect = document.querySelector(
             'select[name="es_gratuito"]',
         ) as HTMLSelectElement;
@@ -633,7 +623,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
             if (contenedorPrecio) contenedorPrecio.style.display = "block";
         }
     } // Función para manejar el toggle desde el select gratuito
-    function togglePrecio(select: HTMLSelectElement): void {
+    function togglePrecioNuevo(select: HTMLSelectElement): void {
         const precioInput = document.querySelector(
             'input[name="precio"]',
         ) as HTMLInputElement;
@@ -658,10 +648,8 @@ const { categorias = [], organizadores = [] } = Astro.props;
                 }
             }
         }
-    }
-
-    // Cargar asignaciones disponibles
-    async function cargarAsignaciones() {
+    } // Cargar asignaciones disponibles
+    async function cargarAsignacionesNuevo() {
         try {
             console.log("🔄 Cargando asignaciones disponibles...");
             const { data, error } = await actions.getAllAsignaciones({});
@@ -674,16 +662,14 @@ const { categorias = [], organizadores = [] } = Astro.props;
             if (!data?.success || !data.asignaciones) {
                 console.warn("⚠️ No hay asignaciones disponibles");
                 return;
-            }
-
-            asignacionesDisponibles = data.asignaciones;
+            }            asignacionesDisponibles = data.asignaciones;
             const select = document.getElementById(
-                "asignacion-evento",
+                "asignacion-evento-nuevo",
             ) as HTMLSelectElement;
 
             if (!select) {
                 console.error(
-                    "❌ No se encontró el elemento select #asignacion-evento",
+                    "❌ No se encontró el elemento select #asignacion-evento-nuevo",
                 );
                 return;
             }
@@ -715,9 +701,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
         } catch (error) {
             console.error("💥 Error crítico al cargar asignaciones:", error);
         }
-    }
-
-    function abrirModalNuevoEvento(): void {
+    }    function abrirModalNuevoEvento(): void {
         console.log("🎯 Abriendo modal nuevo evento...");
         const modal = document.getElementById("modalNuevoEvento");
         if (modal) {
@@ -734,10 +718,13 @@ const { categorias = [], organizadores = [] } = Astro.props;
 
             if (fechaInscripcionInicio && !fechaInscripcionInicio.value) {
                 fechaInscripcionInicio.value = fechaHoy;
-            }
-
+            } 
+            
+            console.log("🔄 Intentando cargar asignaciones...");
             // Cargar asignaciones
-            cargarAsignaciones();
+            cargarAsignacionesNuevo();
+        } else {
+            console.error("❌ No se encontró el modal #modalNuevoEvento");
         }
     }
     function cerrarModalNuevoEvento(): void {
@@ -774,21 +761,19 @@ const { categorias = [], organizadores = [] } = Astro.props;
             }
             if (contenedorPrecio) {
                 contenedorPrecio.style.display = "none";
-            } // Resetear información de categoría
+            }            // Resetear información de categoría
             const infoCategoria = document.getElementById(
-                "info-categoria",
+                "info-categoria-nuevo",
             ) as HTMLElement;
 
             if (infoCategoria) infoCategoria.style.display = "none";
         }
-    }
-
-    // Asignar funciones al objeto window
+    } // Asignar funciones al objeto window
     window.abrirModalNuevoEvento = abrirModalNuevoEvento;
     window.cerrarModalNuevoEvento = cerrarModalNuevoEvento;
-    window.toggleGratuito = toggleGratuito;
-    window.togglePrecio = togglePrecio;
-    window.mostrarInfoCategoria = mostrarInfoCategoria;
+    window.toggleGratuitoNuevo = toggleGratuitoNuevo;
+    window.togglePrecioNuevo = togglePrecioNuevo;
+    window.mostrarInfoCategoriaNuevo = mostrarInfoCategoriaNuevo;
 
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById(

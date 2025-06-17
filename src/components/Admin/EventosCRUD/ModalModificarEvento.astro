@@ -1,5 +1,12 @@
 ---
 import "../../../styles/Admin/ModalModificarEvento.css";
+
+interface Props {
+    categorias?: any[];
+    organizadores?: any[];
+}
+
+const { categorias = [], organizadores = [] } = Astro.props;
 ---
 
 <div id="modalModificarEvento" class="modal">
@@ -49,15 +56,81 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                     name="categoria"
                                     class="input-dato"
                                     required
+                                    onchange="mostrarInfoCategoriaModificar(this)"
                                 >
                                     <option value=""
                                         >Seleccione una categoría</option
                                     >
-                                    <!-- Las opciones se cargarán dinámicamente -->
+                                    {
+                                        categorias.map((categoria) => (
+                                            <option
+                                                value={categoria.id_cat}
+                                                data-puntaje={
+                                                    categoria.pun_apr_cat
+                                                }
+                                                data-asignacion={
+                                                    categoria.asi_cat
+                                                }
+                                                data-requiere-puntaje={
+                                                    categoria.requiere_puntaje
+                                                }
+                                                data-requiere-asistencia={
+                                                    categoria.requiere_asistencia
+                                                }
+                                                data-brinda-certificado={
+                                                    categoria.brinda_certificado
+                                                }
+                                                data-porcentaje-asistencia={
+                                                    categoria.asi_cat
+                                                }
+                                            >
+                                                {categoria.nom_cat}
+                                            </option>
+                                        ))
+                                    }
                                 </select>
                             </div>
                         </div>
 
+                        <!-- Información dinámica de la categoría -->
+                        <div
+                            id="info-categoria"
+                            class="contenedor-dato"
+                            style="display: none;"
+                        >
+                            <p class="texto-dato">
+                                Información de la Categoría
+                            </p>
+                            <div class="info-categoria-contenido">
+                                <div id="info-puntaje" style="display: none;">
+                                    <p class="info-item">
+                                        <strong>Puntaje de aprobación:</strong>
+                                        <span id="valor-puntaje">-</span> puntos
+                                    </p>
+                                </div>
+                                <div
+                                    id="info-asistencia"
+                                    style="display: none;"
+                                >
+                                    <p class="info-item">
+                                        <strong>Requiere asistencia:</strong>
+                                        <span id="valor-porcentaje-asistencia"
+                                            >-</span
+                                        >% mínimo
+                                    </p>
+                                </div>
+                                <div
+                                    id="info-certificado"
+                                    style="display: none;"
+                                >
+                                    <p class="info-item">
+                                        <strong>Brinda certificado:</strong> Sí
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contenedor-nombre">
                         <div class="contenedor-dato">
                             <p class="texto-dato">Área:</p>
                             <div class="contenedor-input">
@@ -83,28 +156,13 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                     </div>
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Precio (USD):</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    max="999999.99"
-                                    class="input-dato"
-                                    name="precio"
-                                    value="0"
-                                    id="precio-input"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">¿Es Gratuito?</p>
+                            <p class="texto-dato">¿Es gratuito?</p>
                             <div class="contenedor-input">
                                 <select
                                     name="es_gratuito"
                                     class="input-dato"
                                     id="es-gratuito-select"
+                                    onchange="togglePrecioModificar(this)"
                                 >
                                     <option value="false"
                                         >No, tiene costo</option
@@ -114,11 +172,30 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 </select>
                             </div>
                         </div>
-                    </div>
 
+                        <div class="contenedor-dato" id="contenedor-precio">
+                            <p class="texto-dato">Precio (USD):</p>
+                            <div class="contenedor-input precio-container">
+                                <span class="precio-label">$</span>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="999999.99"
+                                    class="input-dato"
+                                    name="precio"
+                                    value="0"
+                                    id="precio-input"
+                                    oninput="toggleGratuito(this)"
+                                />
+                            </div>
+                        </div>
+                    </div>
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">¿Requiere Carta?</p>
+                            <p class="texto-dato">
+                                ¿Requiere carta de motivación?
+                            </p>
                             <div class="contenedor-input">
                                 <select
                                     name="requiere_carta"
@@ -144,7 +221,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             </div>
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">
                             Carta de Motivación (Opcional):
@@ -175,37 +251,12 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         </div>
 
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Hora de Inicio:</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="time"
-                                    class="input-dato"
-                                    name="hora_inicio"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="contenedor-nombre">
-                        <div class="contenedor-dato">
                             <p class="texto-dato">Fecha de Finalización:</p>
                             <div class="contenedor-input">
                                 <input
                                     type="date"
                                     class="input-dato"
                                     name="fecha_fin"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Hora de Finalización:</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="time"
-                                    class="input-dato"
-                                    name="hora_fin"
                                 />
                             </div>
                         </div>
@@ -275,7 +326,18 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 <option value=""
                                     >Seleccione un organizador</option
                                 >
-                                <!-- Las opciones se cargarán dinámicamente -->
+                                {
+                                    organizadores.map((organizador) => (
+                                        <option value={organizador.ced_org}>
+                                            {organizador.tit_aca_org}{" "}
+                                            {organizador.nom_org1}{" "}
+                                            {organizador.nom_org2 || ""}{" "}
+                                            {organizador.ape_org1}{" "}
+                                            {organizador.ape_org2 || ""} -{" "}
+                                            {organizador.ced_org}
+                                        </option>
+                                    ))
+                                }
                             </select>
                         </div>
                     </div>
@@ -288,7 +350,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 <select
                                     name="id_asignacion"
                                     class="input-dato"
-                                    required
+                                    id="asignacion-evento"
                                 >
                                     <option value=""
                                         >Seleccione una asignación</option
@@ -296,6 +358,10 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                     <!-- Las opciones se cargarán dinámicamente -->
                                 </select>
                             </div>
+                            <p class="texto-info-asignaciones">
+                                La asignación determina qué carreras pueden
+                                participar en este evento.
+                            </p>
                         </div>
                     </div>
                     <div class="contenedor-boton-modificar">
@@ -345,6 +411,91 @@ import "../../../styles/Admin/ModalModificarEvento.css";
             </form>
         </div>
 
+        <style>
+            .texto-info-asignaciones {
+                margin-top: 5px;
+                color: #6b7280;
+                font-size: 12px;
+                font-style: italic;
+            }
+
+            .input-dato[name="precio"]:disabled {
+                background-color: #f3f4f6;
+                color: #6b7280;
+            }
+
+            .contenedor-nombre {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+
+            .contenedor-dato textarea {
+                resize: vertical;
+                min-height: 60px;
+            }
+
+            .precio-container {
+                position: relative;
+            }
+
+            .precio-label {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #6b7280;
+                pointer-events: none;
+            }
+
+            .input-dato[name="precio"] {
+                padding-left: 25px;
+            }
+
+            /* Estilos para información de categoría */
+            .info-categoria-contenido {
+                background-color: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                padding: 12px;
+                margin-top: 8px;
+            }
+
+            .info-item {
+                margin: 6px 0;
+                font-size: 14px;
+                color: #374151;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .info-item strong {
+                color: #1f2937;
+                min-width: 140px;
+            }
+
+            #info-categoria {
+                border-left: 3px solid #3b82f6;
+                padding-left: 12px;
+                background-color: #f0f9ff;
+                border-radius: 0 6px 6px 0;
+            }
+
+            #campos-puntaje,
+            #campos-asistencia {
+                border-left: 3px solid #10b981;
+                padding-left: 12px;
+                background-color: #f0fdf4;
+                border-radius: 0 6px 6px 0;
+            }
+
+            .categoria-destacada {
+                background-color: #eff6ff !important;
+                border: 2px solid #3b82f6 !important;
+            }
+        </style>
+
         <script>
             import { actions } from "astro:actions";
             import Swal from "sweetalert2";
@@ -354,8 +505,8 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 des_eve: string;
                 fec_ini_eve: string;
                 fec_fin_eve?: string;
-                hor_ini_eve: string;
-                hor_fin_eve?: string;
+                fec_ini_ins_eve: string;
+                fec_fin_ins_eve: string;
                 dur_eve?: number;
                 are_eve?: string;
                 ubi_eve: string;
@@ -367,105 +518,244 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 requiere_carta: boolean;
                 es_destacado: boolean;
                 car_mot_eve?: string;
-                fec_ini_ins?: string;
-                fec_fin_ins?: string;
-                id_asignacion?: string;
+                id_asi_eve?: string;
             }
             declare global {
                 interface Window {
                     abrirModalModificarEvento: (eventoId: string) => void;
                     cerrarModalModificarEvento: () => void;
+                    toggleGratuitoModificar: (input: HTMLInputElement) => void;
+                    togglePrecioModificar: (select: HTMLSelectElement) => void;
+                    mostrarInfoCategoriaModificar: (
+                        select: HTMLSelectElement,
+                    ) => void;
+                }
+            }
+
+            let asignacionesDisponibles: any[] = [];
+
+            // Función para mostrar información de categoría
+            function mostrarInfoCategoriaModificar(
+                select: HTMLSelectElement,
+            ): void {
+                const selectedOption = select.selectedOptions[0];
+
+                // Elementos de información
+                const infoCategoria = document.getElementById(
+                    "info-categoria",
+                ) as HTMLElement;
+                const infoPuntaje = document.getElementById(
+                    "info-puntaje",
+                ) as HTMLElement;
+                const infoAsistencia = document.getElementById(
+                    "info-asistencia",
+                ) as HTMLElement;
+                const infoCertificado = document.getElementById(
+                    "info-certificado",
+                ) as HTMLElement;
+                const valorPuntaje = document.getElementById(
+                    "valor-puntaje",
+                ) as HTMLElement;
+                const valorPorcentajeAsistencia = document.getElementById(
+                    "valor-porcentaje-asistencia",
+                ) as HTMLElement;
+
+                if (!selectedOption || !selectedOption.value) {
+                    // Ocultar todo si no hay selección
+                    if (infoCategoria) infoCategoria.style.display = "none";
+                    return;
+                }
+
+                // Obtener datos de la categoría
+                const puntajeApr = selectedOption.getAttribute("data-puntaje");
+                const porcentajeAsistencia = selectedOption.getAttribute(
+                    "data-porcentaje-asistencia",
+                );
+                const requierePuntaje =
+                    selectedOption.getAttribute("data-requiere-puntaje") ===
+                    "true";
+                const requiereAsistencia =
+                    selectedOption.getAttribute("data-requiere-asistencia") ===
+                    "true";
+                const brindaCertificado =
+                    selectedOption.getAttribute("data-brinda-certificado") ===
+                    "true";
+
+                // Mostrar información de la categoría
+                if (infoCategoria) {
+                    infoCategoria.style.display = "block";
+
+                    // Mostrar/ocultar información según los atributos
+                    if (infoPuntaje && valorPuntaje) {
+                        if (requierePuntaje && puntajeApr) {
+                            infoPuntaje.style.display = "block";
+                            valorPuntaje.textContent = puntajeApr;
+                        } else {
+                            infoPuntaje.style.display = "none";
+                        }
+                    }
+
+                    if (infoAsistencia && valorPorcentajeAsistencia) {
+                        if (requiereAsistencia && porcentajeAsistencia) {
+                            infoAsistencia.style.display = "block";
+                            valorPorcentajeAsistencia.textContent =
+                                porcentajeAsistencia;
+                        } else {
+                            infoAsistencia.style.display = "none";
+                        }
+                    }
+
+                    if (infoCertificado) {
+                        if (brindaCertificado) {
+                            infoCertificado.style.display = "block";
+                        } else {
+                            infoCertificado.style.display = "none";
+                        }
+                    }
+                }
+
+                console.log("📊 Información de categoría actualizada:", {
+                    requierePuntaje,
+                    requiereAsistencia,
+                    brindaCertificado,
+                    puntajeApr,
+                    porcentajeAsistencia,
+                });
+            }
+
+            // Función para manejar el toggle de precio gratuito
+            function toggleGratuitoModificar(input: HTMLInputElement): void {
+                const esGratuitoSelect = document.querySelector(
+                    'select[name="es_gratuito"]',
+                ) as HTMLSelectElement;
+                const contenedorPrecio = document.getElementById(
+                    "contenedor-precio",
+                ) as HTMLElement;
+
+                if (parseFloat(input.value) === 0) {
+                    esGratuitoSelect.value = "true";
+                    input.disabled = true;
+                    if (contenedorPrecio)
+                        contenedorPrecio.style.display = "none";
+                } else {
+                    esGratuitoSelect.value = "false";
+                    input.disabled = false;
+                    if (contenedorPrecio)
+                        contenedorPrecio.style.display = "block";
+                }
+            }
+
+            // Función para manejar el toggle desde el select gratuito
+            function togglePrecioModificar(select: HTMLSelectElement): void {
+                const precioInput = document.querySelector(
+                    'input[name="precio"]',
+                ) as HTMLInputElement;
+                const contenedorPrecio = document.getElementById(
+                    "contenedor-precio",
+                ) as HTMLElement;
+
+                if (select.value === "true") {
+                    // Es gratuito - ocultar precio
+                    if (contenedorPrecio)
+                        contenedorPrecio.style.display = "none";
+                    if (precioInput) {
+                        precioInput.value = "0";
+                        precioInput.disabled = true;
+                    }
+                } else {
+                    // No es gratuito - mostrar precio
+                    if (contenedorPrecio)
+                        contenedorPrecio.style.display = "block";
+                    if (precioInput) {
+                        precioInput.disabled = false;
+                        if (precioInput.value === "0") precioInput.value = "";
+                    }
+                }
+            } // Cargar asignaciones disponibles
+            async function cargarAsignacionesModificar() {
+                try {
+                    console.log("🔄 Cargando asignaciones disponibles...");
+                    const { data, error } = await actions.getAllAsignaciones(
+                        {},
+                    );
+
+                    if (error) {
+                        console.error(
+                            "❌ Error al cargar asignaciones:",
+                            error,
+                        );
+                        return;
+                    }
+
+                    if (!data?.success || !data.asignaciones) {
+                        console.warn("⚠️ No se encontraron asignaciones");
+                        return;
+                    }
+
+                    asignacionesDisponibles = data.asignaciones;
+                    const select = document.getElementById(
+                        "asignacion-evento",
+                    ) as HTMLSelectElement;
+
+                    if (!select) {
+                        console.error(
+                            "❌ No se encontró el select de asignaciones",
+                        );
+                        return;
+                    }
+
+                    // Limpiar opciones existentes (excepto la primera)
+                    while (select.children.length > 1) {
+                        select.removeChild(select.lastChild!);
+                    }
+
+                    // Agregar asignaciones disponibles
+                    asignacionesDisponibles.forEach((asignacion) => {
+                        const option = document.createElement("option");
+                        option.value = asignacion.id_asi;
+                        option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
+                        select.appendChild(option);
+                    });
+
+                    console.log(
+                        `✅ ${asignacionesDisponibles.length} asignaciones cargadas exitosamente`,
+                    );
+                } catch (error) {
+                    console.error(
+                        "💥 Error crítico al cargar asignaciones:",
+                        error,
+                    );
                 }
             }
             async function cargarCategoriasOrganizadoresYAsignaciones() {
                 try {
-                    // Cargar categorías usando acciones de Astro
-                    const { data: categoriasData } =
-                        await actions.getCategorias({});
-
-                    if (categoriasData?.success) {
-                        const selectCategoria = document.querySelector(
-                            'select[name="categoria"]',
-                        ) as HTMLSelectElement;
-
-                        if (selectCategoria) {
-                            selectCategoria.innerHTML =
-                                '<option value="">Seleccione una categoría</option>';
-                            categoriasData.categorias.forEach(
-                                (categoria: any) => {
-                                    const option =
-                                        document.createElement("option");
-                                    option.value = categoria.id_cat;
-                                    option.textContent = categoria.nom_cat;
-                                    selectCategoria.appendChild(option);
-                                },
-                            );
-                        }
-                    }
-
-                    // Cargar organizadores usando acciones de Astro
-                    const { data: organizadoresData } =
-                        await actions.getOrganizadores({});
-
-                    if (organizadoresData?.success) {
-                        const selectOrganizador = document.querySelector(
-                            'select[name="cedula_organizador"]',
-                        ) as HTMLSelectElement;
-
-                        if (selectOrganizador) {
-                            selectOrganizador.innerHTML =
-                                '<option value="">Seleccione un organizador</option>';
-                            organizadoresData.organizadores.forEach(
-                                (organizador: any) => {
-                                    const option =
-                                        document.createElement("option");
-                                    option.value = organizador.ced_org;
-                                    option.textContent = `${organizador.nom_org1} ${organizador.nom_org2} ${organizador.ape_org1} ${organizador.ape_org2} - ${organizador.ced_org}`;
-                                    selectOrganizador.appendChild(option);
-                                },
-                            );
-                        }
-                    }
-
-                    // Cargar asignaciones disponibles
-                    const { data: asignacionesData } =
-                        await actions.getAsignacionesPlantilla({});
-
-                    if (asignacionesData?.success) {
-                        const selectAsignacion = document.querySelector(
-                            'select[name="id_asignacion"]',
-                        ) as HTMLSelectElement;
-
-                        if (selectAsignacion) {
-                            selectAsignacion.innerHTML =
-                                '<option value="">Seleccione una asignación</option>';
-                            asignacionesData.asignaciones.forEach(
-                                (asignacion: any) => {
-                                    const option =
-                                        document.createElement("option");
-                                    option.value = asignacion.id_asi;
-                                    option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
-                                    selectAsignacion.appendChild(option);
-                                },
-                            );
-                        }
-                    }
-                } catch (error) {
-                    console.error(
-                        "Error al cargar categorías, organizadores y asignaciones:",
-                        error,
+                    // Las categorías y organizadores ya vienen cargados desde las props del componente Astro
+                    // Solo cargamos las asignaciones dinámicamente
+                    console.log(
+                        "🔄 Cargando solo asignaciones (categorías y organizadores ya están en props)",
                     );
+                    // Cargar asignaciones
+                    await cargarAsignacionesModificar();
+
+                    console.log("✅ Datos cargados correctamente");
+                } catch (error) {
+                    console.error("Error al cargar datos:", error);
                 }
             }
             async function abrirModalModificarEvento(
                 eventoId: string,
             ): Promise<void> {
+                console.log("🔄 Abriendo modal para evento:", eventoId);
+
                 const modal = document.getElementById("modalModificarEvento");
                 const form = document.getElementById(
                     "formulario-modificar-evento",
                 ) as HTMLFormElement;
 
-                if (!modal || !form) return;
+                if (!modal || !form) {
+                    console.error("❌ No se encontró el modal o formulario");
+                    return;
+                }
 
                 // Cargar categorías, organizadores y asignaciones dinámicamente
                 await cargarCategoriasOrganizadoresYAsignaciones();
@@ -478,11 +768,18 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                     JSON.parse((input as HTMLInputElement).value),
                 );
 
+                console.log("📊 Eventos disponibles:", eventos.length);
+
                 const evento = eventos.find(
                     (e: Evento) => e.id_eve === eventoId,
                 );
 
-                if (!evento) return;
+                if (!evento) {
+                    console.error("❌ Evento no encontrado:", eventoId);
+                    return;
+                }
+
+                console.log("✅ Evento encontrado:", evento);
 
                 // Llenar el formulario con los datos del evento
                 const nombre = form.querySelector(
@@ -515,14 +812,8 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 const fechaInicio = form.querySelector(
                     'input[name="fecha_inicio"]',
                 ) as HTMLInputElement;
-                const horaInicio = form.querySelector(
-                    'input[name="hora_inicio"]',
-                ) as HTMLInputElement;
                 const fechaFin = form.querySelector(
                     'input[name="fecha_fin"]',
-                ) as HTMLInputElement;
-                const horaFin = form.querySelector(
-                    'input[name="hora_fin"]',
                 ) as HTMLInputElement;
                 const fechaInicioInscripcion = form.querySelector(
                     'input[name="fecha_inicio_inscripcion"]',
@@ -550,53 +841,123 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 ) as HTMLImageElement;
 
                 // Asignar valores
-                if (nombre) nombre.value = evento.nom_eve;
-                if (descripcion) descripcion.value = evento.des_eve;
-                if (categoria) categoria.value = evento.id_cat_eve;
-                if (area) area.value = evento.are_eve || "";
-                if (precio) precio.value = evento.precio.toString();
-                if (esGratuito)
+                console.log("📝 Asignando valores al formulario...");
+
+                if (nombre) {
+                    nombre.value = evento.nom_eve;
+                    console.log("✅ Nombre asignado:", evento.nom_eve);
+                }
+                if (descripcion) {
+                    descripcion.value = evento.des_eve;
+                    console.log("✅ Descripción asignada");
+                }
+                if (categoria) {
+                    categoria.value = evento.id_cat_eve;
+                    console.log("✅ Categoría asignada:", evento.id_cat_eve);
+                    // Mostrar información de categoría después de seleccionar
+                    setTimeout(
+                        () => mostrarInfoCategoriaModificar(categoria),
+                        100,
+                    );
+                }
+                if (area) {
+                    area.value = evento.are_eve || "";
+                    console.log("✅ Área asignada:", evento.are_eve);
+                }
+                if (precio) {
+                    precio.value = evento.precio.toString();
+                    console.log("✅ Precio asignado:", evento.precio);
+                }
+                if (esGratuito) {
                     esGratuito.value = evento.es_gratuito.toString();
-                if (requiereCarta)
+                    console.log("✅ Es gratuito asignado:", evento.es_gratuito);
+                    // Aplicar lógica de precio/gratuito después de establecer el valor
+                    setTimeout(() => togglePrecioModificar(esGratuito), 100);
+                }
+                if (requiereCarta) {
                     requiereCarta.value = evento.requiere_carta.toString();
-                if (esDestacado)
+                    console.log(
+                        "✅ Requiere carta asignado:",
+                        evento.requiere_carta,
+                    );
+                }
+                if (esDestacado) {
                     esDestacado.value = evento.es_destacado.toString();
-                if (carMotEve) carMotEve.value = evento.car_mot_eve || "";
-                if (fechaInicio)
+                    console.log(
+                        "✅ Es destacado asignado:",
+                        evento.es_destacado,
+                    );
+                }
+                if (carMotEve) {
+                    carMotEve.value = evento.car_mot_eve || "";
+                    console.log("✅ Carta motivación asignada");
+                }
+                if (fechaInicio) {
                     fechaInicio.value = new Date(evento.fec_ini_eve)
                         .toISOString()
                         .split("T")[0];
-                if (horaInicio) horaInicio.value = evento.hor_ini_eve;
-                if (fechaFin && evento.fec_fin_eve)
+                    console.log(
+                        "✅ Fecha inicio asignada:",
+                        evento.fec_ini_eve,
+                    );
+                }
+                if (fechaFin && evento.fec_fin_eve) {
                     fechaFin.value = new Date(evento.fec_fin_eve)
                         .toISOString()
                         .split("T")[0];
-                if (horaFin && evento.hor_fin_eve)
-                    horaFin.value = evento.hor_fin_eve;
-                if (fechaInicioInscripcion && evento.fec_ini_ins)
-                    fechaInicioInscripcion.value = new Date(evento.fec_ini_ins)
+                    console.log("✅ Fecha fin asignada:", evento.fec_fin_eve);
+                }
+                if (fechaInicioInscripcion && evento.fec_ini_ins_eve) {
+                    fechaInicioInscripcion.value = new Date(
+                        evento.fec_ini_ins_eve,
+                    )
                         .toISOString()
                         .split("T")[0];
-                if (fechaFinInscripcion && evento.fec_fin_ins)
-                    fechaFinInscripcion.value = new Date(evento.fec_fin_ins)
+                    console.log(
+                        "✅ Fecha inicio inscripción asignada:",
+                        evento.fec_ini_ins_eve,
+                    );
+                }
+                if (fechaFinInscripcion && evento.fec_fin_ins_eve) {
+                    fechaFinInscripcion.value = new Date(evento.fec_fin_ins_eve)
                         .toISOString()
                         .split("T")[0];
-                if (duracion && evento.dur_eve)
+                    console.log(
+                        "✅ Fecha fin inscripción asignada:",
+                        evento.fec_fin_ins_eve,
+                    );
+                }
+                if (duracion && evento.dur_eve) {
                     duracion.value = evento.dur_eve.toString();
-                if (ubicacion) ubicacion.value = evento.ubi_eve;
-                if (cedulaOrganizador)
+                    console.log("✅ Duración asignada:", evento.dur_eve);
+                }
+                if (ubicacion) {
+                    ubicacion.value = evento.ubi_eve;
+                    console.log("✅ Ubicación asignada:", evento.ubi_eve);
+                }
+                if (cedulaOrganizador) {
                     cedulaOrganizador.value = evento.ced_org_eve;
-                if (idAsignacion && evento.id_asignacion)
-                    idAsignacion.value = evento.id_asignacion;
-                if (eventoIdInput) eventoIdInput.value = evento.id_eve;
-                if (eventoImagen)
+                    console.log("✅ Organizador asignado:", evento.ced_org_eve);
+                }
+                if (idAsignacion && evento.id_asi_eve) {
+                    idAsignacion.value = evento.id_asi_eve;
+                    console.log("✅ Asignación asignada:", evento.id_asi_eve);
+                }
+                if (eventoIdInput) {
+                    eventoIdInput.value = evento.id_eve;
+                    console.log("✅ ID evento asignado:", evento.id_eve);
+                }
+                if (eventoImagen) {
                     eventoImagen.src =
                         evento.img_eve ||
                         "https://via.placeholder.com/300x200?text=Sin+Imagen";
+                    eventoImagen.style.display = "block";
+                    console.log("✅ Imagen asignada:", evento.img_eve);
+                }
 
+                console.log("✅ Todos los valores asignados, mostrando modal");
                 modal.style.display = "block";
             }
-
             function cerrarModalModificarEvento(): void {
                 const modal = document.getElementById("modalModificarEvento");
                 const form = document.getElementById(
@@ -606,6 +967,39 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 if (modal && form) {
                     modal.style.display = "none";
                     form.reset();
+
+                    // Resetear imagen
+                    const imagen = document.getElementById(
+                        "evento-imagen",
+                    ) as HTMLImageElement;
+                    const fileName = document.querySelector(
+                        "#modalModificarEvento .file-name",
+                    ) as HTMLElement;
+                    if (imagen) imagen.style.display = "none";
+                    if (fileName)
+                        fileName.textContent =
+                            "No se ha seleccionado ningún archivo";
+
+                    // Resetear precio y su contenedor
+                    const precioInput = document.querySelector(
+                        'input[name="precio"]',
+                    ) as HTMLInputElement;
+                    const contenedorPrecio = document.getElementById(
+                        "contenedor-precio",
+                    ) as HTMLElement;
+                    if (precioInput) {
+                        precioInput.value = "0";
+                        precioInput.disabled = false;
+                    }
+                    if (contenedorPrecio) {
+                        contenedorPrecio.style.display = "block";
+                    }
+
+                    // Resetear información de categoría
+                    const infoCategoria = document.getElementById(
+                        "info-categoria",
+                    ) as HTMLElement;
+                    if (infoCategoria) infoCategoria.style.display = "none";
                 }
             }
 
@@ -642,9 +1036,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 "No se ha seleccionado ningún archivo válido";
                         }
                     });
-                }
-
-                // Manejar lógica de precio/gratuito
+                } // Manejar lógica de precio/gratuito
                 const esGratuitoSelect = document.querySelector(
                     'select[name="es_gratuito"]',
                 ) as HTMLSelectElement;
@@ -655,13 +1047,21 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 if (esGratuitoSelect && precioInput) {
                     function actualizarVisibilidadPrecio() {
                         const esGratuito = esGratuitoSelect.value === "true";
+                        const contenedorPrecio = document.getElementById(
+                            "contenedor-precio",
+                        ) as HTMLElement;
+
                         if (esGratuito) {
                             precioInput.value = "0";
                             precioInput.disabled = true;
                             precioInput.style.opacity = "0.5";
+                            if (contenedorPrecio)
+                                contenedorPrecio.style.display = "none";
                         } else {
                             precioInput.disabled = false;
                             precioInput.style.opacity = "1";
+                            if (contenedorPrecio)
+                                contenedorPrecio.style.display = "block";
                         }
                     }
 
@@ -669,6 +1069,18 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         "change",
                         actualizarVisibilidadPrecio,
                     );
+
+                    // También manejar cambios en el input de precio
+                    precioInput.addEventListener("input", () => {
+                        if (parseFloat(precioInput.value) === 0) {
+                            esGratuitoSelect.value = "true";
+                            actualizarVisibilidadPrecio();
+                        } else if (esGratuitoSelect.value === "true") {
+                            esGratuitoSelect.value = "false";
+                            actualizarVisibilidadPrecio();
+                        }
+                    });
+
                     // Ejecutar una vez al cargar
                     actualizarVisibilidadPrecio();
                 } // Manejar envío del formulario
@@ -676,12 +1088,9 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                     form.addEventListener("submit", async (e) => {
                         e.preventDefault();
 
-                        const formData = new FormData(form);
-
-                        // Obtener valores y validar
+                        const formData = new FormData(form); // Obtener valores y validar
                         const areaValue = formData.get("area") as string;
                         const fechaFin = formData.get("fecha_fin") as string;
-                        const horaFin = formData.get("hora_fin") as string;
                         const duracionStr = formData.get("duracion") as string;
                         const carMotEve = formData.get("car_mot_eve") as string;
                         const fechaInicioInscripcion = formData.get(
@@ -690,17 +1099,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         const fechaFinInscripcion = formData.get(
                             "fecha_fin_inscripcion",
                         ) as string;
-                        const horaInicio = formData.get(
-                            "hora_inicio",
-                        ) as string;
-
-                        // Convertir horas a formato del backend si es necesario
-                        if (horaInicio) {
-                            formData.set("hora_inicio", horaInicio);
-                        }
-                        if (horaFin) {
-                            formData.set("hora_fin", horaFin);
-                        }
 
                         // Renombrar campos para que coincidan con la acción
                         if (carMotEve && carMotEve.trim() !== "") {
@@ -735,14 +1133,9 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         const areaValida =
                             areaValue && areasPermitidas.includes(areaValue)
                                 ? areaValue
-                                : undefined;
-
-                        // Limpiar campos vacíos
+                                : undefined; // Limpiar campos vacíos
                         if (!fechaFin || fechaFin.trim() === "") {
                             formData.delete("fecha_fin");
-                        }
-                        if (!horaFin || horaFin.trim() === "") {
-                            formData.delete("hora_fin");
                         }
                         if (!duracionStr || duracionStr.trim() === "") {
                             formData.delete("duracion");
@@ -822,6 +1215,10 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 } // Asignar funciones al objeto window
                 window.abrirModalModificarEvento = abrirModalModificarEvento;
                 window.cerrarModalModificarEvento = cerrarModalModificarEvento;
+                window.toggleGratuitoModificar = toggleGratuitoModificar;
+                window.togglePrecioModificar = togglePrecioModificar;
+                window.mostrarInfoCategoriaModificar =
+                    mostrarInfoCategoriaModificar;
             });
         </script>
     </div>
