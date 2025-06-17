@@ -15,7 +15,7 @@ const { data: cuenta } = await Astro.callAction(
   session?.user?.id || "",
 );
 
-const idUsuario = cuenta?.id_usu_per;
+const idUsuario = cuenta?.id_usu;
 
 let eventosUsuario: any[] = [];
 let upcomingEvents: any[] = [];
