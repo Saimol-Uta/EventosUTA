@@ -4,7 +4,9 @@ import "../../../styles/Admin/ModalModificarEvento.css";
 
 <div id="modalModificarEvento" class="modal">
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalModificarEvento()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalModificarEvento()"
+            >&times;</span
+        >
         <div class="formulario-completo">
             <form
                 class="formulario-modificar-registro"
@@ -79,55 +81,84 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             </div>
                         </div>
                     </div>
-                    <div class="contenedor-dato">
-                        <p class="texto-dato">Precio (USD):</p>
-                        <div class="contenedor-input">
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                class="input-dato"
-                                name="precio"
-                                value="0"
-                            />
-                        </div>
-                    </div>
-
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Nota de Aprobación:</p>
+                            <p class="texto-dato">Precio (USD):</p>
                             <div class="contenedor-input">
                                 <input
                                     type="number"
-                                    step="0.1"
+                                    step="0.01"
                                     min="0"
-                                    max="10"
+                                    max="999999.99"
                                     class="input-dato"
-                                    name="nota_aprobacion"
-                                    value="7.0"
+                                    name="precio"
+                                    value="0"
+                                    id="precio-input"
                                 />
                             </div>
                         </div>
 
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Tiempo de Registro:</p>
+                            <p class="texto-dato">¿Es Gratuito?</p>
                             <div class="contenedor-input">
                                 <select
-                                    name="tiempo_registro_asignacion"
+                                    name="es_gratuito"
                                     class="input-dato"
+                                    id="es-gratuito-select"
                                 >
-                                    <option value="true" selected
-                                        >Se requiere registro de asistencia</option
-                                    >
                                     <option value="false"
-                                        >No se requiere registro de asistencia</option
+                                        >No, tiene costo</option
+                                    >
+                                    <option value="true">Sí, es gratuito</option
                                     >
                                 </select>
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">¿Requiere Carta?</p>
+                            <div class="contenedor-input">
+                                <select
+                                    name="requiere_carta"
+                                    class="input-dato"
+                                >
+                                    <option value="false"
+                                        >No requiere carta</option
+                                    >
+                                    <option value="true"
+                                        >Sí requiere carta</option
+                                    >
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">¿Es Destacado?</p>
+                            <div class="contenedor-input">
+                                <select name="es_destacado" class="input-dato">
+                                    <option value="false">No destacado</option>
+                                    <option value="true">Sí destacado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Carta de Motivación (Opcional):
+                        </p>
+                        <div class="contenedor-input">
+                            <textarea
+                                class="input-dato"
+                                name="car_mot_eve"
+                                rows="3"
+                                placeholder="Instrucciones para la carta de motivación..."
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
                 <div class="contenedor-superior">
                     <p class="texto-centrado texto-roja">Programación</p>
                     <div class="contenedor-nombre">
@@ -180,14 +211,41 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         </div>
                     </div>
 
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Fecha Inicio Inscripción:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="date"
+                                    class="input-dato"
+                                    name="fecha_inicio_inscripcion"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Fecha Fin Inscripción:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="date"
+                                    class="input-dato"
+                                    name="fecha_fin_inscripcion"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Duración (horas)</p>
+                        <p class="texto-dato">Duración (minutos)</p>
                         <div class="contenedor-input">
                             <input
                                 type="number"
                                 min="1"
                                 class="input-dato"
                                 name="duracion"
+                                placeholder="Duración en minutos"
                             />
                         </div>
                     </div>
@@ -221,61 +279,31 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             </select>
                         </div>
                     </div>
-
-                    <!-- Sección de Asignaciones -->
+                    <!-- Sección de Asignación -->
                     <div class="contenedor-superior">
-                        <p class="texto-centrado texto-roja">Asignaciones</p>
+                        <p class="texto-centrado texto-roja">Asignación</p>
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Asignaciones Actuales:</p>
-                            <div
-                                id="asignaciones-actuales"
-                                class="asignaciones-display"
-                            >
-                                <!-- Se mostrará la lista de asignaciones actuales -->
-                            </div>
-                        </div>
-
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Gestionar Asignaciones:</p>
+                            <p class="texto-dato">Asignación del Evento:</p>
                             <div class="contenedor-input">
                                 <select
-                                    id="asignaciones-disponibles"
+                                    name="id_asignacion"
                                     class="input-dato"
-                                    multiple
-                                    size="6"
+                                    required
                                 >
+                                    <option value=""
+                                        >Seleccione una asignación</option
+                                    >
                                     <!-- Las opciones se cargarán dinámicamente -->
                                 </select>
                             </div>
-                            <p class="texto-info-asignaciones">
-                                Selecciona las asignaciones que quieres agregar
-                                al evento. Las asignaciones actuales se
-                                mostrarán arriba.
-                            </p>
-                        </div>
-
-                        <div class="contenedor-botones-asignaciones">
-                            <button
-                                type="button"
-                                id="btn-agregar-asignaciones"
-                                class="boton-asignacion btn-agregar"
-                            >
-                                ➕ Agregar Seleccionadas
-                            </button>
-                            <button
-                                type="button"
-                                id="btn-gestionar-asignaciones"
-                                class="boton-asignacion btn-gestionar"
-                            >
-                                🔧 Gestionar Asignaciones
-                            </button>
                         </div>
                     </div>
                     <div class="contenedor-boton-modificar">
                         <button
                             type="button"
                             class="boton-modificar"
-                            onclick="cerrarModalModificarEvento()">Cancelar</button
+                            onclick="cerrarModalModificarEvento()"
+                            >Cancelar</button
                         >
                         <button type="submit" class="boton-modificar"
                             >Modificar Evento</button
@@ -335,17 +363,21 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 precio: number;
                 ced_org_eve: string;
                 id_cat_eve: string;
-                not_apr_eve?: number;
-                tie_reg_asi?: boolean;
+                es_gratuito: boolean;
+                requiere_carta: boolean;
+                es_destacado: boolean;
+                car_mot_eve?: string;
+                fec_ini_ins?: string;
+                fec_fin_ins?: string;
+                id_asignacion?: string;
             }
             declare global {
                 interface Window {
                     abrirModalModificarEvento: (eventoId: string) => void;
                     cerrarModalModificarEvento: () => void;
-                    abrirAsignacionesModal: (eventoId: string) => void;
                 }
             }
-            async function cargarCategoriasYOrganizadores() {
+            async function cargarCategoriasOrganizadoresYAsignaciones() {
                 try {
                     // Cargar categorías usando acciones de Astro
                     const { data: categoriasData } =
@@ -394,204 +426,49 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             );
                         }
                     }
-                } catch (error) {
-                    console.error(
-                        "Error al cargar categorías y organizadores:",
-                        error,
-                    );
-                }
-            }
-            async function cargarAsignacionesActuales(eventoId: string) {
-                try {
+
+                    // Cargar asignaciones disponibles
                     const { data: asignacionesData } =
-                        await actions.getAsignacionesByEvento({
-                            id_evento: eventoId,
-                        });
-
-                    const contenedorAsignaciones = document.getElementById(
-                        "asignaciones-actuales",
-                    );
-                    if (!contenedorAsignaciones) return;
-                    if (
-                        asignacionesData?.success &&
-                        asignacionesData.asignaciones.length > 0
-                    ) {
-                        contenedorAsignaciones.innerHTML =
-                            asignacionesData.asignaciones
-                                .map(
-                                    (asignacion: any) => `
-                            <div class="asignacion-item" data-asignacion-id="${asignacion.id_asi}">
-                                <span class="asignacion-nombre">${asignacion.nom_asi}</span>
-                                <span class="asignacion-detalle">${asignacion.des_asi}</span>
-                                <button type="button" class="btn-eliminar-asignacion" onclick="eliminarAsignacion('${asignacion.id_asi}', '${eventoId}')">
-                                    ❌
-                                </button>
-                            </div>
-                        `,
-                                )
-                                .join("");
-                    } else {
-                        contenedorAsignaciones.innerHTML =
-                            '<p class="no-asignaciones">No hay asignaciones asignadas a este evento.</p>';
-                    }
-                } catch (error) {
-                    console.error(
-                        "Error al cargar asignaciones actuales:",
-                        error,
-                    );
-                }
-            }
-
-            async function cargarAsignacionesDisponibles() {
-                try {
-                    const { data: plantillasData } =
                         await actions.getAsignacionesPlantilla({});
 
-                    const selectAsignaciones = document.getElementById(
-                        "asignaciones-disponibles",
-                    ) as HTMLSelectElement;
-                    if (!selectAsignaciones) return;
-                    if (plantillasData?.success) {
-                        selectAsignaciones.innerHTML = "";
-                        plantillasData.asignaciones.forEach(
-                            (asignacion: any) => {
-                                const option = document.createElement("option");
-                                option.value = asignacion.id_asi;
-                                option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
-                                selectAsignaciones.appendChild(option);
-                            },
-                        );
+                    if (asignacionesData?.success) {
+                        const selectAsignacion = document.querySelector(
+                            'select[name="id_asignacion"]',
+                        ) as HTMLSelectElement;
+
+                        if (selectAsignacion) {
+                            selectAsignacion.innerHTML =
+                                '<option value="">Seleccione una asignación</option>';
+                            asignacionesData.asignaciones.forEach(
+                                (asignacion: any) => {
+                                    const option =
+                                        document.createElement("option");
+                                    option.value = asignacion.id_asi;
+                                    option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
+                                    selectAsignacion.appendChild(option);
+                                },
+                            );
+                        }
                     }
                 } catch (error) {
                     console.error(
-                        "Error al cargar asignaciones disponibles:",
+                        "Error al cargar categorías, organizadores y asignaciones:",
                         error,
                     );
                 }
             }
-
-            async function agregarAsignacionesSeleccionadas(eventoId: string) {
-                const selectAsignaciones = document.getElementById(
-                    "asignaciones-disponibles",
-                ) as HTMLSelectElement;
-                if (!selectAsignaciones) return;
-
-                const asignacionesSeleccionadas = Array.from(
-                    selectAsignaciones.selectedOptions,
-                ).map((option) => option.value);
-
-                if (asignacionesSeleccionadas.length === 0) {
-                    await Swal.fire({
-                        icon: "warning",
-                        title: "Atención",
-                        text: "Por favor selecciona al menos una asignación.",
-                        confirmButtonColor: "#dc2626",
-                    });
-                    return;
-                }
-                try {
-                    for (const asignacionId of asignacionesSeleccionadas) {
-                        const { data, error } =
-                            await actions.duplicarAsignacionAEvento({
-                                id_asignacion_plantilla: asignacionId,
-                                id_evento_destino: eventoId,
-                            });
-
-                        if (!data?.success) {
-                            throw new Error(
-                                error?.message || "Error al agregar asignación",
-                            );
-                        }
-                    }
-
-                    await Swal.fire({
-                        icon: "success",
-                        title: "Éxito",
-                        text: `Se agregaron ${asignacionesSeleccionadas.length} asignación(es) al evento.`,
-                        confirmButtonColor: "#059669",
-                    });
-
-                    // Recargar asignaciones actuales y limpiar selección
-                    await cargarAsignacionesActuales(eventoId);
-                    selectAsignaciones.selectedIndex = -1;
-                } catch (error) {
-                    console.error("Error al agregar asignaciones:", error);
-                    await Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: "No se pudieron agregar las asignaciones seleccionadas.",
-                        confirmButtonColor: "#dc2626",
-                    });
-                }
-            }
-
-            async function eliminarAsignacion(
-                asignacionId: string,
+            async function abrirModalModificarEvento(
                 eventoId: string,
-            ) {
-                const resultado = await Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "Esta acción eliminará la asignación del evento.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#dc2626",
-                    cancelButtonColor: "#6b7280",
-                    confirmButtonText: "Sí, eliminar",
-                    cancelButtonText: "Cancelar",
-                });
-
-                if (resultado.isConfirmed) {
-                    try {
-                        const { data, error } =
-                            await actions.eliminarAsignacion({
-                                id_asignacion: asignacionId,
-                            });
-
-                        if (data?.success) {
-                            await Swal.fire({
-                                icon: "success",
-                                title: "Eliminado",
-                                text: "Asignación eliminada correctamente.",
-                                confirmButtonColor: "#059669",
-                            });
-
-                            // Recargar asignaciones actuales
-                            await cargarAsignacionesActuales(eventoId);
-                        } else {
-                            throw new Error(
-                                error?.message ||
-                                    "Error al eliminar asignación",
-                            );
-                        }
-                    } catch (error) {
-                        console.error("Error al eliminar asignación:", error);
-                        await Swal.fire({
-                            icon: "error",
-                            title: "Error",
-                            text: "No se pudo eliminar la asignación.",
-                            confirmButtonColor: "#dc2626",
-                        });
-                    }
-                }
-            }
-            function abrirAsignacionesModal(eventoId: string) {
-                // Esta función abrirá el modal de gestión de asignaciones existente
-                if (window.abrirModalAsignaciones) {
-                    window.abrirModalAsignaciones(eventoId, "Evento");
-                }
-            }
-            async function abrirModalModificarEvento(eventoId: string): Promise<void> {
+            ): Promise<void> {
                 const modal = document.getElementById("modalModificarEvento");
                 const form = document.getElementById(
                     "formulario-modificar-evento",
                 ) as HTMLFormElement;
 
-                if (!modal || !form) return; // Cargar categorías y organizadores dinámicamente
-                await cargarCategoriasYOrganizadores();
+                if (!modal || !form) return;
 
-                // Cargar asignaciones
-                await cargarAsignacionesActuales(eventoId);
-                await cargarAsignacionesDisponibles();
+                // Cargar categorías, organizadores y asignaciones dinámicamente
+                await cargarCategoriasOrganizadoresYAsignaciones();
 
                 // Obtener todos los eventos del DOM
                 const eventosInputs = document.querySelectorAll(
@@ -623,6 +500,18 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 const precio = form.querySelector(
                     'input[name="precio"]',
                 ) as HTMLInputElement;
+                const esGratuito = form.querySelector(
+                    'select[name="es_gratuito"]',
+                ) as HTMLSelectElement;
+                const requiereCarta = form.querySelector(
+                    'select[name="requiere_carta"]',
+                ) as HTMLSelectElement;
+                const esDestacado = form.querySelector(
+                    'select[name="es_destacado"]',
+                ) as HTMLSelectElement;
+                const carMotEve = form.querySelector(
+                    'textarea[name="car_mot_eve"]',
+                ) as HTMLTextAreaElement;
                 const fechaInicio = form.querySelector(
                     'input[name="fecha_inicio"]',
                 ) as HTMLInputElement;
@@ -635,6 +524,12 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 const horaFin = form.querySelector(
                     'input[name="hora_fin"]',
                 ) as HTMLInputElement;
+                const fechaInicioInscripcion = form.querySelector(
+                    'input[name="fecha_inicio_inscripcion"]',
+                ) as HTMLInputElement;
+                const fechaFinInscripcion = form.querySelector(
+                    'input[name="fecha_fin_inscripcion"]',
+                ) as HTMLInputElement;
                 const duracion = form.querySelector(
                     'input[name="duracion"]',
                 ) as HTMLInputElement;
@@ -644,11 +539,8 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 const cedulaOrganizador = form.querySelector(
                     'select[name="cedula_organizador"]',
                 ) as HTMLSelectElement;
-                const notaAprobacion = form.querySelector(
-                    'input[name="nota_aprobacion"]',
-                ) as HTMLInputElement;
-                const tiempoRegistro = form.querySelector(
-                    'select[name="tiempo_registro_asignacion"]',
+                const idAsignacion = form.querySelector(
+                    'select[name="id_asignacion"]',
                 ) as HTMLSelectElement;
                 const eventoIdInput = form.querySelector(
                     'input[name="evento_id"]',
@@ -663,6 +555,13 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 if (categoria) categoria.value = evento.id_cat_eve;
                 if (area) area.value = evento.are_eve || "";
                 if (precio) precio.value = evento.precio.toString();
+                if (esGratuito)
+                    esGratuito.value = evento.es_gratuito.toString();
+                if (requiereCarta)
+                    requiereCarta.value = evento.requiere_carta.toString();
+                if (esDestacado)
+                    esDestacado.value = evento.es_destacado.toString();
+                if (carMotEve) carMotEve.value = evento.car_mot_eve || "";
                 if (fechaInicio)
                     fechaInicio.value = new Date(evento.fec_ini_eve)
                         .toISOString()
@@ -674,19 +573,21 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         .split("T")[0];
                 if (horaFin && evento.hor_fin_eve)
                     horaFin.value = evento.hor_fin_eve;
+                if (fechaInicioInscripcion && evento.fec_ini_ins)
+                    fechaInicioInscripcion.value = new Date(evento.fec_ini_ins)
+                        .toISOString()
+                        .split("T")[0];
+                if (fechaFinInscripcion && evento.fec_fin_ins)
+                    fechaFinInscripcion.value = new Date(evento.fec_fin_ins)
+                        .toISOString()
+                        .split("T")[0];
                 if (duracion && evento.dur_eve)
                     duracion.value = evento.dur_eve.toString();
                 if (ubicacion) ubicacion.value = evento.ubi_eve;
                 if (cedulaOrganizador)
                     cedulaOrganizador.value = evento.ced_org_eve;
-                if (notaAprobacion)
-                    notaAprobacion.value = (
-                        evento.not_apr_eve || 7.0
-                    ).toString();
-                if (tiempoRegistro)
-                    tiempoRegistro.value = (
-                        evento.tie_reg_asi !== false
-                    ).toString();
+                if (idAsignacion && evento.id_asignacion)
+                    idAsignacion.value = evento.id_asignacion;
                 if (eventoIdInput) eventoIdInput.value = evento.id_eve;
                 if (eventoImagen)
                     eventoImagen.src =
@@ -720,9 +621,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 ) as HTMLElement;
                 const eventoImagen = document.getElementById(
                     "evento-imagen",
-                ) as HTMLImageElement;
-
-                // Manejar cambio de archivo
+                ) as HTMLImageElement; // Manejar cambio de archivo
                 if (fileInput && fileNameDisplay && eventoImagen) {
                     fileInput.addEventListener("change", (e: Event) => {
                         const target = e.target as HTMLInputElement;
@@ -745,24 +644,82 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                     });
                 }
 
-                // Manejar envío del formulario
+                // Manejar lógica de precio/gratuito
+                const esGratuitoSelect = document.querySelector(
+                    'select[name="es_gratuito"]',
+                ) as HTMLSelectElement;
+                const precioInput = document.querySelector(
+                    'input[name="precio"]',
+                ) as HTMLInputElement;
+
+                if (esGratuitoSelect && precioInput) {
+                    function actualizarVisibilidadPrecio() {
+                        const esGratuito = esGratuitoSelect.value === "true";
+                        if (esGratuito) {
+                            precioInput.value = "0";
+                            precioInput.disabled = true;
+                            precioInput.style.opacity = "0.5";
+                        } else {
+                            precioInput.disabled = false;
+                            precioInput.style.opacity = "1";
+                        }
+                    }
+
+                    esGratuitoSelect.addEventListener(
+                        "change",
+                        actualizarVisibilidadPrecio,
+                    );
+                    // Ejecutar una vez al cargar
+                    actualizarVisibilidadPrecio();
+                } // Manejar envío del formulario
                 if (form) {
                     form.addEventListener("submit", async (e) => {
                         e.preventDefault();
 
                         const formData = new FormData(form);
 
-                        // Obtener valores y validar área
+                        // Obtener valores y validar
                         const areaValue = formData.get("area") as string;
                         const fechaFin = formData.get("fecha_fin") as string;
                         const horaFin = formData.get("hora_fin") as string;
                         const duracionStr = formData.get("duracion") as string;
-                        const notaAprobacionStr = formData.get(
-                            "nota_aprobacion",
+                        const carMotEve = formData.get("car_mot_eve") as string;
+                        const fechaInicioInscripcion = formData.get(
+                            "fecha_inicio_inscripcion",
                         ) as string;
-                        const tiempoRegistroStr = formData.get(
-                            "tiempo_registro_asignacion",
+                        const fechaFinInscripcion = formData.get(
+                            "fecha_fin_inscripcion",
                         ) as string;
+                        const horaInicio = formData.get(
+                            "hora_inicio",
+                        ) as string;
+
+                        // Convertir horas a formato del backend si es necesario
+                        if (horaInicio) {
+                            formData.set("hora_inicio", horaInicio);
+                        }
+                        if (horaFin) {
+                            formData.set("hora_fin", horaFin);
+                        }
+
+                        // Renombrar campos para que coincidan con la acción
+                        if (carMotEve && carMotEve.trim() !== "") {
+                            formData.set("carta_motivacion", carMotEve);
+                            formData.delete("car_mot_eve");
+                        } else {
+                            formData.delete("car_mot_eve");
+                        }
+
+                        // Verificar si hay asignación seleccionada
+                        const idAsignacion = formData.get(
+                            "id_asignacion",
+                        ) as string;
+                        if (idAsignacion && idAsignacion.trim() !== "") {
+                            formData.set("asignacion_id", idAsignacion);
+                            formData.delete("id_asignacion");
+                        } else {
+                            formData.delete("id_asignacion");
+                        }
 
                         // Validar que el área sea uno de los valores permitidos
                         const areasPermitidas = [
@@ -790,20 +747,37 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         if (!duracionStr || duracionStr.trim() === "") {
                             formData.delete("duracion");
                         }
-                        if (
-                            !notaAprobacionStr ||
-                            notaAprobacionStr.trim() === ""
-                        ) {
-                            formData.set("nota_aprobacion", "7.0");
-                        }
-                        if (
-                            !tiempoRegistroStr ||
-                            tiempoRegistroStr.trim() === ""
-                        ) {
-                            formData.set("tiempo_registro_asignacion", "true");
+                        if (!carMotEve || carMotEve.trim() === "") {
+                            formData.delete("car_mot_eve");
                         }
                         if (!areaValida) {
                             formData.delete("area");
+                        }
+
+                        // Validar fechas de inscripción
+                        if (
+                            !fechaInicioInscripcion ||
+                            fechaInicioInscripcion.trim() === ""
+                        ) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "La fecha de inicio de inscripción es requerida.",
+                                confirmButtonColor: "#dc2626",
+                            });
+                            return;
+                        }
+                        if (
+                            !fechaFinInscripcion ||
+                            fechaFinInscripcion.trim() === ""
+                        ) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "La fecha de fin de inscripción es requerida.",
+                                confirmButtonColor: "#dc2626",
+                            });
+                            return;
                         }
 
                         // Verificar si hay imagen seleccionada
@@ -848,42 +822,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 } // Asignar funciones al objeto window
                 window.abrirModalModificarEvento = abrirModalModificarEvento;
                 window.cerrarModalModificarEvento = cerrarModalModificarEvento;
-                window.abrirAsignacionesModal = abrirAsignacionesModal;
-
-                // Event listeners para botones de asignaciones
-                const btnAgregarAsignaciones = document.getElementById(
-                    "btn-agregar-asignaciones",
-                );
-                const btnGestionarAsignaciones = document.getElementById(
-                    "btn-gestionar-asignaciones",
-                );
-
-                if (btnAgregarAsignaciones) {
-                    btnAgregarAsignaciones.addEventListener(
-                        "click",
-                        async () => {
-                            const eventoIdInput = document.querySelector(
-                                'input[name="evento_id"]',
-                            ) as HTMLInputElement;
-                            if (eventoIdInput && eventoIdInput.value) {
-                                await agregarAsignacionesSeleccionadas(
-                                    eventoIdInput.value,
-                                );
-                            }
-                        },
-                    );
-                }
-
-                if (btnGestionarAsignaciones) {
-                    btnGestionarAsignaciones.addEventListener("click", () => {
-                        const eventoIdInput = document.querySelector(
-                            'input[name="evento_id"]',
-                        ) as HTMLInputElement;
-                        if (eventoIdInput && eventoIdInput.value) {
-                            abrirAsignacionesModal(eventoIdInput.value);
-                        }
-                    });
-                }
             });
         </script>
     </div>

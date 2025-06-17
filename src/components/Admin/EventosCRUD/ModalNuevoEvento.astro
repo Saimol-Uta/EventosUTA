@@ -100,50 +100,78 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                 class="input-dato"
                                 name="precio"
                                 value="0"
+                                onchange="toggleGratuito(this)"
                             />
                         </div>
                     </div>
 
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Nota de Aprobación:</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    min="0"
-                                    max="10"
-                                    class="input-dato"
-                                    name="nota_aprobacion"
-                                    value="7.0"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Tiempo de Registro:</p>
+                            <p class="texto-dato">¿Es gratuito?</p>
                             <div class="contenedor-input">
                                 <select
-                                    name="tiempo_registro_asignacion"
+                                    name="es_gratuito"
                                     class="input-dato"
+                                    onchange="togglePrecio(this)"
                                 >
-                                    <option value="true" selected
-                                        >Se requiere registro de asistencia</option
+                                    <option value="true">Sí, es gratuito</option
                                     >
                                     <option value="false"
-                                        >No se requiere registro de asistencia</option
+                                        >No, tiene costo</option
                                     >
                                 </select>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="contenedor-superior">
-                    <p class="texto-centrado texto-rojo">Programación</p>
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">
+                                ¿Requiere carta de motivación?
+                            </p>
+                            <div class="contenedor-input">
+                                <select
+                                    name="requiere_carta"
+                                    class="input-dato"
+                                >
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Fecha de Inicio:</p>
+                            <p class="texto-dato">¿Es evento destacado?</p>
+                            <div class="contenedor-input">
+                                <select name="es_destacado" class="input-dato">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Carta de motivación:</p>
+                            <div class="contenedor-input">
+                                <textarea
+                                    class="input-dato"
+                                    name="carta_motivacion"
+                                    rows="2"
+                                    placeholder="Texto opcional para carta de motivación"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="contenedor-superior">
+                    <p class="texto-centrado texto-rojo">
+                        Programación del Evento
+                    </p>
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">
+                                Fecha de Inicio del Evento:
+                            </p>
                             <div class="contenedor-input">
                                 <input
                                     type="date"
@@ -155,21 +183,9 @@ const { categorias = [], organizadores = [] } = Astro.props;
                         </div>
 
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Hora de Inicio:</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="time"
-                                    class="input-dato"
-                                    name="hora_inicio"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="contenedor-nombre">
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Fecha de Finalización:</p>
+                            <p class="texto-dato">
+                                Fecha de Finalización del Evento:
+                            </p>
                             <div class="contenedor-input">
                                 <input
                                     type="date"
@@ -178,27 +194,44 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                 />
                             </div>
                         </div>
+                    </div>
 
+                    <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Hora de Finalización:</p>
+                            <p class="texto-dato">Inicio de Inscripciones:</p>
                             <div class="contenedor-input">
                                 <input
-                                    type="time"
+                                    type="date"
                                     class="input-dato"
-                                    name="hora_fin"
+                                    name="fecha_inicio_inscripciones"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Fin de Inscripciones:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="date"
+                                    class="input-dato"
+                                    name="fecha_fin_inscripciones"
+                                    required
                                 />
                             </div>
                         </div>
                     </div>
 
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Duración (horas)</p>
+                        <p class="texto-dato">Duración (minutos)</p>
                         <div class="contenedor-input">
                             <input
                                 type="number"
-                                min="1"
+                                min="15"
+                                step="15"
                                 class="input-dato"
                                 name="duracion"
+                                placeholder="Ej: 120 para 2 horas"
                             />
                         </div>
                     </div>
@@ -211,6 +244,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                                 class="input-dato"
                                 name="ubicacion"
                                 required
+                                placeholder="Ej: Aula 101, Laboratorio de Sistemas, etc."
                             />
                         </div>
                     </div>
@@ -243,28 +277,27 @@ const { categorias = [], organizadores = [] } = Astro.props;
                             </select>
                         </div>
                     </div>
-
                     <!-- Sección de Asignaciones -->
                     <div class="contenedor-superior">
-                        <p class="texto-centrado texto-rojo">Asignaciones</p>
+                        <p class="texto-centrado texto-rojo">Dirigido a</p>
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Seleccionar Asignaciones:</p>
+                            <p class="texto-dato">Asignación (opcional):</p>
                             <div class="contenedor-input">
                                 <select
-                                    id="asignaciones-evento"
-                                    name="asignaciones[]"
+                                    id="asignacion-evento"
+                                    name="asignacion"
                                     class="input-dato"
-                                    multiple
-                                    size="6"
                                 >
+                                    <option value="">
+                                        Sin restricciones (abierto a todos)
+                                    </option>
                                     <!-- Las opciones se cargarán dinámicamente -->
                                 </select>
                             </div>
                             <p class="texto-info-asignaciones">
-                                Mantén presionado Ctrl/Cmd para seleccionar
-                                múltiples asignaciones. Si no seleccionas
-                                ninguna, el evento no tendrá restricciones de
-                                inscripción.
+                                Si no seleccionas una asignación, el evento
+                                estará abierto a todos los usuarios sin
+                                restricciones de carrera o facultad.
                             </p>
                         </div>
                     </div>
@@ -325,25 +358,37 @@ const { categorias = [], organizadores = [] } = Astro.props;
         font-style: italic;
     }
 
-    .contenedor-dato select[multiple] {
-        height: auto;
-        min-height: 120px;
+    .input-dato[name="precio"]:disabled {
+        background-color: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .contenedor-nombre {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .contenedor-dato textarea {
         resize: vertical;
+        min-height: 60px;
     }
 
-    .contenedor-dato select[multiple] option {
-        padding: 8px;
-        margin: 2px 0;
-        border-radius: 4px;
+    .precio-container {
+        position: relative;
     }
 
-    .contenedor-dato select[multiple] option:hover {
-        background-color: #f0f8ff;
+    .precio-label {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+        pointer-events: none;
     }
 
-    .contenedor-dato select[multiple] option:checked {
-        background-color: #4169e1;
-        color: white;
+    .input-dato[name="precio"] {
+        padding-left: 25px;
     }
 </style>
 
@@ -355,95 +400,97 @@ const { categorias = [], organizadores = [] } = Astro.props;
         interface Window {
             abrirModalNuevoEvento: () => void;
             cerrarModalNuevoEvento: () => void;
+            toggleGratuito: (input: HTMLInputElement) => void;
+            togglePrecio: (select: HTMLSelectElement) => void;
         }
     }
 
     let asignacionesDisponibles: any[] = [];
 
-    async function testearConexionAcciones() {
-        try {
-            console.log("🧪 Probando conexión con acciones...");
-            const resultado = await actions.getAsignacionesPlantilla({});
-            console.log("🧪 Resultado de prueba:", resultado);
-            return resultado;
-        } catch (error) {
-            console.error("🧪 Error en prueba:", error);
-            return null;
+    // Función para manejar el toggle de precio gratuito
+    function toggleGratuito(input: HTMLInputElement): void {
+        const esGratuitoSelect = document.querySelector(
+            'select[name="es_gratuito"]',
+        ) as HTMLSelectElement;
+        if (parseFloat(input.value) === 0) {
+            esGratuitoSelect.value = "true";
+            input.disabled = true;
+        } else {
+            esGratuitoSelect.value = "false";
+            input.disabled = false;
         }
     }
 
-    async function cargarAsignacionesPlantilla() {
+    // Función para manejar el toggle desde el select gratuito
+    function togglePrecio(select: HTMLSelectElement): void {
+        const precioInput = document.querySelector(
+            'input[name="precio"]',
+        ) as HTMLInputElement;
+        if (select.value === "true") {
+            precioInput.value = "0";
+            precioInput.disabled = true;
+        } else {
+            precioInput.disabled = false;
+            if (precioInput.value === "0") {
+                precioInput.value = "";
+            }
+        }
+    }
+
+    // Cargar asignaciones disponibles
+    async function cargarAsignaciones() {
         try {
-            console.log("🔄 Iniciando carga de asignaciones plantilla...");
-            const { data, error } = await actions.getAsignacionesPlantilla({});
+            console.log("🔄 Cargando asignaciones disponibles...");
+            const { data, error } = await actions.getAllAsignaciones({});
 
             if (error) {
-                console.error("❌ Error en getAsignacionesPlantilla:", error);
+                console.error("❌ Error al cargar asignaciones:", error);
                 return;
             }
 
-            if (!data?.success) {
-                console.warn("⚠️ La consulta no fue exitosa:", data?.error);
-                return;
-            }
-
-            if (!data.asignaciones || data.asignaciones.length === 0) {
+            if (!data?.success || !data.asignaciones) {
                 console.warn("⚠️ No hay asignaciones disponibles");
                 return;
             }
 
             asignacionesDisponibles = data.asignaciones;
             const select = document.getElementById(
-                "asignaciones-evento",
+                "asignacion-evento",
             ) as HTMLSelectElement;
 
             if (!select) {
                 console.error(
-                    "❌ No se encontró el elemento select #asignaciones-evento",
+                    "❌ No se encontró el elemento select #asignacion-evento",
                 );
                 return;
             }
 
-            select.innerHTML = "";
-
-            // Agregar opción por defecto
-            const defaultOption = document.createElement("option");
-            defaultOption.value = "";
-            defaultOption.textContent =
-                "Ninguna asignación (evento sin restricciones)";
-            defaultOption.disabled = true;
-            select.appendChild(defaultOption);
+            // Limpiar opciones existentes (excepto la primera)
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild!);
+            }
 
             // Agregar asignaciones disponibles
             asignacionesDisponibles.forEach((asignacion) => {
                 const option = document.createElement("option");
                 option.value = asignacion.id_asi;
 
-                const carreraTexto = asignacion.carreras
-                    ? ` (${asignacion.carreras.nom_car})`
-                    : " (Público general)";
+                // Mostrar información de la asignación
+                let descripcion = asignacion.nom_asi;
+                if (asignacion.tip_asi) {
+                    descripcion += ` (${asignacion.tip_asi})`;
+                }
 
-                const badges = [];
-                if (asignacion.es_gratuito) badges.push("Gratuito");
-                if (asignacion.requiere_validacion) badges.push("Validación");
-
-                const badgeTexto =
-                    badges.length > 0 ? ` [${badges.join(", ")}]` : "";
-
-                option.textContent = `${asignacion.nom_asi}${carreraTexto}${badgeTexto}`;
+                option.textContent = descripcion;
                 select.appendChild(option);
             });
 
             console.log(
-                "🎉 Select actualizado exitosamente con",
+                "✅ Asignaciones cargadas:",
                 asignacionesDisponibles.length,
-                "asignaciones",
             );
         } catch (error) {
-            console.error(
-                "💥 Error crítico al cargar asignaciones plantilla:",
-                error,
-            );
+            console.error("💥 Error crítico al cargar asignaciones:", error);
         }
     }
 
@@ -452,9 +499,22 @@ const { categorias = [], organizadores = [] } = Astro.props;
         const modal = document.getElementById("modalNuevoEvento");
         if (modal) {
             modal.style.display = "block";
-            testearConexionAcciones().then(() => {
-                cargarAsignacionesPlantilla();
-            });
+
+            // Establecer fechas por defecto
+            const fechaHoy = new Date().toISOString().split("T")[0];
+            const fechaInscripcionInicio = document.querySelector(
+                'input[name="fecha_inicio_inscripciones"]',
+            ) as HTMLInputElement;
+            const fechaEvento = document.querySelector(
+                'input[name="fecha_inicio"]',
+            ) as HTMLInputElement;
+
+            if (fechaInscripcionInicio && !fechaInscripcionInicio.value) {
+                fechaInscripcionInicio.value = fechaHoy;
+            }
+
+            // Cargar asignaciones
+            cargarAsignaciones();
         }
     }
 
@@ -479,12 +539,13 @@ const { categorias = [], organizadores = [] } = Astro.props;
             if (fileName)
                 fileName.textContent = "No se ha seleccionado ningún archivo";
 
-            // Resetear selector de asignaciones
-            const selectAsignaciones = document.getElementById(
-                "asignaciones-evento",
-            ) as HTMLSelectElement;
-            if (selectAsignaciones) {
-                selectAsignaciones.selectedIndex = -1;
+            // Resetear precio
+            const precioInput = document.querySelector(
+                'input[name="precio"]',
+            ) as HTMLInputElement;
+            if (precioInput) {
+                precioInput.disabled = false;
+                precioInput.value = "0";
             }
         }
     }
@@ -535,55 +596,57 @@ const { categorias = [], organizadores = [] } = Astro.props;
 
                 const formData = new FormData(form);
 
+                // Validar fechas
+                const fechaInicio = formData.get("fecha_inicio") as string;
+                const fechaFin = formData.get("fecha_fin") as string;
+                const fechaInicioInscripciones = formData.get(
+                    "fecha_inicio_inscripciones",
+                ) as string;
+                const fechaFinInscripciones = formData.get(
+                    "fecha_fin_inscripciones",
+                ) as string;
+
+                if (fechaFin && new Date(fechaFin) <= new Date(fechaInicio)) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error en fechas",
+                        text: "La fecha de finalización debe ser posterior a la fecha de inicio",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
+                if (
+                    new Date(fechaFinInscripciones) <=
+                    new Date(fechaInicioInscripciones)
+                ) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error en fechas de inscripción",
+                        text: "La fecha de fin de inscripciones debe ser posterior al inicio",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
+                if (new Date(fechaFinInscripciones) > new Date(fechaInicio)) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error en fechas",
+                        text: "Las inscripciones deben cerrar antes del inicio del evento",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
                 try {
                     const { data, error } = await actions.crearEvento(formData);
 
                     if (data?.success) {
-                        // Obtener asignaciones seleccionadas
-                        const selectAsignaciones = document.getElementById(
-                            "asignaciones-evento",
-                        ) as HTMLSelectElement;
-                        const asignacionesSeleccionadas = Array.from(
-                            selectAsignaciones.selectedOptions,
-                        )
-                            .map((option) => option.value)
-                            .filter((value) => value !== "");
-
-                        // Si hay asignaciones seleccionadas, duplicarlas al evento
-                        if (
-                            asignacionesSeleccionadas.length > 0 &&
-                            data.data?.id
-                        ) {
-                            await Promise.all(
-                                asignacionesSeleccionadas.map(
-                                    async (idAsignacion) => {
-                                        try {
-                                            await actions.duplicarAsignacionAEvento(
-                                                {
-                                                    id_asignacion_plantilla:
-                                                        idAsignacion,
-                                                    id_evento_destino:
-                                                        data.data.id,
-                                                },
-                                            );
-                                        } catch (error) {
-                                            console.error(
-                                                "Error al duplicar asignación:",
-                                                error,
-                                            );
-                                        }
-                                    },
-                                ),
-                            );
-                        }
-
                         await Swal.fire({
                             icon: "success",
-                            title: "Éxito",
-                            text:
-                                asignacionesSeleccionadas.length > 0
-                                    ? `Evento creado correctamente con ${asignacionesSeleccionadas.length} asignación(es).`
-                                    : "Evento creado correctamente sin restricciones de inscripción.",
+                            title: "¡Éxito!",
+                            text: "Evento creado correctamente",
                             confirmButtonColor: "#059669",
                         }).then(() => {
                             window.location.reload();
@@ -595,7 +658,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                             text:
                                 data?.message ||
                                 error?.message ||
-                                "No se pudo crear el evento.",
+                                "No se pudo crear el evento",
                             confirmButtonColor: "#dc2626",
                         });
                     }
@@ -614,5 +677,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
         // Asignar funciones al objeto window
         window.abrirModalNuevoEvento = abrirModalNuevoEvento;
         window.cerrarModalNuevoEvento = cerrarModalNuevoEvento;
+        window.toggleGratuito = toggleGratuito;
+        window.togglePrecio = togglePrecio;
     });
 </script>

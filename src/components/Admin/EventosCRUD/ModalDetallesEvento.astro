@@ -4,15 +4,13 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
 
 <div id="modalDetallesReserva" class="modal">
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalDetallesEvento()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalDetallesEvento()">&times;</span
+        >
         <div class="detalles-reserva">
             <h2 id="evento-nombre">Nombre del Evento</h2>
 
             <div class="seccion-detalles centrar">
-                <img
-                    id="evento-imagen-detalle"
-                    class="imagen-curso"
-                />
+                <img id="evento-imagen-detalle" class="imagen-curso" />
                 <div class="descripcion-completa-container">
                     <p class="descripcion-completa">
                         <strong>Descripción:</strong>
@@ -20,7 +18,6 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     </p>
                 </div>
             </div>
-
             <div class="seccion-detalles">
                 <h3>Información General</h3>
                 <div class="info-grid">
@@ -32,6 +29,32 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     <p>
                         <strong>Precio:</strong>
                         <span id="evento-precio"></span>
+                    </p>
+                    <p>
+                        <strong>Es Gratuito:</strong>
+                        <span id="evento-es-gratuito"></span>
+                    </p>
+                    <p>
+                        <strong>Es Destacado:</strong>
+                        <span id="evento-es-destacado"></span>
+                    </p>
+                    <p>
+                        <strong>Requiere Carta:</strong>
+                        <span id="evento-requiere-carta"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="seccion-detalles">
+                <h3>Fechas de Inscripción</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Inicio de Inscripción:</strong>
+                        <span id="evento-fecha-inicio-inscripcion"></span>
+                    </p>
+                    <p>
+                        <strong>Fin de Inscripción:</strong>
+                        <span id="evento-fecha-fin-inscripcion"></span>
                     </p>
                 </div>
             </div>
@@ -65,6 +88,36 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     </p>
                 </div>
             </div>
+
+            <div class="seccion-detalles">
+                <h3>Asignación</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Asignación:</strong>
+                        <span id="evento-asignacion"></span>
+                    </p>
+                    <p>
+                        <strong>Descripción de Asignación:</strong>
+                        <span id="evento-asignacion-descripcion"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div
+                class="seccion-detalles"
+                id="seccion-carta-motivacion"
+                style="display: none;"
+            >
+                <h3>Carta de Motivación</h3>
+                <div class="info-detalle">
+                    <p>
+                        <strong>Instrucciones:</strong>
+                    </p>
+                    <div class="carta-motivacion-container">
+                        <span id="evento-carta-motivacion"></span>
+                    </div>
+                </div>
+            </div>
             <div class="seccion-detalles">
                 <h3>Organizador</h3>
                 <div class="info-grid">
@@ -80,25 +133,83 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                         <strong>Título Académico:</strong>
                         <span id="organizador-titulo"></span>
                     </p>
-                </div>
-            </div>
-
-            <div class="seccion-detalles">
-                <h3>Configuración de Evento</h3>
-                <div class="info-grid">
                     <p>
-                        <strong>Nota de Aprobación:</strong>
-                        <span id="evento-nota-aprobacion"></span>
+                        <strong>Email:</strong>
+                        <span id="organizador-email"></span>
                     </p>
                     <p>
-                        <strong>Tiempo de Registro:</strong>
-                        <span id="evento-tiempo-registro"></span>
+                        <strong>Teléfono:</strong>
+                        <span id="organizador-telefono"></span>
+                    </p>
+                </div>
+            </div>
+            <div class="seccion-detalles">
+                <h3>Estado del Evento</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Estado:</strong>
+                        <span id="evento-estado" class="estado-badge"></span>
+                    </p>
+                    <p>
+                        <strong>Inscripciones:</strong>
+                        <span
+                            id="evento-estado-inscripciones"
+                            class="estado-badge"></span>
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .carta-motivacion-container {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 8px;
+        font-style: italic;
+        line-height: 1.5;
+    }
+
+    .info-detalle {
+        margin-bottom: 16px;
+    }
+
+    .estado-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: bold;
+        background-color: #f3f4f6;
+        display: inline-block;
+    }
+
+    .seccion-detalles h3 {
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+    }
+
+    .info-grid p {
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .info-grid p strong {
+        color: #374151;
+        min-width: 150px;
+    }
+
+    .info-grid p span {
+        text-align: right;
+        flex: 1;
+    }
+</style>
 
 <script>
     declare global {
@@ -145,21 +256,84 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                 evento.img_eve ||
                 "https://via.placeholder.com/300x200?text=Sin+Imagen";
             imagen.alt = `Imagen de ${evento.nom_eve}`;
-        }
-
-        // Información General
+        } // Información General
         const categoria = modal.querySelector("#evento-categoria");
         if (categoria) {
             // Manejar tanto evento.categoria.data como evento.categoria directamente
-            const categoriaData = evento.categoria?.data || evento.categoria;
+            const categoriaData =
+                evento.categorias_eventos ||
+                evento.categoria?.data ||
+                evento.categoria;
             categoria.textContent = categoriaData?.nom_cat || "Sin categoría";
         }
 
         const area = modal.querySelector("#evento-area");
         if (area) area.textContent = evento.are_eve || "No especificada";
+        const precio = modal.querySelector("#evento-precio") as HTMLElement;
+        if (precio) {
+            if (evento.es_gratuito) {
+                precio.textContent = "Gratuito";
+                precio.style.color = "#059669";
+                precio.style.fontWeight = "bold";
+            } else {
+                precio.textContent = `$${Number(evento.precio || 0).toFixed(2)}`;
+            }
+        }
 
-        const precio = modal.querySelector("#evento-precio");
-        if (precio) precio.textContent = `$${evento.precio || 0}`;
+        const esGratuito = modal.querySelector(
+            "#evento-es-gratuito",
+        ) as HTMLElement;
+        if (esGratuito) {
+            esGratuito.textContent = evento.es_gratuito ? "Sí" : "No";
+            esGratuito.style.color = evento.es_gratuito ? "#059669" : "#6b7280";
+        }
+
+        const esDestacado = modal.querySelector(
+            "#evento-es-destacado",
+        ) as HTMLElement;
+        if (esDestacado) {
+            esDestacado.textContent = evento.es_destacado ? "Sí" : "No";
+            esDestacado.style.color = evento.es_destacado
+                ? "#dc2626"
+                : "#6b7280";
+        }
+
+        const requiereCarta = modal.querySelector(
+            "#evento-requiere-carta",
+        ) as HTMLElement;
+        if (requiereCarta) {
+            requiereCarta.textContent = evento.requiere_carta ? "Sí" : "No";
+            requiereCarta.style.color = evento.requiere_carta
+                ? "#dc2626"
+                : "#6b7280";
+        }
+
+        // Fechas de Inscripción
+        const fechaInicioInscripcion = modal.querySelector(
+            "#evento-fecha-inicio-inscripcion",
+        );
+        if (fechaInicioInscripcion) {
+            if (evento.fec_ini_ins_eve) {
+                const fecha = new Date(evento.fec_ini_ins_eve);
+                fechaInicioInscripcion.textContent =
+                    fecha.toLocaleDateString("es-ES");
+            } else {
+                fechaInicioInscripcion.textContent = "No especificada";
+            }
+        }
+
+        const fechaFinInscripcion = modal.querySelector(
+            "#evento-fecha-fin-inscripcion",
+        );
+        if (fechaFinInscripcion) {
+            if (evento.fec_fin_ins_eve) {
+                const fecha = new Date(evento.fec_fin_ins_eve);
+                fechaFinInscripcion.textContent =
+                    fecha.toLocaleDateString("es-ES");
+            } else {
+                fechaFinInscripcion.textContent = "No especificada";
+            }
+        }
 
         // Programación
         const fechaInicio = modal.querySelector("#evento-fecha-inicio");
@@ -185,22 +359,68 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         const horaFin = modal.querySelector("#evento-hora-fin");
         if (horaFin)
             horaFin.textContent = evento.hor_fin_eve || "No especificada";
-
         const duracion = modal.querySelector("#evento-duracion");
         if (duracion) {
-            duracion.textContent = evento.dur_eve
-                ? `${evento.dur_eve} horas`
-                : "No especificada";
+            if (evento.dur_eve) {
+                // Mostrar duración en minutos y convertir a horas si es necesario
+                if (evento.dur_eve >= 60) {
+                    const horas = Math.floor(evento.dur_eve / 60);
+                    const minutos = evento.dur_eve % 60;
+                    duracion.textContent =
+                        minutos > 0
+                            ? `${horas}h ${minutos}min (${evento.dur_eve} minutos)`
+                            : `${horas}h (${evento.dur_eve} minutos)`;
+                } else {
+                    duracion.textContent = `${evento.dur_eve} minutos`;
+                }
+            } else {
+                duracion.textContent = "No especificada";
+            }
         }
 
         const ubicacion = modal.querySelector("#evento-ubicacion");
         if (ubicacion)
             ubicacion.textContent = evento.ubi_eve || "No especificada";
 
-        // Organizador - Cédula
+        // Asignación
+        const asignacion = modal.querySelector("#evento-asignacion");
+        if (asignacion) {
+            const asignacionData = evento.asignaciones || evento.asignacion;
+            asignacion.textContent = asignacionData?.nom_asi || "General";
+        }
+
+        const asignacionDescripcion = modal.querySelector(
+            "#evento-asignacion-descripcion",
+        );
+        if (asignacionDescripcion) {
+            const asignacionData = evento.asignaciones || evento.asignacion;
+            asignacionDescripcion.textContent =
+                asignacionData?.des_asi || "Sin descripción específica";
+        }
+
+        // Carta de Motivación
+        const seccionCartaMotivacion = modal.querySelector(
+            "#seccion-carta-motivacion",
+        ) as HTMLElement;
+        const cartaMotivacion = modal.querySelector("#evento-carta-motivacion");
+        if (seccionCartaMotivacion && cartaMotivacion) {
+            if (evento.requiere_carta && evento.car_mot_eve) {
+                seccionCartaMotivacion.style.display = "block";
+                cartaMotivacion.textContent = evento.car_mot_eve;
+            } else if (evento.requiere_carta) {
+                seccionCartaMotivacion.style.display = "block";
+                cartaMotivacion.textContent =
+                    "Se requiere carta de motivación pero no se han especificado instrucciones.";
+            } else {
+                seccionCartaMotivacion.style.display = "none";
+            }
+        } // Organizador - Cédula
         const organizadorCedula = modal.querySelector("#organizador-cedula");
         if (organizadorCedula) {
-            const orgData = evento.organizador?.data || evento.organizador;
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
             organizadorCedula.textContent =
                 orgData?.ced_org || "No especificada";
         }
@@ -208,7 +428,10 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         // Organizador - Nombre
         const organizadorNombre = modal.querySelector("#organizador-nombre");
         if (organizadorNombre) {
-            const orgData = evento.organizador?.data || evento.organizador;
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
             if (orgData) {
                 const nombreCompleto =
                     `${orgData.nom_org1} ${orgData.nom_org2 || ""} ${orgData.ape_org1} ${orgData.ape_org2 || ""}`.trim();
@@ -216,28 +439,110 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             } else {
                 organizadorNombre.textContent = "No especificado";
             }
-        } // Organizador - Título
+        }
+
+        // Organizador - Título
         const organizadorTitulo = modal.querySelector("#organizador-titulo");
         if (organizadorTitulo) {
-            const orgData = evento.organizador?.data || evento.organizador;
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
             organizadorTitulo.textContent =
                 orgData?.tit_aca_org || "No especificado";
         }
 
-        // Configuración del Evento - Nota de Aprobación
-        const notaAprobacion = modal.querySelector("#evento-nota-aprobacion");
-        if (notaAprobacion) {
-            notaAprobacion.textContent =
-                (evento.not_apr_eve || 7.0).toString() + " puntos";
+        // Organizador - Email
+        const organizadorEmail = modal.querySelector("#organizador-email");
+        if (organizadorEmail) {
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
+            organizadorEmail.textContent =
+                orgData?.ema_org || "No especificado";
         }
 
-        // Configuración del Evento - Tiempo de Registro
-        const tiempoRegistro = modal.querySelector("#evento-tiempo-registro");
-        if (tiempoRegistro) {
-            tiempoRegistro.textContent =
-                evento.tie_reg_asi !== false
-                    ? "Permitir registro en cualquier momento"
-                    : "Restringir tiempo de registro";
+        // Organizador - Teléfono
+        const organizadorTelefono = modal.querySelector(
+            "#organizador-telefono",
+        );
+        if (organizadorTelefono) {
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
+            organizadorTelefono.textContent =
+                orgData?.tel_org || "No especificado";
+        }
+
+        // Estado del Evento
+        const estadoEvento = modal.querySelector(
+            "#evento-estado",
+        ) as HTMLElement;
+        if (estadoEvento) {
+            const fechaHoy = new Date();
+            const fechaInicio = new Date(evento.fec_ini_eve);
+            const fechaFin = evento.fec_fin_eve
+                ? new Date(evento.fec_fin_eve)
+                : fechaInicio;
+
+            let estado = "";
+            let color = "";
+
+            if (fechaFin < fechaHoy) {
+                estado = "Finalizado";
+                color = "#6b7280";
+            } else if (fechaInicio <= fechaHoy && fechaFin >= fechaHoy) {
+                estado = "En Curso";
+                color = "#059669";
+            } else {
+                estado = "Próximo";
+                color = "#3b82f6";
+            }
+
+            estadoEvento.textContent = estado;
+            estadoEvento.style.color = color;
+            estadoEvento.style.fontWeight = "bold";
+        }
+
+        // Estado de Inscripciones
+        const estadoInscripciones = modal.querySelector(
+            "#evento-estado-inscripciones",
+        ) as HTMLElement;
+        if (estadoInscripciones) {
+            const fechaHoy = new Date();
+            let estadoInsc = "";
+            let colorInsc = "";
+
+            if (evento.fec_ini_ins_eve && evento.fec_fin_ins_eve) {
+                const fechaInicioInsc = new Date(evento.fec_ini_ins_eve);
+                const fechaFinInsc = new Date(evento.fec_fin_ins_eve);
+
+                if (fechaFinInsc < fechaHoy) {
+                    estadoInsc = "Cerradas";
+                    colorInsc = "#6b7280";
+                } else if (
+                    fechaInicioInsc <= fechaHoy &&
+                    fechaFinInsc >= fechaHoy
+                ) {
+                    estadoInsc = "Abiertas";
+                    colorInsc = "#059669";
+                } else if (fechaInicioInsc > fechaHoy) {
+                    estadoInsc = "Próximamente";
+                    colorInsc = "#f59e0b";
+                } else {
+                    estadoInsc = "No definidas";
+                    colorInsc = "#6b7280";
+                }
+            } else {
+                estadoInsc = "No definidas";
+                colorInsc = "#6b7280";
+            }
+
+            estadoInscripciones.textContent = estadoInsc;
+            estadoInscripciones.style.color = colorInsc;
+            estadoInscripciones.style.fontWeight = "bold";
         }
     } // Cerrar modal al hacer clic fuera de él
     window.onclick = function (event) {
