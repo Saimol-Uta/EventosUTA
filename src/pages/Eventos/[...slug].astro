@@ -60,6 +60,34 @@ const formatearDuracion = (minutos: number) => {
             : `${dias} días`;
     }
 };
+
+// Función para comparar solo fechas (sin horas)
+function esHoyODespues(fecha: Date) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const comparar = new Date(fecha);
+    comparar.setHours(0, 0, 0, 0);
+    return hoy >= comparar;
+}
+
+function esAntesDe(fecha: Date) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const comparar = new Date(fecha);
+    comparar.setHours(0, 0, 0, 0);
+    return hoy < comparar;
+}
+
+const inscripcionDisponible = () => {
+    const inicio = new Date(evento.fec_ini_ins_eve);
+    const fin = new Date(evento.fec_fin_ins_eve);
+    return esHoyODespues(inicio) && !esAntesDe(fin);
+};
+
+const inscripcionProximamente = () => {
+    const inicio = new Date(evento.fec_ini_ins_eve);
+    return esAntesDe(inicio);
+};
 ---
 
 <Layout>
@@ -208,11 +236,26 @@ const formatearDuracion = (minutos: number) => {
     </div>
 
     <div class="text-center mb-8">
-        <a
-            href={`/Eventos/Evento-Inscripcion/${slug}`}
-            class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
-        >
-            Registrarme en el curso
-        </a>
+        {
+            inscripcionDisponible() ? (
+                <a
+                    href={`/Eventos/Evento-Inscripcion/${slug}`}
+                    class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
+                >
+                    Registrarme en el curso
+                </a>
+            ) : inscripcionProximamente() ? (
+                <span style="color: #b91c1c; font-weight: bold; font-size: 1.2rem;">
+                    Evento próximamente. Inscripciones desde: <br />
+                    <span style="color: #222;">
+                        {formatearFecha(evento.fec_ini_ins_eve)}
+                    </span>
+                </span>
+            ) : (
+                <span style="color: #b91c1c; font-weight: bold; font-size: 1.2rem;">
+                    Fecha límite superada para inscribirse
+                </span>
+            )
+        }
     </div>
 </section>
