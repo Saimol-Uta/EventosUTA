@@ -17,54 +17,93 @@ const {
   modoAdmin = false
 } = Astro.props;
 
-const eventos = await prisma.eventos.findMany({
-  take: 3,
+const eventosDestacados = await prisma.eventos.findMany({
+  where: {
+    es_destacado: true,
+  },
+  take: 6,
   orderBy: {
-    fec_ini_eve: "desc", 
+    fec_ini_eve: "desc",
   },
 });
+
+const slides = [];
+for (let i = 0; i < eventosDestacados.length; i += 2) {
+  slides.push(eventosDestacados.slice(i, i + 2));
+}
 ---
+<section class="py-12 bg-gray-50 text-center">
+  <h2 class="text-3xl font-bold text-red-800 mb-10">Eventos Favoritos</h2>
 
-<div class="bg-gray-100 min-h-screen py-8">
-  <div class="max-w-6xl mx-auto px-4 text-center">
-    <h1 class="text-2xl md:text-3xl font-bold text-[#650000] mb-10">
-      {tituloFacultad}
-    </h1>
-      <section class="py-12 bg-gray-50 text-center">
-    <h2 class="text-3xl font-bold text-red-800 mb-10"> Eventos Favoritos </h2>
-
-    <div class="flex flex-wrap justify-center gap-8 px-4">
-      {eventos.map((evento) => (
-        <Evento
-          imagen={evento.img_eve}
-          titulo={evento.nom_eve}
-          estado={evento.id_asi_eve?.length?.toString() || "0"}
-          horas={evento.dur_eve ?? 0}
-          slug={evento.id_eve}
-        />
-      ))}
+  <div class="relative max-w-5xl mx-auto">
+    <!-- Carrusel contenedor -->
+    <div id="carousel-container" class="overflow-hidden rounded-xl shadow-lg w-full">
+      <!-- Carrusel interior -->
+      <div
+        id="carousel-inner"
+        class="flex transition-transform duration-700 ease-in-out"
+        style="width: 100%;"
+      >
+        {slides.map((grupo) => (
+          <div class="min-w-full flex justify-center gap-6 bg-white p-6">
+            {grupo.map((evento) => (
+              <Evento
+                imagen={evento.img_eve}
+                titulo={evento.nom_eve}
+                estado={evento.id_asi_eve?.length?.toString() || "0"}
+                horas={evento.dur_eve ?? 0}
+                slug={evento.id_eve}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
 
-    <div class="mt-10">
-      <a
-  href="/cursosCompleto"
-  class="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-red-600 text-white font-semibold shadow-lg transition duration-300 hover:bg-red-700 hover:shadow-xl"
->
-  Ver más
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    stroke-width="2"
-  >
-    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-  </svg>
-</a>
-    </div>
-  </section>
+    <!-- Botones -->
+    <div class="flex justify-center gap-4 mt-6">
+      <button
+        onclick="cambiarSlide(-1)"
+        class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md hover:bg-red-700 transition"
+        aria-label="Anterior"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
 
+      <button
+        onclick="cambiarSlide(1)"
+        class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md hover:bg-red-700 transition"
+        aria-label="Siguiente"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Botón Ver más -->
+  <div class="mt-10">
+    <a
+      href="/cursosCompleto"
+      class="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-red-600 text-white font-semibold shadow-md hover:bg-red-700 transition"
+    >
+      Ver más
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+      </svg>
+    </a>
+  </div>
+</section>
     <TarjetaConImagen
       titulo={tituloDescripcion}
       contenido={contenidoDescripcion}
@@ -91,3 +130,24 @@ const eventos = await prisma.eventos.findMany({
     />
   </div>
 </div>
+<script>
+  let currentSlide = 0;
+
+  function cambiarSlide(direccion) {
+    const carouselInner = document.getElementById("carousel-inner");
+    const totalSlides = carouselInner.children.length;
+
+    currentSlide += direccion;
+    if (currentSlide < 0) currentSlide = totalSlides - 1;
+    if (currentSlide >= totalSlides) currentSlide = 0;
+
+    const offset = currentSlide * carouselInner.offsetWidth;
+    carouselInner.style.transform = `translateX(-${offset}px)`;
+  }
+
+  // Ajusta al redimensionar (opcional pero recomendado)
+  window.addEventListener("resize", () => {
+    const carouselInner = document.getElementById("carousel-inner");
+    carouselInner.style.transform = `translateX(-${currentSlide * carouselInner.offsetWidth}px)`;
+  });
+</script>
