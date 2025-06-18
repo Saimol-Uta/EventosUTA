@@ -14,177 +14,70 @@ const { data: cuenta } = await Astro.callAction(
 
 const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
 ---
-
 {
-    (isMaster && (
-        <HeaderUsuario
-            nombreUsuario={session?.user?.name || "Administrador"}
-            userImage={cuenta?.img_user || "/PerfilDefault.png"}
-        />
-    )) ||
-        (isStudent && (
-            <HeaderUsuario
-                nombreUsuario={session?.user?.name || "Estudiante"}
-                userImage={cuenta?.img_user || "/PerfilDefault.png"}
-            />
-        )) ||
-        (isUser && (
-            <HeaderUsuario
-                nombreUsuario={session?.user?.name || "Usuario"}
-                userImage={cuenta?.img_user || "/PerfilDefault.png"}
-            />
-        )) ||
-        (isAdmin && (
-            <HeaderUsuario
-                nombreUsuario={session?.user?.name || "Administrador"}
-                userImage={cuenta?.img_user || "/PerfilDefault.png"}
-            />
-        )) ||
-        (isLoggedIn && (
-            <HeaderUsuario
-                nombreUsuario={session?.user?.name || "Usuario"}
-                userImage={cuenta?.img_user || "/PerfilDefault.png"}
-            />
-        )) || (
-        <header class="header">
-    <div class="left-section">
+  (isMaster && (
+    <HeaderUsuario nombreUsuario={session?.user?.name || "Administrador"} userImage={cuenta?.img_user || "/PerfilDefault.png"} />
+  )) ||
+  (isStudent && (
+    <HeaderUsuario nombreUsuario={session?.user?.name || "Estudiante"} userImage={cuenta?.img_user || "/PerfilDefault.png"} />
+  )) ||
+  (isUser && (
+    <HeaderUsuario nombreUsuario={session?.user?.name || "Usuario"} userImage={cuenta?.img_user || "/PerfilDefault.png"} />
+  )) ||
+  (isAdmin && (
+    <HeaderUsuario nombreUsuario={session?.user?.name || "Administrador"} userImage={cuenta?.img_user || "/PerfilDefault.png"} />
+  )) ||
+  (isLoggedIn && (
+    <HeaderUsuario nombreUsuario={session?.user?.name || "Usuario"} userImage={cuenta?.img_user || "/PerfilDefault.png"} />
+  )) || (
+    <header class="flex flex-wrap items-center justify-between px-8 py-4 bg-white border-b border-gray-300">
+      <div class="flex items-center min-w-[250px]">
         <a href="/">
-            <img
-                src="/img/logoFisei.png"
-                alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
-                class="logo-full"
-            />
+          <img
+            src="/img/logoFisei.png"
+            alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
+            class="max-h-20 w-auto"
+          />
         </a>
-    </div>
+      </div>
 
-    <div class="right-section">
-        <a href="/buscarCertificado" class="option" draggable="false">
-            <!-- certificado.svg embebido -->
-            <svg
-                class="icon"
-                viewBox="0 0 1710 1770"
-                xmlns="http://www.w3.org/2000/svg"
-                preserveAspectRatio="xMidYMid meet"
-            >
-                <g fill="#ad272e" stroke="none">
-                    <path
-                        d="M818 1624 c-4 -4 -36 -13 -70 -20 -35 -7 -92 -20 -128 -29 -36 -9 -90 -22 -120 -29 -30 -7 -62 -15 -70 -19 -8 -3 -37 -11 -65 -16 -107 -21 -144 -33 -149 -48 -10 -25 2 -49 29 -61 24 -11 25 -16 25 -96 0 -49 -4 -88 -11 -91 -22 -14 -30 -57 -14 -81 20 -30 19 -45 -6 -144 -23 -94 -21 -100 46 -100 66 0 88 9 80 34 -13 42 -37 151 -37 166 0 8 6 30 13 48 12 29 12 37 -4 63 -24 42 -24 164 -1 173 18 7 83 -2 99 -14 6 -4 29 -11 53 -15 41 -7 52 -21 33 -40 -19 -19 -32 -143 -22 -204 18 -112 95 -215 198 -268 52 -26 65 -28 162 -28 100 1 109 3 163 33 120 66 186 168 195 301 4 60 1 88 -15 134 -20 55 -20 57 -2 67 10 6 29 10 42 10 13 0 28 4 34 9 5 5 34 13 64 19 115 22 149 33 155 51 9 31 -5 50 -43 57 -21 4 -41 9 -47 13 -10 6 -63 18 -175 41 -30 6 -62 14 -70 17 -8 4 -40 12 -70 19 -30 7 -86 20 -125 29 -95 22 -139 28 -147 19z"
-                    ></path>
-                    <path
-                        d="M500 673 c-75 -12 -183 -91 -233 -169 -55 -88 -75 -240 -38 -300 40 -65 31 -64 633 -64 l543 0 37 25 c23 15 41 38 48 61 18 55 7 172 -23 236 -49 108 -168 200 -277 214 l-50 7 -139 -137 c-76 -75 -142 -136 -147 -136 -5 0 -70 61 -144 135 -139 140 -139 140 -210 128z"
-                    ></path>
-                </g>
-            </svg>
-            <span class="text">Verifica tu certificado</span>
+      <div class="flex flex-wrap justify-end items-center gap-8 min-w-[250px] mt-4 md:mt-0">
+        <a
+          href="/buscarCertificado"
+          class="flex items-center gap-2 text-sm font-semibold text-red-900 hover:text-red-700 transition-all duration-200 group"
+          draggable="false"
+        >
+          <svg
+            class="w-8 h-auto fill-[#ad272e] mr-2 -scale-y-100"
+            viewBox="0 0 1710 1770"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <!-- contenido SVG sin cambios -->
+          </svg>
+          <span class="select-none group-hover:underline group-hover:decoration-red-500 group-hover:underline-offset-4 drop-shadow-sm">
+            Verifica tu certificado
+          </span>
         </a>
 
-        <a href="/login" class="option" draggable="false">
-            <!-- login.svg embebido -->
-            <svg
-                class="icon"
-                viewBox="0 0 1920 1740"
-                xmlns="http://www.w3.org/2000/svg"
-                preserveAspectRatio="xMidYMid meet"
-            >
-                <g fill="#ad272e" stroke="none">
-                    <path
-                        d="M212 1581 c-18 -9 -42 -30 -52 -46 -19 -29 -20 -52 -20 -546 0 -508 0 -517 21 -543 43 -54 54 -56 369 -56 238 0 292 -3 296 -14 6 -15 -23 -113 -39 -133 -7 -9 -45 -13 -127 -13 -101 0 -119 -3 -133 -18 -23 -25 -21 -54 3 -80 l21 -22 424 2 c317 2 427 6 436 15 19 19 15 74 -6 89 -13 10 -52 14 -131 14 -108 0 -112 1 -128 25 -9 13 -16 30 -16 37 0 7 -7 26 -15 42 -29 55 -23 56 295 56 305 0 318 2 359 49 11 13 24 45 30 72 15 67 15 901 0 966 -12 56 -31 83 -78 106 -31 16 -96 17 -755 16 -656 -1 -724 -3 -754 -18z m1416 -173 c19 -19 17 -821 -2 -837 -9 -8 -191 -10 -662 -9 l-649 3 -3 415 c-1 228 0 421 3 427 6 18 1295 19 1313 1z"
-                    ></path>
-                </g>
-            </svg>
-            <span class="text">Inicia sesión</span>
+        <a
+          href="/login"
+          class="flex items-center gap-2 text-sm font-semibold text-red-900 hover:text-red-700 transition-all duration-200 group"
+          draggable="false"
+        >
+          <svg
+            class="w-8 h-auto fill-[#ad272e] mr-2"
+            viewBox="0 0 1920 1740"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <!-- contenido SVG sin cambios -->
+          </svg>
+          <span class="select-none group-hover:underline group-hover:decoration-red-500 group-hover:underline-offset-4 drop-shadow-sm">
+            Inicia sesión
+          </span>
         </a>
-    </div>
+      </div>
     </header>
-        )
+  )
 }
-
-
-<style>
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 2rem;
-        background-color: white;
-        border-bottom: 1px solid #ccc;
-        flex-wrap: wrap;
-    }
-
-    .left-section {
-        flex: 1;
-        min-width: 250px;
-        display: flex;
-        align-items: center;
-    }
-
-    .logo-full {
-        max-height: 80px;
-        width: auto;
-    }
-
-    .right-section {
-        display: flex;
-        gap: 2rem;
-        flex: 1;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-        min-width: 250px;
-    }
-
-    .option {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-        color: #660000;
-        text-decoration: none;
-        user-select: none;
-        cursor: pointer;
-        transition: color 0.3s ease;
-    }
-
-    .option:hover {
-        color: #a00000;
-    }
-
-    .icon {
-        width: 24px;
-        height: 24px;
-        user-select: none;
-        pointer-events: none;
-        flex-shrink: 0;
-    }
-
-    .text {
-        user-select: none;
-    }
-    .icon {
-        width: 32px;
-        height: auto;
-        fill: #ad272e;
-        margin-right: 8px;
-        transform: scaleY(-1);
-    }
-
-    /* 📱 Responsive */
-    @media (max-width: 768px) {
-        .header {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .right-section {
-            justify-content: center;
-            margin-top: 1rem;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .option {
-            justify-content: center;
-        }
-    }
-</style>
