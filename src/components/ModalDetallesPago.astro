@@ -50,8 +50,10 @@ import "../styles/ModalDetallesInscripcion.css";
             </div>
             <div class="contenedor-boton-modificar">
                 <button
-                    class="boton-modificar"
-                    onclick="aprobarInscripcionPago()">Aprobar</button
+                    class="boton-modificar bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mr-2 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    id="boton-aprobar-pago"
+                    disabled
+                    onclick="if (!this.disabled) aprobarInscripcionPago()">Aprobar</button
                 >
                 <button
                     class="boton-modificar"
@@ -89,9 +91,70 @@ import "../styles/ModalDetallesInscripcion.css";
                 currentInscripcionIdPago = inscripcionId;
                 window.currentInscripcionIdPago = inscripcionId;
 
+                console.log(
+                    "Abriendo modal deSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS pago para inscripción:",
+                    inscripcionId,
+                );
+
                 // Cargar comprobante de pago dinámicamente
                 cargarComprobantePago(inscripcionId);
+                // Verificar requisitos y actualizar botón
+                verificarRequisitosPagoYActualizarBoton();
             }
+
+            function verificarRequisitosPagoYActualizarBoton() {
+                const botonAprobar = document.getElementById(
+                    "boton-aprobar-pago",
+                ) as HTMLButtonElement;
+
+                if (!botonAprobar) return;
+
+                // Deshabilitar por defecto
+                botonAprobar.disabled = true;
+
+                const inscripcionesData =
+                    (window as any).inscripcionesData || [];
+                const inscripcion = inscripcionesData.find(
+                    (ins: any) =>
+                        ins.id_ins === window.currentInscripcionIdPago,
+                );
+
+                if (!inscripcion) {
+                    console.warn("No se encontró la inscripción actual");
+                    return;
+                }
+
+                const evento = inscripcion.eventos || {};
+
+                // Verificar si el evento es de pago
+                const esPago =
+                    !evento.es_gratuito &&
+                    evento.precio &&
+                    Number(evento.precio) > 0;
+
+                if (!esPago) {
+                    // Si el evento es gratuito, habilitar el botón
+                    botonAprobar.disabled = false;
+                    botonAprobar.title =
+                        "Evento gratuito - No requiere comprobante de pago";
+                    return;
+                }
+
+                // Si es evento de pago, verificar que existe el comprobante
+                const tieneComprobante = isValidDocumentLink(
+                    inscripcion.enl_ord_pag_ins,
+                );
+                console.log(inscripcion.enl_ord_pag_ins, tieneComprobante);
+
+                botonAprobar.disabled = !tieneComprobante;
+
+                if (!tieneComprobante) {
+                    botonAprobar.title = `Evento de pago ($${Number(evento.precio).toFixed(2)}) - Falta comprobante de pago`;
+                } else {
+                    botonAprobar.title = `Evento de pago ($${Number(evento.precio).toFixed(2)}) - Comprobante disponible`;
+                }
+            }
+
             function cargarComprobantePago(inscripcionId: string) {
                 try {
                     // Obtener datos de inscripción desde el contexto global
