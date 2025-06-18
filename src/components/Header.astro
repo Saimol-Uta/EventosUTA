@@ -20,30 +20,46 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
         <HeaderUsuario
             nombreUsuario={session?.user?.name || "Administrador"}
             userImage={cuenta?.img_user || "/PerfilDefault.png"}
+            logoImage="/img/logoFisei.png"
+            titulo1={"FACULTAD DE INGENIERÍA"}
+                titulo2={"en Sistemas, Electrónica e Industrial"}
+
         />
     )) ||
         (isStudent && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Estudiante"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
+                logoImage="/img/logoFisei.png"
+                titulo1={"FACULTAD DE INGENIERÍA "}
+                titulo2={"en Sistemas, Electrónica e Industrial"}
             />
         )) ||
         (isUser && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
+                logoImage="/img/logoFisei.png"
+                titulo1={"FACULTAD DE INGENIERÍA"}
+                titulo2={"en Sistemas, Electrónica e Industrial"}
             />
         )) ||
         (isAdmin && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Administrador"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
+                logoImage="/img/logoFisei.png"
+                titulo1={"FACULTAD DE INGENIERÍA "}
+                titulo2={"en Sistemas, Electrónica e Industrial"}
             />
         )) ||
         (isLoggedIn && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
+                logoImage="/img/logoFisei.png"
+                titulo1={"FACULTAD "}
+                titulo2={"en Sistemas, Electrónica e Industrial"}
             />
         )) || (
         <header class="header">

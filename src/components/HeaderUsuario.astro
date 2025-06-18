@@ -6,23 +6,30 @@ import "../styles/global.css";
 export interface Props {
   nombreUsuario: string;
   userImage: string;
+  logoImage: string;
+  titulo1: string;
+  titulo2: string;
 }
 
-const {nombreUsuario, userImage} = Astro.props;
+const {nombreUsuario, userImage, titulo1, titulo2, logoImage} = Astro.props;
 ---
 <head>
 </head>
 
 <header class="header">
-    <div class="left-section">
-        <a href="/">
-            <img
-                src="/img/logoFisei.png"
-                alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
-                class="logo-full"
-            />
-        </a>
-    </div>
+<div class="left-section">
+    <a href="/" class="flex items-center gap-2">
+        <img
+            src={logoImage}
+            alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
+            class="w-12 h-auto"
+        />
+        <div class="flex flex-col leading-tight">
+            <span class="text-lg font-semibold text-red-800"> {titulo1} </span>
+            <span class="text-sm text-red-800">{titulo2}</span>
+        </div>
+    </a>
+</div>
 
 
   <div class="right-section">
@@ -51,6 +58,7 @@ const {nombreUsuario, userImage} = Astro.props;
   flex-wrap: wrap;
 }
 
+
 .left-section {
   flex: 1;
   min-width: 250px;
@@ -61,6 +69,17 @@ const {nombreUsuario, userImage} = Astro.props;
 .logo-full {
   max-height: 80px;
   width: auto;
+}
+.logo-text{
+  color:#800303;
+  font-size: 1rem;
+
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+    text-decoration: none; /* para quitar subrayado del enlace */
+    gap: 10px; /* espacio entre imagen y texto */
 }
 
 .right-section {
