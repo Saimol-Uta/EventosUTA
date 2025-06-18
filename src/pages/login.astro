@@ -33,121 +33,162 @@ if (message === "perfil-actualizado") {
     <head>
         <meta charset="UTF-8" />
         <title>Login - Talleres Tecnológicos</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #fff;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-            }
+  <style>
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #fdf2f2, #a57676); /* fondo claro suave */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-            .login-container {
-                border: 1px solid #ccc;
-                padding: 30px 40px;
-                text-align: center;
-                max-width: 350px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            }
+.login-wrapper {
+  display: flex;
+  width: 900px;
+  height: 520px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
 
-            .login-container img {
-                width: 100%;
-                max-width: 280px;
-                margin-bottom: 20px;
-            }
+.login-left {
+  background: linear-gradient(135deg, #6b1111, #b11d1d); /* rojo elegante */
+  color: white;
+  width: 45%;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+}
 
-            .login-container input[type="email"],
-            .login-container input[type="password"] {
-                width: 100%;
-                padding: 10px;
-                margin-bottom: 15px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-            }
+.login-left .logo {
+  max-width: 120px;
+  margin: 0 auto 30px;
+}
 
-            .login-container button {
-                background-color: #a00;
-                color: white;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 16px;
-            }
+.login-left h1 {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
 
-            .login-container button:hover {
-                background-color: #800000;
-            }
+.login-left p {
+  font-size: 14px;
+  opacity: 0.9;
+}
 
-            .login-container a {
-                display: block;
-                margin-top: 10px;
-                font-size: 14px;
-                text-decoration: none;
-                color: #800000;
-            }
+.login-left .volver {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: #fdd;
+  font-size: 14px;
+  text-decoration: none;
+}
 
-            .login-container a:hover {
-                text-decoration: underline;
-            }
+.login-left .volver:hover {
+  text-decoration: underline;
+}
 
-            .volver {
-                position: absolute;
-                top: 10px;
-                right: 20px;
-                font-size: 14px;
-                color: #800000;
-            }
+.login-right {
+  width: 55%;
+  padding: 50px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-            .volver:hover {
-                text-decoration: underline;
-            }
+.login-right form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-            /* NUEVO: Estilos para el mensaje de éxito */
-            .mensaje-exito {
-                background-color: #d1fae5;
-                color: #065f46;
-                border: 1px solid #10b981;
-                padding: 12px 20px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-                text-align: center;
-                font-weight: 600;
-                font-size: 14px;
-                max-width: 400px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-        </style>
+.login-right input[type="email"],
+.login-right input[type="password"] {
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.login-right button {
+  background: #932020; /* rojo suave institucional */
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.login-right button:hover {
+  background: #cd1a1a;
+}
+
+.form-extras {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #555;
+  align-items: center;
+}
+
+.form-extras a,
+.login-right a {
+  text-decoration: none;
+  color: #a31616;
+}
+
+.form-extras a:hover,
+.login-right a:hover {
+  text-decoration: underline;
+}
+
+.mensaje-exito {
+  background-color: #fcebea;
+  color: #8a1c1c;
+  border: 1px solid #ef9a9a;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+</style>
+
     </head>
     <body>
-        <a class="volver" href="/">Regresar</a>
+<div class="login-wrapper">
+  <div class="login-left">
+    <img src="/FISEX.png" alt="Logo Facultad de Ingeniería" class="logo" />
+    <h1>¡Bienvenido!</h1>
+    <p>Accede a tu cuenta para gestionar tus talleres y eventos.</p>
+    <a href="/" class="volver">← Regresar</a>
+  </div>
 
-        <div class="login-container">
-            <!-- NUEVO: Mostrar mensaje de éxito si existe -->
-            {mensajeExito && <div class="mensaje-exito">{mensajeExito}</div>}
+  <div class="login-right">
+    {mensajeExito && <div class="mensaje-exito">{mensajeExito}</div>}
 
-            <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
-            <form>
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Usuario"
-                    required
-                />
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Contraseña"
-                    required
-                />
-                <button type="submit" id="btn-submit">Acceder</button>
-                <p>¿No tiene una cuenta?</p>
-                <a href="/register">Regístrese aquí</a>
-            </form>
-        </div>
+    <form>
+      <input type="email" name="email" placeholder="Usuario" required />
+      <input type="password" name="password" placeholder="Contraseña" required />
+      <div class="form-extras">
+        <label><input type="checkbox" /> Recordarme</label>
+        <a href="#">¿Olvidaste tu contraseña?</a>
+      </div>
+      <button type="submit" id="btn-submit">Acceder</button>
+      <p>¿No tiene una cuenta? <a href="/register">Regístrese aquí</a></p>
+    </form>
+  </div>
+</div>
+
     </body>
 </html>
 <script>
