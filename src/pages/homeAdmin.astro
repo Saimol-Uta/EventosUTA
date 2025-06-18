@@ -118,60 +118,64 @@ if (session && session.user) {
             <div class="w-full md:w-3/4 flex flex-col gap-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
                     <Card title="Inscripciones Pendientes">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                inscripciones.slice(0, 4).map((c) => (
-                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                        <p>
-                                            <strong>Estudiante:</strong>{" "}
-                                            {c.usuarios.nom_usu1}
-                                        </p>
-                                        <p>
-                                            <strong>Evento:</strong>{" "}
-                                            {c.eventos.nom_eve}
-                                        </p>
-                                    </div>
-                                ))
-                            }
-                            {
-                                inscripciones.length > 4 && (
-                                    <a
-                                        href="/Admin/gestionEventos"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
+                       <div class="flex flex-col gap-y-4">
+    {
+        inscripciones.slice(0, 4).map((c) => (
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl shadow-lg p-4 text-gray-700 hover:shadow-xl transition-shadow duration-300">
+                <p class="mb-1">
+                    <strong class="text-gray-900">Estudiante:</strong>{" "}
+                    {c.usuarios.nom_usu1}
+                </p>
+                <p>
+                    <strong class="text-gray-900">Evento:</strong>{" "}
+                    {c.eventos.nom_eve}
+                </p>
+            </div>
+        ))
+    }
+
+    {
+        inscripciones.length > 4 && (
+            <a
+                href="/Admin/gestionEventos"
+                class="text-red-700 text-sm underline hover:text-red-900 transition-colors duration-300"
+            >
+                Ver más...
+            </a>
+        )
+    }
+</div>
+
                     </Card>
 
                     <Card title="Eventos Próximos">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                upcomingEvents.slice(0, 4).map((e) => (
-                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                        <p>
-                                            <strong>Evento:</strong> {e.nom_eve}
-                                        </p>
-                                        <p>
-                                            <strong>Fecha de inicio:</strong>{" "}
-                                            {e.fec_ini_eve}
-                                        </p>
-                                    </div>
-                                ))
-                            }
-                            {
-                                upcomingEvents.length > 4 && (
-                                    <a
-                                        href="/eventosProximos"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
+                     <div class="flex flex-col gap-y-4">
+    {
+        upcomingEvents.slice(0, 4).map((e) => (
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl shadow-lg p-4 text-gray-700 hover:shadow-xl transition-shadow duration-300">
+                <p class="mb-1">
+                    <strong class="text-gray-900">Evento:</strong> {e.nom_eve}
+                </p>
+                <p>
+                    <strong class="text-gray-900">Fecha de inicio:</strong>{" "}
+                    {e.fec_ini_eve}
+                </p>
+            </div>
+        ))
+    }
+
+    {
+        upcomingEvents.length > 4 && (
+            <a
+                href="/eventosProximos"
+                class="text-red-700 text-sm underline hover:text-red-900 transition-colors duration-300"
+            >
+                Ver más...
+            </a>
+        )
+    }
+</div>
+
                     </Card>
                 </div>
             </div>
