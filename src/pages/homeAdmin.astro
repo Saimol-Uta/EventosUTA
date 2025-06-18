@@ -87,31 +87,8 @@ if (session && session.user) {
                 />
                 <p class="text-red-800 font-semibold text-lg">{nombreAdmin}</p>
                 <Button text="Editar Perfil" href="/PerfilUserDos" />
-                <div class="text-center mt-4 text-red-800">Documentos</div>
                 <div class="flex gap-2 mt-2">
-                    <DocumentButton
-                        label="Cédula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ced_cue}
-                        fieldName="enl_ced_cue"
-                        size="w-24 h-24"
-                    />
-
-                    <DocumentButton
-                        label="Matrícula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_mat_cue}
-                        fieldName="enl_mat_cue"
-                        size="w-24 h-24"
-                    />
-
-                    <DocumentButton
-                        label="Extensión"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ext_cue}
-                        fieldName="enl_ext_cue"
-                        size="w-24 h-24"
-                    />
+                  
                 </div>
             </div>
 
