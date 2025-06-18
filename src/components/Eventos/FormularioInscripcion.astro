@@ -121,12 +121,16 @@ if (Astro.request.method === "POST") {
         // Si hay error por carta de motivación, no continuar
         if (inscripcionError) throw inscripcionError;
 
+        console.log("PARAMS ENVIADOS A setDatosInscripcion:", params);
+
         const { data, error } = await Astro.callAction(
             actions.setDatosInscripcion,
             params,
         );
         inscripcionResult = data;
         inscripcionError = error;
+        // LOG para verificar si se guarda en la base de datos
+        console.log("RESULTADO DE setDatosInscripcion:", { data, error });
     } catch (err) {
         inscripcionError = {
             message:
@@ -234,7 +238,7 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
             <input
                 type="hidden"
                 name="idUsuario"
-                value={usuario?.cuentas?.[0]?.id_cue || usuario?.id_usu || ""}
+                value={usuario?.cor_cue ?? usuario?.cuentas?.[0]?.cor_cue ?? ""}
             />
             <input type="hidden" name="idEvento" value={evento?.id_eve || ""} />
             <div class="form-card" style="padding: 2rem;">
