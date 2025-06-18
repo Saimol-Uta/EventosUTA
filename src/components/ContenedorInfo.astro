@@ -16,6 +16,7 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
 <div
     class={`flex flex-col ${invertir ? "lg:flex-row-reverse" : "lg:flex-row"} justify-center items-center gap-8 mx-auto max-w-6xl px-4 py-12`}
 >
+    <!-- Columna de texto -->
     <div class="w-full max-w-xl font-sans text-center">
         <form
             action={actions.updatePaginaPrincipal}
@@ -23,7 +24,6 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
             enctype="multipart/form-data"
             class="flex flex-col items-center gap-6 w-full"
         >
-            <!-- Título editable -->
             {
                 modoEdicion ? (
                     <input
@@ -40,7 +40,6 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
                 )
             }
 
-            <!-- Contenido editable -->
             {
                 modoEdicion ? (
                     <>
@@ -79,42 +78,49 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
         </form>
     </div>
 
-    <!-- Imagen editable por separado -->
+    <!-- Columna de imagen -->
     <div class="w-full max-w-xl flex flex-col justify-center items-center gap-4">
-        <form
-            action={actions.updatePaginaPrincipal}
-            method="post"
-            enctype="multipart/form-data"
-            class="flex flex-col items-center gap-4"
-        >
-            <label for="imagen" class="cursor-pointer">
-                <img
-                    src={imagenUrl}
-                    alt={`Imagen de ${titulo}`}
-                    class="rounded-3xl shadow-xl object-cover w-full h-auto max-h-96 transform transition-transform duration-300 hover:scale-105 hover:brightness-105"
-                    loading="lazy"
-                />
-            </label>
+        {
+            modoEdicion ? (
+                <form
+                    action={actions.updatePaginaPrincipal}
+                    method="post"
+                    enctype="multipart/form-data"
+                    class="flex flex-col items-center gap-4"
+                >
+                    <label for="imagen" class="cursor-pointer">
+                        <img
+                            src={imagenUrl}
+                            alt={`Imagen de ${titulo}`}
+                            class="rounded-3xl shadow-xl object-cover w-full h-auto max-h-96 transform transition-transform duration-300 hover:scale-105 hover:brightness-105"
+                            loading="lazy"
+                        />
+                    </label>
 
-            <input
-                type="file"
-                id="imagen"
-                name="imagen"
-                accept="image/*"
-                class="hidden"
-                required
-            />
+                    <input
+                        type="file"
+                        id="imagen"
+                        name="imagen"
+                        accept="image/*"
+                        class="hidden"
+                        required
+                    />
 
-            {
-                modoEdicion && (
                     <button
                         type="submit"
                         class="bg-[#7c0a0a] text-white text-sm px-4 py-1.5 rounded-full shadow-sm hover:shadow-md hover:brightness-110 transition-all duration-300"
                     >
                         Guardar imagen
                     </button>
-                )
-            }
-        </form>
+                </form>
+            ) : (
+                <img
+                    src={imagenUrl}
+                    alt={`Imagen de ${titulo}`}
+                    class="rounded-3xl shadow-xl object-cover w-full h-auto max-h-96"
+                    loading="lazy"
+                />
+            )
+        }
     </div>
 </div>
