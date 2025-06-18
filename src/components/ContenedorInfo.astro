@@ -16,7 +16,7 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
 <div
     class={`flex flex-col ${invertir ? "lg:flex-row-reverse" : "lg:flex-row"} justify-center items-center gap-8 mx-auto max-w-6xl px-4 py-12`}
 >
-    <!-- Columna de texto -->
+    
     <div class="w-full max-w-xl font-sans text-center">
         <form
             action={actions.updatePaginaPrincipal}
@@ -78,7 +78,7 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
         </form>
     </div>
 
-    <!-- Columna de imagen -->
+  
     <div class="w-full max-w-xl flex flex-col justify-center items-center gap-4">
         {
             modoEdicion ? (
