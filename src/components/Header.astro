@@ -3,6 +3,10 @@ import HeaderUsuario from "@components/HeaderUsuario.astro";
 import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
 
+const imagenLogo = "/img/logoFisei.png";
+const titulo1 = "FACULTAD DE INGENIERÍA";
+const titulo2 = "EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL";
+
 const session = await getSession(Astro.request);
 console.log("Session:", session);
 
@@ -10,6 +14,7 @@ const { data: cuenta } = await Astro.callAction(
     actions.getCuentaByIdSingle,
     session?.user?.id || "",
 );
+
 
 
 const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
@@ -20,9 +25,9 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
         <HeaderUsuario
             nombreUsuario={session?.user?.name || "Administrador"}
             userImage={cuenta?.img_user || "/PerfilDefault.png"}
-            logoImage="/img/logoFisei.png"
-            titulo1={"FACULTAD DE INGENIERÍA"}
-                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
+            logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
 
         />
     )) ||
@@ -30,49 +35,52 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Estudiante"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
-                logoImage="/img/logoFisei.png"
-                titulo1={"FACULTAD DE INGENIERÍA "}
-                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
+                 logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
             />
         )) ||
         (isUser && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
-                logoImage="/img/logoFisei.png"
-                titulo1={"FACULTAD DE INGENIERÍA"}
-                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
+              logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
             />
         )) ||
         (isAdmin && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Administrador"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
-                logoImage="/img/logoFisei.png"
-                titulo1={"FACULTAD DE INGENIERÍA "}
-                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
+               logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
             />
         )) ||
         (isLoggedIn && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
-                logoImage="/img/logoFisei.png"
-                titulo1={"FACULTAD DE INGENIERÍA "}
-                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
+              logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
             />
         )) || (
         <header class="header">
-    <div class="left-section">
-        <a href="/">
-            <img
-                src="/img/logoFisei.png"
-                alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
-                class="logo-full"
-            />
-        </a>
-    </div>
-
+<div class="left-section">
+    <a href="/" class="flex items-center gap-2">
+        <img
+            src={imagenLogo}
+            alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
+            class="w-16 h-auto"
+        />
+        <div class="flex flex-col leading-tight">
+            <span class="text-lg font-semibold text-red-800"> {titulo1} </span>
+            <span class="text-sm font-semibold text-red-800">{titulo2}</span>
+        </div>
+    </a>
+</div>
     <div class="right-section">
         <a href="/buscarCertificado" class="option" draggable="false">
            
