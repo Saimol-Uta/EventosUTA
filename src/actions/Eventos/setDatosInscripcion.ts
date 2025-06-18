@@ -116,16 +116,15 @@ export const setDatosInscripcion = defineAction({
                 car_mot_inscrip: car_mot_eve,
                 // ...otros campos...
             });
+            const metodoPagoValido = metodoPago === "TRANSFERENCIA" || metodoPago === "EFECTIVO" ? metodoPago : null;
             const inscripcion = await prisma.inscripciones.create({
                 data: {
                     id_usu_ins: idUsuario,
                     id_eve_ins: idEvento,
-                    met_pag_ins: metodoPago === "DEPOSITO" || metodoPago === "TRANSFERENCIA" || metodoPago === "ONLINE"
-    ? metodoPago
-    : null,
+                    met_pag_ins: metodoPagoValido,
                     enl_ord_pag_ins: enlaceComprobante || null,
                     car_mot_inscrip: car_mot_eve || null,
-                    est_ins: evento.precio && Number(evento.precio) > 0 ? "DPendiente" : "Aprobado", // <-- CORREGIDO
+                    est_ins: evento.precio && Number(evento.precio) > 0 ? "DPendiente" : "Aprobado",
                     est_par: "PENDIENTE",
                 },
             });
