@@ -22,7 +22,7 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
             userImage={cuenta?.img_user || "/PerfilDefault.png"}
             logoImage="/img/logoFisei.png"
             titulo1={"FACULTAD DE INGENIERÍA"}
-                titulo2={"en Sistemas, Electrónica e Industrial"}
+                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
 
         />
     )) ||
@@ -32,7 +32,7 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
                 logoImage="/img/logoFisei.png"
                 titulo1={"FACULTAD DE INGENIERÍA "}
-                titulo2={"en Sistemas, Electrónica e Industrial"}
+                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
             />
         )) ||
         (isUser && (
@@ -41,7 +41,7 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
                 logoImage="/img/logoFisei.png"
                 titulo1={"FACULTAD DE INGENIERÍA"}
-                titulo2={"en Sistemas, Electrónica e Industrial"}
+                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
             />
         )) ||
         (isAdmin && (
@@ -50,7 +50,7 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
                 logoImage="/img/logoFisei.png"
                 titulo1={"FACULTAD DE INGENIERÍA "}
-                titulo2={"en Sistemas, Electrónica e Industrial"}
+                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
             />
         )) ||
         (isLoggedIn && (
@@ -58,8 +58,8 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
                 nombreUsuario={session?.user?.name || "Usuario"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
                 logoImage="/img/logoFisei.png"
-                titulo1={"FACULTAD "}
-                titulo2={"en Sistemas, Electrónica e Industrial"}
+                titulo1={"FACULTAD DE INGENIERÍA "}
+                titulo2={"EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL"}
             />
         )) || (
         <header class="header">
