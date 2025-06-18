@@ -69,8 +69,14 @@ export const getByIdInscripcion = defineAction({
                             car_mot_eve: true, // Campo que faltaba
                             categorias_eventos: {
                                 select: {
+                                    id_cat: true,
                                     nom_cat: true,
                                     des_cat: true,
+                                    pun_apr_cat: true,
+                                    asi_cat: true,
+                                    requiere_puntaje: true,
+                                    requiere_asistencia: true,
+                                    brinda_certificado: true
                                 }
                             },
                             organizadores: {
