@@ -78,9 +78,13 @@ import "../styles/ModalDetallesInscripcion.css";
             </div>
             <div class="contenedor-boton-modificar">
                 <button
-                    class="boton-modificar"
-                    onclick="aprobarInscripcionDocumentacion()">Aprobar</button
+                    class="boton-modificar bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mr-2 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    id="boton-aprobar-documentacion"
+                    disabled
+                    onclick="if (!this.disabled) aprobarInscripcionDocumentacion()"
                 >
+                    Aprobar
+                </button>
                 <button
                     class="boton-modificar"
                     onclick="rechazarInscripcionDocumentacion()"
@@ -117,13 +121,103 @@ import "../styles/ModalDetallesInscripcion.css";
             function abrirModalDetallesInscripcion(inscripcionId: string) {
                 const modal = document.getElementById("modalDetallesReserva");
                 if (modal) modal.style.display = "block";
-                currentInscripcionId = inscripcionId;
                 window.currentInscripcionId = inscripcionId;
-
+                verificarRequisitosYActualizarBoton();
                 cargarInformacionUsuario(inscripcionId);
                 cargarDocumentosInscripcion(inscripcionId);
+
+                // Asegurarse de que el botón se actualice correctamente
             }
 
+            // ...existing code...
+            function verificarRequisitosYActualizarBoton() {
+                const botonAprobar = document.getElementById(
+                    "boton-aprobar-documentacion",
+                ) as HTMLButtonElement;
+
+                if (!botonAprobar) return;
+
+                // Deshabilitar por defecto
+                botonAprobar.disabled = true;
+
+                const inscripcionesData =
+                    (window as any).inscripcionesData || [];
+                const inscripcion = inscripcionesData.find(
+                    (ins: any) => ins.id_ins === window.currentInscripcionId,
+                );
+
+                if (!inscripcion) {
+                    console.warn("No se encontró la inscripción actual");
+                    return;
+                }
+
+                const usuario = inscripcion.usuarios || {};
+                const evento = inscripcion.eventos || {};
+
+                // Verificar si el evento tiene asignación y si es de tipo facultad o carrera
+                const asignacion = evento.asignaciones;
+                const tieneAsignacionValida =
+                    asignacion &&
+                    (asignacion.tip_asi === "FACULTAD" ||
+                        asignacion.tip_asi === "CARRERA");
+
+                // Verificar si el usuario es estudiante
+                const esEstudiante = usuario.rol_cue === "ESTUDIANTE";
+
+                // Solo aplicar validaciones estrictas si:
+                // 1. El evento tiene asignación válida (FACULTAD o CARRERA)
+                // 2. Y el usuario es ESTUDIANTE
+                if (!tieneAsignacionValida || !esEstudiante) {
+                    // Para eventos sin asignación o usuarios no estudiantes, usar lógica original
+                    const eventoRequiereCarta = evento.requiere_carta || false;
+                    const requisitosCumplidos =
+                        usuario.enl_ced_cue &&
+                        (eventoRequiereCarta
+                            ? inscripcion.car_mot_inscrip
+                            : true);
+
+                    botonAprobar.disabled = !requisitosCumplidos;
+
+                    if (!tieneAsignacionValida) {
+                        botonAprobar.title =
+                            "Evento sin restricciones específicas";
+                    } else if (!esEstudiante) {
+                        botonAprobar.title =
+                            "Usuario no es estudiante - Validación básica";
+                    }
+                    return;
+                }
+
+                // Si es estudiante en evento con asignación válida, verificar requisitos específicos
+                const eventoRequiereCarta = evento.requiere_carta || false;
+
+                // Para estudiantes en eventos con asignación: validar cédula + matrícula + carta (si se requiere)
+                const requisitosCumplidos =
+                    usuario.enl_ced_cue &&
+                    usuario.enl_mat_cue &&
+                    (eventoRequiereCarta ? inscripcion.car_mot_inscrip : true);
+
+                botonAprobar.disabled = !requisitosCumplidos;
+
+                // Agregar tooltip explicativo para estudiantes
+                if (!requisitosCumplidos) {
+                    const motivos = [];
+                    if (!usuario.enl_ced_cue) {
+                        motivos.push("Falta cédula");
+                    }
+                    if (!usuario.enl_mat_cue) {
+                        motivos.push("Falta matrícula");
+                    }
+                    if (eventoRequiereCarta && !inscripcion.car_mot_inscrip) {
+                        motivos.push("Falta carta de motivación");
+                    }
+
+                    botonAprobar.title = `Estudiante en evento de ${asignacion.tip_asi} - Requisitos faltantes: ${motivos.join(", ")}`;
+                } else {
+                    botonAprobar.title = `Estudiante en evento de ${asignacion.tip_asi} - Todos los requisitos completos`;
+                }
+            }
+            // ...existing code...
             function cargarInformacionUsuario(inscripcionId: string) {
                 try {
                     // Obtener datos de inscripción desde el contexto global

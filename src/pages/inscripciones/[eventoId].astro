@@ -126,6 +126,7 @@ const links = [
                     {
                         inscripciones.length > 0 ? (
                             inscripciones.map((inscripcion: any) => (
+                                console.log("Procesando inscripción:", inscripcion),
                                 <div
                                     class="registro-fila"
                                     data-estado={inscripcion.est_ins}
