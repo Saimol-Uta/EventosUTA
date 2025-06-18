@@ -8,11 +8,11 @@ import "../../styles/Inscripcion.css";
 // 1. Obtener sesión del usuario
 const session = await getSession(Astro.request);
 if (!session?.user) {
-  return Astro.redirect("/login");
+    return Astro.redirect("/login");
 }
 const idUsuario = session.user.id;
 if (!idUsuario) {
-  throw new Error("El usuario no tiene un ID válido.");
+    throw new Error("El usuario no tiene un ID válido.");
 }
 
 // 2. Obtener ID del evento por query param o hardcode para test
@@ -21,94 +21,200 @@ const idEvento = url.searchParams.get("evento") ?? "id-del-evento-default";
 
 // 3. Llamar acción que trae datos completos
 const { data } = await Astro.callAction(actions.getDatosInscripcion, {
-  idUsuario,
-  idEvento,
+    idUsuario,
+    idEvento,
 });
-const { usuario, evento, inscripcion, requisitos } = data ?? {};
+
+// Extraer datos con verificación de tipos
+const usuario = data?.data?.usuario ?? null;
+const evento = data?.data?.evento ?? null;
 ---
 
 <Layout>
-  <body>
-    <div class="container">
-      <div class="form-card">
-        <h2>Inscripción</h2>
-        <p>{new Date().toLocaleDateString("es-EC")}</p>
+    <body>
+        <div class="container">
+            <div class="form-card">
+                <h2>Inscripción</h2>
+                <p>{new Date().toLocaleDateString("es-EC")}</p>
 
-        <h3>Datos del Usuario</h3>
+                <h3>Datos del Usuario</h3>
+                <div class="form-group">
+                    <label>Correo electrónico</label>
+                    <input
+                        type="email"
+                        value={usuario?.cor_cue ?? ""}
+                        readonly
+                    />
+                </div>
 
-        <div class="form-group">
-          <label>Correo electrónico</label>
-          <input type="email" value={usuario?.cuentas[0]?.cor_cue ?? ""} readonly />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input
+                            type="text"
+                            value={usuario?.nom_usu1 ?? ""}
+                            readonly
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido</label>
+                        <input
+                            type="text"
+                            value={usuario?.ape_usu1 ?? ""}
+                            readonly
+                        />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo de Documento</label>
+                        <select disabled>
+                            <option selected>Cédula</option>
+                            <option>Pasaporte</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Documento</label>
+                        <input
+                            type="text"
+                            value={usuario?.ced_usu ?? ""}
+                            readonly
+                        />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input
+                        type="tel"
+                        value={usuario?.num_tel_usu ?? ""}
+                        readonly
+                    />
+                </div>
+                <h3>Requisitos</h3>
+                <div class="requisitos-container">
+                    <div class="requisito-item">
+                        <div class="requisito-info">
+                            <span class="requisito-texto"
+                                >Tener cuenta en el sistema</span
+                            >
+                            <div class="requisito-estado">
+                                <input
+                                    type="checkbox"
+                                    id="req-sistema"
+                                    class="requisito-checkbox"
+                                    checked={true}
+                                    readonly
+                                />
+                                <label for="req-sistema" class="custom-checkbox"
+                                ></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {
+                        evento?.requiere_carta && (
+                            <div class="requisito-item">
+                                <div class="requisito-info">
+                                    <span class="requisito-texto">
+                                        Carta de solicitud requerida
+                                    </span>
+                                    <div class="requisito-estado">
+                                        <input
+                                            type="checkbox"
+                                            id="req-carta"
+                                            class="requisito-checkbox"
+                                            checked={false}
+                                            readonly
+                                        />
+                                        <label
+                                            for="req-carta"
+                                            class="custom-checkbox"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
+                </div>
+
+                <div class="form-row">
+                    <button class="submit-button">Cancelar</button>
+                    <button class="submit-button">Inscribirse</button>
+                </div>
+            </div>
+            <div class="vehicle-card">
+                <h3>{evento?.nom_eve ?? "Evento no disponible"}</h3>
+                <img
+                    src={evento?.img_eve ?? "/img/placeholder.jpg"}
+                    alt="Curso"
+                    class="curso-imagen"
+                />
+
+                {
+                    evento?.asignaciones && (
+                        <p>
+                            <strong>Dirigido a:</strong>{" "}
+                            {evento.asignaciones.nom_asi}
+                        </p>
+                    )
+                }
+
+                <p>
+                    <strong>Categoría:</strong>
+                    {evento?.categorias_eventos?.nom_cat ?? "-"}
+                </p>
+                <p>
+                    <strong>Precio:</strong> ${
+                        Number(evento?.precio ?? 0).toFixed(2)
+                    }
+                </p>
+                {
+                    evento?.es_gratuito && (
+                        <p style="color: green;">
+                            <strong>Evento gratuito</strong>
+                        </p>
+                    )
+                }
+                <p><strong>Área:</strong> {evento?.are_eve ?? "-"}</p>
+                <p><strong>Ubicación:</strong> {evento?.ubi_eve ?? "-"}</p>
+                <p>
+                    <strong>Fecha Inicio:</strong>
+                    {
+                        new Date(evento?.fec_ini_eve ?? "").toLocaleDateString(
+                            "es-EC",
+                        )
+                    }
+                </p>
+                {
+                    evento?.fec_fin_eve && (
+                        <p>
+                            <strong>Fecha Fin:</strong>{" "}
+                            {new Date(evento.fec_fin_eve).toLocaleDateString(
+                                "es-EC",
+                            )}
+                        </p>
+                    )
+                }
+                <p>
+                    <strong>Duración:</strong>
+                    {
+                        evento?.dur_eve
+                            ? `${evento.dur_eve} minutos`
+                            : "No especificada"
+                    }
+                </p>
+
+                <p>
+                    <strong>Organizador:</strong>
+                    {
+                        evento?.organizadores
+                            ? `${evento.organizadores.tit_aca_org} ${evento.organizadores.nom_org1} ${evento.organizadores.ape_org1}`
+                            : "-"
+                    }
+                </p>
+            </div>
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" value={usuario?.nom_usu1 ?? ""} readonly />
-          </div>
-          <div class="form-group">
-            <label>Apellido</label>
-            <input type="text" value={usuario?.ape_usu1 ?? ""} readonly />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tipo de Documento</label>
-            <select disabled>
-              <option selected>Cédula</option>
-              <option>Pasaporte</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Número de Documento</label>
-            <input type="text" value={usuario?.ced_usu ?? ""} readonly />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Teléfono</label>
-          <input type="tel" value={usuario?.num_tel_usu ?? ""} readonly />
-        </div>
-
-        <h3>Requisitos</h3>
-        <div class="requisitos-container">
-         {Array.isArray(requisitos) && requisitos.map((req, index) => (
-  <div class="requisito-item">
-    <div class="requisito-info">
-      <span class="requisito-texto">{req.nom_req}</span>
-      <div class="requisito-estado">
-        <input
-          type="checkbox"
-          id={`req-${index}`}
-          class="requisito-checkbox"
-          checked={false} 
-          readonly
-        />
-        <label for={`req-${index}`} class="custom-checkbox"></label>
-      </div>
-    </div>
-  </div>
-))}
-
-        </div>
-
-        <div class="form-row">
-          <button class="submit-button">Cancelar</button>
-          <button class="submit-button">Inscribirse</button>
-        </div>
-      </div>
-
-      <div class="vehicle-card">
-        <h3>{evento?.nom_eve ?? "Evento no disponible"}</h3>
-        <img src={evento?.img_eve ?? "/img/placeholder.jpg"} alt="Curso" class="curso-imagen" />
-        <p><strong>Asignación:</strong> {evento?.eventos_asignaciones?.[0]?.asignaciones?.nom_asi ?? "-"}</p>
-        <p><strong>Categoría:</strong> {evento?.categorias_eventos?.nom_cat ?? "-"}</p>
-        <p><strong>Precio:</strong> ${evento?.precio ?? "0.00"}</p>
-        <p><strong>Área:</strong> {evento?.are_eve ?? "-"}</p>
-        <p><strong>Fecha Inicio:</strong> {new Date(evento?.fec_ini_eve ?? "").toLocaleDateString("es-EC")}</p>
-        <p><strong>Duración:</strong> {evento?.dur_eve ?? 0} horas</p>
-      </div>
-    </div>
-  </body>
+    </body>
 </Layout>
