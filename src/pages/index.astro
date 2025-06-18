@@ -6,8 +6,9 @@ import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
 import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
-import InformacionUsuario from "@/components/InformacionUsuario.astro";
-import ContenedorInfo from "@/components/ContenedorInfo.astro";
+import Evento from "../components/EventoCard.astro";
+
+
 import prisma from "@/db";
 import { actions } from "astro:actions";
 
@@ -21,6 +22,12 @@ if (session && session.user) {
         esAdmin = true;
     }
 }
+const eventos = await prisma.eventos.findMany({
+  take: 4,
+  orderBy: {
+    fec_ini_eve: "desc", // o por fecha de creación o algún campo relevante
+  },
+});
 
 const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 ---
@@ -28,6 +35,40 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 <Layout>
     <Header />
     <Navbar />
+  <section class="py-12 bg-gray-50 text-center">
+    <h2 class="text-3xl font-bold text-red-800 mb-10"> Eventos Favoritos </h2>
+
+    <div class="flex flex-wrap justify-center gap-8 px-4">
+      {eventos.map((evento) => (
+        <Evento
+          imagen={evento.img_eve}
+          titulo={evento.nom_eve}
+          estado={evento.id_asi_eve?.length?.toString() || "0"}
+          horas={evento.dur_eve ?? 0}
+          slug={evento.id_eve}
+        />
+      ))}
+    </div>
+
+    <div class="mt-10">
+      <a
+  href="/cursosCompleto"
+  class="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-red-600 text-white font-semibold shadow-lg transition duration-300 hover:bg-red-700 hover:shadow-xl"
+>
+  Ver más
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    stroke-width="2"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+  </svg>
+</a>
+    </div>
+  </section>
     <InformacionFacultad
         tituloFacultad="Facultad de Ingenieria en Sistemas Electronica e Industrial"
         tituloDescripcion="Descripción"
