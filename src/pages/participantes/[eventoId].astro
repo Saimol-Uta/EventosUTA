@@ -142,6 +142,81 @@ function formatearEstadoParticipacion(estado: string): {
     }
 }
 
+// Función para calcular el estado dinámicamente según los requisitos de la categoría
+function calcularEstadoParticipacion(
+    asiPar: number | null | undefined,
+    notPar: number | null | undefined,
+    requiereAsistencia: boolean,
+    requierePuntaje: boolean,
+    puntajeAprobacion: number = 7.0,
+    porcentajeAsistenciaMinimo: number = 70,
+): {
+    estado: string;
+    motivo: string;
+} {
+    console.log("=== CALCULANDO ESTADO ===");
+    console.log("Asistencia:", asiPar);
+    console.log("Nota:", notPar);
+    console.log("Requiere asistencia:", requiereAsistencia);
+    console.log("Requiere puntaje:", requierePuntaje);
+    console.log("Puntaje aprobación:", puntajeAprobacion);
+
+    // Si no requiere nada, está aprobado por defecto
+    if (!requiereAsistencia && !requierePuntaje) {
+        return {
+            estado: "APROBADA",
+            motivo: "No requiere asistencia ni puntaje",
+        };
+    }
+
+    let cumpleAsistencia = true;
+    let cumplePuntaje = true;
+    let motivoRechazo = [];
+
+    // Verificar asistencia si es requerida
+    if (requiereAsistencia) {
+        if (asiPar === null || asiPar === undefined) {
+            cumpleAsistencia = false;
+            motivoRechazo.push("falta asistencia");
+        } else if (asiPar < porcentajeAsistenciaMinimo) {
+            cumpleAsistencia = false;
+            motivoRechazo.push(
+                `asistencia insuficiente (${asiPar}% < ${porcentajeAsistenciaMinimo}%)`,
+            );
+        }
+    }
+
+    // Verificar puntaje si es requerido
+    if (requierePuntaje) {
+        if (notPar === null || notPar === undefined) {
+            cumplePuntaje = false;
+            motivoRechazo.push("falta calificación");
+        } else {
+            const nota =
+                typeof notPar === "string" ? parseFloat(notPar) : notPar;
+            if (isNaN(nota) || nota < puntajeAprobacion) {
+                cumplePuntaje = false;
+                motivoRechazo.push(
+                    `nota insuficiente (${nota} < ${puntajeAprobacion})`,
+                );
+            }
+        }
+    }
+
+    // Determinar estado final
+    if (cumpleAsistencia && cumplePuntaje) {
+        return { estado: "APROBADA", motivo: "Cumple todos los requisitos" };
+    } else if (!cumpleAsistencia && !cumplePuntaje) {
+        return { estado: "REPROBADA", motivo: motivoRechazo.join(", ") };
+    } else if (!cumpleAsistencia) {
+        return { estado: "REPROBADA", motivo: motivoRechazo.join(", ") };
+    } else if (!cumplePuntaje) {
+        return { estado: "REPROBADA", motivo: motivoRechazo.join(", ") };
+    } else {
+        return { estado: "PENDIENTE", motivo: "En evaluación" };
+    }
+}
+
 const links = [
     { label: "Eventos", href: "/Admin/EventosCRUD" },
     { label: "Usuarios", href: "/perfil" },
@@ -230,15 +305,21 @@ const links = [
                                 </small>
                             </div>
                         </div>
-
-                        <div class="form-group">
-                            <label for="estado">Estado:</label>
-                            <select id="estado" name="estado">
-                                <option value="PENDIENTE">Pendiente</option>
-                                <option value="APROBADA">Aprobada</option>
-                                <option value="REPROBADA">Reprobada</option>
-                                <option value="ASISTIO">Solo Asistió</option>
-                            </select>
+                        <!-- El estado se calcula automáticamente según los requisitos de la categoría -->
+                        <div
+                            class="form-group"
+                            id="estado-info"
+                            style="display: none;"
+                        >
+                            <label>Estado actual:</label>
+                            <div id="estado-calculado" class="estado-preview">
+                                <span id="estado-texto" class="badge-estado"
+                                ></span>
+                                <small
+                                    id="estado-motivo"
+                                    style="display: block; margin-top: 0.5rem; color: #6c757d; font-style: italic;"
+                                ></small>
+                            </div>
                         </div>
 
                         <div class="modal-actions">
@@ -387,14 +468,28 @@ const links = [
                                 );
                                 console.log("Nota formateada:", notaFormateada);
 
+                                // Calcular estado dinámicamente según requisitos de la categoría
+                                const estadoCalculado =
+                                    calcularEstadoParticipacion(
+                                        participante.asi_par,
+                                        participante.not_par,
+                                        requiereAsistencia,
+                                        requierePuntaje,
+                                        puntajeAprobacion,
+                                    );
+                                console.log(
+                                    "Estado calculado:",
+                                    estadoCalculado,
+                                );
+
                                 const estadoParticipacion =
                                     formatearEstadoParticipacion(
-                                        participante.est_par,
+                                        estadoCalculado.estado,
                                     );
                                 return (
                                     <div
                                         class="registro-fila"
-                                        data-estado={participante.est_par}
+                                        data-estado={estadoCalculado.estado}
                                         data-participante-id={
                                             participante.id_ins
                                         }
@@ -409,6 +504,7 @@ const links = [
                                         data-puntaje-aprobacion={
                                             puntajeAprobacion
                                         }
+                                        data-motivo={estadoCalculado.motivo}
                                     >
                                         <div class="parte-izquierda-registro-fila">
                                             {participante.usuarios?.nom_usu1}{" "}
@@ -790,10 +886,22 @@ const links = [
         .registro-fila[data-estado] {
             transition: opacity 0.3s ease;
         }
-
         .btn-calificar:hover {
             background-color: #f8f9fa;
             border-radius: 4px;
+        }
+
+        /* Estilos para la vista previa del estado calculado */
+        .estado-preview {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        #estado-motivo {
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
         /* Estilos para información de carrera */
@@ -846,7 +954,131 @@ const links = [
                 exportarCalificaciones: () => void;
                 exportarPDF: () => void;
             }
-        } // Función para abrir modal de calificación
+        } // Función para calcular el estado dinámicamente (versión JavaScript)
+        function calcularEstadoModal(
+            asistencia: number | null,
+            nota: number | null,
+            requiereAsistencia: boolean,
+            requierePuntaje: boolean,
+            puntajeAprobacion: number = 7.0,
+            porcentajeAsistenciaMinimo: number = 70,
+        ): { estado: string; motivo: string; clase: string } {
+            console.log("=== CALCULANDO ESTADO EN MODAL ===");
+            console.log("Asistencia:", asistencia);
+            console.log("Nota:", nota);
+            console.log("Requiere asistencia:", requiereAsistencia);
+            console.log("Requiere puntaje:", requierePuntaje);
+
+            // Si no requiere nada, está aprobado por defecto
+            if (!requiereAsistencia && !requierePuntaje) {
+                return {
+                    estado: "APROBADA",
+                    motivo: "No requiere asistencia ni puntaje",
+                    clase: "aprobada",
+                };
+            }
+
+            let cumpleAsistencia = true;
+            let cumplePuntaje = true;
+            let motivoRechazo = [];
+
+            // Verificar asistencia si es requerida
+            if (requiereAsistencia) {
+                if (asistencia === null || asistencia === undefined) {
+                    cumpleAsistencia = false;
+                    motivoRechazo.push("falta asistencia");
+                } else if (asistencia < porcentajeAsistenciaMinimo) {
+                    cumpleAsistencia = false;
+                    motivoRechazo.push(
+                        `asistencia insuficiente (${asistencia}% < ${porcentajeAsistenciaMinimo}%)`,
+                    );
+                }
+            }
+
+            // Verificar puntaje si es requerido
+            if (requierePuntaje) {
+                if (nota === null || nota === undefined) {
+                    cumplePuntaje = false;
+                    motivoRechazo.push("falta calificación");
+                } else if (nota < puntajeAprobacion) {
+                    cumplePuntaje = false;
+                    motivoRechazo.push(
+                        `nota insuficiente (${nota} < ${puntajeAprobacion})`,
+                    );
+                }
+            }
+
+            // Determinar estado final
+            if (cumpleAsistencia && cumplePuntaje) {
+                return {
+                    estado: "APROBADA",
+                    motivo: "Cumple todos los requisitos",
+                    clase: "aprobada",
+                };
+            } else {
+                return {
+                    estado: "REPROBADA",
+                    motivo: motivoRechazo.join(", "),
+                    clase: "reprobada",
+                };
+            }
+        }
+
+        // Función para actualizar la vista previa del estado
+        function actualizarEstadoPreview(
+            requiereAsistencia: boolean,
+            requierePuntaje: boolean,
+            puntajeAprobacion: number,
+        ) {
+            const asistenciaNumber = document.getElementById(
+                "asistencia-number",
+            ) as HTMLInputElement;
+            const notaNumber = document.getElementById(
+                "nota-number",
+            ) as HTMLInputElement;
+            const estadoTexto = document.getElementById(
+                "estado-texto",
+            ) as HTMLElement;
+            const estadoMotivo = document.getElementById(
+                "estado-motivo",
+            ) as HTMLElement;
+            const estadoInfo = document.getElementById(
+                "estado-info",
+            ) as HTMLElement;
+
+            if (!estadoTexto || !estadoMotivo || !estadoInfo) return;
+
+            // Obtener valores actuales
+            const asistenciaValor = requiereAsistencia
+                ? asistenciaNumber?.value
+                    ? parseFloat(asistenciaNumber.value)
+                    : null
+                : 100; // Si no requiere asistencia, consideramos que "asistió"
+
+            const notaValor = requierePuntaje
+                ? notaNumber?.value
+                    ? parseFloat(notaNumber.value)
+                    : null
+                : puntajeAprobacion; // Si no requiere nota, consideramos que "aprobó"
+
+            // Calcular estado
+            const resultado = calcularEstadoModal(
+                asistenciaValor,
+                notaValor,
+                requiereAsistencia,
+                requierePuntaje,
+                puntajeAprobacion,
+            );
+
+            // Actualizar interfaz
+            estadoTexto.textContent =
+                resultado.estado === "APROBADA" ? "Aprobada" : "Reprobada";
+            estadoTexto.className = `badge-estado ${resultado.clase}`;
+            estadoMotivo.textContent = resultado.motivo;
+            estadoInfo.style.display = "block";
+        }
+
+        // Función para abrir modal de calificación
         window.abrirModalCalificacion = function (
             participanteId: string,
             nombreCompleto: string,
@@ -878,9 +1110,6 @@ const links = [
             const puntajeMin = document.getElementById(
                 "puntaje-min",
             ) as HTMLElement;
-            const estadoSelect = document.getElementById(
-                "estado",
-            ) as HTMLSelectElement;
 
             if (modal && participanteInput) {
                 participanteInput.value = nombreCompleto;
@@ -894,7 +1123,6 @@ const links = [
                 let puntajeAprobacion = 7.0;
                 let asistenciaActual = "0";
                 let notaActual = "0";
-                let estadoActual = "PENDIENTE";
                 if (filaParticipante) {
                     // Log para debug del modal
                     console.log("=== DEBUG MODAL ===");
@@ -903,14 +1131,10 @@ const links = [
                     console.log(
                         "Dataset completo de la fila:",
                         filaParticipante.dataset,
-                    );
-
-                    // Extraer datos actuales de la fila
+                    ); // Extraer datos actuales de la fila
                     asistenciaActual =
                         filaParticipante.dataset.asistencia || "0";
                     notaActual = filaParticipante.dataset.nota || "0";
-                    estadoActual =
-                        filaParticipante.dataset.estado || "PENDIENTE";
                     requiereAsistencia =
                         filaParticipante.dataset.requiereAsistencia === "true";
                     requierePuntaje =
@@ -918,11 +1142,9 @@ const links = [
                     puntajeAprobacion = parseFloat(
                         filaParticipante.dataset.puntajeAprobacion || "7.0",
                     );
-
                     console.log("Datos extraídos:");
                     console.log("- Asistencia actual:", asistenciaActual);
                     console.log("- Nota actual:", notaActual);
-                    console.log("- Estado actual:", estadoActual);
                     console.log("- Requiere asistencia:", requiereAsistencia);
                     console.log("- Requiere puntaje:", requierePuntaje);
                     console.log("- Puntaje aprobación:", puntajeAprobacion);
@@ -984,16 +1206,18 @@ const links = [
                         notaActual === "Sin calificar" ? "" : notaActual;
                     puntajeMin.textContent = puntajeAprobacion.toString();
                 }
-
                 console.log("=== FIN CONFIGURACIÓN ===");
-
-                // Configurar otros campos
-                if (estadoSelect) {
-                    estadoSelect.value = estadoActual;
-                }
 
                 // Guardar el ID del participante en el modal para usarlo al enviar
                 modal.dataset.participanteId = participanteId;
+
+                // Actualizar la vista previa del estado calculado
+                actualizarEstadoPreview(
+                    requiereAsistencia,
+                    requierePuntaje,
+                    puntajeAprobacion,
+                );
+
                 modal.style.display = "flex";
             }
         };
@@ -1068,9 +1292,7 @@ const links = [
                         );
                     }
                 });
-            }
-
-            // Filtrar por estado
+            } // Filtrar por estado
             if (filtroEstado) {
                 filtroEstado.addEventListener("change", function () {
                     const filtro = this.value;
@@ -1086,6 +1308,70 @@ const links = [
                             fila.style.display = "none";
                         }
                     });
+                });
+            }
+
+            // Agregar eventos para actualizar la vista previa del estado cuando cambien los valores
+            const asistenciaNumber = document.getElementById(
+                "asistencia-number",
+            ) as HTMLInputElement;
+            const notaNumber = document.getElementById(
+                "nota-number",
+            ) as HTMLInputElement;
+
+            if (asistenciaNumber) {
+                asistenciaNumber.addEventListener("input", function () {
+                    const modal = document.getElementById(
+                        "modalCalificaciones",
+                    ) as HTMLElement;
+                    const filaParticipante = document.querySelector(
+                        `[data-participante-id="${modal.dataset.participanteId}"]`,
+                    ) as HTMLElement;
+
+                    if (filaParticipante) {
+                        const requiereAsistencia =
+                            filaParticipante.dataset.requiereAsistencia ===
+                            "true";
+                        const requierePuntaje =
+                            filaParticipante.dataset.requierePuntaje === "true";
+                        const puntajeAprobacion = parseFloat(
+                            filaParticipante.dataset.puntajeAprobacion || "7.0",
+                        );
+
+                        actualizarEstadoPreview(
+                            requiereAsistencia,
+                            requierePuntaje,
+                            puntajeAprobacion,
+                        );
+                    }
+                });
+            }
+
+            if (notaNumber) {
+                notaNumber.addEventListener("input", function () {
+                    const modal = document.getElementById(
+                        "modalCalificaciones",
+                    ) as HTMLElement;
+                    const filaParticipante = document.querySelector(
+                        `[data-participante-id="${modal.dataset.participanteId}"]`,
+                    ) as HTMLElement;
+
+                    if (filaParticipante) {
+                        const requiereAsistencia =
+                            filaParticipante.dataset.requiereAsistencia ===
+                            "true";
+                        const requierePuntaje =
+                            filaParticipante.dataset.requierePuntaje === "true";
+                        const puntajeAprobacion = parseFloat(
+                            filaParticipante.dataset.puntajeAprobacion || "7.0",
+                        );
+
+                        actualizarEstadoPreview(
+                            requiereAsistencia,
+                            requierePuntaje,
+                            puntajeAprobacion,
+                        );
+                    }
                 });
             }
         }); // Función para exportar calificaciones
