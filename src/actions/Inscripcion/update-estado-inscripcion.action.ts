@@ -147,16 +147,30 @@ export const updateEstadoInscripcion = defineAction({
                         select: { nom_usu1: true, nom_usu2: true, ape_usu1: true, ape_usu2: true }
                     }
                 }
-            });
-
-            const nombreCompleto = `${inscripcionActualizada.usuarios?.nom_usu1 || ''} ${inscripcionActualizada.usuarios?.nom_usu2 || ''}`.trim();
+            }); const nombreCompleto = `${inscripcionActualizada.usuarios?.nom_usu1 || ''} ${inscripcionActualizada.usuarios?.nom_usu2 || ''}`.trim();
             const apellidoCompleto = `${inscripcionActualizada.usuarios?.ape_usu1 || ''} ${inscripcionActualizada.usuarios?.ape_usu2 || ''}`.trim();
+
+            // Convertir a objeto plano para serialización
+            const inscripcionSerializable = {
+                id_ins: inscripcionActualizada.id_ins,
+                est_ins: inscripcionActualizada.est_ins,
+                fec_ins: inscripcionActualizada.fec_ins?.toISOString(),
+                evento: {
+                    nom_eve: inscripcionActualizada.eventos?.nom_eve
+                },
+                usuario: {
+                    nom_usu1: inscripcionActualizada.usuarios?.nom_usu1,
+                    nom_usu2: inscripcionActualizada.usuarios?.nom_usu2,
+                    ape_usu1: inscripcionActualizada.usuarios?.ape_usu1,
+                    ape_usu2: inscripcionActualizada.usuarios?.ape_usu2
+                }
+            };
 
             return {
                 success: true,
                 message: `${mensaje} para ${nombreCompleto} ${apellidoCompleto}`,
                 data: {
-                    inscripcion: inscripcionActualizada,
+                    inscripcion: inscripcionSerializable,
                     nuevoEstado: nuevoEstado,
                     tipo: tipo,
                     accion: estado === "Rechazado" ? "rechazado" : "aprobado"
