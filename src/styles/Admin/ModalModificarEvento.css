@@ -80,7 +80,7 @@
     padding: 15px;
     border-radius: 10px;
     min-width: 280px;
-    max-width: 550px;
+    max-width: 850px;
 }
 
 .contenedor-superior,
@@ -197,8 +197,10 @@ select {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 15px;
     max-width: 350px;
+    margin: 0 auto;
 }
 
 .imagen-evento {

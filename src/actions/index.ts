@@ -1,5 +1,7 @@
-
 import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras } from './Eventos';
+
+// Importaciones de Facultades
+import { getAllFacultades, getFacultadById } from './Facultades/get-facultades.action';
 
 // Importaciones de Asignaciones
 import {
@@ -135,7 +137,11 @@ export const server = {
     //description
     updatePaginaPrincipal,
     getInfo,
-    getCuentaByIdSingle
+    getCuentaByIdSingle,
+
+    // Nuevas acciones para Facultades
+    getAllFacultades,
+    getFacultadById,
 
 };
 
