@@ -49,6 +49,17 @@ const fechaMin = `${año - 100}-${mes}-${dia}`;
         max-width: 120px;
         margin: 0 auto 30px;
       }
+      .login-wrapper {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.login-wrapper.appear {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 
       .login-right h1 {
         font-size: 32px;
@@ -156,6 +167,18 @@ const fechaMin = `${año - 100}-${mes}-${dia}`;
         <p>Crea tu cuenta para participar en nuestros talleres y eventos.</p>
         <a href="/" class="volver">← Regresar</a>
       </div>
+
     </div>
+    <script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const wrapper = document.querySelector(".login-wrapper");
+    if (wrapper) {
+      setTimeout(() => {
+        wrapper.classList.add("appear");
+      }, 50); // pequeño retardo para permitir animación
+    }
+  });
+</script>
+
   </body>
 </html>
