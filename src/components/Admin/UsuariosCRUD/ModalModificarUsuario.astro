@@ -182,9 +182,9 @@ const carreras = carrerasData?.carreras || [];
                                 <option value="ADMINISTRADOR"
                                     >Administrador</option
                                 >
-                                <option value="ORGANIZADOR">Organizador</option>
+
                                 <option value="ESTUDIANTE">Estudiante</option>
-                                <option value="DOCENTE">Docente</option>
+
                                 <option value="USUARIO">Usuario</option>
                             </select>
                         </div>
@@ -660,9 +660,7 @@ const carreras = carrerasData?.carreras || [];
     /* Estilos para campos requeridos */
     span[style*="color: red"] {
         font-weight: bold;
-    }
-
-    /* Mejorar el estilo de los selects */
+    } /* Mejorar el estilo de los selects */
     select.input-dato {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
         background-position: right 8px center;
@@ -670,6 +668,18 @@ const carreras = carrerasData?.carreras || [];
         background-size: 16px;
         padding-right: 40px;
         appearance: none;
+        cursor: pointer;
+    }
+
+    /* Asegurar que los selects de rol y carrera tengan cursor pointer */
+    select[name="rol_cue"],
+    select[name="id_car_per"] {
+        cursor: pointer !important;
+    }
+
+    /* Evitar cursor not-allowed en selects */
+    select.input-dato:not(:disabled) {
+        cursor: pointer !important;
     }
 
     /* Mejoras para los hints */

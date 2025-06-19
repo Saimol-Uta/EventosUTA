@@ -233,52 +233,54 @@ const carreras = carrerasData?.carreras || [];
                         </div>
                     </div>
 
-                    <p
+                    <!-- <p
                         class="texto-centrado texto-roja"
                         style="margin-top: 20px;"
                     >
                         Documentos y Enlaces (Opcional)
-                    </p>
+                    </p> -->
 
-                    <div class="contenedor-dato">
-                        <p class="texto-dato">Enlace Cédula</p>
-                        <div class="contenedor-input">
-                            <input
-                                type="url"
-                                class="input-dato"
-                                name="enl_ced_cue"
-                                placeholder="URL del documento de cédula"
-                            />
+                    <div style="display: none;">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Enlace Cédula</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="url"
+                                    class="input-dato"
+                                    name="enl_ced_cue"
+                                    placeholder="URL del documento de cédula"
+                                />
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="contenedor-dato">
-                        <p class="texto-dato">Enlace Matrícula</p>
-                        <div class="contenedor-input">
-                            <input
-                                type="url"
-                                class="input-dato"
-                                name="enl_mat_cue"
-                                placeholder="URL del documento de matrícula"
-                            />
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Enlace Matrícula</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="url"
+                                    class="input-dato"
+                                    name="enl_mat_cue"
+                                    placeholder="URL del documento de matrícula"
+                                />
+                            </div>
                         </div>
-                    </div>
-                    <div class="contenedor-dato">
-                        <p class="texto-dato">Imagen de Perfil</p>
-                        <div class="contenedor-input">
-                            <input
-                                type="url"
-                                class="input-dato"
-                                name="img_user"
-                                id="input-imagen-usuario"
-                                placeholder="URL de la imagen de perfil"
-                                onblur="mostrarVistaPrevia(this.value)"
-                            />
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Imagen de Perfil</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="url"
+                                    class="input-dato"
+                                    name="img_user"
+                                    id="input-imagen-usuario"
+                                    placeholder="URL de la imagen de perfil"
+                                    onblur="mostrarVistaPrevia(this.value)"
+                                />
+                            </div>
+                            <small style="color: #6b7280; font-size: 12px;">
+                                La imagen se mostrará arriba cuando ingreses una
+                                URL válida
+                            </small>
                         </div>
-                        <small style="color: #6b7280; font-size: 12px;">
-                            La imagen se mostrará arriba cuando ingreses una URL
-                            válida
-                        </small>
                     </div>
 
                     <div class="contenedor-boton-modificar">
