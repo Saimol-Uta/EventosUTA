@@ -2,125 +2,118 @@
 import { actions } from "astro:actions";
 
 const {
-    titulo,
-    contenido,
-    imagenUrl,
-    invertir = false,
-    modoEdicion = false,
-    columna,
+  titulo,
+  contenido,
+  imagenUrl,
+  invertir = false,
+  modoEdicion = false,
+  columna,
 } = Astro.props;
 
 const result = Astro.getActionResult(actions.updatePaginaPrincipal);
 ---
 
-<div
-    class={`flex flex-col ${invertir ? "lg:flex-row-reverse" : "lg:flex-row"} justify-center items-center gap-8 mx-auto max-w-6xl px-4 py-12`}
+<section
+  class="relative w-full bg-cover bg-center py-16 px-6 lg:px-24 text-white"
+  style={`background-image: url('${imagenUrl}');`}
 >
-    
-    <div class="w-full max-w-xl font-sans text-center">
+  <!-- Capa oscura encima de la imagen -->
+  <div class="absolute inset-0 bg-black/50"></div>
+
+  <!-- Contenido encima de la imagen -->
+  <div
+    class={`relative z-10 max-w-6xl mx-auto flex flex-col ${
+      invertir ? "lg:flex-row-reverse" : "lg:flex-row"
+    } items-center gap-12`}
+  >
+    <!-- Texto -->
+    <div class="w-full text-center lg:text-left space-y-6">
+      <form
+        action={actions.updatePaginaPrincipal}
+        method="post"
+        enctype="multipart/form-data"
+        class="flex flex-col gap-4 items-center lg:items-start"
+      >
+        {modoEdicion ? (
+          <input
+            type="text"
+            name={`titulo-${columna}`}
+            value={titulo}
+            placeholder="Título"
+            class="text-4xl lg:text-5xl font-extrabold bg-transparent w-full placeholder:text-gray-200 focus:outline-none border-b border-white pb-1 text-white drop-shadow-lg"
+          />
+        ) : (
+          <h2 class="text-4xl lg:text-5xl font-extrabold drop-shadow-lg">{titulo}</h2>
+        )}
+
+        {modoEdicion ? (
+          <>
+            <textarea
+              id={`contenido-${columna}`}
+              name={columna}
+              class="w-full bg-transparent p-2 text-lg focus:outline-none resize-none placeholder:text-gray-300 border-b border-white text-white drop-shadow"
+              rows="6"
+              required
+              placeholder="Escribe contenido..."
+            >{contenido}</textarea>
+
+            <button
+              type="submit"
+              class="bg-[#7c0a0a] text-white text-sm px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:brightness-110 transition-all duration-300"
+            >
+              Guardar texto
+            </button>
+          </>
+        ) : (
+          <p class="text-lg leading-relaxed whitespace-pre-line drop-shadow-lg">
+            {contenido}
+          </p>
+        )}
+
+        {result?.data?.success === false && (
+          <p class="text-red-400 text-sm mt-1">{result?.data?.error}</p>
+        )}
+        {result?.data?.success === true && (
+          <p class="text-green-300 text-sm mt-1">{result?.data?.message}</p>
+        )}
+      </form>
+    </div>
+
+    <!-- Edición imagen -->
+    {modoEdicion && (
+      <div class="w-full max-w-sm">
         <form
-            action={actions.updatePaginaPrincipal}
-            method="post"
-            enctype="multipart/form-data"
-            class="flex flex-col items-center gap-6 w-full"
+          action={actions.updatePaginaPrincipal}
+          method="post"
+          enctype="multipart/form-data"
+          class="flex flex-col items-center gap-4"
         >
-            {
-                modoEdicion ? (
-                    <input
-                        type="text"
-                        name={`titulo-${columna}`}
-                        value={titulo}
-                        placeholder="Título"
-                        class="text-3xl lg:text-4xl font-extrabold text-[#650000] bg-transparent text-center w-full placeholder:text-gray-400 focus:outline-none border-b-2 border-gray-300 pb-1"
-                    />
-                ) : (
-                    <h2 class="text-3xl lg:text-4xl font-extrabold text-[#650000] mb-4 drop-shadow-sm">
-                        {titulo}
-                    </h2>
-                )
-            }
-
-            {
-                modoEdicion ? (
-                    <>
-                        <textarea
-                            id={`contenido-${columna}`}
-                            name={columna}
-                            class="w-full bg-transparent p-2 text-lg text-gray-800 focus:outline-none focus:ring-0 resize-none placeholder:text-gray-400"
-                            style="border-bottom: 2px solid #ccc;"
-                            rows="6"
-                            required
-                            placeholder="Escribe contenido..."
-                        >
-                            {contenido}
-                        </textarea>
-
-                        <button
-                            type="submit"
-                            class="bg-[#7c0a0a] text-white text-sm px-4 py-1.5 rounded-full shadow-sm hover:shadow-md hover:brightness-110 transition-all duration-300"
-                        >
-                            Guardar texto
-                        </button>
-                    </>
-                ) : (
-                    <p class="text-lg leading-relaxed text-gray-800 whitespace-pre-line drop-shadow-sm">
-                        {contenido}
-                    </p>
-                )
-            }
-
-            {result?.data?.success === false && (
-                <p class="text-red-600 text-sm mt-1">{result?.data?.error}</p>
-            )}
-            {result?.data?.success === true && (
-                <p class="text-green-600 text-sm mt-1">{result?.data?.message}</p>
-            )}
-        </form>
-    </div>
-
-  
-    <div class="w-full max-w-xl flex flex-col justify-center items-center gap-4">
-        {
-            modoEdicion ? (
-                <form
-                    action={actions.updatePaginaPrincipal}
-                    method="post"
-                    enctype="multipart/form-data"
-                    class="flex flex-col items-center gap-4"
-                >
-                    <label for="imagen" class="cursor-pointer">
-                        <img
-                            src={imagenUrl}
-                            alt={`Imagen de ${titulo}`}
-                            class="rounded-3xl shadow-xl object-cover w-full h-auto max-h-96 transform transition-transform duration-300 hover:scale-105 hover:brightness-105"
-                            loading="lazy"
-                        />
-                    </label>
-
-                    <input
-                        type="file"
-                        id="imagen"
-                        name="imagen"
-                        accept="image/*"
-                        class="hidden"
-                        required
-                    />
-
-                    <button
-                        type="submit"
-                        class="bg-[#7c0a0a] text-white text-sm px-4 py-1.5 rounded-full shadow-sm hover:shadow-md hover:brightness-110 transition-all duration-300"
-                    >
-                        Guardar imagen
-                    </button>
-                </form>
-            ) : (
-                <img
-                    src={imagenUrl}
-                    alt={`Imagen de ${titulo}`}
-                    class="rounded-3xl shadow-xl object-cover w-full h-auto max-h-96"
-                    loading="lazy"
-                />
-            )
-        }
-    </div>
+         <div class="group relative cursor-pointer text-sm text-white">
+  <label for="imagen" class="cursor-pointer">
+    Cambiar imagen de fondo
+  </label>
+  <span
+    class="absolute left-0 -bottom-0.5 h-0.5 w-0 bg-white transition-all duration-300 group-hover:w-full"
+  ></span>
 </div>
+
+          <input
+            type="file"
+            id="imagen"
+            name="imagen"
+            accept="image/*"
+            class="hidden"
+            required
+          />
+
+          <button
+            type="submit"
+            class="bg-[#7c0a0a] text-white text-sm px-4 py-2 rounded-full shadow hover:shadow-md hover:brightness-110 transition-all"
+          >
+            Guardar imagen
+          </button>
+        </form>
+      </div>
+    )}
+  </div>
+</section>
