@@ -2,7 +2,11 @@
 import Header from "../components/Header.astro";
 import Navbar from "../components/Navbar.astro";
 import Layout from "../layouts/Layout.astro";
+import MenuAdmin from "../components/MenuAdministrador.astro";
 import Filtros from "../components/filtros.astro";
+import { actions } from "astro:actions";
+import type { CustomUser } from "../../auth.config";
+import { getSession } from "auth-astro/server";
 import ContenedorEventos from "../components/ContenedorEvento.astro";
 
 // Extraer filtros desde la URL
@@ -17,11 +21,25 @@ const page = parseInt(url.searchParams.get("page") || "1", 10);
 
 // Número de cursos por página (configurable)
 const cursosPorPagina = 6;
+
+const session = await getSession(Astro.request);
+let esAdmin = false;
+
+if (session && session.user) {
+    const user = session.user as CustomUser;
+    const rol = user.rol?.toUpperCase();
+    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+        esAdmin = true;
+    }
+}
+
+const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 ---
 
 <Layout>
   <Header />
-  <Navbar />
+  {esAdmin ? <MenuAdmin/> : <Navbar />}
+  
   <Filtros />
 
   <section class="seccion-principal">
