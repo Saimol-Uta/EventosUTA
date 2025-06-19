@@ -31,6 +31,21 @@ const participantes =
 
 console.log("Participantes obtenidos:", participantes.length);
 
+// Log detallado de cada participante para verificar estados
+if (participantes.length > 0) {
+    console.log("=== ESTADOS ACTUALES DE PARTICIPANTES ===");
+    participantes.forEach((p: any, index: number) => {
+        console.log(`Participante ${index + 1}:`, {
+            id: p.id_ins,
+            nombre: `${p.usuarios?.nom_usu1} ${p.usuarios?.ape_usu1}`,
+            est_par: p.est_par,
+            asi_par: p.asi_par,
+            not_par: p.not_par,
+        });
+    });
+    console.log("=========================================");
+}
+
 // Obtener información del evento y sus asignaciones
 const eventoInfo = participantes.length > 0 ? participantes[0].eventos : null;
 
@@ -360,6 +375,56 @@ const links = [
                                 </div>
                             )
                         }
+                        {
+                            eventoInfo?.categorias_eventos && (
+                                <div class="info-requisitos">
+                                    <small>
+                                        <strong>Requisitos:</strong>{" "}
+                                        {!eventoInfo.categorias_eventos
+                                            .requiere_asistencia &&
+                                        !eventoInfo.categorias_eventos
+                                            .requiere_puntaje ? (
+                                            <span class="sin-requisitos">
+                                                No requiere asistencia ni
+                                                calificación - Aprobación
+                                                automática
+                                            </span>
+                                        ) : (
+                                            <>
+                                                {eventoInfo.categorias_eventos
+                                                    .requiere_asistencia && (
+                                                    <span class="requisito">
+                                                        Asistencia (
+                                                        {eventoInfo
+                                                            .categorias_eventos
+                                                            .asi_cat || 70}
+                                                        % mín.)
+                                                    </span>
+                                                )}
+                                                {eventoInfo.categorias_eventos
+                                                    .requiere_asistencia &&
+                                                    eventoInfo
+                                                        .categorias_eventos
+                                                        .requiere_puntaje && (
+                                                        <span> | </span>
+                                                    )}
+                                                {eventoInfo.categorias_eventos
+                                                    .requiere_puntaje && (
+                                                    <span class="requisito">
+                                                        Calificación (
+                                                        {eventoInfo
+                                                            .categorias_eventos
+                                                            .pun_apr_cat ||
+                                                            7.0}{" "}
+                                                        mín.)
+                                                    </span>
+                                                )}
+                                            </>
+                                        )}
+                                    </small>
+                                </div>
+                            )
+                        }
                     </div>
                     <div class="registros-superior-derecho">
                         <select
@@ -382,6 +447,12 @@ const links = [
                         </button>
                         <button class="btn-pdf" onclick="exportarPDF()">
                             PDF
+                        </button>
+                        <button
+                            class="btn-recalcular"
+                            onclick="recalcularTodosLosEstados()"
+                        >
+                            Recalcular Estados
                         </button>
                     </div>
                 </div>
@@ -423,6 +494,9 @@ const links = [
                                 const puntajeAprobacion =
                                     participante.eventos?.categorias_eventos
                                         ?.pun_apr_cat || 7.0;
+                                const porcentajeAsistenciaMinimo =
+                                    participante.eventos?.categorias_eventos
+                                        ?.asi_cat || 70;
 
                                 // Log para cada participante
                                 console.log(
@@ -443,6 +517,10 @@ const links = [
                                 console.log(
                                     "Puntaje aprobación:",
                                     puntajeAprobacion,
+                                );
+                                console.log(
+                                    "Porcentaje asistencia mínimo:",
+                                    porcentajeAsistenciaMinimo,
                                 );
                                 console.log(
                                     "Asistencia actual:",
@@ -466,9 +544,7 @@ const links = [
                                     "Asistencia formateada:",
                                     asistencia,
                                 );
-                                console.log("Nota formateada:", notaFormateada);
-
-                                // Calcular estado dinámicamente según requisitos de la categoría
+                                console.log("Nota formateada:", notaFormateada); // Calcular estado dinámicamente según requisitos de la categoría
                                 const estadoCalculado =
                                     calcularEstadoParticipacion(
                                         participante.asi_par,
@@ -476,6 +552,7 @@ const links = [
                                         requiereAsistencia,
                                         requierePuntaje,
                                         puntajeAprobacion,
+                                        porcentajeAsistenciaMinimo,
                                     );
                                 console.log(
                                     "Estado calculado:",
@@ -503,6 +580,9 @@ const links = [
                                         data-requiere-puntaje={requierePuntaje}
                                         data-puntaje-aprobacion={
                                             puntajeAprobacion
+                                        }
+                                        data-porcentaje-asistencia-minimo={
+                                            porcentajeAsistenciaMinimo
                                         }
                                         data-motivo={estadoCalculado.motivo}
                                     >
@@ -552,9 +632,14 @@ const links = [
                                         </div>{" "}
                                         <div class="registro-opciones">
                                             <button
-                                                onclick={`abrirModalCalificacion('${participante.id_ins}', '${participante.usuarios?.nom_usu1} ${participante.usuarios?.nom_usu2 || ""} ${participante.usuarios?.ape_usu1} ${participante.usuarios?.ape_usu2}')`}
-                                                title="Editar Calificación"
-                                                class="btn-calificar"
+                                                onclick={`abrirModalCalificacion('${participante.id_ins}', '${participante.usuarios?.nom_usu1} ${participante.usuarios?.nom_usu2 || ""} ${participante.usuarios?.ape_usu1} ${participante.usuarios?.ape_usu2}', ${requiereAsistencia}, ${requierePuntaje})`}
+                                                title={
+                                                    requiereAsistencia ||
+                                                    requierePuntaje
+                                                        ? "Editar Calificación"
+                                                        : "Este evento no requiere calificación"
+                                                }
+                                                class={`btn-calificar ${!requiereAsistencia && !requierePuntaje ? "btn-disabled" : ""}`}
                                             >
                                                 <img
                                                     class="imagen-boton-registro"
@@ -586,9 +671,7 @@ const links = [
             font-size: 0.9rem;
             color: #495057;
             cursor: help;
-        }
-
-        /* Estilos para información de asignación */
+        } /* Estilos para información de asignación */
         .info-asignacion {
             margin-top: 0.5rem;
             color: #6c757d;
@@ -597,6 +680,26 @@ const links = [
 
         .info-asignacion small {
             font-size: 0.8rem;
+        }
+
+        /* Estilos para información de requisitos */
+        .info-requisitos {
+            margin-top: 0.3rem;
+            color: #495057;
+        }
+
+        .info-requisitos small {
+            font-size: 0.8rem;
+        }
+
+        .info-requisitos .sin-requisitos {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .info-requisitos .requisito {
+            color: #b01025;
+            font-weight: 500;
         }
 
         /* Estilos para badges de asistencia */
@@ -726,9 +829,23 @@ const links = [
             cursor: pointer;
             font-weight: bold;
         }
-
         .btn-pdf:hover {
             background-color: var(--color-oscuro-uta);
+        }
+
+        .btn-recalcular {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-recalcular:hover {
+            background-color: #138496;
         }
         /* Modal styles */
         .modal {
@@ -891,6 +1008,21 @@ const links = [
             border-radius: 4px;
         }
 
+        /* Estilos para botón deshabilitado */
+        .btn-calificar.btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-calificar.btn-disabled:hover {
+            background-color: transparent;
+            transform: none;
+        }
+
+        .btn-calificar.btn-disabled img {
+            filter: grayscale(100%);
+        }
+
         /* Estilos para la vista previa del estado calculado */
         .estado-preview {
             padding: 1rem;
@@ -942,17 +1074,18 @@ const links = [
         import { actions } from "astro:actions";
         import Swal from "sweetalert2";
         import jsPDF from "jspdf";
-        import autoTable from "jspdf-autotable";
-
-        // Declarar tipos para funciones globales
+        import autoTable from "jspdf-autotable"; // Declarar tipos para funciones globales
         declare global {
             interface Window {
                 abrirModalCalificacion: (
                     participanteId: string,
                     nombreCompleto: string,
+                    requiereAsistencia: boolean,
+                    requierePuntaje: boolean,
                 ) => void;
                 exportarCalificaciones: () => void;
                 exportarPDF: () => void;
+                recalcularTodosLosEstados: () => void;
             }
         } // Función para calcular el estado dinámicamente (versión JavaScript)
         function calcularEstadoModal(
@@ -1022,13 +1155,12 @@ const links = [
                     clase: "reprobada",
                 };
             }
-        }
-
-        // Función para actualizar la vista previa del estado
+        } // Función para actualizar la vista previa del estado
         function actualizarEstadoPreview(
             requiereAsistencia: boolean,
             requierePuntaje: boolean,
             puntajeAprobacion: number,
+            porcentajeAsistenciaMinimo: number = 70,
         ) {
             const asistenciaNumber = document.getElementById(
                 "asistencia-number",
@@ -1059,15 +1191,14 @@ const links = [
                 ? notaNumber?.value
                     ? parseFloat(notaNumber.value)
                     : null
-                : puntajeAprobacion; // Si no requiere nota, consideramos que "aprobó"
-
-            // Calcular estado
+                : puntajeAprobacion; // Si no requiere nota, consideramos que "aprobó"            // Calcular estado
             const resultado = calcularEstadoModal(
                 asistenciaValor,
                 notaValor,
                 requiereAsistencia,
                 requierePuntaje,
                 puntajeAprobacion,
+                porcentajeAsistenciaMinimo,
             );
 
             // Actualizar interfaz
@@ -1076,13 +1207,31 @@ const links = [
             estadoTexto.className = `badge-estado ${resultado.clase}`;
             estadoMotivo.textContent = resultado.motivo;
             estadoInfo.style.display = "block";
-        }
-
-        // Función para abrir modal de calificación
+        } // Función para abrir modal de calificación
         window.abrirModalCalificacion = function (
             participanteId: string,
             nombreCompleto: string,
+            requiereAsistencia: boolean,
+            requierePuntaje: boolean,
         ) {
+            console.log("=== VALIDANDO APERTURA DEL MODAL ===");
+            console.log("Participante ID:", participanteId);
+            console.log("Requiere asistencia:", requiereAsistencia);
+            console.log("Requiere puntaje:", requierePuntaje); // Validar si el evento requiere al menos asistencia o puntaje
+            if (!requiereAsistencia && !requierePuntaje) {
+                // Mostrar mensaje informativo y no abrir el modal
+                Swal.fire({
+                    title: "No se requiere calificación",
+                    text: "Este evento no requiere registro de asistencia ni calificación. Los participantes están aprobados automáticamente.",
+                    icon: "info",
+                    confirmButtonText: "Entendido",
+                    confirmButtonColor: "#b01025",
+                });
+                return;
+            }
+
+            console.log("Validación pasada, abriendo modal...");
+
             const modal = document.getElementById(
                 "modalCalificaciones",
             ) as HTMLElement;
@@ -1121,6 +1270,7 @@ const links = [
                 let requiereAsistencia = false;
                 let requierePuntaje = false;
                 let puntajeAprobacion = 7.0;
+                let porcentajeAsistenciaMinimo = 70;
                 let asistenciaActual = "0";
                 let notaActual = "0";
                 if (filaParticipante) {
@@ -1141,6 +1291,10 @@ const links = [
                         filaParticipante.dataset.requierePuntaje === "true";
                     puntajeAprobacion = parseFloat(
                         filaParticipante.dataset.puntajeAprobacion || "7.0",
+                    );
+                    porcentajeAsistenciaMinimo = parseFloat(
+                        filaParticipante.dataset.porcentajeAsistenciaMinimo ||
+                            "70",
                     );
                     console.log("Datos extraídos:");
                     console.log("- Asistencia actual:", asistenciaActual);
@@ -1209,13 +1363,12 @@ const links = [
                 console.log("=== FIN CONFIGURACIÓN ===");
 
                 // Guardar el ID del participante en el modal para usarlo al enviar
-                modal.dataset.participanteId = participanteId;
-
-                // Actualizar la vista previa del estado calculado
+                modal.dataset.participanteId = participanteId; // Actualizar la vista previa del estado calculado
                 actualizarEstadoPreview(
                     requiereAsistencia,
                     requierePuntaje,
                     puntajeAprobacion,
+                    porcentajeAsistenciaMinimo,
                 );
 
                 modal.style.display = "flex";
@@ -1318,7 +1471,6 @@ const links = [
             const notaNumber = document.getElementById(
                 "nota-number",
             ) as HTMLInputElement;
-
             if (asistenciaNumber) {
                 asistenciaNumber.addEventListener("input", function () {
                     const modal = document.getElementById(
@@ -1337,16 +1489,20 @@ const links = [
                         const puntajeAprobacion = parseFloat(
                             filaParticipante.dataset.puntajeAprobacion || "7.0",
                         );
+                        const porcentajeAsistenciaMinimo = parseFloat(
+                            filaParticipante.dataset
+                                .porcentajeAsistenciaMinimo || "70",
+                        );
 
                         actualizarEstadoPreview(
                             requiereAsistencia,
                             requierePuntaje,
                             puntajeAprobacion,
+                            porcentajeAsistenciaMinimo,
                         );
                     }
                 });
             }
-
             if (notaNumber) {
                 notaNumber.addEventListener("input", function () {
                     const modal = document.getElementById(
@@ -1365,11 +1521,16 @@ const links = [
                         const puntajeAprobacion = parseFloat(
                             filaParticipante.dataset.puntajeAprobacion || "7.0",
                         );
+                        const porcentajeAsistenciaMinimo = parseFloat(
+                            filaParticipante.dataset
+                                .porcentajeAsistenciaMinimo || "70",
+                        );
 
                         actualizarEstadoPreview(
                             requiereAsistencia,
                             requierePuntaje,
                             puntajeAprobacion,
+                            porcentajeAsistenciaMinimo,
                         );
                     }
                 });
@@ -1545,6 +1706,109 @@ const links = [
             logoFISEI.onerror = () => {
                 alert("No se pudo cargar el logo de FISEI.");
             };
+        };
+
+        // Función para recalcular todos los estados de participación
+        window.recalcularTodosLosEstados = async function () {
+            const resultado = await Swal.fire({
+                title: "¿Recalcular todos los estados?",
+                text: "Esto actualizará el estado de todos los participantes según los requisitos actuales de la categoría.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#17a2b8",
+                cancelButtonColor: "#dc2626",
+                confirmButtonText: "Sí, recalcular",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (!resultado.isConfirmed) return;
+
+            try {
+                // Mostrar loader
+                Swal.fire({
+                    title: "Recalculando estados...",
+                    text: "Por favor espera mientras se actualizan los estados.",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                // Obtener todas las filas de participantes
+                const filasParticipantes = document.querySelectorAll(
+                    ".registro-fila[data-participante-id]",
+                );
+                let actualizados = 0;
+                let errores = 0;
+
+                for (const fila of filasParticipantes) {
+                    try {
+                        const participanteId = (fila as HTMLElement).dataset
+                            .participanteId;
+                        const asistencia = (fila as HTMLElement).dataset
+                            .asistencia;
+                        const nota = (fila as HTMLElement).dataset.nota;
+
+                        console.log(
+                            `Recalculando participante ${participanteId}:`,
+                            { asistencia, nota },
+                        );
+
+                        const formData = new FormData();
+                        formData.append("inscripcionId", participanteId || "");
+                        if (
+                            asistencia &&
+                            asistencia !== "null" &&
+                            asistencia !== "undefined"
+                        ) {
+                            formData.append("asistencia", asistencia);
+                        }
+                        if (
+                            nota &&
+                            nota !== "null" &&
+                            nota !== "undefined" &&
+                            nota !== "Sin calificar"
+                        ) {
+                            formData.append("nota", nota);
+                        }
+
+                        const { data, error } =
+                            await actions.updateParticipante(formData);
+
+                        if (data?.success) {
+                            actualizados++;
+                        } else {
+                            console.error(
+                                `Error al actualizar participante ${participanteId}:`,
+                                error,
+                            );
+                            errores++;
+                        }
+                    } catch (error) {
+                        console.error("Error al procesar participante:", error);
+                        errores++;
+                    }
+                }
+
+                // Mostrar resultado
+                await Swal.fire({
+                    title: "Recálculo completado",
+                    text: `Se actualizaron ${actualizados} participantes. ${errores > 0 ? `${errores} errores encontrados.` : ""}`,
+                    icon: errores > 0 ? "warning" : "success",
+                    confirmButtonText: "OK",
+                });
+
+                // Recargar la página para mostrar los cambios
+                window.location.reload();
+            } catch (error) {
+                console.error("Error durante el recálculo:", error);
+                await Swal.fire({
+                    title: "Error",
+                    text: "Ocurrió un error durante el recálculo de estados.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            }
         };
 
         // Cerrar modal al hacer clic fuera

@@ -63,22 +63,22 @@ export const updateParticipante = defineAction({
                 });
             }
 
-            console.log("Requisitos de la categoría:", categoria);
-
-            // Función para calcular el estado automáticamente
+            console.log("Requisitos de la categoría:", categoria);            // Función para calcular el estado automáticamente
             function calcularEstadoParticipacion(
                 asiPar: number | null,
                 notPar: number | null,
                 requiereAsistencia: boolean,
                 requierePuntaje: boolean,
                 puntajeAprobacion: number = 7.0,
-                porcentajeAsistenciaMinimo: number = 70,
+                porcentajeAsistenciaMinimo: number = 70
             ): string {
                 console.log("=== CALCULANDO ESTADO EN BACKEND ===");
                 console.log("Asistencia:", asiPar);
                 console.log("Nota:", notPar);
                 console.log("Requiere asistencia:", requiereAsistencia);
                 console.log("Requiere puntaje:", requierePuntaje);
+                console.log("Puntaje aprobación (mínimo):", puntajeAprobacion);
+                console.log("Porcentaje asistencia mínimo:", porcentajeAsistenciaMinimo);
 
                 // Si no requiere nada, está aprobado por defecto
                 if (!requiereAsistencia && !requierePuntaje) {
@@ -92,27 +92,50 @@ export const updateParticipante = defineAction({
                 if (requiereAsistencia) {
                     if (asiPar === null || asiPar === undefined) {
                         cumpleAsistencia = false;
+                        console.log("❌ No cumple asistencia: valor nulo o indefinido");
                     } else if (asiPar < porcentajeAsistenciaMinimo) {
                         cumpleAsistencia = false;
+                        console.log(`❌ No cumple asistencia: ${asiPar}% < ${porcentajeAsistenciaMinimo}%`);
+                    } else {
+                        console.log(`✅ Cumple asistencia: ${asiPar}% >= ${porcentajeAsistenciaMinimo}%`);
                     }
+                } else {
+                    console.log("ℹ️ No requiere asistencia");
                 }
 
                 // Verificar puntaje si es requerido
                 if (requierePuntaje) {
                     if (notPar === null || notPar === undefined) {
                         cumplePuntaje = false;
+                        console.log("❌ No cumple puntaje: valor nulo o indefinido");
                     } else if (notPar < puntajeAprobacion) {
                         cumplePuntaje = false;
+                        console.log(`❌ No cumple puntaje: ${notPar} < ${puntajeAprobacion}`);
+                    } else {
+                        console.log(`✅ Cumple puntaje: ${notPar} >= ${puntajeAprobacion}`);
                     }
+                } else {
+                    console.log("ℹ️ No requiere puntaje");
                 }
 
                 // Determinar estado final
+                console.log("=== EVALUACIÓN FINAL ===");
+                console.log("Cumple asistencia:", cumpleAsistencia);
+                console.log("Cumple puntaje:", cumplePuntaje);
+
                 if (cumpleAsistencia && cumplePuntaje) {
+                    console.log("✅ RESULTADO: APROBADA (cumple ambos requisitos)");
                     return "APROBADA";
                 } else {
+                    const motivos = [];
+                    if (!cumpleAsistencia) motivos.push("asistencia insuficiente");
+                    if (!cumplePuntaje) motivos.push("puntaje insuficiente");
+                    console.log(`❌ RESULTADO: REPROBADA (${motivos.join(", ")})`);
                     return "REPROBADA";
                 }
-            }            // Calcular el estado automáticamente
+            }
+
+            // Calcular el estado automáticamente
             const estadoCalculado = calcularEstadoParticipacion(
                 asistencia,
                 nota,
@@ -123,6 +146,23 @@ export const updateParticipante = defineAction({
             );
 
             console.log("Estado calculado automáticamente:", estadoCalculado);
+
+            // Validar que el estado calculado sea uno de los valores permitidos
+            const estadosPermitidos = ["PENDIENTE", "APROBADA", "REPROBADA", "ASISTIO"];
+            if (!estadosPermitidos.includes(estadoCalculado)) {
+                console.error("Estado calculado no válido:", estadoCalculado);
+                throw new ActionError({
+                    code: "BAD_REQUEST",
+                    message: `Estado calculado no válido: ${estadoCalculado}`,
+                });
+            }
+
+            console.log("=== DATOS PARA ACTUALIZAR EN BD ===");
+            console.log("ID inscripción:", inscripcionId);
+            console.log("Asistencia:", asistencia);
+            console.log("Nota:", nota);
+            console.log("Estado calculado:", estadoCalculado);
+            console.log("===================================");
 
             // Actualizar la inscripción con los nuevos datos de participación
             const inscripcionActualizada = await db.inscripciones.update({
@@ -142,14 +182,35 @@ export const updateParticipante = defineAction({
                 }
             });
 
-            const nombreCompleto = `${inscripcionActualizada.usuarios?.nom_usu1 || ''} ${inscripcionActualizada.usuarios?.nom_usu2 || ''}`.trim();
+            console.log("=== INSCRIPCIÓN ACTUALIZADA ===");
+            console.log("Estado en BD:", inscripcionActualizada.est_par);
+            console.log("Asistencia en BD:", inscripcionActualizada.asi_par);
+            console.log("Nota en BD:", inscripcionActualizada.not_par);
+            console.log("==============================="); const nombreCompleto = `${inscripcionActualizada.usuarios?.nom_usu1 || ''} ${inscripcionActualizada.usuarios?.nom_usu2 || ''}`.trim();
             const apellidoCompleto = `${inscripcionActualizada.usuarios?.ape_usu1 || ''} ${inscripcionActualizada.usuarios?.ape_usu2 || ''}`.trim();
+
+            // Convertir los datos a objetos serializables
+            const inscripcionSerializable = {
+                id_ins: inscripcionActualizada.id_ins,
+                est_par: inscripcionActualizada.est_par,
+                asi_par: inscripcionActualizada.asi_par,
+                not_par: inscripcionActualizada.not_par ? Number(inscripcionActualizada.not_par) : null,
+                evento: {
+                    nom_eve: inscripcionActualizada.eventos?.nom_eve || null
+                },
+                usuario: {
+                    nom_usu1: inscripcionActualizada.usuarios?.nom_usu1 || null,
+                    nom_usu2: inscripcionActualizada.usuarios?.nom_usu2 || null,
+                    ape_usu1: inscripcionActualizada.usuarios?.ape_usu1 || null,
+                    ape_usu2: inscripcionActualizada.usuarios?.ape_usu2 || null
+                }
+            };
 
             return {
                 success: true,
                 message: `Calificación actualizada para ${nombreCompleto} ${apellidoCompleto}. Estado: ${estadoCalculado}`,
                 data: {
-                    inscripcion: inscripcionActualizada,
+                    inscripcion: inscripcionSerializable,
                     estadoCalculado: estadoCalculado,
                     asistencia: asistencia,
                     nota: nota
