@@ -32,11 +32,10 @@ const facultades = facultadesData?.facultades || [];
     <body class="bg-gray-50 min-h-screen">
         <Header />
         <MenuAdmin />
-
         <!-- Modal para Nueva Carrera -->
         <div
             id="modalNuevaCarrera"
-            class="modal fixed inset-0 bg-black bg-opacity-30 hidden items-center justify-center z-50"
+            class="modal fixed inset-0 backdrop-blur-sm bg-white/10 hidden items-center justify-center z-50"
         >
             <div
                 class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -172,11 +171,10 @@ const facultades = facultadesData?.facultades || [];
                 </form>
             </div>
         </div>
-
         <!-- Modal para Editar Carrera -->
         <div
             id="modalEditarCarrera"
-            class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+            class="modal fixed inset-0 backdrop-blur-sm bg-white/10 hidden items-center justify-center z-50"
         >
             <div
                 class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
@@ -311,11 +309,10 @@ const facultades = facultadesData?.facultades || [];
                 </form>
             </div>
         </div>
-
         <!-- Modal para Ver Detalles de Carrera -->
         <div
             id="modalDetallesCarrera"
-            class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+            class="modal fixed inset-0 backdrop-blur-sm bg-white/10 hidden items-center justify-center z-50"
         >
             <div
                 class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
