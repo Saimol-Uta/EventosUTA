@@ -60,6 +60,7 @@ model eventos {
   requiere_carta     Boolean?           @default(false)
   es_destacado       Boolean?           @default(false)
   id_asi_eve         String?            @db.Uuid
+  estado_evento      String?            @default("ACTIVO") @db.VarChar(15)
   organizadores      organizadores      @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
   asignaciones       asignaciones?      @relation(fields: [id_asi_eve], references: [id_asi], onDelete: NoAction, onUpdate: NoAction)
   categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
