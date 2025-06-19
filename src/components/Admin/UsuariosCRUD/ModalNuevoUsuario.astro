@@ -21,9 +21,32 @@ const carreras = carrerasData?.carreras || [];
                 enctype="multipart/form-data"
             >
                 <div class="contenedor-superior">
-                    <p class="texto-centrado texto-roja">Información General</p>
+                    <p class="texto-centrado texto-roja">
+                        Información Personal
+                    </p>
+
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Cédula</p>
+                        <p class="texto-dato">
+                            Correo Electrónico <span style="color: red;"
+                                >*</span>
+                        </p>
+                        <div class="contenedor-input">
+                            <input
+                                type="email"
+                                class="input-dato"
+                                name="cor_cue"
+                                required
+                                maxlength="150"
+                                placeholder="ejemplo@uta.edu.ec"
+                                title="Ingrese un correo electrónico válido"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Cédula <span style="color: red;">*</span>
+                        </p>
                         <div class="contenedor-input">
                             <input
                                 type="text"
@@ -37,15 +60,34 @@ const carreras = carrerasData?.carreras || [];
                         </div>
                     </div>
 
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Contraseña <span style="color: red;">*</span>
+                        </p>
+                        <div class="contenedor-input">
+                            <input
+                                type="password"
+                                class="input-dato"
+                                name="cont_cuenta"
+                                required
+                                minlength="6"
+                                title="La contraseña debe tener al menos 6 caracteres"
+                            />
+                        </div>
+                    </div>
+
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Primer Nombre</p>
+                            <p class="texto-dato">
+                                Primer Nombre <span style="color: red;">*</span>
+                            </p>
                             <div class="contenedor-input">
                                 <input
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu1"
                                     required
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -57,6 +99,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu2"
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -64,13 +107,17 @@ const carreras = carrerasData?.carreras || [];
 
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Primer Apellido</p>
+                            <p class="texto-dato">
+                                Primer Apellido <span style="color: red;"
+                                    >*</span>
+                            </p>
                             <div class="contenedor-input">
                                 <input
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu1"
                                     required
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -82,12 +129,17 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu2"
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
                     </div>
+
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Fecha de Nacimiento</p>
+                        <p class="texto-dato">
+                            Fecha de Nacimiento <span style="color: red;"
+                                >*</span>
+                        </p>
                         <div class="contenedor-input">
                             <input
                                 type="date"
@@ -106,23 +158,98 @@ const carreras = carrerasData?.carreras || [];
                                 class="input-dato"
                                 name="num_tel_usu"
                                 pattern="[0-9]{10}"
-                                title="Ingrese un número de teléfono válido"
+                                maxlength="10"
+                                title="Ingrese un número de teléfono válido de 10 dígitos"
                             />
                         </div>
                     </div>
+
+                    <p
+                        class="texto-centrado texto-roja"
+                        style="margin-top: 20px;"
+                    >
+                        Información Académica
+                    </p>
+
                     <div class="contenedor-dato">
                         <p class="texto-dato">Carrera</p>
                         <div class="contenedor-input">
                             <select class="input-dato" name="id_car_per">
-                                <option value="">Seleccionar carrera</option>
+                                <option value=""
+                                    >Seleccionar carrera (opcional)</option
+                                >
                                 {
                                     carreras.map((carrera: any) => (
                                         <option value={carrera.id_car}>
                                             {carrera.nom_car}
+                                            {carrera.cod_car
+                                                ? ` (${carrera.cod_car})`
+                                                : ""}
                                         </option>
                                     ))
                                 }
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Rol <span style="color: red;">*</span>
+                        </p>
+                        <div class="contenedor-input">
+                            <select class="input-dato" name="rol_cue" required>
+                                <option value="">Seleccione un rol</option>
+                                <option value="ESTUDIANTE">Estudiante</option>
+                                <option value="DOCENTE">Docente</option>
+                                <option value="ORGANIZADOR">Organizador</option>
+                                <option value="ADMINISTRADOR"
+                                    >Administrador</option
+                                >
+                                <option value="USUARIO">Usuario</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <p
+                        class="texto-centrado texto-roja"
+                        style="margin-top: 20px;"
+                    >
+                        Documentos y Enlaces (Opcional)
+                    </p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Enlace Cédula</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="url"
+                                class="input-dato"
+                                name="enl_ced_cue"
+                                placeholder="URL del documento de cédula"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Enlace Matrícula</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="url"
+                                class="input-dato"
+                                name="enl_mat_cue"
+                                placeholder="URL del documento de matrícula"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Imagen de Perfil</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="url"
+                                class="input-dato"
+                                name="img_user"
+                                placeholder="URL de la imagen de perfil"
+                            />
                         </div>
                     </div>
 
@@ -131,6 +258,7 @@ const carreras = carrerasData?.carreras || [];
                             type="button"
                             class="boton-modificar"
                             onclick="cerrarModalNuevoUsuario()"
+                            style="background-color: #6b7280;"
                         >
                             Cancelar
                         </button>
@@ -144,10 +272,149 @@ const carreras = carrerasData?.carreras || [];
     </div>
 </div>
 
-<script>
-    import { actions } from "astro:actions";
-    import Swal from "sweetalert2";
+<style>
+    /* Estilos específicos para el modal de nuevo usuario */
+    .modal-contenido {
+        max-height: 90vh;
+        overflow-y: auto;
+        width: 90%;
+        max-width: 600px;
+    }
 
+    .contenedor-superior {
+        padding: 20px;
+    }
+
+    .texto-centrado.texto-roja {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 20px 0 15px 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #b01025, #d42c44);
+        color: white;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .contenedor-dato {
+        margin-bottom: 15px;
+    }
+
+    .texto-dato {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #374151;
+    }
+
+    .input-dato,
+    select.input-dato {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+    }
+
+    .input-dato:focus,
+    select.input-dato:focus {
+        outline: none;
+        border-color: #b01025;
+        box-shadow: 0 0 0 3px rgba(176, 16, 37, 0.1);
+    }
+
+    .contenedor-nombre {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .contenedor-boton-modificar {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .boton-modificar {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 120px;
+    }
+
+    .boton-modificar[type="submit"] {
+        background-color: #b01025;
+        color: white;
+    }
+
+    .boton-modificar[type="submit"]:hover {
+        background-color: #8e0d1f;
+        transform: translateY(-1px);
+    }
+
+    .boton-modificar:not([type="submit"]) {
+        background-color: #6b7280;
+        color: white;
+    }
+
+    .boton-modificar:not([type="submit"]):hover {
+        background-color: #4b5563;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .modal-contenido {
+            width: 95%;
+            margin: 10px;
+        }
+
+        .contenedor-nombre {
+            grid-template-columns: 1fr;
+        }
+
+        .contenedor-boton-modificar {
+            flex-direction: column;
+        }
+
+        .texto-centrado.texto-roja {
+            font-size: 16px;
+            margin: 15px 0 10px 0;
+            padding: 8px;
+        }
+    }
+
+    /* Validación visual */
+    .input-dato:invalid {
+        border-color: #dc2626;
+    }
+
+    .input-dato:valid {
+        border-color: #059669;
+    }
+
+    /* Estilos para campos requeridos */
+    span[style*="color: red"] {
+        font-weight: bold;
+    }
+
+    /* Mejorar el estilo de los selects */
+    select.input-dato {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 8px center;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-right: 40px;
+        appearance: none;
+    }
+</style>
+
+<script>
     declare global {
         interface Window {
             abrirModalNuevoUsuario: () => void;
@@ -178,33 +445,65 @@ const carreras = carrerasData?.carreras || [];
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById(
             "formulario-nuevo-usuario",
-        ) as HTMLFormElement;
-
-        // Manejar envío del formulario
+        ) as HTMLFormElement; // Manejar envío del formulario
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
-                const formData = new FormData(form);
-
+                const formData = new FormData(form); // Convertir FormData a objeto para la validación
+                const userData = {
+                    cor_cue: formData.get("cor_cue") as string,
+                    ced_usu: formData.get("ced_usu") as string,
+                    cont_cuenta: formData.get("cont_cuenta") as string,
+                    nom_usu1: formData.get("nom_usu1") as string,
+                    nom_usu2: (formData.get("nom_usu2") as string) || undefined,
+                    ape_usu1: formData.get("ape_usu1") as string,
+                    ape_usu2: (formData.get("ape_usu2") as string) || undefined,
+                    fec_nac_usu: formData.get("fec_nac_usu") as string,
+                    num_tel_usu:
+                        (formData.get("num_tel_usu") as string) || undefined,
+                    id_car_per:
+                        (formData.get("id_car_per") as string) || undefined,
+                    rol_cue: formData.get("rol_cue") as string,
+                    enl_ced_cue:
+                        (formData.get("enl_ced_cue") as string) || undefined,
+                    enl_mat_cue:
+                        (formData.get("enl_mat_cue") as string) || undefined,
+                    img_user: (formData.get("img_user") as string) || undefined,
+                };
                 try {
-                    const { data, error } = await actions.setUser(formData);
+                    // Importar módulos dinámicamente para compatibilidad
+                    const { actions } = await import("astro:actions");
+                    const { default: Swal } = await import("sweetalert2");
+
+                    // Mostrar loading
+                    Swal.fire({
+                        title: "Creando usuario...",
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
+
+                    const { data, error } =
+                        await actions.crearUsuario(userData);
 
                     if (data?.success) {
                         await Swal.fire({
                             icon: "success",
                             title: "Éxito",
-                            text: "Usuario creado correctamente",
+                            text:
+                                data.message || "Usuario creado correctamente",
                             confirmButtonColor: "#059669",
-                        }).then(() => {
-                            window.location.reload();
                         });
+                        cerrarModalNuevoUsuario();
+                        window.location.reload();
                     } else {
                         await Swal.fire({
                             icon: "error",
                             title: "Error",
                             text:
-                                (data as any)?.error ||
+                                data?.message ||
                                 error?.message ||
                                 "No se pudo crear el usuario.",
                             confirmButtonColor: "#dc2626",
@@ -212,6 +511,7 @@ const carreras = carrerasData?.carreras || [];
                     }
                 } catch (error) {
                     console.error("Error:", error);
+                    const { default: Swal } = await import("sweetalert2");
                     await Swal.fire({
                         icon: "error",
                         title: "Error",

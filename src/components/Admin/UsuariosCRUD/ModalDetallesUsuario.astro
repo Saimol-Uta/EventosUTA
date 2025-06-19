@@ -1,6 +1,5 @@
 ---
 import "../../../styles/Admin/ModalDetallesEvento.css";
-import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
 ---
 
 <div id="modalDetallesUsuario" class="modal">
@@ -10,74 +9,174 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
         >
         <div class="detalles-reserva">
             <h2 id="usuario-nombre">Nombre del Usuario</h2>
-
             <div class="seccion-detalles">
-                <h3>Información General</h3>
+                <h3>Información Personal</h3>
                 <div class="info-grid">
+                    <p>
+                        <strong>Correo Electrónico:</strong>
+                        <span id="usuario-correo">Cargando...</span>
+                    </p>
                     <p>
                         <strong>Cédula:</strong>
                         <span id="usuario-cedula">Cargando...</span>
                     </p>
                     <p>
+                        <strong>Primer Nombre:</strong>
+                        <span id="usuario-primer-nombre">Cargando...</span>
+                    </p>
+                    <p>
+                        <strong>Segundo Nombre:</strong>
+                        <span id="usuario-segundo-nombre">Cargando...</span>
+                    </p>
+                    <p>
+                        <strong>Primer Apellido:</strong>
+                        <span id="usuario-primer-apellido">Cargando...</span>
+                    </p>
+                    <p>
+                        <strong>Segundo Apellido:</strong>
+                        <span id="usuario-segundo-apellido">Cargando...</span>
+                    </p>
+                    <p>
                         <strong>Fecha de Nacimiento:</strong>
                         <span id="usuario-fec-nac">Cargando...</span>
                     </p>
-                </div>
-            </div>
-
-            <div class="seccion-detalles">
-                <div class="info-grid">
+                    <p>
+                        <strong>Edad:</strong>
+                        <span id="usuario-edad">Cargando...</span>
+                    </p>
                     <p>
                         <strong>Número de Teléfono:</strong>
                         <span id="usuario-numero">Cargando...</span>
                     </p>
                     <p>
-                        <strong>Carrera:</strong>
-                        <span id="usuario-carrera">Cargando...</span>
+                        <strong>Rol:</strong>
+                        <span id="usuario-rol">Cargando...</span>
                     </p>
                 </div>
             </div>
-            <div class="seccion-detalles">
-                <p class="texto-centrado texto-roja">Cuentas Asociadas</p>
 
-                <div class="contenedor-dato">
-                    <div id="usuario-cuentas" class="asignaciones-display">
-                        <!-- Aquí se mostrará dinámicamente la lista de cuentas asociadas -->
-                    </div>
+            <div class="seccion-detalles">
+                <h3>Información Académica</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Carrera:</strong>
+                        <span id="usuario-carrera">Cargando...</span>
+                    </p>
+                    <p>
+                        <strong>Código de Carrera:</strong>
+                        <span id="usuario-carrera-codigo">Cargando...</span>
+                    </p>
+                    <p>
+                        <strong>Facultad:</strong>
+                        <span id="usuario-facultad">Cargando...</span>
+                    </p>
+                    <p>
+                        <strong>Descripción de Carrera:</strong>
+                        <span id="usuario-carrera-descripcion">Cargando...</span
+                        >
+                    </p>
+                </div>
+            </div>
+
+            <div class="seccion-detalles">
+                <h3>Documentos y Enlaces</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Enlace Cédula:</strong>
+                        <span id="usuario-enlace-cedula">
+                            <a
+                                id="link-cedula"
+                                href="#"
+                                target="_blank"
+                                style="display: none; color: #b01025; text-decoration: none;"
+                                >📄 Ver Documento</a
+                            >
+                            <span id="no-cedula" style="color: #6b7280;"
+                                >No disponible</span
+                            >
+                        </span>
+                    </p>
+                    <p>
+                        <strong>Enlace Matrícula:</strong>
+                        <span id="usuario-enlace-matricula">
+                            <a
+                                id="link-matricula"
+                                href="#"
+                                target="_blank"
+                                style="display: none; color: #b01025; text-decoration: none;"
+                                >📄 Ver Documento</a
+                            >
+                            <span id="no-matricula" style="color: #6b7280;"
+                                >No disponible</span
+                            >
+                        </span>
+                    </p>
+                    <p>
+                        <strong>Imagen de Perfil:</strong>
+                        <span id="usuario-imagen-perfil">
+                            <a
+                                id="link-imagen"
+                                href="#"
+                                target="_blank"
+                                style="display: none; color: #b01025; text-decoration: none;"
+                                >🖼️ Ver Imagen</a
+                            >
+                            <span id="no-imagen" style="color: #6b7280;"
+                                >No disponible</span
+                            >
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="seccion-detalles">
+                <h3>Actividad del Usuario</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Inscripciones:</strong>
+                        <span id="usuario-inscripciones-count">0</span>
+                    </p>
+                    <p>
+                        <strong>Solicitudes de Cambio:</strong>
+                        <span id="usuario-cambios-count">0</span>
+                    </p>
                 </div>
 
-                <div class="contenedor-dato" id="botones-cuentas-container">
-                    <!-- Los botones se generarán dinámicamente aquí -->
+                <div class="contenedor-dato">
+                    <div class="contenedor-botones-asignaciones">
+                        <button
+                            type="button"
+                            id="btn-ver-inscripciones"
+                            class="boton-asignacion"
+                            onclick="verInscripcionesUsuario()"
+                        >
+                            📋 Ver Inscripciones Detalladas
+                        </button>
+                        <button
+                            type="button"
+                            id="btn-ver-cambios"
+                            class="boton-asignacion"
+                            onclick="verCambiosUsuario()"
+                        >
+                            📝 Ver Solicitudes de Cambio
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Mover ModalDetallesCuenta fuera del contenido principal -->
-    <ModalDetallesCuenta />
 </div>
 
 <style>
-    .cuentas-list {
-        margin-top: 10px;
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 10px 0;
     }
 
-    .cuenta-item {
-        padding: 8px 12px;
+    .info-grid p {
         margin: 5px 0;
-        background-color: #f8f9fa;
-        border-radius: 6px;
-        border-left: 3px solid #b01025;
-    }
-
-    .cuenta-item strong {
-        color: #b01025;
-        margin-right: 8px;
-    }
-
-    .cuenta-count {
-        font-weight: bold;
-        color: #333;
     }
 
     .boton-asignacion {
@@ -99,6 +198,67 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
 
     .contenedor-botones-asignaciones {
         margin: 5px 0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .seccion-detalles {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .seccion-detalles h3 {
+        margin: 0 0 10px 0;
+        color: #b01025;
+        font-size: 16px;
+    }
+
+    .rol-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: white;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .rol-admin,
+    .rol-administrador {
+        background-color: #dc2626;
+    }
+
+    .rol-organizador {
+        background-color: #ea580c;
+    }
+
+    .rol-estudiante {
+        background-color: #059669;
+    }
+
+    .rol-docente {
+        background-color: #0284c7;
+    }
+
+    .rol-badge:not(.rol-admin):not(.rol-administrador):not(
+            .rol-organizador
+        ):not(.rol-estudiante):not(.rol-docente) {
+        background-color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .contenedor-botones-asignaciones {
+            flex-direction: column;
+        }
     }
 </style>
 
@@ -107,7 +267,8 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
         interface Window {
             cerrarModalDetallesUsuario: () => void;
             abrirModalDetallesUsuario: (usuario: any) => void;
-            mostrarDetallesCuentaUsuario: (cuentaIndex: number) => void;
+            verInscripcionesUsuario: () => void;
+            verCambiosUsuario: () => void;
         }
     }
 
@@ -119,7 +280,7 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
         if (modal) modal.style.display = "none";
     }
 
-    function abrirModalDetallesUsuario(usuario: any) {
+    async function abrirModalDetallesUsuario(usuario: any) {
         const modal = document.getElementById("modalDetallesUsuario");
         if (!modal) return;
 
@@ -127,34 +288,249 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
         usuarioActual = usuario;
 
         // Poblar el modal con los datos del usuario
-        poblarModalConDatos(usuario);
+        await poblarModalConDatos(usuario);
 
         modal.style.display = "block";
     }
-
-    function mostrarDetallesCuentaUsuario(cuentaIndex: number) {
-        if (
-            !usuarioActual ||
-            !usuarioActual.cuentas ||
-            !usuarioActual.cuentas[cuentaIndex]
-        ) {
-            console.error("No se pudo encontrar la cuenta solicitada");
+    async function verInscripcionesUsuario() {
+        if (!usuarioActual?.cor_cue) {
+            console.error("No hay usuario actual o cor_cue");
             return;
         }
 
-        const cuenta = usuarioActual.cuentas[cuentaIndex];
+        try {
+            // Importar módulos dinámicamente
+            const { actions } = await import("astro:actions");
+            const { default: Swal } = await import("sweetalert2");
 
-        // Llamar a la función del modal de detalles de cuenta
-        if (window.abrirModalDetallesCuenta) {
-            window.abrirModalDetallesCuenta(usuarioActual, cuenta);
-        } else {
-            console.error(
-                "La función abrirModalDetallesCuenta no está disponible",
-            );
+            // Mostrar loading
+            Swal.fire({
+                title: "Cargando inscripciones...",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            }); // Obtener inscripciones del usuario
+            const { data, error } = await actions.getInscripcionesByUser({
+                userId: usuarioActual.cor_cue,
+            });
+
+            if (error || !data?.success) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text:
+                        data?.message ||
+                        "No se pudieron cargar las inscripciones",
+                    confirmButtonColor: "#dc2626",
+                });
+                return;
+            }
+
+            const inscripciones = data.data || [];
+
+            if (inscripciones.length === 0) {
+                await Swal.fire({
+                    icon: "info",
+                    title: "Sin inscripciones",
+                    text: `${usuarioActual.nom_usu1} ${usuarioActual.ape_usu1} no tiene inscripciones registradas.`,
+                    confirmButtonColor: "#059669",
+                });
+                return;
+            } // Crear tabla HTML con las inscripciones
+            const inscripcionesHTML = inscripciones
+                .map(
+                    (ins: any) => `
+                <tr>
+                    <td>${ins.eventos?.nom_eve || "Sin nombre"}</td>
+                    <td>${formatearFecha(ins.fec_ins)}</td>
+                    <td><span class="estado-badge estado-${ins.est_ins?.toLowerCase()}">${ins.est_ins || "Sin estado"}</span></td>
+                    <td><span class="estado-badge estado-${ins.est_par?.toLowerCase()}">${ins.est_par || "Sin estado"}</span></td>
+                    <td>${ins.not_par || "Sin nota"}</td>
+                </tr>
+            `,
+                )
+                .join("");
+
+            await Swal.fire({
+                title: `Inscripciones de ${usuarioActual.nom_usu1} ${usuarioActual.ape_usu1}`,
+                html: `
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f8f9fa;">
+                                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left;">Evento</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left;">Fecha Inscripción</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left;">Estado Inscripción</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left;">Estado Participación</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left;">Nota</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${inscripcionesHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        .estado-badge {
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                            font-size: 11px;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                        }
+                        .estado-activo, .estado-aprobado { background-color: #059669; color: white; }
+                        .estado-pendiente { background-color: #f59e0b; color: white; }
+                        .estado-rechazado, .estado-inactivo { background-color: #dc2626; color: white; }
+                        .estado-asistió, .estado-participó { background-color: #059669; color: white; }
+                        .estado-no_asistió, .estado-no_participó { background-color: #6b7280; color: white; }
+                    </style>
+                `,
+                width: "80%",
+                confirmButtonColor: "#059669",
+                confirmButtonText: "Cerrar",
+            });
+        } catch (error) {
+            console.error("Error al obtener inscripciones:", error);
+            const { default: Swal } = await import("sweetalert2");
+            await Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Error al cargar las inscripciones del usuario",
+                confirmButtonColor: "#dc2626",
+            });
         }
     }
 
-    function poblarModalConDatos(usuario: any) {
+    async function verCambiosUsuario() {
+        if (!usuarioActual?.cor_cue) {
+            console.error("No hay usuario actual o cor_cue");
+            return;
+        }
+
+        try {
+            // Importar módulos dinámicamente
+            const { actions } = await import("astro:actions");
+            const { default: Swal } = await import("sweetalert2");
+
+            // Mostrar loading
+            Swal.fire({
+                title: "Cargando solicitudes de cambio...",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            }); // Obtener cambios del usuario
+            const { data, error } = await actions.getCambiosByUser({
+                userId: usuarioActual.cor_cue,
+            });
+
+            if (error || !data?.success) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text:
+                        data?.message ||
+                        "No se pudieron cargar las solicitudes de cambio",
+                    confirmButtonColor: "#dc2626",
+                });
+                return;
+            }
+
+            const cambios = data.data || [];
+
+            if (cambios.length === 0) {
+                await Swal.fire({
+                    icon: "info",
+                    title: "Sin solicitudes",
+                    text: `${usuarioActual.nom_usu1} ${usuarioActual.ape_usu1} no tiene solicitudes de cambio registradas.`,
+                    confirmButtonColor: "#059669",
+                });
+                return;
+            }
+
+            // Crear tabla HTML con los cambios
+            const cambiosHTML = cambios
+                .map(
+                    (cambio: any) => `
+                <tr>
+                    <td>${formatearFecha(cambio.fec_cam)}</td>
+                    <td>${cambio.tip_cam || "No especificado"}</td>
+                    <td style="max-width: 200px; word-wrap: break-word;">${cambio.des_cam || "Sin descripción"}</td>
+                    <td style="max-width: 150px; word-wrap: break-word;">${cambio.mot_cam || "Sin motivo"}</td>
+                    <td><span class="estado-badge estado-${cambio.est_cam?.toLowerCase()}">${cambio.est_cam || "Sin estado"}</span></td>
+                    <td><span class="prioridad-badge prioridad-${cambio.pri_cam?.toLowerCase()}">${cambio.pri_cam || "Sin prioridad"}</span></td>
+                </tr>
+            `,
+                )
+                .join("");
+
+            await Swal.fire({
+                title: `Solicitudes de cambio de ${usuarioActual.nom_usu1} ${usuarioActual.ape_usu1}`,
+                html: `
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                            <thead>
+                                <tr style="background-color: #f8f9fa;">
+                                    <th style="border: 1px solid #dee2e6; padding: 6px; text-align: left;">Fecha</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 6px; text-align: left;">Tipo</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 6px; text-align: left;">Descripción</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 6px; text-align: left;">Motivo</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 6px; text-align: left;">Estado</th>
+                                    <th style="border: 1px solid #dee2e6; padding: 6px; text-align: left;">Prioridad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${cambiosHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                    <style>
+                        .estado-badge, .prioridad-badge {
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                            font-size: 10px;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                        }
+                        .estado-aprobado, .estado-resuelto { background-color: #059669; color: white; }
+                        .estado-pendiente, .estado-en_proceso { background-color: #f59e0b; color: white; }
+                        .estado-rechazado, .estado-cancelado { background-color: #dc2626; color: white; }
+                        .prioridad-alta { background-color: #dc2626; color: white; }
+                        .prioridad-media { background-color: #f59e0b; color: white; }
+                        .prioridad-baja { background-color: #059669; color: white; }
+                    </style>
+                `,
+                width: "90%",
+                confirmButtonColor: "#059669",
+                confirmButtonText: "Cerrar",
+            });
+        } catch (error) {
+            console.error("Error al obtener cambios:", error);
+            const { default: Swal } = await import("sweetalert2");
+            await Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Error al cargar las solicitudes de cambio del usuario",
+                confirmButtonColor: "#dc2626",
+            });
+        }
+    }
+
+    // Función auxiliar para formatear fechas
+    function formatearFecha(fecha: string): string {
+        if (!fecha) return "No especificada";
+        try {
+            return new Intl.DateTimeFormat("es-ES", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+            }).format(new Date(fecha));
+        } catch {
+            return fecha;
+        }
+    }
+    async function poblarModalConDatos(usuario: any) {
         const modal = document.getElementById("modalDetallesUsuario");
         if (!modal) return;
 
@@ -165,20 +541,35 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
 
         if (titulo) titulo.textContent = nombreCompleto || "Sin nombre";
 
-        // Información General
+        // Información Personal
+        const correo = modal.querySelector("#usuario-correo");
+        if (correo) correo.textContent = usuario.cor_cue || "N/A";
+
         const cedula = modal.querySelector("#usuario-cedula");
-        if (cedula) {
-            console.log("Cédula del usuario:", usuario.ced_usu); // Para debugging
-            cedula.textContent = usuario.ced_usu || "N/A";
-        }
+        if (cedula) cedula.textContent = usuario.ced_usu || "N/A";
+
+        const primerNombre = modal.querySelector("#usuario-primer-nombre");
+        if (primerNombre) primerNombre.textContent = usuario.nom_usu1 || "N/A";
+
+        const segundoNombre = modal.querySelector("#usuario-segundo-nombre");
+        if (segundoNombre)
+            segundoNombre.textContent = usuario.nom_usu2 || "N/A";
+
+        const primerApellido = modal.querySelector("#usuario-primer-apellido");
+        if (primerApellido)
+            primerApellido.textContent = usuario.ape_usu1 || "N/A";
+
+        const segundoApellido = modal.querySelector(
+            "#usuario-segundo-apellido",
+        );
+        if (segundoApellido)
+            segundoApellido.textContent = usuario.ape_usu2 || "N/A";
 
         const fechaNac = modal.querySelector("#usuario-fec-nac");
         if (fechaNac) {
-            console.log("Fecha de nacimiento:", usuario.fec_nac_usu); // Para debugging
             if (usuario.fec_nac_usu) {
                 try {
                     const fecha = new Date(usuario.fec_nac_usu);
-                    // Verificar si la fecha es válida
                     if (!isNaN(fecha.getTime())) {
                         fechaNac.textContent =
                             fecha.toLocaleDateString("es-ES");
@@ -194,72 +585,107 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
             }
         }
 
+        const edad = modal.querySelector("#usuario-edad");
+        if (edad) {
+            if (usuario.edad !== null && usuario.edad !== undefined) {
+                edad.textContent = `${usuario.edad} años`;
+            } else {
+                edad.textContent = "N/A";
+            }
+        }
+
         const telefono = modal.querySelector("#usuario-numero");
         if (telefono)
             telefono.textContent = usuario.num_tel_usu || "No especificado";
 
+        const rol = modal.querySelector("#usuario-rol");
+        if (rol) {
+            rol.textContent = usuario.rol_cue || "Sin rol";
+            rol.className = `rol-badge rol-${(usuario.rol_cue || "").toLowerCase()}`;
+        }
+
+        // Información Académica
         const carrera = modal.querySelector("#usuario-carrera");
-        if (carrera) {
+        if (carrera)
             carrera.textContent = usuario.carrera?.nom_car || "Sin carrera";
-        } // Mostrar información de cuentas
-        const cuentasContainer = modal.querySelector("#usuario-cuentas");
-        const botonesContainer = modal.querySelector(
-            "#botones-cuentas-container",
+
+        const carreraCodigo = modal.querySelector("#usuario-carrera-codigo");
+        if (carreraCodigo)
+            carreraCodigo.textContent = usuario.carrera?.cod_car || "N/A";
+
+        const facultad = modal.querySelector("#usuario-facultad");
+        if (facultad) {
+            // Aquí necesitarías obtener la facultad basada en el id_fac_per de la carrera
+            facultad.textContent = "Información no disponible"; // Por ahora
+        }
+
+        const carreraDescripcion = modal.querySelector(
+            "#usuario-carrera-descripcion",
         );
+        if (carreraDescripcion)
+            carreraDescripcion.textContent = usuario.carrera?.des_car || "N/A";
 
-        if (cuentasContainer && botonesContainer) {
-            // Limpiar contenedores
-            cuentasContainer.innerHTML = "";
-            botonesContainer.innerHTML = "";
-
-            if (usuario.cuentas && usuario.cuentas.length > 0) {
-                // Mostrar información general de cuentas
-                cuentasContainer.innerHTML = `
-                    <div class="cuenta-info">
-                        <span class="cuenta-count">Cuentas asociadas: ${usuario.cuentas.length}</span>
-                        <div class="cuentas-list">
-                            ${usuario.cuentas
-                                .map(
-                                    (cuenta: any, index: number) => `
-                                <div class="cuenta-item">
-                                    <strong>Cuenta ${index + 1}:</strong>
-                                    <span>${cuenta.cor_cue || "Sin correo"} - ${cuenta.rol_cue || "Sin rol"}</span>
-                                </div>
-                            `,
-                                )
-                                .join("")}
-                        </div>
-                    </div>
-                `;
-                // Generar botones para cada cuenta
-                const botonesHTML = usuario.cuentas
-                    .map((cuenta: any, index: number) => {
-                        const correo = cuenta.cor_cue || "Sin correo";
-                        const rol = cuenta.rol_cue || "Sin rol";
-
-                        return `
-                        <div class="contenedor-botones-asignaciones">
-                            <button
-                                type="button"
-                                class="boton-asignacion btn-gestionar"
-                                onclick="mostrarDetallesCuentaUsuario(${index})"
-                                title="Ver detalles de ${correo}"
-                            >
-                                📧 ${correo} (${rol})
-                            </button>
-                        </div>
-                    `;
-                    })
-                    .join("");
-
-                botonesContainer.innerHTML = botonesHTML;
-            } else {
-                cuentasContainer.innerHTML = `
-                    <div class="cuenta-info">
-                        <span class="cuenta-count">No hay cuentas asociadas</span>
-                    </div>
-                `;
+        // Documentos y Enlaces
+        const linkCedula = modal.querySelector(
+            "#link-cedula",
+        ) as HTMLAnchorElement;
+        const noCedula = modal.querySelector("#no-cedula");
+        if (usuario.enl_ced_cue) {
+            if (linkCedula) {
+                linkCedula.href = usuario.enl_ced_cue;
+                linkCedula.style.display = "inline";
             }
+            if (noCedula) (noCedula as HTMLElement).style.display = "none";
+        } else {
+            if (linkCedula) linkCedula.style.display = "none";
+            if (noCedula) (noCedula as HTMLElement).style.display = "inline";
+        }
+
+        const linkMatricula = modal.querySelector(
+            "#link-matricula",
+        ) as HTMLAnchorElement;
+        const noMatricula = modal.querySelector("#no-matricula");
+        if (usuario.enl_mat_cue) {
+            if (linkMatricula) {
+                linkMatricula.href = usuario.enl_mat_cue;
+                linkMatricula.style.display = "inline";
+            }
+            if (noMatricula)
+                (noMatricula as HTMLElement).style.display = "none";
+        } else {
+            if (linkMatricula) linkMatricula.style.display = "none";
+            if (noMatricula)
+                (noMatricula as HTMLElement).style.display = "inline";
+        }
+
+        const linkImagen = modal.querySelector(
+            "#link-imagen",
+        ) as HTMLAnchorElement;
+        const noImagen = modal.querySelector("#no-imagen");
+        if (usuario.img_user) {
+            if (linkImagen) {
+                linkImagen.href = usuario.img_user;
+                linkImagen.style.display = "inline";
+            }
+            if (noImagen) (noImagen as HTMLElement).style.display = "none";
+        } else {
+            if (linkImagen) linkImagen.style.display = "none";
+            if (noImagen) (noImagen as HTMLElement).style.display = "inline";
+        }
+
+        // Establecer contadores básicos
+        const inscripcionesCount = modal.querySelector(
+            "#usuario-inscripciones-count",
+        );
+        if (inscripcionesCount) {
+            inscripcionesCount.textContent =
+                usuario.cantidadInscripciones?.toString() || "0";
+        }
+
+        const cambiosCount = modal.querySelector("#usuario-cambios-count");
+        if (cambiosCount) {
+            cambiosCount.textContent =
+                usuario.cantidadSolicitudes?.toString() || "0";
         }
     }
 
@@ -269,8 +695,11 @@ import ModalDetallesCuenta from "../UsuariosCRUD/ModalDetallesCuenta.astro";
         if (event.target === modal) {
             cerrarModalDetallesUsuario();
         }
-    }; // Exponer funciones globalmente
+    };
+
+    // Exponer funciones globalmente
     window.cerrarModalDetallesUsuario = cerrarModalDetallesUsuario;
     window.abrirModalDetallesUsuario = abrirModalDetallesUsuario;
-    window.mostrarDetallesCuentaUsuario = mostrarDetallesCuentaUsuario;
+    window.verInscripcionesUsuario = verInscripcionesUsuario;
+    window.verCambiosUsuario = verCambiosUsuario;
 </script>

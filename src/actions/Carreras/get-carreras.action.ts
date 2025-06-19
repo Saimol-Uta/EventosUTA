@@ -9,17 +9,29 @@ export const getAllCarreras = defineAction({
         try {
             const carreras = await prisma.carreras.findMany({
                 include: {
-                    asignaciones: {
+                    facultades: {
                         select: {
-                            id_asi: true,
-                            nom_asi: true
+                            id_fac: true,
+                            nom_fac: true
+                        }
+                    },
+                    detalle_asignaciones: {
+                        include: {
+                            asignaciones: {
+                                select: {
+                                    id_asi: true,
+                                    nom_asi: true,
+                                    des_asi: true
+                                }
+                            }
                         }
                     },
                     usuarios: {
                         select: {
-                            id_usu: true,
+                            cor_cue: true,
                             nom_usu1: true,
-                            ape_usu1: true
+                            ape_usu1: true,
+                            ced_usu: true
                         }
                     }
                 },
@@ -54,16 +66,26 @@ export const getCarreraById = defineAction({
             const carrera = await prisma.carreras.findUnique({
                 where: { id_car: input.id_car },
                 include: {
-                    asignaciones: {
+                    facultades: {
                         select: {
-                            id_asi: true,
-                            nom_asi: true,
-                            des_asi: true
+                            id_fac: true,
+                            nom_fac: true
+                        }
+                    },
+                    detalle_asignaciones: {
+                        include: {
+                            asignaciones: {
+                                select: {
+                                    id_asi: true,
+                                    nom_asi: true,
+                                    des_asi: true
+                                }
+                            }
                         }
                     },
                     usuarios: {
                         select: {
-                            id_usu: true,
+                            cor_cue: true,
                             nom_usu1: true,
                             ape_usu1: true,
                             ced_usu: true

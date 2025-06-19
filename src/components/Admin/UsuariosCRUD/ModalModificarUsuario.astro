@@ -1,6 +1,5 @@
 ---
 import "../../../styles/Admin/ModalModificarEvento.css";
-import ModalGestionarCuenta from "../UsuariosCRUD/ModalGestionarCuenta.astro";
 import { actions } from "astro:actions";
 
 // Obtener carreras para el select
@@ -12,7 +11,6 @@ const carreras = carrerasData?.carreras || [];
 ---
 
 <div id="modalModificarUsuario" class="modal">
-    <ModalGestionarCuenta />
     <div class="modal-contenido">
         <span class="cerrar" onclick="cerrarModalModificarUsuario()"
             >&times;</span
@@ -24,32 +22,54 @@ const carreras = carrerasData?.carreras || [];
                 id="formulario-modificar-usuario"
                 enctype="multipart/form-data"
             >
-                <input type="hidden" name="usuario_cedula" />
-
+                <input type="hidden" name="cor_cue_original" />
                 <div class="contenedor-superior">
-                    <p class="texto-centrado texto-roja">Información General</p>
+                    <p class="texto-centrado texto-roja">
+                        Información Personal
+                    </p>
 
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Cédula</p>
+                        <p class="texto-dato">Correo Electrónico (ID)</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="email"
+                                class="input-dato"
+                                name="cor_cue"
+                                readonly
+                                style="background-color: #f3f4f6; color: #6b7280;"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Cédula <span style="color: red;">*</span>
+                        </p>
                         <div class="contenedor-input">
                             <input
                                 type="text"
                                 class="input-dato"
-                                name="usuario-cedula"
-                                readonly
+                                name="ced_usu"
+                                required
+                                pattern="[0-9]{10}"
+                                title="Cédula de 10 dígitos"
+                                maxlength="10"
                             />
                         </div>
                     </div>
 
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Primer Nombre</p>
+                            <p class="texto-dato">
+                                Primer Nombre <span style="color: red;">*</span>
+                            </p>
                             <div class="contenedor-input">
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="usuario-nombre1"
+                                    name="nom_usu1"
                                     required
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -59,7 +79,8 @@ const carreras = carrerasData?.carreras || [];
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="usuario-nombre2"
+                                    name="nom_usu2"
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -67,13 +88,17 @@ const carreras = carrerasData?.carreras || [];
 
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Primer Apellido</p>
+                            <p class="texto-dato">
+                                Primer Apellido <span style="color: red;"
+                                    >*</span>
+                            </p>
                             <div class="contenedor-input">
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="usuario-apellido1"
+                                    name="ape_usu1"
                                     required
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -83,44 +108,53 @@ const carreras = carrerasData?.carreras || [];
                                 <input
                                     type="text"
                                     class="input-dato"
-                                    name="usuario-apellido2"
+                                    name="ape_usu2"
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
                     </div>
 
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Fecha de Nacimiento</p>
+                        <p class="texto-dato">
+                            Fecha de Nacimiento <span style="color: red;"
+                                >*</span>
+                        </p>
                         <div class="contenedor-input">
                             <input
                                 type="date"
                                 class="input-dato"
-                                name="usuario-fecha-nacimiento"
+                                name="fec_nac_usu"
                                 required
                             />
                         </div>
                     </div>
+
                     <div class="contenedor-dato">
                         <p class="texto-dato">Número de Teléfono</p>
                         <div class="contenedor-input">
                             <input
                                 type="tel"
                                 class="input-dato"
-                                name="numero-usuario"
+                                name="num_tel_usu"
                                 pattern="[0-9]{10}"
                                 title="Número de teléfono de 10 dígitos"
+                                maxlength="10"
                             />
                         </div>
                     </div>
 
+                    <p
+                        class="texto-centrado texto-roja"
+                        style="margin-top: 20px;"
+                    >
+                        Información Académica
+                    </p>
+
                     <div class="contenedor-dato">
                         <p class="texto-dato">Carrera</p>
                         <div class="contenedor-input">
-                            <select
-                                name="carrera-usuario"
-                                class="input-dato"
-                                required
-                            >
+                            <select name="id_car_per" class="input-dato">
                                 <option value="">Seleccione una carrera</option>
                                 {
                                     carreras.map((carrera: any) => (
@@ -135,34 +169,89 @@ const carreras = carrerasData?.carreras || [];
                             </select>
                         </div>
                     </div>
-                </div>
 
-                <div class="contenedor-inferior">
-                    <p class="texto-centrado texto-roja">Cuentas Asociadas</p>
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Cuentas Actuales:</p>
-                        <div id="cuentas-actuales" class="asignaciones-display">
-                            <!-- Aquí se mostrará dinámicamente la lista de cuentas asociadas -->
+                        <p class="texto-dato">
+                            Rol del Usuario <span style="color: red;">*</span>
+                        </p>
+                        <div class="contenedor-input">
+                            <select name="rol_cue" class="input-dato" required>
+                                <option value="">Seleccione un rol</option>
+                                <option value="ADMINISTRADOR"
+                                    >Administrador</option
+                                >
+                                <option value="ORGANIZADOR">Organizador</option>
+                                <option value="ESTUDIANTE">Estudiante</option>
+                                <option value="DOCENTE">Docente</option>
+                                <option value="USUARIO">Usuario</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <p
+                        class="texto-centrado texto-roja"
+                        style="margin-top: 20px;"
+                    >
+                        Documentos y Enlaces
+                    </p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Enlace Cédula</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="url"
+                                class="input-dato"
+                                name="enl_ced_cue"
+                                placeholder="URL del documento de cédula"
+                            />
                         </div>
                     </div>
 
                     <div class="contenedor-dato">
-                        <div class="contenedor-botones-asignaciones">
-                            <button
-                                type="button"
-                                id="btn-crear-cuenta"
-                                class="boton-asignacion btn-agregar"
-                            >
-                                ➕ Crear Nueva Cuenta
-                            </button>
-                            <button
-                                type="button"
-                                id="btn-gestionar-cuentas"
-                                class="boton-asignacion btn-gestionar"
-                            >
-                                🔧 Gestionar Cuentas
-                            </button>
+                        <p class="texto-dato">Enlace Matrícula</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="url"
+                                class="input-dato"
+                                name="enl_mat_cue"
+                                placeholder="URL del documento de matrícula"
+                            />
                         </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Imagen de Perfil</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="url"
+                                class="input-dato"
+                                name="img_user"
+                                placeholder="URL de la imagen de perfil"
+                            />
+                        </div>
+                    </div>
+
+                    <p
+                        class="texto-centrado texto-roja"
+                        style="margin-top: 20px;"
+                    >
+                        Seguridad
+                    </p>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">Nueva Contraseña</p>
+                        <div class="contenedor-input">
+                            <input
+                                type="password"
+                                class="input-dato"
+                                name="cont_cuenta"
+                                placeholder="Dejar vacío para mantener la actual"
+                                minlength="6"
+                            />
+                        </div>
+                        <small style="color: #6b7280; font-size: 12px;">
+                            Dejar vacío para mantener la contraseña actual
+                        </small>
                     </div>
 
                     <div class="contenedor-boton-modificar">
@@ -170,6 +259,7 @@ const carreras = carrerasData?.carreras || [];
                             type="button"
                             class="boton-modificar"
                             onclick="cerrarModalModificarUsuario()"
+                            style="background-color: #6b7280;"
                         >
                             Cancelar
                         </button>
@@ -181,11 +271,14 @@ const carreras = carrerasData?.carreras || [];
             </form>
         </div>
         <script>
-            import { actions } from "astro:actions";
-            import Swal from "sweetalert2";
-
+            declare global {
+                interface Window {
+                    abrirModalModificarUsuario: (usuarioId: string) => void;
+                    cerrarModalModificarUsuario: () => void;
+                }
+            }
             interface Usuario {
-                id_usu: string;
+                cor_cue: string; // Primary key
                 ced_usu: string;
                 nom_usu1: string;
                 nom_usu2?: string;
@@ -194,33 +287,16 @@ const carreras = carrerasData?.carreras || [];
                 fec_nac_usu: string;
                 num_tel_usu?: string;
                 id_car_per?: string;
+                rol_cue: string;
+                cont_cuenta: string;
+                enl_ced_cue?: string;
+                enl_mat_cue?: string;
+                img_user?: string;
                 carrera?: {
                     id_car: string;
                     nom_car: string;
+                    cod_car?: string;
                 };
-                cantidadCuentas: number;
-            }
-            declare global {
-                interface Window {
-                    abrirModalModificarUsuario: (usuarioId: string) => void;
-                    cerrarModalModificarUsuario: () => void;
-                    editarCuenta: (
-                        cuentaId: string,
-                        correo: string,
-                        tipo: string,
-                    ) => void;
-                    eliminarCuenta: (
-                        cuentaId: string,
-                        cedulaUsuario: string,
-                    ) => Promise<void>;
-                    crearNuevaCuenta: () => void;
-                    abrirModalGestionarCuenta: (
-                        correo: string,
-                        rol: string,
-                        idCuenta?: string,
-                        idUsuario?: string,
-                    ) => void;
-                }
             }
 
             let usuarioActualId: string = "";
@@ -243,44 +319,58 @@ const carreras = carrerasData?.carreras || [];
                     JSON.parse((input as HTMLInputElement).value),
                 );
                 const usuario = usuarios.find(
-                    (u: Usuario) => u.id_usu === usuarioId,
+                    (u: Usuario) => u.cor_cue === usuarioId,
                 );
 
                 if (!usuario) return;
 
                 // Almacenar el ID del usuario actual
-                usuarioActualId = usuario.id_usu || "";
-
-                // Llenar el formulario con los datos del usuario
+                usuarioActualId = usuario.cor_cue || ""; // Llenar el formulario con los datos del usuario
+                const correo = form.querySelector(
+                    'input[name="cor_cue"]',
+                ) as HTMLInputElement;
                 const cedula = form.querySelector(
-                    'input[name="usuario-cedula"]',
+                    'input[name="ced_usu"]',
                 ) as HTMLInputElement;
                 const nombre1 = form.querySelector(
-                    'input[name="usuario-nombre1"]',
+                    'input[name="nom_usu1"]',
                 ) as HTMLInputElement;
                 const nombre2 = form.querySelector(
-                    'input[name="usuario-nombre2"]',
+                    'input[name="nom_usu2"]',
                 ) as HTMLInputElement;
                 const apellido1 = form.querySelector(
-                    'input[name="usuario-apellido1"]',
+                    'input[name="ape_usu1"]',
                 ) as HTMLInputElement;
                 const apellido2 = form.querySelector(
-                    'input[name="usuario-apellido2"]',
+                    'input[name="ape_usu2"]',
                 ) as HTMLInputElement;
                 const fechaNacimiento = form.querySelector(
-                    'input[name="usuario-fecha-nacimiento"]',
+                    'input[name="fec_nac_usu"]',
                 ) as HTMLInputElement;
                 const telefono = form.querySelector(
-                    'input[name="numero-usuario"]',
+                    'input[name="num_tel_usu"]',
                 ) as HTMLInputElement;
                 const carrera = form.querySelector(
-                    'select[name="carrera-usuario"]',
+                    'select[name="id_car_per"]',
                 ) as HTMLSelectElement;
-                const cedulaHidden = form.querySelector(
-                    'input[name="usuario_cedula"]',
+                const rol = form.querySelector(
+                    'select[name="rol_cue"]',
+                ) as HTMLSelectElement;
+                const enlaceCedula = form.querySelector(
+                    'input[name="enl_ced_cue"]',
+                ) as HTMLInputElement;
+                const enlaceMatricula = form.querySelector(
+                    'input[name="enl_mat_cue"]',
+                ) as HTMLInputElement;
+                const imagenPerfil = form.querySelector(
+                    'input[name="img_user"]',
+                ) as HTMLInputElement;
+                const corCueHidden = form.querySelector(
+                    'input[name="cor_cue_original"]',
                 ) as HTMLInputElement;
 
                 // Asignar valores
+                if (correo) correo.value = usuario.cor_cue || "";
                 if (cedula) cedula.value = usuario.ced_usu || "";
                 if (nombre1) nombre1.value = usuario.nom_usu1;
                 if (nombre2) nombre2.value = usuario.nom_usu2 || "";
@@ -292,13 +382,17 @@ const carreras = carrerasData?.carreras || [];
                 }
                 if (telefono) telefono.value = usuario.num_tel_usu || "";
                 if (carrera) carrera.value = usuario.id_car_per || "";
-                if (cedulaHidden) cedulaHidden.value = usuario.ced_usu || "";
-
-                // Cargar las cuentas del usuario
-                await cargarCuentasActuales(usuario.id_usu || "");
+                if (rol) rol.value = usuario.rol_cue || "";
+                if (enlaceCedula)
+                    enlaceCedula.value = usuario.enl_ced_cue || "";
+                if (enlaceMatricula)
+                    enlaceMatricula.value = usuario.enl_mat_cue || "";
+                if (imagenPerfil) imagenPerfil.value = usuario.img_user || "";
+                if (corCueHidden) corCueHidden.value = usuario.cor_cue || "";
 
                 modal.style.display = "block";
             }
+
             function cerrarModalModificarUsuario(): void {
                 const modal = document.getElementById("modalModificarUsuario");
                 const form = document.getElementById(
@@ -308,196 +402,6 @@ const carreras = carrerasData?.carreras || [];
                 if (modal && form) {
                     modal.style.display = "none";
                     form.reset();
-                }
-            }
-
-            async function cargarCuentasActuales(cedulaUsuario: string) {
-                try {
-                    const { data: cuentasData } =
-                        await actions.getCuentaById(cedulaUsuario);
-
-                    const contenedorCuentas =
-                        document.getElementById("cuentas-actuales");
-                    if (!contenedorCuentas) return;
-                    if (cuentasData && cuentasData.length > 0) {
-                        contenedorCuentas.innerHTML = cuentasData
-                            .map((cuenta: any) => {
-                                const correoMostrar =
-                                    cuenta.cor_cue || cuenta.correo_cue;
-                                return `
-                            <div class="asignacion-item" data-cuenta-id="${cuenta.id_cue}">
-                                <span class="asignacion-nombre">${correoMostrar}</span>
-                                <span class="asignacion-detalle">${cuenta.tip_cue}</span>
-                                <div class="cuenta-acciones">
-                                    <button type="button" class="btn-editar-cuenta" data-cuenta-id="${cuenta.id_cue}" data-correo="${correoMostrar}" data-tipo="${cuenta.tip_cue}">
-                                        ✏️ Editar
-                                    </button>
-                                    <button type="button" class="btn-eliminar-cuenta" data-cuenta-id="${cuenta.id_cue}" data-cedula="${cedulaUsuario}">
-                                        ❌ Eliminar
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                            })
-                            .join("");
-
-                        // Agregar event listeners a los botones creados dinámicamente
-                        setTimeout(() => {
-                            const botonesEditar =
-                                document.querySelectorAll(".btn-editar-cuenta");
-                            const botonesEliminar = document.querySelectorAll(
-                                ".btn-eliminar-cuenta",
-                            );
-
-                            botonesEditar.forEach((boton) => {
-                                boton.addEventListener("click", (e) => {
-                                    const target =
-                                        e.target as HTMLButtonElement;
-                                    const cuentaId =
-                                        target.getAttribute("data-cuenta-id");
-                                    const correo =
-                                        target.getAttribute("data-correo");
-                                    const tipo =
-                                        target.getAttribute("data-tipo");
-
-                                    if (cuentaId && correo && tipo) {
-                                        editarCuenta(cuentaId, correo, tipo);
-                                    }
-                                });
-                            });
-
-                            botonesEliminar.forEach((boton) => {
-                                boton.addEventListener("click", (e) => {
-                                    const target =
-                                        e.target as HTMLButtonElement;
-                                    const cuentaId =
-                                        target.getAttribute("data-cuenta-id");
-                                    const cedula =
-                                        target.getAttribute("data-cedula");
-
-                                    if (cuentaId && cedula) {
-                                        eliminarCuenta(cuentaId, cedula);
-                                    }
-                                });
-                            });
-                        }, 100);
-                    } else {
-                        contenedorCuentas.innerHTML =
-                            '<p class="no-cuentas">Este usuario no tiene cuentas asociadas.</p>';
-                    }
-                } catch (error) {
-                    console.error("Error al cargar cuentas actuales:", error);
-                    const contenedorCuentas =
-                        document.getElementById("cuentas-actuales");
-                    if (contenedorCuentas) {
-                        contenedorCuentas.innerHTML =
-                            '<p class="error-cuentas">Error al cargar las cuentas del usuario.</p>';
-                    }
-                }
-            }
-
-            async function eliminarCuenta(
-                cuentaId: string,
-                cedulaUsuario: string,
-            ) {
-                const resultado = await Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "Esta acción eliminará la cuenta del usuario.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#dc2626",
-                    cancelButtonColor: "#6b7280",
-                    confirmButtonText: "Sí, eliminar",
-                    cancelButtonText: "Cancelar",
-                });
-
-                if (resultado.isConfirmed) {
-                    try {
-                        const { data, error } = await actions.eliminarCuenta({
-                            id_cue: cuentaId,
-                        });
-
-                        if (data?.success) {
-                            await Swal.fire({
-                                icon: "success",
-                                title: "Eliminado",
-                                text: "Cuenta eliminada correctamente.",
-                                confirmButtonColor: "#059669",
-                            });
-
-                            // Recargar cuentas actuales
-                            await cargarCuentasActuales(cedulaUsuario);
-                        } else {
-                            throw new Error(
-                                error?.message ||
-                                    "No se pudo eliminar la cuenta.",
-                            );
-                        }
-                    } catch (error) {
-                        console.error("Error al eliminar cuenta:", error);
-                        await Swal.fire({
-                            icon: "error",
-                            title: "Error",
-                            text:
-                                error instanceof Error
-                                    ? error.message
-                                    : "No se pudo eliminar la cuenta.",
-                            confirmButtonColor: "#dc2626",
-                        });
-                    }
-                }
-            }
-
-            function editarCuenta(
-                cuentaId: string,
-                correo: string,
-                tipo: string,
-            ) {
-                // Usar la función del modal de gestionar cuenta existente
-                if (window.abrirModalGestionarCuenta) {
-                    window.abrirModalGestionarCuenta(
-                        correo,
-                        tipo,
-                        cuentaId,
-                        usuarioActualId,
-                    );
-                } else {
-                    console.error(
-                        "La función abrirModalGestionarCuenta no está disponible",
-                    );
-                }
-            }
-            function crearNuevaCuenta() {
-                // Obtener la cédula del usuario actual
-                const cedulaInput = document.querySelector(
-                    'input[name="usuario_cedula"]',
-                ) as HTMLInputElement;
-                const cedula = cedulaInput?.value;
-
-                if (!cedula) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: "No se pudo obtener la cédula del usuario.",
-                        confirmButtonColor: "#dc2626",
-                    });
-                    return;
-                }
-
-                // Crear un correo temporal basado en la cédula
-                const correoTemporal = `${cedula}@uta.edu.ec`;
-                // Usar la función del modal de gestionar cuenta para crear nueva cuenta
-                if (window.abrirModalGestionarCuenta) {
-                    window.abrirModalGestionarCuenta(
-                        correoTemporal,
-                        "estudiante",
-                        "",
-                        usuarioActualId,
-                    );
-                } else {
-                    console.error(
-                        "La función abrirModalGestionarCuenta no está disponible",
-                    );
                 }
             }
 
@@ -513,78 +417,75 @@ const carreras = carrerasData?.carreras || [];
 
                         const formData = new FormData(form);
 
-                        // Crear objeto con los datos del usuario
+                        // Obtener el correo original para la actualización
+                        const corCueOriginal = formData.get(
+                            "cor_cue_original",
+                        ) as string;
+
+                        if (!corCueOriginal) {
+                            const { default: Swal } = await import(
+                                "sweetalert2"
+                            );
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "No se pudo identificar el usuario a actualizar.",
+                                confirmButtonColor: "#dc2626",
+                            });
+                            return;
+                        } // Crear objeto con los datos del usuario
                         const usuarioData = {
-                            cedula: formData.get("usuario_cedula") as string,
-                            primerNombre: formData.get(
-                                "usuario-nombre1",
-                            ) as string,
-                            segundoNombre:
-                                (formData.get("usuario-nombre2") as string) ||
-                                "",
-                            primerApellido: formData.get(
-                                "usuario-apellido1",
-                            ) as string,
-                            segundoApellido:
-                                (formData.get("usuario-apellido2") as string) ||
-                                "",
-                            telefono:
-                                (formData.get("numero-usuario") as string) ||
-                                "",
-                            carreraId: formData.get(
-                                "carrera-usuario",
-                            ) as string,
-                            fechaNacimiento: formData.get(
-                                "usuario-fecha-nacimiento",
-                            ) as string,
+                            cor_cue: corCueOriginal,
+                            ced_usu: formData.get("ced_usu") as string,
+                            nom_usu1: formData.get("nom_usu1") as string,
+                            nom_usu2:
+                                (formData.get("nom_usu2") as string) ||
+                                undefined,
+                            ape_usu1: formData.get("ape_usu1") as string,
+                            ape_usu2:
+                                (formData.get("ape_usu2") as string) ||
+                                undefined,
+                            fec_nac_usu: formData.get("fec_nac_usu") as string,
+                            num_tel_usu:
+                                (formData.get("num_tel_usu") as string) ||
+                                undefined,
+                            id_car_per:
+                                (formData.get("id_car_per") as string) ||
+                                undefined,
+                            rol_cue: formData.get("rol_cue") as string,
+                            cont_cuenta:
+                                (formData.get("cont_cuenta") as string) ||
+                                undefined,
+                            enl_ced_cue:
+                                (formData.get("enl_ced_cue") as string) ||
+                                undefined,
+                            enl_mat_cue:
+                                (formData.get("enl_mat_cue") as string) ||
+                                undefined,
+                            img_user:
+                                (formData.get("img_user") as string) ||
+                                undefined,
                         };
+
                         try {
-                            const formDataForAction = new FormData();
-                            formDataForAction.append(
-                                "cedula",
-                                usuarioData.cedula,
-                            );
-                            formDataForAction.append(
-                                "primerNombre",
-                                usuarioData.primerNombre,
-                            );
-                            formDataForAction.append(
-                                "segundoNombre",
-                                usuarioData.segundoNombre,
-                            );
-                            formDataForAction.append(
-                                "primerApellido",
-                                usuarioData.primerApellido,
-                            );
-                            formDataForAction.append(
-                                "segundoApellido",
-                                usuarioData.segundoApellido,
-                            );
-                            formDataForAction.append(
-                                "telefono",
-                                usuarioData.telefono,
-                            );
-                            formDataForAction.append(
-                                "carreraId",
-                                usuarioData.carreraId,
-                            );
-                            formDataForAction.append(
-                                "fechaNacimiento",
-                                usuarioData.fechaNacimiento,
-                            );
-
+                            // Importar actions dinámicamente
+                            const { actions } = await import("astro:actions");
                             const { data, error } =
-                                await actions.modificarUsuario(
-                                    formDataForAction,
-                                );
+                                await actions.actualizarUsuario(usuarioData);
 
+                            const { default: Swal } = await import(
+                                "sweetalert2"
+                            );
                             if (data?.success) {
                                 await Swal.fire({
                                     icon: "success",
                                     title: "Éxito",
-                                    text: "Usuario modificado correctamente.",
+                                    text:
+                                        data.message ||
+                                        "Usuario actualizado correctamente",
                                     confirmButtonColor: "#059669",
                                 }).then(() => {
+                                    cerrarModalModificarUsuario();
                                     window.location.reload();
                                 });
                             } else {
@@ -592,13 +493,17 @@ const carreras = carrerasData?.carreras || [];
                                     icon: "error",
                                     title: "Error",
                                     text:
+                                        data?.message ||
                                         error?.message ||
-                                        "No se pudo modificar el usuario.",
+                                        "No se pudo actualizar el usuario.",
                                     confirmButtonColor: "#dc2626",
                                 });
                             }
                         } catch (error) {
                             console.error("Error:", error);
+                            const { default: Swal } = await import(
+                                "sweetalert2"
+                            );
                             await Swal.fire({
                                 icon: "error",
                                 title: "Error",
@@ -609,37 +514,166 @@ const carreras = carrerasData?.carreras || [];
                     });
                 }
 
-                // Event listeners para botones de cuentas
-                const btnCrearCuenta =
-                    document.getElementById("btn-crear-cuenta");
-                const btnGestionarCuentas = document.getElementById(
-                    "btn-gestionar-cuentas",
-                );
-
-                if (btnCrearCuenta) {
-                    btnCrearCuenta.addEventListener("click", () => {
-                        crearNuevaCuenta();
-                    });
-                }
-
-                if (btnGestionarCuentas) {
-                    btnGestionarCuentas.addEventListener("click", () => {
-                        // Abrir modal general de gestión de cuentas (funcionalidad futura)
-                        Swal.fire({
-                            icon: "info",
-                            title: "Información",
-                            text: "Usa los botones individuales de cada cuenta para gestionarlas.",
-                            confirmButtonColor: "#059669",
-                        });
-                    });
-                } // Asignar funciones al objeto window
+                // Exponer funciones globalmente
                 window.abrirModalModificarUsuario = abrirModalModificarUsuario;
                 window.cerrarModalModificarUsuario =
                     cerrarModalModificarUsuario;
-                window.editarCuenta = editarCuenta;
-                window.eliminarCuenta = eliminarCuenta;
-                window.crearNuevaCuenta = crearNuevaCuenta;
             });
         </script>
     </div>
 </div>
+
+<style>
+    /* Estilos específicos para el modal de modificar usuario */
+    .modal-contenido {
+        max-height: 90vh;
+        overflow-y: auto;
+        width: 90%;
+        max-width: 600px;
+    }
+
+    .contenedor-superior {
+        padding: 20px;
+    }
+
+    .texto-centrado.texto-roja {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 20px 0 15px 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #b01025, #d42c44);
+        color: white;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .contenedor-dato {
+        margin-bottom: 15px;
+    }
+
+    .texto-dato {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #374151;
+    }
+
+    .input-dato,
+    select.input-dato {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+    }
+
+    .input-dato:focus,
+    select.input-dato:focus {
+        outline: none;
+        border-color: #b01025;
+        box-shadow: 0 0 0 3px rgba(176, 16, 37, 0.1);
+    }
+
+    .input-dato:read-only {
+        background-color: #f3f4f6;
+        color: #6b7280;
+        cursor: not-allowed;
+    }
+
+    .contenedor-nombre {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .contenedor-boton-modificar {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .boton-modificar {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 120px;
+    }
+
+    .boton-modificar[type="submit"] {
+        background-color: #b01025;
+        color: white;
+    }
+
+    .boton-modificar[type="submit"]:hover {
+        background-color: #8e0d1f;
+        transform: translateY(-1px);
+    }
+
+    .boton-modificar:not([type="submit"]) {
+        background-color: #6b7280;
+        color: white;
+    }
+
+    .boton-modificar:not([type="submit"]):hover {
+        background-color: #4b5563;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .modal-contenido {
+            width: 95%;
+            margin: 10px;
+        }
+
+        .contenedor-nombre {
+            grid-template-columns: 1fr;
+        }
+
+        .contenedor-boton-modificar {
+            flex-direction: column;
+        }
+
+        .texto-centrado.texto-roja {
+            font-size: 16px;
+            margin: 15px 0 10px 0;
+            padding: 8px;
+        }
+    }
+
+    /* Validación visual */
+    .input-dato:invalid {
+        border-color: #dc2626;
+    }
+
+    .input-dato:valid {
+        border-color: #059669;
+    }
+
+    /* Estilos para campos requeridos */
+    span[style*="color: red"] {
+        font-weight: bold;
+    }
+
+    /* Mejorar el estilo de los selects */
+    select.input-dato {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 8px center;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-right: 40px;
+        appearance: none;
+    }
+
+    /* Mejoras para los hints */
+    small {
+        display: block;
+        margin-top: 4px;
+        font-style: italic;
+    }
+</style>
