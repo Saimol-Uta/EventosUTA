@@ -324,7 +324,7 @@ const links = [
                         <div
                             class="form-group"
                             id="estado-info"
-                            style="display: none;"
+                            style="display: none; visibility: hidden; height: 0; padding: 0; margin: 0;"
                         >
                             <label>Estado actual:</label>
                             <div id="estado-calculado" class="estado-preview">
@@ -1074,20 +1074,9 @@ const links = [
         import { actions } from "astro:actions";
         import Swal from "sweetalert2";
         import jsPDF from "jspdf";
-        import autoTable from "jspdf-autotable"; // Declarar tipos para funciones globales
-        declare global {
-            interface Window {
-                abrirModalCalificacion: (
-                    participanteId: string,
-                    nombreCompleto: string,
-                    requiereAsistencia: boolean,
-                    requierePuntaje: boolean,
-                ) => void;
-                exportarCalificaciones: () => void;
-                exportarPDF: () => void;
-                recalcularTodosLosEstados: () => void;
-            }
-        } // Función para calcular el estado dinámicamente (versión JavaScript)
+        import autoTable from "jspdf-autotable";
+
+        // Función para calcular el estado dinámicamente (versión JavaScript)
         function calcularEstadoModal(
             asistencia: number | null,
             nota: number | null,
@@ -1208,6 +1197,7 @@ const links = [
             estadoMotivo.textContent = resultado.motivo;
             estadoInfo.style.display = "block";
         } // Función para abrir modal de calificación
+        //@ts-ignore
         window.abrirModalCalificacion = function (
             participanteId: string,
             nombreCompleto: string,
@@ -1373,10 +1363,11 @@ const links = [
 
                 modal.style.display = "flex";
             }
-        };
-
-        // Cerrar modal
+        }; // Cerrar modal
         document.addEventListener("DOMContentLoaded", function () {
+            // Ejecutar recálculo automático al cargar la página
+            ejecutarRecalculoAutomatico();
+
             const closeBtn = document.querySelector(".close") as HTMLElement;
             const cancelBtn = document.querySelector(
                 ".btn-cancelar",
@@ -1536,6 +1527,7 @@ const links = [
                 });
             }
         }); // Función para exportar calificaciones
+        //@ts-ignore
         window.exportarCalificaciones = function () {
             console.log("Exportando calificaciones...");
 
@@ -1597,6 +1589,7 @@ const links = [
             window.URL.revokeObjectURL(url);
         };
 
+        //@ts-ignore
         window.exportarPDF = () => {
             const logoFISEI = new Image();
             const logoUTA = new Image();
@@ -1706,9 +1699,8 @@ const links = [
             logoFISEI.onerror = () => {
                 alert("No se pudo cargar el logo de FISEI.");
             };
-        };
-
-        // Función para recalcular todos los estados de participación
+        }; // Función para recalcular todos los estados de participación
+        //@ts-ignore
         window.recalcularTodosLosEstados = async function () {
             const resultado = await Swal.fire({
                 title: "¿Recalcular todos los estados?",
@@ -1809,9 +1801,127 @@ const links = [
                     confirmButtonText: "OK",
                 });
             }
+        }; // Función para ejecutar recálculo automático sin confirmación al cargar la página
+        async function ejecutarRecalculoAutomatico() {
+            // Obtener el ID del evento actual
+            const eventoId = window.location.pathname.split("/").pop();
+            const storageKey = `recalculo_ejecutado_${eventoId}`;
+
+            // Verificar si ya se ejecutó el recálculo para este evento
+            const yaEjecutado = localStorage.getItem(storageKey);
+            if (yaEjecutado) {
+                console.log(
+                    "ℹ️ Recálculo automático ya ejecutado para este evento, saltando...",
+                );
+                return;
+            }
+
+            console.log(
+                "🔄 Iniciando recálculo automático de estados (primera vez)...",
+            );
+
+            try {
+                // Obtener todas las filas de participantes
+                const filasParticipantes = document.querySelectorAll(
+                    ".registro-fila[data-participante-id]",
+                );
+
+                if (filasParticipantes.length === 0) {
+                    console.log("ℹ️ No hay participantes para recalcular");
+                    return;
+                }
+
+                let actualizados = 0;
+                let errores = 0;
+
+                console.log(
+                    `📊 Procesando ${filasParticipantes.length} participantes...`,
+                );
+
+                for (const fila of filasParticipantes) {
+                    try {
+                        const participanteId = (fila as HTMLElement).dataset
+                            .participanteId;
+                        const asistencia = (fila as HTMLElement).dataset
+                            .asistencia;
+                        const nota = (fila as HTMLElement).dataset.nota;
+
+                        console.log(
+                            `🔄 Recalculando participante ${participanteId}:`,
+                            { asistencia, nota },
+                        );
+
+                        const formData = new FormData();
+                        formData.append("inscripcionId", participanteId || "");
+                        if (
+                            asistencia &&
+                            asistencia !== "null" &&
+                            asistencia !== "undefined"
+                        ) {
+                            formData.append("asistencia", asistencia);
+                        }
+                        if (
+                            nota &&
+                            nota !== "null" &&
+                            nota !== "undefined" &&
+                            nota !== "Sin calificar"
+                        ) {
+                            formData.append("nota", nota);
+                        }
+
+                        const { data, error } =
+                            await actions.updateParticipante(formData);
+
+                        if (data?.success) {
+                            actualizados++;
+                        } else {
+                            console.error(
+                                `❌ Error al actualizar participante ${participanteId}:`,
+                                error,
+                            );
+                            errores++;
+                        }
+                    } catch (error) {
+                        console.error(
+                            "❌ Error al procesar participante:",
+                            error,
+                        );
+                        errores++;
+                    }
+                }
+                console.log(
+                    `✅ Recálculo automático completado: ${actualizados} actualizados, ${errores} errores`,
+                );
+
+                // Marcar como ejecutado en localStorage
+                localStorage.setItem(storageKey, "true");
+                console.log(
+                    "💾 Recálculo marcado como ejecutado para este evento",
+                );
+
+                // Si hubo actualizaciones, recargar la página para mostrar los cambios
+                if (actualizados > 0) {
+                    console.log("🔄 Recargando página para mostrar cambios...");
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error(
+                    "❌ Error durante el recálculo automático:",
+                    error,
+                );
+            }
+        } // Función de utilidad para limpiar la marca de recálculo (para debugging o forzar nuevo recálculo)
+        //@ts-ignore
+        window.limpiarMarcaRecalculo = function () {
+            const eventoId = window.location.pathname.split("/").pop();
+            const storageKey = `recalculo_ejecutado_${eventoId}`;
+            localStorage.removeItem(storageKey);
+            console.log(
+                "🧹 Marca de recálculo limpiada. El próximo recálculo se ejecutará automáticamente.",
+            );
         };
 
-        // Cerrar modal al hacer clic fuera
+        // Cerrar modalal hacer clic fuera
         window.addEventListener("click", function (event) {
             const modal = document.getElementById(
                 "modalCalificaciones",
