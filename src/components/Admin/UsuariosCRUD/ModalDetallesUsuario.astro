@@ -8,6 +8,20 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             >&times;</span
         >
         <div class="detalles-reserva">
+            <!-- Vista previa de imagen de usuario -->
+            <div
+                id="imagen-preview-container"
+                class="imagen-preview-container"
+                style="display: none;"
+            >
+                <img
+                    id="imagen-preview"
+                    class="imagen-preview"
+                    src=""
+                    alt="Imagen de perfil del usuario"
+                />
+            </div>
+
             <h2 id="usuario-nombre">Nombre del Usuario</h2>
             <div class="seccion-detalles">
                 <h3>Información Personal</h3>
@@ -244,13 +258,59 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
     .rol-docente {
         background-color: #0284c7;
     }
-
     .rol-badge:not(.rol-admin):not(.rol-administrador):not(
             .rol-organizador
         ):not(.rol-estudiante):not(.rol-docente) {
         background-color: #6b7280;
+    } /* Estilos para vista previa de imagen */
+    .imagen-preview-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        margin: 20px auto;
+        padding: 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        max-width: 220px;
+        transition: all 0.3s ease;
     }
 
+    .imagen-preview-container:hover {
+        border-color: #b01025;
+        box-shadow: 0 6px 25px rgba(176, 16, 37, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .imagen-preview {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #b01025;
+        box-shadow: 0 4px 20px rgba(176, 16, 37, 0.2);
+        transition: all 0.3s ease;
+        background-color: #fff;
+    }
+
+    .imagen-preview:hover {
+        transform: scale(1.08);
+        box-shadow: 0 6px 30px rgba(176, 16, 37, 0.3);
+        border-color: #880f1f;
+    }
+
+    /* Añadir un indicador de imagen de perfil */
+    .imagen-preview-container::before {
+        content: "👤 Imagen de Perfil";
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
     @media (max-width: 768px) {
         .info-grid {
             grid-template-columns: 1fr;
@@ -258,6 +318,20 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
 
         .contenedor-botones-asignaciones {
             flex-direction: column;
+        }
+
+        .imagen-preview-container {
+            max-width: 180px;
+            padding: 15px;
+        }
+
+        .imagen-preview {
+            width: 120px;
+            height: 120px;
+        }
+
+        .imagen-preview-container::before {
+            font-size: 12px;
         }
     }
 </style>
@@ -274,10 +348,28 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
 
     // Variable global para almacenar el usuario actual
     let usuarioActual: any = null;
-
     function cerrarModalDetallesUsuario() {
         const modal = document.getElementById("modalDetallesUsuario");
-        if (modal) modal.style.display = "none";
+        if (modal) {
+            modal.style.display = "none";
+
+            // Limpiar vista previa de imagen
+            const imagenPreviewContainer = modal.querySelector(
+                "#imagen-preview-container",
+            ) as HTMLElement;
+            const imagenPreview = modal.querySelector(
+                "#imagen-preview",
+            ) as HTMLImageElement;
+
+            if (imagenPreviewContainer) {
+                imagenPreviewContainer.style.display = "none";
+            }
+            if (imagenPreview) {
+                imagenPreview.src = "";
+                imagenPreview.onerror = null;
+                imagenPreview.onload = null;
+            }
+        }
     }
 
     async function abrirModalDetallesUsuario(usuario: any) {
@@ -657,20 +749,45 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             if (noMatricula)
                 (noMatricula as HTMLElement).style.display = "inline";
         }
-
         const linkImagen = modal.querySelector(
             "#link-imagen",
         ) as HTMLAnchorElement;
         const noImagen = modal.querySelector("#no-imagen");
+
+        // Mostrar vista previa de imagen
+        const imagenPreviewContainer = modal.querySelector(
+            "#imagen-preview-container",
+        ) as HTMLElement;
+        const imagenPreview = modal.querySelector(
+            "#imagen-preview",
+        ) as HTMLImageElement;
+
         if (usuario.img_user) {
             if (linkImagen) {
                 linkImagen.href = usuario.img_user;
                 linkImagen.style.display = "inline";
             }
             if (noImagen) (noImagen as HTMLElement).style.display = "none";
+
+            // Mostrar vista previa de la imagen
+            if (imagenPreview && imagenPreviewContainer) {
+                imagenPreview.src = usuario.img_user;
+                imagenPreview.onerror = () => {
+                    console.warn("Error al cargar imagen:", usuario.img_user);
+                    imagenPreviewContainer.style.display = "none";
+                };
+                imagenPreview.onload = () => {
+                    imagenPreviewContainer.style.display = "block";
+                };
+            }
         } else {
             if (linkImagen) linkImagen.style.display = "none";
             if (noImagen) (noImagen as HTMLElement).style.display = "inline";
+
+            // Ocultar vista previa si no hay imagen
+            if (imagenPreviewContainer) {
+                imagenPreviewContainer.style.display = "none";
+            }
         }
 
         // Establecer contadores básicos

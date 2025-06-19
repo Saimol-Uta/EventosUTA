@@ -21,14 +21,35 @@ const carreras = carrerasData?.carreras || [];
                 enctype="multipart/form-data"
             >
                 <div class="contenedor-superior">
+                    <!-- Vista previa de imagen de usuario -->
+                    <div
+                        class="contenedor-imagen-usuario"
+                        id="contenedor-imagen-usuario"
+                        style="display: none;"
+                    >
+                        <img
+                            id="imagen-usuario-preview"
+                            src=""
+                            alt="Vista previa del usuario"
+                            class="imagen-usuario-preview"
+                        />
+                        <button
+                            type="button"
+                            class="boton-quitar-imagen"
+                            onclick="quitarImagenPreview()"
+                        >
+                            <span>&times;</span>
+                        </button>
+                    </div>
+
                     <p class="texto-centrado texto-roja">
                         Información Personal
                     </p>
 
                     <div class="contenedor-dato">
                         <p class="texto-dato">
-                            Correo Electrónico <span style="color: red;"
-                                >*</span>
+                            Correo Electrónico <span style="color: red;">*</span
+                            >
                         </p>
                         <div class="contenedor-input">
                             <input
@@ -109,7 +130,8 @@ const carreras = carrerasData?.carreras || [];
                         <div class="contenedor-dato">
                             <p class="texto-dato">
                                 Primer Apellido <span style="color: red;"
-                                    >*</span>
+                                    >*</span
+                                >
                             </p>
                             <div class="contenedor-input">
                                 <input
@@ -138,7 +160,8 @@ const carreras = carrerasData?.carreras || [];
                     <div class="contenedor-dato">
                         <p class="texto-dato">
                             Fecha de Nacimiento <span style="color: red;"
-                                >*</span>
+                                >*</span
+                            >
                         </p>
                         <div class="contenedor-input">
                             <input
@@ -240,7 +263,6 @@ const carreras = carrerasData?.carreras || [];
                             />
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Imagen de Perfil</p>
                         <div class="contenedor-input">
@@ -248,9 +270,15 @@ const carreras = carrerasData?.carreras || [];
                                 type="url"
                                 class="input-dato"
                                 name="img_user"
+                                id="input-imagen-usuario"
                                 placeholder="URL de la imagen de perfil"
+                                onblur="mostrarVistaPrevia(this.value)"
                             />
                         </div>
+                        <small style="color: #6b7280; font-size: 12px;">
+                            La imagen se mostrará arriba cuando ingreses una URL
+                            válida
+                        </small>
                     </div>
 
                     <div class="contenedor-boton-modificar">
@@ -280,9 +308,64 @@ const carreras = carrerasData?.carreras || [];
         width: 90%;
         max-width: 600px;
     }
-
     .contenedor-superior {
         padding: 20px;
+    }
+
+    /* Estilos para vista previa de imagen de usuario */
+    .contenedor-imagen-usuario {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px dashed #b01025;
+    }
+
+    .imagen-usuario-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #b01025;
+        box-shadow: 0 4px 12px rgba(176, 16, 37, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .imagen-usuario-preview:hover {
+        transform: scale(1.05);
+    }
+
+    .boton-quitar-imagen {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .boton-quitar-imagen:hover {
+        background-color: #b91c1c;
+        transform: scale(1.1);
+    }
+
+    .boton-quitar-imagen span {
+        line-height: 1;
     }
 
     .texto-centrado.texto-roja {
@@ -419,6 +502,8 @@ const carreras = carrerasData?.carreras || [];
         interface Window {
             abrirModalNuevoUsuario: () => void;
             cerrarModalNuevoUsuario: () => void;
+            mostrarVistaPrevia: (url: string) => void;
+            quitarImagenPreview: () => void;
         }
     }
 
@@ -439,6 +524,63 @@ const carreras = carrerasData?.carreras || [];
         if (modal && form) {
             modal.style.display = "none";
             form.reset();
+            // Ocultar vista previa de imagen al cerrar
+            quitarImagenPreview();
+        }
+    }
+
+    function mostrarVistaPrevia(url: string): void {
+        const contenedorImagen = document.getElementById(
+            "contenedor-imagen-usuario",
+        );
+        const imagenPreview = document.getElementById(
+            "imagen-usuario-preview",
+        ) as HTMLImageElement;
+
+        if (!url || url.trim() === "") {
+            quitarImagenPreview();
+            return;
+        }
+
+        // Validar que sea una URL válida
+        try {
+            new URL(url);
+        } catch {
+            quitarImagenPreview();
+            return;
+        }
+
+        if (contenedorImagen && imagenPreview) {
+            imagenPreview.src = url;
+            imagenPreview.onload = () => {
+                contenedorImagen.style.display = "flex";
+            };
+            imagenPreview.onerror = () => {
+                quitarImagenPreview();
+                console.warn("No se pudo cargar la imagen:", url);
+            };
+        }
+    }
+
+    function quitarImagenPreview(): void {
+        const contenedorImagen = document.getElementById(
+            "contenedor-imagen-usuario",
+        );
+        const imagenPreview = document.getElementById(
+            "imagen-usuario-preview",
+        ) as HTMLImageElement;
+        const inputImagen = document.getElementById(
+            "input-imagen-usuario",
+        ) as HTMLInputElement;
+
+        if (contenedorImagen) {
+            contenedorImagen.style.display = "none";
+        }
+        if (imagenPreview) {
+            imagenPreview.src = "";
+        }
+        if (inputImagen) {
+            inputImagen.value = "";
         }
     }
 
@@ -520,10 +662,10 @@ const carreras = carrerasData?.carreras || [];
                     });
                 }
             });
-        }
-
-        // Asignar funciones al objeto window
+        } // Asignar funciones al objeto window
         window.abrirModalNuevoUsuario = abrirModalNuevoUsuario;
         window.cerrarModalNuevoUsuario = cerrarModalNuevoUsuario;
+        window.mostrarVistaPrevia = mostrarVistaPrevia;
+        window.quitarImagenPreview = quitarImagenPreview;
     });
 </script>
