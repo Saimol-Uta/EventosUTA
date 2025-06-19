@@ -3,10 +3,26 @@ import EventoCard from "./EventoCard.astro";
 import RenderPageNum from "./RenderPageNum.astro"; // Ajusta ruta según tu estructura
 import { getEventosFiltrados } from "../actions/Eventos/getFiltros";
 import type { Eventos } from "../interface/eventosSimple";
+import { actions } from "astro:actions";
+import type { CustomUser } from "../../auth.config";
+import { getSession } from "auth-astro/server";
+
+const session = await getSession(Astro.request);
+let esAdmin = false;
+
+if (session && session.user) {
+    const user = session.user as CustomUser;
+    const rol = user.rol?.toUpperCase();
+    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+        esAdmin = true;
+    }
+}
+
 
 const { filtros = {}, page = 1, cursosPorPagina = 6 } = Astro.props;
 
 const { data } = await Astro.callAction(getEventosFiltrados, filtros);
+
 
 const listaEventos = (data?.eventos || []) as Eventos[];
 
@@ -38,7 +54,11 @@ function construirUrl(pagina: number) {
         estado={evento.asignaciones?.length?.toString() || "0"}
         horas={evento.dur_eve ?? 0}
         slug={evento.id_eve}
+        modoAdmin={esAdmin}
+        esDestacado={evento.es_destacado}
+       
       />
+      
     ))
   ) : (
     <div class="sin-resultados">

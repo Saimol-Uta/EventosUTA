@@ -12,6 +12,8 @@ export interface Eventos {
     ubi_eve: string;
     ced_org_eve: string;
     img_eve?: string;
+    es_destacado?:boolean;
+
     // Relaciones
     asignaciones?: any[]; // Puedes reemplazar 'any' por la interfaz correspondiente si la tienes
     organizador?: any;    // Relación con organizadores

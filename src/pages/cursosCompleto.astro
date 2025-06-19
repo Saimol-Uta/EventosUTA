@@ -74,9 +74,15 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
     </div>
 
     <!-- Eventos filtrados con paginación -->
-    <ContenedorEventos filtros={filtros} page={page} cursosPorPagina={cursosPorPagina} />
+    <ContenedorEventos filtros={filtros} page={page} cursosPorPagina={cursosPorPagina} modoAdmin={esAdmin} />
+{esAdmin && (
+  <div style="margin-top: 20px; text-align: right;">
+    <button id="btn-guardar-favoritos" class="btn-buscar" disabled onclick="guardarFavoritos()">Guardar Eventos Favoritos</button>
+  </div>
+)}
 
-    <!-- Sin resultados (por si quieres mostrarlo manualmente) -->
+
+   
     <div class="cursos-sin-resultados" style="display: none;">
       <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
         <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
@@ -90,7 +96,7 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
   </section>
 </Layout>
 
-<!-- ✅ Estilos -->
+
 <style>
   .seccion-principal {
     padding: 20px 40px;
@@ -224,6 +230,18 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
   font-size: 0.95rem;
   color: #444;
 }
+.btn-favorito {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.btn-favorito.activo {
+  color: rgb(229, 5, 16);
+}
+
 
 </style>
 
