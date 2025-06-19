@@ -354,25 +354,17 @@ const links = [
             <div class="registros-grid">
                 <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Participantes - {
+                        {
                             eventoInfo && (
                                 <span class="evento-nombre">
                                     {eventoInfo.nom_eve}
                                 </span>
                             )
                         }
-                        <span class="total-participantes">
-                            ({participantes.length} participantes)
-                        </span>
+
                         {
                             eventoInfo?.asignaciones && (
-                                <div class="info-asignacion">
-                                    <small>
-                                        <strong>Asignación:</strong>{" "}
-                                        {eventoInfo.asignaciones.nom_asi}(
-                                        {eventoInfo.asignaciones.tip_asi})
-                                    </small>
-                                </div>
+                                <div class="info-asignacion" />
                             )
                         }
                         {
@@ -438,22 +430,63 @@ const links = [
                             <option value="REPROBADA">Reprobadas</option>
                             <option value="ASISTIO">Solo Asistió</option>
                         </select>
-                        Exportar
-                        <button
-                            class="btn-exportar"
-                            onclick="exportarCalificaciones()"
+
+                        {/* Mostrar estado del evento */}
+                        <span
+                            class={`estado-evento ${eventoInfo?.estado_evento?.toLowerCase()}`}
                         >
-                            SVG
-                        </button>
-                        <button class="btn-pdf" onclick="exportarPDF()">
-                            PDF
-                        </button>
-                        <button
-                            class="btn-recalcular"
-                            onclick="recalcularTodosLosEstados()"
-                        >
-                            Recalcular Estados
-                        </button>
+                            Estado: {eventoInfo?.estado_evento || "ACTIVO"}
+                        </span>
+
+                        {
+                            /* Botón finalizar evento - solo visible si está ACTIVO */
+                        }
+                        {
+                            eventoInfo?.estado_evento === "ACTIVO" && (
+                                <button
+                                    class="btn-finalizar"
+                                    onclick="finalizarEvento()"
+                                    title="Finalizar evento - bloqueará la edición de participaciones"
+                                >
+                                    🏁 Finalizar Evento
+                                </button>
+                            )
+                        }
+
+                        {
+                            /* Botones de exportar - solo visibles si el evento está FINALIZADO */
+                        }
+                        {
+                            eventoInfo?.estado_evento === "FINALIZADO" && (
+                                <>
+                                    Exportar
+                                    <button
+                                        class="btn-exportar"
+                                        onclick="exportarCalificaciones()"
+                                    >
+                                        SVG
+                                    </button>
+                                    <button
+                                        class="btn-pdf"
+                                        onclick="exportarPDF()"
+                                    >
+                                        PDF
+                                    </button>
+                                </>
+                            )
+                        }
+
+                        {/* Botón recalcular - solo visible si está ACTIVO */}
+                        {
+                            eventoInfo?.estado_evento === "ACTIVO" && (
+                                <button
+                                    class="btn-recalcular"
+                                    onclick="recalcularTodosLosEstados()"
+                                >
+                                    Recalcular Estados
+                                </button>
+                            )
+                        }
                     </div>
                 </div>
                 <div class="registros-inferior-titulos">
@@ -632,14 +665,22 @@ const links = [
                                         </div>{" "}
                                         <div class="registro-opciones">
                                             <button
-                                                onclick={`abrirModalCalificacion('${participante.id_ins}', '${participante.usuarios?.nom_usu1} ${participante.usuarios?.nom_usu2 || ""} ${participante.usuarios?.ape_usu1} ${participante.usuarios?.ape_usu2}', ${requiereAsistencia}, ${requierePuntaje})`}
-                                                title={
-                                                    requiereAsistencia ||
-                                                    requierePuntaje
-                                                        ? "Editar Calificación"
-                                                        : "Este evento no requiere calificación"
+                                                onclick={
+                                                    eventoInfo?.estado_evento ===
+                                                    "FINALIZADO"
+                                                        ? ""
+                                                        : `abrirModalCalificacion('${participante.id_ins}', '${participante.usuarios?.nom_usu1} ${participante.usuarios?.nom_usu2 || ""} ${participante.usuarios?.ape_usu1} ${participante.usuarios?.ape_usu2}', ${requiereAsistencia}, ${requierePuntaje})`
                                                 }
-                                                class={`btn-calificar ${!requiereAsistencia && !requierePuntaje ? "btn-disabled" : ""}`}
+                                                title={
+                                                    eventoInfo?.estado_evento ===
+                                                    "FINALIZADO"
+                                                        ? "Evento finalizado - No se pueden editar calificaciones"
+                                                        : requiereAsistencia ||
+                                                            requierePuntaje
+                                                          ? "Editar Calificación"
+                                                          : "Este evento no requiere calificación"
+                                                }
+                                                class={`btn-calificar ${(!requiereAsistencia && !requierePuntaje) || eventoInfo?.estado_evento === "FINALIZADO" ? "btn-disabled" : ""}`}
                                             >
                                                 <img
                                                     class="imagen-boton-registro"
@@ -843,9 +884,54 @@ const links = [
             cursor: pointer;
             font-weight: bold;
         }
-
         .btn-recalcular:hover {
             background-color: #138496;
+        }
+
+        /* Estilos para botón finalizar evento */
+        .btn-finalizar {
+            background-color: #fd7e14;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .btn-finalizar:hover {
+            background-color: #e8670e;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para estado del evento */
+        .estado-evento {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        .estado-evento.activo {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .estado-evento.finalizado {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .estado-evento.cancelado {
+            background-color: #e2e3e5;
+            color: #6c757d;
+            border: 1px solid #d6d8db;
         }
         /* Modal styles */
         .modal {
@@ -1076,6 +1162,18 @@ const links = [
         import jsPDF from "jspdf";
         import autoTable from "jspdf-autotable";
 
+        // Extiende la interfaz Window para evitar errores de TypeScript
+        declare global {
+            interface Window {
+                abrirModalCalificacion?: any;
+                exportarCalificaciones?: any;
+                exportarPDF?: any;
+                recalcularTodosLosEstados?: any;
+                finalizarEvento?: any;
+                limpiarMarcaRecalculo?: any;
+            }
+        }
+
         // Función para calcular el estado dinámicamente (versión JavaScript)
         function calcularEstadoModal(
             asistencia: number | null,
@@ -1196,8 +1294,7 @@ const links = [
             estadoTexto.className = `badge-estado ${resultado.clase}`;
             estadoMotivo.textContent = resultado.motivo;
             estadoInfo.style.display = "block";
-        } // Función para abrir modal de calificación
-        //@ts-ignore
+        } // Función para abrir modal de calificación        //@ts-ignore
         window.abrirModalCalificacion = function (
             participanteId: string,
             nombreCompleto: string,
@@ -1207,7 +1304,26 @@ const links = [
             console.log("=== VALIDANDO APERTURA DEL MODAL ===");
             console.log("Participante ID:", participanteId);
             console.log("Requiere asistencia:", requiereAsistencia);
-            console.log("Requiere puntaje:", requierePuntaje); // Validar si el evento requiere al menos asistencia o puntaje
+            console.log("Requiere puntaje:", requierePuntaje);
+
+            // Verificar si el evento está finalizado
+            const estadoEventoElement =
+                document.querySelector(".estado-evento");
+            const estadoEvento =
+                estadoEventoElement?.textContent?.includes("FINALIZADO");
+
+            if (estadoEvento) {
+                Swal.fire({
+                    title: "Evento finalizado",
+                    text: "No se pueden editar las calificaciones porque el evento ya está finalizado.",
+                    icon: "warning",
+                    confirmButtonText: "Entendido",
+                    confirmButtonColor: "#b01025",
+                });
+                return;
+            }
+
+            // Validar si el evento requiere al menos asistencia o puntaje
             if (!requiereAsistencia && !requierePuntaje) {
                 // Mostrar mensaje informativo y no abrir el modal
                 Swal.fire({
@@ -1910,7 +2026,71 @@ const links = [
                     error,
                 );
             }
-        } // Función de utilidad para limpiar la marca de recálculo (para debugging o forzar nuevo recálculo)
+        }
+
+        // Función para finalizar evento
+        //@ts-ignore
+        window.finalizarEvento = async function () {
+            const resultado = await Swal.fire({
+                title: "¿Finalizar el evento?",
+                text: "Esta acción finalizará el evento y bloqueará la edición de participaciones. ¿Estás seguro?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#fd7e14",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Sí, finalizar evento",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (!resultado.isConfirmed) return;
+
+            try {
+                // Mostrar loader
+                Swal.fire({
+                    title: "Finalizando evento...",
+                    text: "Por favor espera mientras se finaliza el evento.",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                const eventoId = window.location.pathname.split("/").pop();
+                const formData = new FormData();
+                formData.append("eventoId", eventoId || "");
+
+                const { data, error } = await actions.finalizarEvento(formData);
+
+                if (data?.success) {
+                    await Swal.fire({
+                        title: "¡Evento finalizado!",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonText: "OK",
+                    });
+
+                    // Recargar la página para mostrar los cambios
+                    window.location.reload();
+                } else {
+                    await Swal.fire({
+                        title: "Error",
+                        text: error?.message || "Error al finalizar el evento",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                }
+            } catch (error) {
+                console.error("Error al finalizar evento:", error);
+                await Swal.fire({
+                    title: "Error",
+                    text: "Ocurrió un error durante la finalización del evento.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            }
+        };
+
+        // Función de utilidad para limpiar la marca de recálculo (para debugging o forzar nuevo recálculo)
         //@ts-ignore
         window.limpiarMarcaRecalculo = function () {
             const eventoId = window.location.pathname.split("/").pop();

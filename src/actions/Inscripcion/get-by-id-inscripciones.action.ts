@@ -66,7 +66,8 @@ export const getByIdInscripcion = defineAction({
                             precio: true, // Campo que faltaba
                             es_gratuito: true, // Campo que faltaba
                             requiere_carta: true, // Campo que faltaba
-                            car_mot_eve: true, // Campo que faltaba
+                            car_mot_eve: true,
+                            estado_evento: true,
                             categorias_eventos: {
                                 select: {
                                     id_cat: true,
