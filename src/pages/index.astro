@@ -6,6 +6,7 @@ import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
 import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
+import MenuAdmin from '../components/MenuAdministrador.astro';
 import InformacionUsuario from "@/components/InformacionUsuario.astro";
 import ContenedorInfo from "@/components/ContenedorInfo.astro";
 import prisma from "@/db";
@@ -27,7 +28,8 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 
 <Layout>
     <Header />
-    <Navbar />
+    
+    {esAdmin ? <MenuAdmin /> : <Navbar/>}
     <InformacionFacultad
         tituloFacultad="Facultad de Ingenieria en Sistemas Electronica e Industrial"
         tituloDescripcion="Descripción"
