@@ -1,0 +1,145 @@
+---
+import "../styles/global.css";
+const {
+  imagen,
+  titulo,
+  resumen,
+  horas,
+  slug
+} = Astro.props;
+---
+
+<a class="card-evento" href={`/Eventos/${slug}`}>
+  <!-- Imagen superior -->
+  <img class="card-img" src={imagen || "/img/logo-fisei.png"} alt="Imagen del evento" />
+
+  <!-- Contenido tipo vidrio -->
+  <div class="info-overlay">
+    <h3 class="titulo">{titulo}</h3>
+    <p class="resumen">{resumen}</p>
+
+    <div class="etiquetas-footer">
+      <div class="etiqueta horas">{horas} horas</div>
+      {horas === 0 || horas === null ? (
+        <div class="etiqueta gratis">Gratis</div>
+      ) : (
+        <div class="etiqueta precio">${(horas * 1.5).toFixed(2)}</div>
+      )}
+    </div>
+  </div>
+</a>
+
+<style>
+.card-evento {
+  width: 100%;
+  max-width: 460px;
+  margin: auto;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-evento:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+}
+
+/* Imagen arriba */
+.card-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Contenido estilo vidrio */
+.info-overlay {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 160px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.titulo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e1e1e;
+  margin: 0;
+}
+
+.resumen {
+  font-size: 1rem;
+  color: #444;
+  margin: 0;
+  line-height: 1.5;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  display: -webkit-box;
+}
+
+.etiquetas-footer {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.etiqueta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  white-space: nowrap;
+}
+
+.etiqueta.horas {
+  color: #0d3b66;
+  background-color: rgba(13, 59, 102, 0.1);
+}
+
+.etiqueta.gratis {
+  color: #1c8f39;
+  background-color: rgba(28, 143, 57, 0.1);
+}
+
+.etiqueta.precio {
+  color: #b30000;
+  background-color: rgba(179, 0, 0, 0.1);
+}
+
+@media (max-width: 640px) {
+  .card-evento {
+    margin: 16px;
+  }
+
+  .card-img {
+    height: 160px;
+  }
+
+  .info-overlay {
+    padding: 16px;
+  }
+
+  .titulo {
+    font-size: 1.1rem;
+  }
+
+  .resumen {
+    -webkit-line-clamp: 2;
+  }
+}
+</style>
