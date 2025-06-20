@@ -86,14 +86,22 @@ export const getDatosInscripcion = defineAction({
             // GENERAL y EXTERNO permiten cualquier usuario
         }
 
+        if (!evento) {
+            throw new Error("Evento no encontrado");
+        }
+
         return {
             data: {
                 usuario,
-                evento,
+                evento: {
+                    ...evento,
+                    requiere_carta: evento.requiere_carta,
+                    // otros campos...
+                },
                 inscripcion,
                 puede_inscribirse: puedeInscribirse,
                 razon_restricciones: razonRestricciones,
-                carreras_asignacion: evento?.asignaciones?.detalle_asignaciones.map(det => det.carreras) || [],
+                carreras_asignacion: evento.asignaciones?.detalle_asignaciones.map(det => det.carreras) || [],
             }
         };
     },

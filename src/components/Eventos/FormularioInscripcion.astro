@@ -28,6 +28,7 @@ const requisitosCompletos = Array.isArray(requisitos) && requisitos.length > 0;
 const datosUsuarioCompletos =
     usuario?.nom_usu1 && usuario?.ape_usu1 && usuario?.ced_usu;
 const esPagado = Number(evento?.precio ?? 0) > 0;
+const requiereCarta = Boolean(evento?.requiere_carta);
 
 // Inicialización
 let inscripcion = null;
@@ -45,17 +46,24 @@ if (Astro.request.method === "POST") {
     let metodoPago = formData.get("metodoPago") ?? "";
     let enlaceComprobante: string | undefined = undefined;
 
+    // NUEVO: Obtener carta de motivación si es requerida
+    let cartaMotivacion: string | undefined = undefined;
+    if (requiereCarta) {
+        cartaMotivacion = formData.get("car_mot_eve")?.toString().trim();
+        if (!cartaMotivacion) {
+            inscripcionError = { message: "Debes escribir la carta de motivación para inscribirte." };
+        }
+    }
+
     // Procesamiento para cursos pagados
     if (esPagado) {
         // Normaliza el método de pago a los valores válidos de la base de datos
         if (typeof metodoPago === "string") {
             const metodo = metodoPago.trim().toUpperCase();
-            if (["TRANSFERENCIA", "DEPOSITO", "ONLINE"].includes(metodo)) {
+            if (["TRANSFERENCIA", "EFECTIVO"].includes(metodo)) {
                 metodoPago = metodo;
-            } else if (metodo === "EFECTIVO") {
-                metodoPago = "DEPOSITO";
             } else {
-                metodoPago = "TRANSFERENCIA";
+                metodoPago = "TRANSFERENCIA"; // Valor por defecto seguro
             }
         }
 
@@ -88,6 +96,7 @@ if (Astro.request.method === "POST") {
             idEvento: string;
             metodoPago?: string;
             enlaceComprobante?: string;
+            car_mot_eve?: string; // <-- Agrega este campo
         } = {
             idUsuario:
                 typeof idUsuario === "string" ? idUsuario : String(idUsuario),
@@ -103,12 +112,23 @@ if (Astro.request.method === "POST") {
                 params.enlaceComprobante = enlaceComprobante;
             }
         }
+        // NUEVO: Agregar carta de motivación si existe
+        if (requiereCarta && cartaMotivacion) {
+            params.car_mot_eve = cartaMotivacion;
+        }
+        // Si hay error por carta de motivación, no continuar
+        if (inscripcionError) throw inscripcionError;
+
+        console.log("PARAMS ENVIADOS A setDatosInscripcion:", params);
+
         const { data, error } = await Astro.callAction(
             actions.setDatosInscripcion,
             params,
         );
         inscripcionResult = data;
         inscripcionError = error;
+        // LOG para verificar si se guarda en la base de datos
+        console.log("RESULTADO DE setDatosInscripcion:", { data, error });
     } catch (err) {
         inscripcionError = {
             message:
@@ -128,6 +148,30 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
     });
     yaInscrito = Boolean(data?.data?.inscripcion?.id_ins); // Esta es la validación correcta
 }
+
+// Validación de restricción de asignación
+let restriccionAsignacion = null;
+if (evento?.asignaciones) {
+    const tipoAsignacion = evento.asignaciones.tip_asi;
+    // Aplana el array de carreras y tipa los objetos
+    const carrerasAsignacion = (evento.asignaciones.detalle_asignaciones?.flatMap((det: { carreras: { id_car?: string; id_fac_per?: string }[] }) => det.carreras) ?? []) as { id_car?: string; id_fac_per?: string }[];
+
+    if (tipoAsignacion === 'CARRERA') {
+        const carreraPermitida = carrerasAsignacion.some(carrera =>
+            carrera.id_car === usuario?.id_car_per
+        );
+        if (!carreraPermitida) {
+            restriccionAsignacion = "No tienes acceso a este evento según tu carrera.";
+        }
+    } else if (tipoAsignacion === 'FACULTAD') {
+        const facultadPermitida = carrerasAsignacion.some(carrera =>
+            carrera.id_fac_per === usuario?.carreras?.id_fac_per
+        );
+        if (!facultadPermitida) {
+            restriccionAsignacion = "No tienes acceso a este evento según tu facultad.";
+        }
+    }
+}
 ---
 
 {/* MENSAJE ÚNICO CENTRADO Y CON ESTILO */}
@@ -144,8 +188,7 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
   "
         >
             <div
-                style={`
-      padding: 1.5rem 2.5rem;
+                style={`padding: 1.5rem 2.5rem;
       border-radius: 12px;
       font-size: 1.2rem;
       font-weight: bold;
@@ -153,51 +196,42 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
       box-shadow: 0 2px 12px #0001;
       background: #fff;
       color: ${
-          inscripcionError
+          inscripcionError || (inscripcionResult && inscripcionResult.success === false)
               ? "#c0392b"
-              : inscripcionResult
+              : inscripcionResult && inscripcionResult.success === true
                 ? "#1e7e34"
                 : "#e67e22"
       };
       border: 2px solid ${
-          inscripcionError
+          inscripcionError || (inscripcionResult && inscripcionResult.success === false)
               ? "#e74c3c"
-              : inscripcionResult
+              : inscripcionResult && inscripcionResult.success === true
                 ? "#28a745"
                 : "#f39c12"
       };
       max-width: 600px;
-      margin: 0 auto;
-    `}
+      margin: 0 auto;`}
             >
                 {inscripcionError
                     ? `Error al inscribirse: ${inscripcionError.message}`
-                    : inscripcionResult
-                      ? "Inscripción realizada correctamente. Estado: pendiente de revisión."
-                      : "Ya estás inscrito en este evento. Estado: pendiente de revisión."}
+                    : inscripcionResult && inscripcionResult.success === false
+                        ? `Error al inscribirse: ${inscripcionResult.message}`
+                        : inscripcionResult && inscripcionResult.success === true
+                            ? "Inscripción realizada correctamente. Estado: pendiente de revisión."
+                            : yaInscrito
+                                ? "Ya estás inscrito en este evento."
+                                : ""}
             </div>
-            {(inscripcionResult || yaInscrito) && (
+            {(inscripcionResult && inscripcionResult.success === true) || yaInscrito ? (
                 <a
                     href="/homeUser"
-                    style="
-        margin-top: 2rem;
-        display: inline-block;
-        background: #1e7e34;
-        color: #fff;
-        padding: 0.7rem 2rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        text-decoration: none;
-        box-shadow: 0 2px 8px #0001;
-        transition: background 0.2s;
-      "
+                    style="margin-top: 2rem; display: inline-block; background: #1e7e34; color: #fff; padding: 0.7rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 2px 8px #0001; transition: background 0.2s;"
                     onmouseover="this.style.background='#145523'"
                     onmouseout="this.style.background='#1e7e34'"
                 >
                     Ir a inicio
                 </a>
-            )}
+            ) : null}
         </div>
     )
 }
@@ -216,7 +250,7 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
             <input
                 type="hidden"
                 name="idUsuario"
-                value={usuario?.cuentas?.[0]?.id_cue || usuario?.id_usu || ""}
+                value={usuario?.cor_cue ?? usuario?.cuentas?.[0]?.cor_cue ?? ""}
             />
             <input type="hidden" name="idEvento" value={evento?.id_eve || ""} />
             <div class="form-card" style="padding: 2rem;">
@@ -228,7 +262,7 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
                     <label>Correo electrónico</label>
                     <input
                         type="email"
-                        value={usuario?.cuentas?.[0]?.cor_cue ?? ""}
+                        value={usuario?.cor_cue ?? usuario?.cuentas?.[0]?.cor_cue ?? ""}
                         readonly
                     />
                 </div>
@@ -319,10 +353,8 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
                         <div class="form-group">
                             <label for="metodoPago">Forma de pago</label>
                             <select id="metodoPago" name="metodoPago" required>
-                                <option value="efectivo">Efectivo</option>
-                                <option value="transferencia">
-                                    Transferencia Bancaria
-                                </option>
+                                <option value="EFECTIVO">Efectivo</option>
+                                <option value="TRANSFERENCIA">Transferencia Bancaria</option>
                             </select>
                         </div>
 
@@ -363,6 +395,23 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
                                 No se ha seleccionado ningún archivo
                             </p>
                         </div>
+                    </div>
+                )}
+
+                {/* Detectar si el evento requiere carta de motivación */}
+                {requiereCarta && (
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label for="car_mot_eve" style="font-weight: bold;">
+                            Carta de motivación <span style="color: red;">*</span>
+                        </label>
+                        <textarea
+                            id="car_mot_eve"
+                            name="car_mot_eve"
+                            rows="6"
+                            required={requiereCarta}
+                            placeholder="Escribe aquí tu carta de motivación para inscribirte en este evento..."
+                            style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;"
+                        ></textarea>
                     </div>
                 )}
 
@@ -465,6 +514,7 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
         const esPagado = !!JSON.parse(
             document.getElementById("es-pagado").value,
         );
+        const requiereCarta = !!JSON.parse(document.getElementById("requiere-carta").value);
         ocultarErrorValidacion();
         if (!datosUsuarioCompletos) {
             mostrarErrorValidacion(
@@ -485,6 +535,13 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
             const fileInput = document.getElementById("file-upload");
             if (!fileInput || !fileInput.files.length) {
                 mostrarErrorValidacion("Debes subir el comprobante de pago.");
+                return false;
+            }
+        }
+        if (requiereCarta) {
+            const carta = document.getElementById("car_mot_eve");
+            if (!carta || !carta.value.trim()) {
+                mostrarErrorValidacion("Debes escribir la carta de motivación para inscribirte.");
                 return false;
             }
         }
@@ -526,3 +583,4 @@ if (idUsuarioBusqueda && idEventoBusqueda) {
     value={JSON.stringify(!!datosUsuarioCompletos)}
 />
 <input type="hidden" id="es-pagado" value={JSON.stringify(!!esPagado)} />
+<input type="hidden" id="requiere-carta" value={JSON.stringify(!!requiereCarta)} />
