@@ -450,16 +450,14 @@ const links = [
             `${inscripcion.usuarios?.nom_usu1 || ""} ${inscripcion.usuarios?.nom_usu2 || ""}`.trim();
         const apellidoCompleto =
             `${inscripcion.usuarios?.ape_usu1 || ""} ${inscripcion.usuarios?.ape_usu2 || ""}`.trim();
-        const correo = inscripcion.usuarios?.cor_cue || "No disponible";
-
-        // Buscar elementos específicos del modal de pago
+        const correo = inscripcion.usuarios?.cor_cue || "No disponible";        // Buscar elementos específicos del modal de pago
         const modalPago = document.getElementById("modalDetallesPago");
         if (modalPago) {
             const modalPagoTitulo = modalPago.querySelector("h2");
-            const pagoNombresModal = modalPago.querySelector("#usuario-nombres");
-            const pagoApellidosModal = modalPago.querySelector("#usuario-apellidos");
-            const pagoCorreoModal = modalPago.querySelector("#usuario-correo");
-            const pagoCedulaModal = modalPago.querySelector("#usuario-cedula");
+            const pagoNombresModal = modalPago.querySelector("#usuario-nombres-pago");
+            const pagoApellidosModal = modalPago.querySelector("#usuario-apellidos-pago");
+            const pagoCorreoModal = modalPago.querySelector("#usuario-correo-pago");
+            const pagoCedulaModal = modalPago.querySelector("#usuario-cedula-pago");
 
             if (modalPagoTitulo)
                 modalPagoTitulo.textContent = inscripcion.eventos?.nom_eve || "Evento";
@@ -468,13 +466,25 @@ const links = [
             if (pagoCorreoModal) pagoCorreoModal.textContent = correo;
             if (pagoCedulaModal)
                 pagoCedulaModal.textContent = inscripcion.usuarios?.ced_usu || "No disponible";
-        }
-
-        // Cargar y mostrar el comprobante de pago
+        }        // Cargar y mostrar el comprobante de pago
         cargarComprobantePagoModal(inscripcion);
         
         // Verificar requisitos y actualizar el botón de aprobar
         verificarRequisitosPagoYActualizarBoton(inscripcion);
+
+        // Abrir el modal usando las funciones del componente
+        console.log("🔄 Delegando a las funciones del componente...");
+        
+        // Usar las funciones del componente directamente
+        if ((window as any).cargarInformacionUsuarioPago) {
+            (window as any).cargarInformacionUsuarioPago(inscripcionId);
+        }
+        if ((window as any).cargarComprobantePago) {
+            (window as any).cargarComprobantePago(inscripcionId);
+        }
+        if ((window as any).verificarRequisitosPagoYActualizarBoton) {
+            (window as any).verificarRequisitosPagoYActualizarBoton();
+        }
 
         // Abrir el modal
         const modal = document.getElementById("modalDetallesPago");
