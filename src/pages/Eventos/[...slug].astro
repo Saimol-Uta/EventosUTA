@@ -14,7 +14,6 @@ interface Props {
     startDate?: string;
     endDate?: string;
     targetAudience?: string[];
-    requirements?: string[];
     organizer?: string;
     image?: string;
     slug: string;
@@ -31,7 +30,64 @@ if (error) {
     return Astro.redirect("/404");
 }
 
-const { evento, requisitos, organizador } = data;
+const { evento } = data;
+
+// Formatear fechas para mostrar
+const formatearFecha = (fecha: string | Date) => {
+    const date = typeof fecha === "string" ? new Date(fecha) : fecha;
+    return date.toLocaleDateString("es-ES", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+};
+
+// Formatear duración
+const formatearDuracion = (minutos: number) => {
+    if (minutos < 60) {
+        return `${minutos} minutos`;
+    } else if (minutos < 1440) {
+        const horas = Math.floor(minutos / 60);
+        const minutosRestantes = minutos % 60;
+        return minutosRestantes > 0
+            ? `${horas}h ${minutosRestantes}m`
+            : `${horas} horas`;
+    } else {
+        const dias = Math.floor(minutos / 1440);
+        const horasRestantes = Math.floor((minutos % 1440) / 60);
+        return horasRestantes > 0
+            ? `${dias} días ${horasRestantes}h`
+            : `${dias} días`;
+    }
+};
+
+// Función para comparar solo fechas (sin horas)
+function esHoyODespues(fecha: Date) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const comparar = new Date(fecha);
+    comparar.setHours(0, 0, 0, 0);
+    return hoy >= comparar;
+}
+
+function esAntesDe(fecha: Date) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const comparar = new Date(fecha);
+    comparar.setHours(0, 0, 0, 0);
+    return hoy < comparar;
+}
+
+const inscripcionDisponible = () => {
+    const inicio = new Date(evento.fec_ini_ins_eve);
+    const fin = new Date(evento.fec_fin_ins_eve);
+    return esHoyODespues(inicio) && !esAntesDe(fin);
+};
+
+const inscripcionProximamente = () => {
+    const inicio = new Date(evento.fec_ini_ins_eve);
+    return esAntesDe(inicio);
+};
 ---
 
 <Layout>
@@ -76,7 +132,6 @@ const { evento, requisitos, organizador } = data;
             {evento.des_eve}
         </p>
     </div>
-
     <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
         <div style="flex: 1;">
             <strong>Lugar de celebración:</strong>
@@ -84,61 +139,123 @@ const { evento, requisitos, organizador } = data;
         </div>
         <div style="flex: 1;">
             <strong>Duración:</strong>
-            <p>{evento.dur_eve}</p>
+            <p>
+                {
+                    evento.dur_eve
+                        ? formatearDuracion(evento.dur_eve)
+                        : "No especificada"
+                }
+            </p>
         </div>
     </div>
 
     <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
         <div style="flex: 1;">
             <strong>Fecha de inicio:</strong>
-            <p>{evento.fec_ini_eve}</p>
+            <p>{formatearFecha(evento.fec_ini_eve)}</p>
         </div>
         <div style="flex: 1;">
             <strong>Fecha de finalización:</strong>
-            <p>{evento.fec_fin_eve}</p>
+            <p>
+                {
+                    evento.fec_fin_eve
+                        ? formatearFecha(evento.fec_fin_eve)
+                        : "No especificada"
+                }
+            </p>
         </div>
     </div>
 
-    <div
-        style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;"
-    >
-        <strong style="display: block; margin-bottom: 0.5rem;"
-            >Dirigido a:</strong
-        >
-        <ul style="margin: 0; padding-left: 1.5rem;">
-            {
-               evento.eventos_asignaciones.map((ea) => (
-    <li>{ea.asignaciones.nom_asi}</li>
-))
-            }
-        </ul>
-    </div>
-    <div
-        style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;"
-    >
-        <strong style="display: block; margin-bottom: 0.5rem;"
-            >Requisitos para ingresar al grupo:</strong
-        >
-        <ul style="margin: 0; padding-left: 1.5rem;">
-            {requisitos.map((requisito) => <li>{requisito.nom_req}</li>)}
-        </ul>
-    </div>
+    {
+        evento.asignaciones && (
+            <div style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;">
+                <strong style="display: block; margin-bottom: 0.5rem;">
+                    Dirigido a:
+                </strong>
+                <div style="margin: 0; padding-left: 1.5rem;">
+                    <p>
+                        <strong>Tipo de asignación:</strong>{" "}
+                        {evento.asignaciones.nom_asi}
+                    </p>
+                    <p>
+                        <strong>Descripción:</strong>{" "}
+                        {evento.asignaciones.des_asi}
+                    </p>
+
+                    {evento.asignaciones.detalle_asignaciones &&
+                        evento.asignaciones.detalle_asignaciones.length > 0 && (
+                            <div style="margin-top: 1rem;">
+                                <strong>Carreras incluidas:</strong>
+                                <ul style="margin-top: 0.5rem;">
+                                    {evento.asignaciones.detalle_asignaciones.map(
+                                        (detalle: any) => (
+                                            <li>{detalle.carreras.nom_car}</li>
+                                        ),
+                                    )}
+                                </ul>
+                            </div>
+                        )}
+                </div>
+            </div>
+        )
+    }
+
+    {
+        evento.precio && Number(evento.precio) > 0 && (
+            <div style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;">
+                <strong style="display: block; margin-bottom: 0.5rem;">
+                    Información de pago:
+                </strong>
+                <p style="margin: 0;">
+                    <strong>Precio:</strong> ${Number(evento.precio).toFixed(2)}
+                    {evento.es_gratuito && (
+                        <span style="color: green;"> (Evento gratuito)</span>
+                    )}
+                </p>
+            </div>
+        )
+    }
 
     <div style="margin-bottom: 2rem;">
         <strong>Organizador:</strong>
         <p>
-            {evento.organizadores.tit_aca_org}.
-            {evento.organizadores.nom_org1}{evento.organizadores.nom_org2}
-            {evento.organizadores.ape_org1}{evento.organizadores.ape_org2}
+            {evento.organizadores.tit_aca_org}
+            {evento.organizadores.nom_org1}
+            {
+                evento.organizadores.nom_org2
+                    ? ` ${evento.organizadores.nom_org2}`
+                    : ""
+            }
+            {` ${evento.organizadores.ape_org1}`}
+            {
+                evento.organizadores.ape_org2
+                    ? ` ${evento.organizadores.ape_org2}`
+                    : ""
+            }
         </p>
     </div>
 
     <div class="text-center mb-8">
-        <a
-            href={`/Eventos/Evento-Inscripcion/${slug}`}
-            class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
-        >
-            Registrarme en el curso
-        </a>
+        {
+            inscripcionDisponible() ? (
+                <a
+                    href={`/Eventos/Evento-Inscripcion/${slug}`}
+                    class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
+                >
+                    Registrarme en el curso
+                </a>
+            ) : inscripcionProximamente() ? (
+                <span style="color: #b91c1c; font-weight: bold; font-size: 1.2rem;">
+                    Evento próximamente. Inscripciones desde: <br />
+                    <span style="color: #222;">
+                        {formatearFecha(evento.fec_ini_ins_eve)}
+                    </span>
+                </span>
+            ) : (
+                <span style="color: #b91c1c; font-weight: bold; font-size: 1.2rem;">
+                    Fecha límite superada para inscribirse
+                </span>
+            )
+        }
     </div>
 </section>

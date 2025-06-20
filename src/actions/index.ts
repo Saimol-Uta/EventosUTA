@@ -1,5 +1,8 @@
-
 import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras } from './Eventos';
+import { finalizarEvento } from './Eventos/finalizar-evento.action';
+
+// Importaciones de Facultades
+import { getAllFacultades, getFacultadById } from './Facultades/get-facultades.action';
 
 // Importaciones de Asignaciones
 import {
@@ -33,6 +36,11 @@ import { modificarUsuario } from './Users/modificar-usuario.action';
 import { setUser } from './Users/setUsers.action';
 import { getAllUsers } from './Admin/get-all-user.action';
 import { getUsersWithAccounts } from './Users/get-users-with-accounts.action';
+import { getInscripcionesByUser } from './Users/get-inscripciones-by-user.action';
+import { getCambiosByUser } from './Users/get-cambios-by-user.action';
+import { getPerfilCompleto } from './Users/get-perfil-completo.action';
+import { actualizarUsuario } from './Users/actualizar-usuario.action';
+import { crearUsuario } from './Users/crear-usuario.action';
 
 import { getDatosInscripcion } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
@@ -64,10 +72,14 @@ export const server = {
     SignIn,
     getEventosPorUsuario,
     createCambio,
-    getUseById,
-    getUserByCedula,
+    getUseById, getUserByCedula,
     setUser, getAllUsers,
     getUsersWithAccounts,
+    getInscripcionesByUser,
+    getCambiosByUser,
+    getPerfilCompleto,
+    actualizarUsuario,
+    crearUsuario,
     eliminarUsuario,
     modificarUsuario,
     uploadImageUser, getCuentaById,
@@ -96,10 +108,10 @@ export const server = {
     getOrganizadorByEvento,
     getOrganizadores,
     getCategoriaById,
-    getCategorias,
-    crearEvento,
+    getCategorias, crearEvento,
     modificarEvento,
-    eliminarEvento,    // Nuevas acciones para asignaciones
+    eliminarEvento,
+    finalizarEvento,// Nuevas acciones para asignaciones
     getCarreras,
     getAsignacionesByEvento,
     crearAsignacion,
@@ -114,8 +126,7 @@ export const server = {
     vincularAsignacionAEvento,
 
     crearAsignacionesPrueba,    // Nuevas acciones para CRUD de carreras
-    crearCarrera,
-    modificarCarrera,
+    crearCarrera, modificarCarrera,
     eliminarCarrera,
     getAllCarreras,
     getCarreraById,
@@ -135,7 +146,11 @@ export const server = {
     //description
     updatePaginaPrincipal,
     getInfo,
-    getCuentaByIdSingle
+    getCuentaByIdSingle,
+
+    // Nuevas acciones para Facultades
+    getAllFacultades,
+    getFacultadById,
 
 };
 

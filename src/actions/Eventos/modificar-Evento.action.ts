@@ -18,9 +18,7 @@ export const modificarEvento = defineAction({
         area: z.enum(['PRACTICA', 'INVESTIGACION', 'ACADEMICA', 'TECNICA', 'INDUSTRIAL', 'EMPRESARIAL', 'IA', 'REDES']).optional(),
         precio: z.coerce.number().min(0),
         fecha_inicio: z.string().transform(str => new Date(str)),
-        hora_inicio: z.string(),
         fecha_fin: z.string().optional().transform(str => str && str !== '' ? new Date(str) : undefined),
-        hora_fin: z.string().optional().transform(str => str && str !== '' ? str : undefined),
         duracion: z.coerce.number().optional(),
         ubicacion: z.string().min(1),
         cedula_organizador: z.string().min(10).max(10),
@@ -28,8 +26,13 @@ export const modificarEvento = defineAction({
             .refine((file) => {
                 return ACCEPTED_FILE_TYPES.includes(file.type);
             }, `only ${ACCEPTED_FILE_TYPES.join(', ')}`).optional(),
-        nota_aprobacion: z.coerce.number().min(0).max(10).optional(),
-        tiempo_registro_asignacion: z.coerce.boolean().optional(),
+        es_gratuito: z.coerce.boolean().optional(),
+        requiere_carta: z.coerce.boolean().optional(),
+        es_destacado: z.coerce.boolean().optional(),
+        carta_motivacion: z.string().optional(),
+        fecha_inicio_inscripcion: z.string().transform(str => new Date(str)),
+        fecha_fin_inscripcion: z.string().transform(str => new Date(str)),
+        asignacion_id: z.string().uuid().optional(),
     }),
     handler: async (form, { request }) => {
         try {
@@ -69,7 +72,21 @@ export const modificarEvento = defineAction({
                 };
             }
 
-            // 4. Procesar imagen si existe
+            // 4. Verificar que la asignación existe (si se proporciona)
+            if (form.asignacion_id) {
+                const asignacion = await prisma.asignaciones.findUnique({
+                    where: { id_asi: form.asignacion_id }
+                });
+
+                if (!asignacion) {
+                    return {
+                        success: false,
+                        message: 'La asignación especificada no existe'
+                    };
+                }
+            }
+
+            // 5. Procesar imagen si existe
             let imagen_url = eventoExistente.img_eve; // Mantener imagen existente por defecto
             console.log(form.imagen);
 
@@ -85,7 +102,7 @@ export const modificarEvento = defineAction({
                 }
             }
 
-            // 5. Actualizar el evento
+            // 6. Actualizar el evento
             const eventoActualizado = await prisma.eventos.update({
                 where: { id_eve: form.evento_id },
                 data: {
@@ -94,16 +111,19 @@ export const modificarEvento = defineAction({
                     id_cat_eve: form.categoria,
                     fec_ini_eve: form.fecha_inicio,
                     fec_fin_eve: form.fecha_fin,
-                    hor_ini_eve: new Date(`1970-01-01T${form.hora_inicio}:00`),
-                    hor_fin_eve: form.hora_fin ? new Date(`1970-01-01T${form.hora_fin}:00`) : undefined,
+                    fec_ini_ins_eve: form.fecha_inicio_inscripcion,
+                    fec_fin_ins_eve: form.fecha_fin_inscripcion,
                     dur_eve: form.duracion,
                     are_eve: form.area,
                     ubi_eve: form.ubicacion,
                     ced_org_eve: form.cedula_organizador,
                     img_eve: imagen_url,
                     precio: form.precio,
-                    not_apr_eve: form.nota_aprobacion || 7.0,
-                    tie_reg_asi: form.tiempo_registro_asignacion ?? true
+                    es_gratuito: form.es_gratuito ?? false,
+                    requiere_carta: form.requiere_carta ?? false,
+                    es_destacado: form.es_destacado ?? false,
+                    car_mot_eve: form.carta_motivacion,
+                    id_asi_eve: form.asignacion_id,
                 }
             });
 

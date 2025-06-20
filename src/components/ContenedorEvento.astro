@@ -1,24 +1,26 @@
 ---
 import EventoCard from "./EventoCard.astro";
-import RenderPageNum from "./RenderPageNum.astro"; // Ajusta ruta según tu estructura
+import RenderPageNum from "./RenderPageNum.astro";
 import { getEventosFiltrados } from "../actions/Eventos/getFiltros";
 import type { Eventos } from "../interface/eventosSimple";
 
-const { filtros = {}, page = 1, cursosPorPagina = 6 } = Astro.props;
+const { filtros = {}, page = 1, cursosPorPagina = 8 } = Astro.props;
 
-const { data } = await Astro.callAction(getEventosFiltrados, filtros);
+// Pasar paginación a la acción
+const { data } = await Astro.callAction(getEventosFiltrados, {
+  ...filtros,
+  page,
+  cursosPorPagina,
+});
 
-const listaEventos = (data?.eventos || []) as Eventos[];
-
-const totalEventos = listaEventos.length;
+const listaEventos = (data?.eventos || []) as unknown as Eventos[];
+const totalEventos = data?.totalEventos ?? 0;
 const totalPaginas = Math.ceil(totalEventos / cursosPorPagina);
 
 const paginaActual = Math.min(Math.max(page, 1), totalPaginas || 1);
 
-const inicio = (paginaActual - 1) * cursosPorPagina;
-const fin = inicio + cursosPorPagina;
-
-const eventosPagina = listaEventos.slice(inicio, fin);
+// Ya no se hace slice, porque la paginación es en la base de datos
+const eventosPagina = listaEventos;
 
 function construirUrl(pagina: number) {
   const url = new URL("/cursosCompleto", "http://dummybase");

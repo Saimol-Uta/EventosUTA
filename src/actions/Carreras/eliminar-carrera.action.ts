@@ -19,11 +19,9 @@ export const eliminarCarrera = defineAction({
                     success: false,
                     message: 'La carrera no existe'
                 };
-            }
-
-            // Verificar si la carrera tiene asignaciones relacionadas
-            const asignacionesRelacionadas = await prisma.asignaciones.count({
-                where: { id_car_asi: input.id_car }
+            }            // Verificar si la carrera tiene asignaciones relacionadas
+            const asignacionesRelacionadas = await prisma.detalle_asignaciones.count({
+                where: { id_car: input.id_car }
             });
 
             if (asignacionesRelacionadas > 0) {

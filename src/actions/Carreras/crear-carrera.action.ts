@@ -7,11 +7,23 @@ export const crearCarrera = defineAction({
     input: z.object({
         nom_car: z.string().min(1, 'El nombre de la carrera es requerido').max(100, 'El nombre no puede exceder 100 caracteres'),
         des_car: z.string().min(1, 'La descripción es requerida').max(250, 'La descripción no puede exceder 250 caracteres'),
-        nom_fac_per: z.string().min(1, 'El nombre de la facultad es requerido').max(250, 'El nombre de la facultad no puede exceder 250 caracteres'),
-        cod_car: z.string().min(1, 'El código de carrera es requerido').max(10, 'El código no puede exceder 10 caracteres').optional(),
+        id_fac_per: z.string().uuid('ID de facultad inválido'),
+        cod_car: z.string().max(10, 'El código no puede exceder 10 caracteres').optional(),
     }),
     handler: async (form) => {
         try {
+            // Verificar que la facultad existe
+            const facultadExistente = await prisma.facultades.findUnique({
+                where: { id_fac: form.id_fac_per }
+            });
+
+            if (!facultadExistente) {
+                return {
+                    success: false,
+                    message: 'La facultad seleccionada no existe'
+                };
+            }
+
             // Verificar si ya existe una carrera con el mismo código (si se proporciona)
             if (form.cod_car) {
                 const carreraExistenteCodigo = await prisma.carreras.findUnique({
@@ -26,15 +38,18 @@ export const crearCarrera = defineAction({
                 }
             }
 
-            // Verificar si ya existe una carrera con el mismo nombre
+            // Verificar si ya existe una carrera con el mismo nombre en la misma facultad
             const carreraExistenteNombre = await prisma.carreras.findFirst({
-                where: { nom_car: form.nom_car }
+                where: {
+                    nom_car: form.nom_car,
+                    id_fac_per: form.id_fac_per
+                }
             });
 
             if (carreraExistenteNombre) {
                 return {
                     success: false,
-                    message: 'Ya existe una carrera con este nombre'
+                    message: 'Ya existe una carrera con este nombre en la facultad seleccionada'
                 };
             }
 
@@ -43,8 +58,15 @@ export const crearCarrera = defineAction({
                 data: {
                     nom_car: form.nom_car,
                     des_car: form.des_car,
-                    nom_fac_per: form.nom_fac_per,
+                    id_fac_per: form.id_fac_per,
                     cod_car: form.cod_car || null,
+                },
+                include: {
+                    facultades: {
+                        select: {
+                            nom_fac: true
+                        }
+                    }
                 }
             });
 
@@ -54,7 +76,8 @@ export const crearCarrera = defineAction({
                 data: {
                     id: nuevaCarrera.id_car,
                     nombre: nuevaCarrera.nom_car,
-                    codigo: nuevaCarrera.cod_car
+                    codigo: nuevaCarrera.cod_car,
+                    facultad: nuevaCarrera.facultades.nom_fac
                 }
             };
 

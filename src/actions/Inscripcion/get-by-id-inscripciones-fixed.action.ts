@@ -14,7 +14,6 @@ export const getByIdInscripcion = defineAction({
                     id_eve_ins: id
                 },
                 select: {
-                    // TODOS los campos de inscripciones
                     id_ins: true,
                     id_usu_ins: true,
                     id_eve_ins: true,
@@ -25,7 +24,6 @@ export const getByIdInscripcion = defineAction({
                     asi_par: true,
                     met_pag_ins: true,
                     enl_ord_pag_ins: true,
-                    car_mot_inscrip: true, // Campo que faltaba
                     usuarios: {
                         select: {
                             cor_cue: true,
@@ -63,21 +61,10 @@ export const getByIdInscripcion = defineAction({
                             fec_fin_eve: true,
                             des_eve: true,
                             img_eve: true,
-                            precio: true, // Campo que faltaba
-                            es_gratuito: true, // Campo que faltaba
-                            requiere_carta: true, // Campo que faltaba
-                            car_mot_eve: true,
-                            estado_evento: true,
                             categorias_eventos: {
                                 select: {
-                                    id_cat: true,
                                     nom_cat: true,
                                     des_cat: true,
-                                    pun_apr_cat: true,
-                                    asi_cat: true,
-                                    requiere_puntaje: true,
-                                    requiere_asistencia: true,
-                                    brinda_certificado: true
                                 }
                             },
                             organizadores: {
@@ -87,32 +74,6 @@ export const getByIdInscripcion = defineAction({
                                     ape_org1: true,
                                     ape_org2: true,
                                     tit_aca_org: true,
-                                }
-                            },
-                            asignaciones: {
-                                select: {
-                                    id_asi: true,
-                                    nom_asi: true,
-                                    des_asi: true,
-                                    tip_asi: true,
-                                    detalle_asignaciones: {
-                                        select: {
-                                            carreras: {
-                                                select: {
-                                                    id_car: true,
-                                                    nom_car: true,
-                                                    cod_car: true,
-                                                    des_car: true,
-                                                    facultades: {
-                                                        select: {
-                                                            nom_fac: true,
-                                                            des_fac: true
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -132,7 +93,6 @@ export const getByIdInscripcion = defineAction({
                     ...inscripcion.eventos,
                     fec_ini_eve: inscripcion.eventos.fec_ini_eve?.toISOString(),
                     fec_fin_eve: inscripcion.eventos.fec_fin_eve?.toISOString(),
-                    precio: inscripcion.eventos.precio ? Number(inscripcion.eventos.precio) : null, // Serializar precio
                 },
                 usuarios: {
                     ...inscripcion.usuarios,

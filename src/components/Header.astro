@@ -8,7 +8,7 @@ const titulo1 = "FACULTAD DE INGENIERÍA";
 const titulo2 = "EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL";
 
 const session = await getSession(Astro.request);
-console.log("Session:", session);
+
 
 const { data: cuenta } = await Astro.callAction(
     actions.getCuentaByIdSingle,
