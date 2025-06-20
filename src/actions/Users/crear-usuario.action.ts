@@ -102,6 +102,7 @@ export const crearUsuario = defineAction({
                     img_user: input.img_user || null,
                     enl_ced_cue: input.enl_ced_cue || null,
                     enl_mat_cue: input.enl_mat_cue || null,
+                    verificado: true,
                 },
                 include: {
                     carreras: {
