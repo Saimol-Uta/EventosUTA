@@ -116,8 +116,7 @@ export const server = {
     vincularAsignacionAEvento,
 
     crearAsignacionesPrueba,    // Nuevas acciones para CRUD de carreras
-    crearCarrera,
-    modificarCarrera,
+    crearCarrera, modificarCarrera,
     eliminarCarrera,
     getAllCarreras,
     getCarreraById,
