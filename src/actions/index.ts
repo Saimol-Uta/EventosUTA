@@ -1,4 +1,5 @@
 import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras } from './Eventos';
+import { finalizarEvento } from './Eventos/finalizar-evento.action';
 
 // Importaciones de Facultades
 import { getAllFacultades, getFacultadById } from './Facultades/get-facultades.action';
@@ -107,10 +108,10 @@ export const server = {
     getOrganizadorByEvento,
     getOrganizadores,
     getCategoriaById,
-    getCategorias,
-    crearEvento,
+    getCategorias, crearEvento,
     modificarEvento,
-    eliminarEvento,    // Nuevas acciones para asignaciones
+    eliminarEvento,
+    finalizarEvento,// Nuevas acciones para asignaciones
     getCarreras,
     getAsignacionesByEvento,
     crearAsignacion,
