@@ -28,7 +28,7 @@ type ResultadoSetUser = {
   error?: string;
 };
 
-type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string };
+type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string; cor_cue?: string };
 
 let usuario: UsuarioParcial | null = null;
 let mensajeGuardado: string | null = null;
@@ -62,7 +62,11 @@ if (accion === "guardarInfo" && formData.has("nom_usu1")) {
   const errores: string[] = [];
 
   // Validaciones obligatorias
-  const camposObligatorios = ["ced_usu", "nom_usu1", "ape_usu1", "ape_usu2", "fec_nac_usu", "id_car_per"];
+  const camposObligatorios = ["ced_usu", "nom_usu1", "ape_usu1", "ape_usu2", "fec_nac_usu"];
+  const correoForm = formData.get("cor_cue")?.toString() ?? "";
+  if (correoForm.endsWith("@uta.edu.ec")) {
+    camposObligatorios.push("id_car_per");
+  }
   for (const campo of camposObligatorios) {
     if (!formData.get(campo)) {
       errores.push(`El campo ${campo} es obligatorio.`);
@@ -106,9 +110,9 @@ if (accion === "guardarInfo" && formData.has("nom_usu1")) {
     errores.push("El número de teléfono debe tener exactamente 10 dígitos.");
   }
 
-  // Validación de carrera seleccionada
+  // Validación de carrera seleccionada SOLO si el correo es institucional
   const carrera = formData.get("id_car_per")?.toString() ?? "";
-  if (!carrera) {
+  if (correoForm.endsWith("@uta.edu.ec") && !carrera) {
     errores.push("Debes seleccionar una carrera.");
   }
 
@@ -119,15 +123,15 @@ if (accion === "guardarInfo" && formData.has("nom_usu1")) {
   } else {
     formData.set("id_usu", id_usu);
     const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
-    const resultadoGuardar = resultadoGuardarRaw.data as SafeResult<ResultadoSetUser>;
+    const resultadoGuardar = resultadoGuardarRaw?.data as SafeResult<ResultadoSetUser> | undefined;
 
-    if (resultadoGuardar.success) {
+    if (resultadoGuardar?.success) {
       mensajeGuardado = resultadoGuardar.value?.created
         ? "Se guardó con éxito."
         : "Usuario actualizado correctamente.";
     } else {
       mostrarError = true;
-      mensajeGuardado = resultadoGuardar.error || "No se pudo guardar.";
+      mensajeGuardado = resultadoGuardar?.error || "No se pudo guardar.";
     }
   }
 }
@@ -137,11 +141,12 @@ if (accion === "guardarInfo" && formData.has("nom_usu1")) {
 
 // Simula obtener datos del usuario actual (como se hace en CompletarPerfilUser)
 const resultadoUsuario = await Astro.callAction(actions.getUserByCedula, { ced_usu: user?.ci_pas });
-usuario = resultadoUsuario?.data?.usuario ?? null;
+usuario = (resultadoUsuario?.data?.usuario as UsuarioParcial | null) ?? null;
 // Obtener carreras desde la base de datos
 const resultadoCarreras = await Astro.callAction(actions.getCarreras, {});
 const listaCarreras = resultadoCarreras?.data?.carreras ?? [];
 
+const correo = usuario?.cor_cue ?? ""; // o user?.email si así se llama el campo
 
 const camposFormulario: CampoFormulario[] = [
   { titulo: "Cédula", valor: usuario?.ced_usu ?? "", name: "ced_usu" },
@@ -151,7 +156,11 @@ const camposFormulario: CampoFormulario[] = [
   { titulo: "Segundo apellido", valor: usuario?.ape_usu2 ?? "", name: "ape_usu2" },
   { titulo: "Fecha de nacimiento", valor: formatDate(usuario?.fec_nac_usu ?? null), name: "fec_nac_usu" },
   { titulo: "Teléfono", valor: usuario?.num_tel_usu ?? "", name: "num_tel_usu" },
-  {
+];
+
+// Solo agregar carrera si el correo es institucional
+if (correo.endsWith("@uta.edu.ec")) {
+  camposFormulario.push({
     titulo: "Carrera",
     valor: usuario?.id_car_per ?? "",
     name: "id_car_per",
@@ -160,8 +169,8 @@ const camposFormulario: CampoFormulario[] = [
       valor: car.id_car,
       texto: car.nom_car,
     })),
-  },
-];
+  });
+}
 
 
 const textoGuardarInfo = "Guardar Información";
