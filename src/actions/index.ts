@@ -35,6 +35,11 @@ import { modificarUsuario } from './Users/modificar-usuario.action';
 import { setUser } from './Users/setUsers.action';
 import { getAllUsers } from './Admin/get-all-user.action';
 import { getUsersWithAccounts } from './Users/get-users-with-accounts.action';
+import { getInscripcionesByUser } from './Users/get-inscripciones-by-user.action';
+import { getCambiosByUser } from './Users/get-cambios-by-user.action';
+import { getPerfilCompleto } from './Users/get-perfil-completo.action';
+import { actualizarUsuario } from './Users/actualizar-usuario.action';
+import { crearUsuario } from './Users/crear-usuario.action';
 
 import { getDatosInscripcion } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
@@ -66,10 +71,14 @@ export const server = {
     SignIn,
     getEventosPorUsuario,
     createCambio,
-    getUseById,
-    getUserByCedula,
+    getUseById, getUserByCedula,
     setUser, getAllUsers,
     getUsersWithAccounts,
+    getInscripcionesByUser,
+    getCambiosByUser,
+    getPerfilCompleto,
+    actualizarUsuario,
+    crearUsuario,
     eliminarUsuario,
     modificarUsuario,
     uploadImageUser, getCuentaById,
