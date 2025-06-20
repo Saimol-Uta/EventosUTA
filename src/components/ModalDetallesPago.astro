@@ -68,17 +68,13 @@ import "../styles/ModalDetallesInscripcion.css";
 </div>
 
 <!-- Modal para visualizar documentos -->
-<div
-    id="modalVisualizarDocumentoPago"
-    class="modal"
-    style="z-index: 9999; display: none;"
->
+<div id="modalVisualizarDocumentoPago" class="modal" style="z-index: 1001;">
     <div class="modal-contenido-documento">
         <span class="cerrar-documento" onclick="cerrarModalDocumentoPago()"
             >&times;</span
         >
         <div class="contenedor-documento">
-            <h3 id="titulo-documento-pago">Visualizar Comprobante</h3>
+            <h3 id="titulo-documento-pago">Visualizar Documento</h3>
             <div id="contenedor-preview-pago">
                 <!-- Para imágenes -->
                 <img
@@ -104,6 +100,17 @@ import "../styles/ModalDetallesInscripcion.css";
                 >
                     <p>Error al cargar el documento</p>
                 </div>
+                <!-- Para texto (carta de motivación) -->
+                <div
+                    id="preview-texto-pago"
+                    style="display: none; padding: 2rem; background-color: white; border-radius: 8px; margin: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-height: 70vh; overflow-y: auto;"
+                >
+                    <div
+                        id="contenido-texto-pago"
+                        style="white-space: pre-wrap; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+                    >
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -126,6 +133,7 @@ import "../styles/ModalDetallesInscripcion.css";
             ) => Promise<void>;
             currentInscripcionIdPago: string;
             abrirModalDocumentoPago: (url: string, titulo: string) => void;
+            abrirModalTextoPago: (texto: string, titulo: string) => void;
             cerrarModalDocumentoPago: () => void;
         }
     }
@@ -400,7 +408,6 @@ import "../styles/ModalDetallesInscripcion.css";
             cerrarModalPagoInscripcion();
         }
     }
-
     function cerrarModalDocumentoPago() {
         const modal = document.getElementById("modalVisualizarDocumentoPago");
         if (modal) modal.style.display = "none";
@@ -412,6 +419,7 @@ import "../styles/ModalDetallesInscripcion.css";
         const previewPdf = document.getElementById(
             "preview-pdf-pago",
         ) as HTMLIFrameElement;
+        const previewTexto = document.getElementById("preview-texto-pago");
 
         if (previewImagen) {
             previewImagen.style.display = "none";
@@ -421,6 +429,13 @@ import "../styles/ModalDetallesInscripcion.css";
             previewPdf.style.display = "none";
             previewPdf.src = "";
         }
+        if (previewTexto) {
+            previewTexto.style.display = "none";
+            const contenidoTexto = document.getElementById(
+                "contenido-texto-pago",
+            );
+            if (contenidoTexto) contenidoTexto.textContent = "";
+        }
     }
     function abrirModalDocumentoPago(url: string, titulo: string) {
         console.log("🔥 INICIO abrirModalDocumentoPago");
@@ -428,7 +443,6 @@ import "../styles/ModalDetallesInscripcion.css";
 
         const modal = document.getElementById("modalVisualizarDocumentoPago");
         console.log("🔥 Modal encontrado:", !!modal);
-
         const tituloElemento = document.getElementById("titulo-documento-pago");
         const previewImagen = document.getElementById(
             "preview-imagen-pago",
@@ -436,6 +450,7 @@ import "../styles/ModalDetallesInscripcion.css";
         const previewPdf = document.getElementById(
             "preview-pdf-pago",
         ) as HTMLIFrameElement;
+        const previewTexto = document.getElementById("preview-texto-pago");
         const cargando = document.getElementById("cargando-documento-pago");
         const error = document.getElementById("error-documento-pago");
 
@@ -444,6 +459,7 @@ import "../styles/ModalDetallesInscripcion.css";
             titulo: !!tituloElemento,
             imagen: !!previewImagen,
             pdf: !!previewPdf,
+            texto: !!previewTexto,
             cargando: !!cargando,
             error: !!error,
         });
@@ -476,13 +492,12 @@ import "../styles/ModalDetallesInscripcion.css";
         // Actualizar título
         if (tituloElemento) {
             tituloElemento.textContent = titulo;
-        }
-
-        // Mostrar indicador de carga
+        } // Mostrar indicador de carga
         if (cargando) cargando.style.display = "block";
         if (error) error.style.display = "none";
         if (previewImagen) previewImagen.style.display = "none";
         if (previewPdf) previewPdf.style.display = "none";
+        if (previewTexto) previewTexto.style.display = "none";
 
         // Detectar tipo de archivo por extensión
         const extension = url.split(".").pop()?.toLowerCase();
@@ -554,6 +569,49 @@ import "../styles/ModalDetallesInscripcion.css";
         }
     }
 
+    function abrirModalTextoPago(texto: string, titulo: string) {
+        console.log("Abriendo modal para texto:", titulo);
+
+        const modal = document.getElementById("modalVisualizarDocumentoPago");
+        const tituloElemento = document.getElementById("titulo-documento-pago");
+        const previewImagen = document.getElementById(
+            "preview-imagen-pago",
+        ) as HTMLImageElement;
+        const previewPdf = document.getElementById(
+            "preview-pdf-pago",
+        ) as HTMLIFrameElement;
+        const previewTexto = document.getElementById("preview-texto-pago");
+        const contenidoTexto = document.getElementById("contenido-texto-pago");
+        const cargando = document.getElementById("cargando-documento-pago");
+        const error = document.getElementById("error-documento-pago");
+
+        if (!modal || !texto) {
+            console.error("Modal o texto no encontrados", { modal, texto });
+            return;
+        }
+
+        // Mostrar modal
+        modal.style.display = "block";
+        console.log("Modal mostrado para texto");
+
+        // Actualizar título
+        if (tituloElemento) {
+            tituloElemento.textContent = titulo;
+        }
+
+        // Ocultar otros elementos
+        if (cargando) cargando.style.display = "none";
+        if (error) error.style.display = "none";
+        if (previewImagen) previewImagen.style.display = "none";
+        if (previewPdf) previewPdf.style.display = "none";
+
+        // Mostrar texto
+        if (previewTexto && contenidoTexto) {
+            contenidoTexto.textContent = texto;
+            previewTexto.style.display = "block";
+        }
+    }
+
     window.onclick = function (event) {
         const modal = document.getElementById("modalDetallesPago");
         const modalDocumento = document.getElementById(
@@ -568,15 +626,16 @@ import "../styles/ModalDetallesInscripcion.css";
     window.aprobarInscripcionPago = aprobarInscripcionPago;
     window.rechazarInscripcionPago = rechazarInscripcionPago;
     window.abrirModalDocumentoPago = abrirModalDocumentoPago;
-    window.cerrarModalDocumentoPago = cerrarModalDocumentoPago;
-
-    // Exponer también las funciones auxiliares
+    window.abrirModalTextoPago = abrirModalTextoPago;
+    window.cerrarModalDocumentoPago = cerrarModalDocumentoPago; // Exponer también las funciones auxiliares
     (window as any).cargarInformacionUsuarioPago = cargarInformacionUsuarioPago;
     (window as any).cargarComprobantePago = cargarComprobantePago;
     (window as any).verificarRequisitosPagoYActualizarBoton =
         verificarRequisitosPagoYActualizarBoton;
+    (window as any).abrirModalTextoPago = abrirModalTextoPago;
     console.log("Funciones de pago expuestas al window:", {
         abrirModalDocumentoPago: typeof window.abrirModalDocumentoPago,
+        abrirModalTextoPago: typeof (window as any).abrirModalTextoPago,
         cerrarModalDocumentoPago: typeof window.cerrarModalDocumentoPago,
         abrirModalPagoInscripcion: typeof window.abrirModalPagoInscripcion,
     });
