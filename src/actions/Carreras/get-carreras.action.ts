@@ -12,7 +12,12 @@ export const getAllCarreras = defineAction({
                     facultades: {
                         select: {
                             id_fac: true,
-                            nom_fac: true
+
+                            nom_fac: true,
+
+                            nom_fac: true,
+                            des_fac: true
+
                         }
                     },
                     detalle_asignaciones: {
@@ -30,8 +35,16 @@ export const getAllCarreras = defineAction({
                         select: {
                             cor_cue: true,
                             nom_usu1: true,
+
                             ape_usu1: true,
-                            ced_usu: true
+                            ced_usu: true,
+
+                            nom_usu2: true,
+                            ape_usu1: true,
+                            ape_usu2: true,
+                            ced_usu: true,
+                            rol_cue: true
+
                         }
                     }
                 },
@@ -40,11 +53,35 @@ export const getAllCarreras = defineAction({
                 }
             });
 
-            const carrerasPlanas = JSON.parse(JSON.stringify(carreras));
+            // Convertir a objetos planos para serialización
+            const carrerasSerializables = carreras.map(carrera => ({
+                id_car: carrera.id_car,
+                nom_car: carrera.nom_car,
+                des_car: carrera.des_car,
+                cod_car: carrera.cod_car,
+                facultad: carrera.facultades ? {
+                    id_fac: carrera.facultades.id_fac,
+                    nom_fac: carrera.facultades.nom_fac,
+                    des_fac: carrera.facultades.des_fac
+                } : null,
+                asignaciones: carrera.detalle_asignaciones.map(detalle => ({
+                    id_asi: detalle.asignaciones.id_asi,
+                    nom_asi: detalle.asignaciones.nom_asi,
+                    des_asi: detalle.asignaciones.des_asi
+                })),
+                usuarios: carrera.usuarios.map(usuario => ({
+                    cor_cue: usuario.cor_cue,
+                    nombre_completo: `${usuario.nom_usu1} ${usuario.nom_usu2 || ''}`.trim(),
+                    apellido_completo: `${usuario.ape_usu1} ${usuario.ape_usu2 || ''}`.trim(),
+                    ced_usu: usuario.ced_usu,
+                    rol_cue: usuario.rol_cue
+                })),
+                total_usuarios: carrera.usuarios.length
+            }));
 
             return {
                 success: true,
-                carreras: carrerasPlanas
+                carreras: carrerasSerializables
             };
         } catch (error) {
             console.error('Error al obtener carreras:', error);
@@ -69,7 +106,12 @@ export const getCarreraById = defineAction({
                     facultades: {
                         select: {
                             id_fac: true,
-                            nom_fac: true
+
+                            nom_fac: true,
+
+                            nom_fac: true,
+                            des_fac: true
+
                         }
                     },
                     detalle_asignaciones: {
@@ -78,7 +120,12 @@ export const getCarreraById = defineAction({
                                 select: {
                                     id_asi: true,
                                     nom_asi: true,
-                                    des_asi: true
+
+                                    des_asi: true,
+
+                                    des_asi: true,
+                                    tip_asi: true
+
                                 }
                             }
                         }
@@ -87,8 +134,11 @@ export const getCarreraById = defineAction({
                         select: {
                             cor_cue: true,
                             nom_usu1: true,
+                            nom_usu2: true,
                             ape_usu1: true,
-                            ced_usu: true
+                            ape_usu2: true,
+                            ced_usu: true,
+                            rol_cue: true
                         }
                     }
                 }
@@ -101,11 +151,37 @@ export const getCarreraById = defineAction({
                 };
             }
 
-            const carreraPlana = JSON.parse(JSON.stringify(carrera));
+            // Convertir a objeto plano para serialización
+            const carreraSerializable = {
+                id_car: carrera.id_car,
+                nom_car: carrera.nom_car,
+                des_car: carrera.des_car,
+                cod_car: carrera.cod_car,
+                id_fac_per: carrera.id_fac_per,
+                facultad: carrera.facultades ? {
+                    id_fac: carrera.facultades.id_fac,
+                    nom_fac: carrera.facultades.nom_fac,
+                    des_fac: carrera.facultades.des_fac
+                } : null,
+                asignaciones: carrera.detalle_asignaciones.map(detalle => ({
+                    id_asi: detalle.asignaciones.id_asi,
+                    nom_asi: detalle.asignaciones.nom_asi,
+                    des_asi: detalle.asignaciones.des_asi,
+                    tip_asi: detalle.asignaciones.tip_asi
+                })),
+                usuarios: carrera.usuarios.map(usuario => ({
+                    cor_cue: usuario.cor_cue,
+                    nombre_completo: `${usuario.nom_usu1} ${usuario.nom_usu2 || ''}`.trim(),
+                    apellido_completo: `${usuario.ape_usu1} ${usuario.ape_usu2 || ''}`.trim(),
+                    ced_usu: usuario.ced_usu,
+                    rol_cue: usuario.rol_cue
+                })),
+                total_usuarios: carrera.usuarios.length
+            };
 
             return {
                 success: true,
-                carrera: carreraPlana
+                carrera: carreraSerializable
             };
         } catch (error) {
             console.error('Error al obtener carrera:', error);
