@@ -336,13 +336,20 @@ import "../styles/ModalDetallesInscripcion.css";
                     } else {
                         enlaceMatricula.style.display = "none";
                         sinMatricula.style.display = "inline";
-                    } // Configurar enlace de carta de motivación (campo no existe en nuevo schema, usando un campo disponible)
-                    // En el nuevo schema no existe enl_ext_cue, así que ocultamos esta sección
-                    enlaceMotivacion.style.display = "none";
-                    sinMotivacion.style.display = "inline";
+                    }
+
+                    // Configurar enlace de carta de motivación
+                    if (isValidDocumentLink(inscripcion.car_mot_inscrip)) {
+                        enlaceMotivacion.href = inscripcion.car_mot_inscrip;
+                        enlaceMotivacion.style.display = "inline";
+                        sinMotivacion.style.display = "none";
+                    } else {
+                        enlaceMotivacion.style.display = "none";
+                        sinMotivacion.style.display = "inline";
+                    }
 
                     // Actualizar badge de estado
-                    actualizarBadgeDocumentos(usuario);
+                    actualizarBadgeDocumentos(usuario, inscripcion);
                 } catch (error) {
                     console.error(
                         "Error al cargar documentos de inscripción:",
@@ -387,15 +394,14 @@ import "../styles/ModalDetallesInscripcion.css";
                     badge.className = "documentos-badge incompleto";
                 }
             }
-
-            function actualizarBadgeDocumentos(cuenta: any) {
+            function actualizarBadgeDocumentos(cuenta: any, inscripcion: any) {
                 const badge = document.getElementById("documentos-status");
                 if (!badge) return;
 
                 const documentos = [
                     cuenta.enl_ced_cue,
                     cuenta.enl_mat_cue,
-                    cuenta.enl_ext_cue,
+                    inscripcion.car_mot_inscrip,
                 ];
 
                 const disponibles = documentos.filter((doc) =>
