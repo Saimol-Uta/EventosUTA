@@ -76,44 +76,46 @@ document.addEventListener("DOMContentLoaded", () => {
 let eventosSeleccionados = new Set();
 
   function toggleFavorito(boton) {
-    const id = boton.dataset.id;
+  const id = boton.dataset.id;
+  console.log("Clic en favorito:", id); // <-- DEBUG
 
-    if (eventosSeleccionados.has(id)) {
-      eventosSeleccionados.delete(id);
-      boton.classList.remove("activo");
-    } else {
-      if (eventosSeleccionados.size >= 6) {
-        alert("Solo puedes seleccionar exactamente 6 eventos destacados.");
-        return;
-      }
-      eventosSeleccionados.add(id);
-      boton.classList.add("activo");
+  if (eventosSeleccionados.has(id)) {
+    eventosSeleccionados.delete(id);
+    boton.classList.remove("activo");
+  } else {
+    if (eventosSeleccionados.size >= 6) {
+      alert("Solo puedes seleccionar exactamente 6 eventos destacados.");
+      return;
     }
-
-    actualizarBotonGuardar();
+    eventosSeleccionados.add(id);
+    boton.classList.add("activo");
   }
 
+  console.log("Seleccionados:", Array.from(eventosSeleccionados)); // <-- DEBUG
+  actualizarBotonGuardar();
+}
   function actualizarBotonGuardar() {
     const btn = document.getElementById("btn-guardar-favoritos");
     if (btn) {
       btn.disabled = eventosSeleccionados.size !== 6;
     }
   }
-
-  async function guardarFavoritos() {
-    if (eventosSeleccionados.size !== 6) {
-      alert("Debes seleccionar exactamente 6 eventos.");
-      return;
-    }
-
-    const res = await fetch("/actions/guardarFavoritos", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ eventos: Array.from(eventosSeleccionados) })
-    });
-
-    const data = await res.json();
-    alert(data.message);
+async function guardarFavoritos() {
+  if (eventosSeleccionados.size !== 6) {
+    alert("Debes seleccionar exactamente 6 eventos.");
+    return;
   }
+
+  console.log("Guardando eventos:", Array.from(eventosSeleccionados)); // <-- DEBUG
+
+  const res = await fetch("/actions/Eventos/guardarFavoritos", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ eventos: Array.from(eventosSeleccionados) })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+}

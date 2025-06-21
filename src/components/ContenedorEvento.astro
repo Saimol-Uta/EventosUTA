@@ -55,6 +55,7 @@ function construirUrl(pagina: number) {
         horas={evento.dur_eve ?? 0}
         slug={evento.id_eve}
         modoAdmin={esAdmin}
+        idEvento={evento.id_eve}
         esDestacado={evento.es_destacado}
        
       />
@@ -62,7 +63,7 @@ function construirUrl(pagina: number) {
     ))
   ) : (
     <div class="sin-resultados">
-      <!-- Puedes mantener o personalizar el contenido para cuando no hay eventos -->
+    
       <p>No se encontraron resultados.</p>
     </div>
   )}
