@@ -54,6 +54,20 @@ function formatDate(date: string | Date | null): string {
   return d.toISOString().substring(0, 10);
 }
 
+
+// Diccionario para mostrar nombres amigables en los errores
+const nombresCampos: Record<string, string> = {
+  ced_usu: "Cédula",
+  nom_usu1: "Primer nombre",
+  nom_usu2: "Segundo nombre",
+  ape_usu1: "Primer apellido",
+  ape_usu2: "Segundo apellido",
+  fec_nac_usu: "Fecha de nacimiento",
+  num_tel_usu: "Teléfono",
+  id_car_per: "Carrera",
+};
+
+
 if (method === "POST") {
   const formData = await Astro.request.formData();
   const accion = formData.get("action")?.toString();
@@ -62,21 +76,38 @@ if (accion === "guardarInfo" && formData.has("nom_usu1")) {
   const errores: string[] = [];
 
   // Validaciones obligatorias
-  const camposObligatorios = ["ced_usu", "nom_usu1", "ape_usu1", "ape_usu2", "fec_nac_usu"];
+  const camposObligatorios = ["ced_usu", "nom_usu1", "ape_usu1", "fec_nac_usu"];
   const correoForm = formData.get("cor_cue")?.toString() ?? "";
   if (correoForm.endsWith("@uta.edu.ec")) {
     camposObligatorios.push("id_car_per");
   }
   for (const campo of camposObligatorios) {
     if (!formData.get(campo)) {
-      errores.push(`El campo ${campo} es obligatorio.`);
+      errores.push(`El campo ${nombresCampos[campo] || campo} es obligatorio.`);
     }
   }
 
-  // Validación de cédula: exactamente 10 dígitos
+  // Validación de cédula: exactamente 10 dígitos numéricos
   const cedula = formData.get("ced_usu")?.toString() ?? "";
   if (!/^\d{10}$/.test(cedula)) {
     errores.push("La cédula debe tener exactamente 10 dígitos numéricos.");
+  }
+
+  // Validación de nombres y apellidos: solo letras y espacios, máximo 20 caracteres
+  const camposTexto = [
+    { campo: "nom_usu1", label: "Primer nombre" },
+    { campo: "nom_usu2", label: "Segundo nombre" },
+    { campo: "ape_usu1", label: "Primer apellido" },
+    { campo: "ape_usu2", label: "Segundo apellido" },
+  ];
+  for (const { campo, label } of camposTexto) {
+    const valor = formData.get(campo)?.toString() ?? "";
+    if (valor.length > 20) {
+      errores.push(`El campo ${label} no debe superar los 20 caracteres.`);
+    }
+    if (valor && !/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(valor)) {
+      errores.push(`El campo ${label} solo debe contener letras y espacios.`);
+    }
   }
 
   // Validación de fecha válida y mayor de 16 años
@@ -95,16 +126,7 @@ if (accion === "guardarInfo" && formData.has("nom_usu1")) {
     }
   }
 
-  // Validación de longitud de campos de texto (máximo 20 caracteres)
-  const camposMax20 = ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"];
-  for (const campo of camposMax20) {
-    const valor = formData.get(campo)?.toString() ?? "";
-    if (valor.length > 20) {
-      errores.push(`El campo ${campo} no debe superar los 20 caracteres.`);
-    }
-  }
-
-  // Validación de teléfono: exactamente 10 dígitos
+  // Validación de teléfono: exactamente 10 dígitos numéricos
   const telefono = formData.get("num_tel_usu")?.toString() ?? "";
   if (!/^\d{10}$/.test(telefono)) {
     errores.push("El número de teléfono debe tener exactamente 10 dígitos.");
@@ -184,13 +206,19 @@ const textoAsociar = "Asociar este usuario a la cuenta";
   <Navbar />
   <div class="bg-gray-100 min-h-screen py-10">
     <div class="max-w-3xl mx-auto px-4 text-center">
-      {mensajeGuardado && (
-        <p class={`mensaje-guardado ${mostrarError ? "mensaje-error" : "mensaje-exito"}`}
-          style={!mostrarError ? 'background:#d1fae5;color:#065f46;padding:1rem;border-radius:8px;margin-bottom:1.5rem;font-weight:600;' : ''}
-        >
-          {mensajeGuardado}
-        </p>
-      )}
+      <div class="mensaje-guardado-centrado">
+        {mensajeGuardado && (
+          <div class={`mensaje-guardado-bonito ${mostrarError ? "mensaje-error-bonito" : "mensaje-exito-bonito"}`}>
+            {mostrarError ? (
+              <span style="font-size:1.5rem;margin-right:0.5rem;">❌</span>
+            ) : (
+              <span style="font-size:1.5rem;margin-right:0.5rem;">✅</span>
+            )}
+            {mensajeGuardado}
+          </div>
+        )}
+      </div>
+
       <FormularioRegistroUsuario
         camposFormulario={camposFormulario}
         cedula={usuario?.ced_usu ?? ""}
@@ -208,3 +236,31 @@ const textoAsociar = "Asociar este usuario a la cuenta";
     </script>
   )}
 </Layout>
+
+<style>
+.mensaje-guardado-centrado {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.mensaje-guardado-bonito {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(185,28,28,0.08);
+  max-width: 90vw;
+}
+.mensaje-error-bonito {
+  background: #fff0f0;
+  color: #b91c1c;
+  border: 1.5px solid #b91c1c;
+}
+.mensaje-exito-bonito {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1.5px solid #10b981;
+}
+</style>
