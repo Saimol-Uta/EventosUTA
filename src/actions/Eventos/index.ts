@@ -7,7 +7,7 @@ export * from './modificar-Evento.action';
 export * from './setCursos';
 export * from './getDatosInscripcion.action';
 export * from './uploadComprobantePago.action';
-//export { guardarFavoritos } from './guardarFavoritos';
+
 
 export { getEventosFiltrados } from './getFiltros';
 export { getEventosPorUsuario } from './getEventosPorUsuario';
