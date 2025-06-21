@@ -1,7 +1,9 @@
 ---
 const { title } = Astro.props;
 ---
-<div class="border p-4 w-full">
-  <h2 class="text-red-800 font-medium mb-2">{title}</h2>
-  <slot />
+<div class="bg-white border border-gray-200 rounded-2xl shadow-md p-6 w-full transition-transform duration-300 hover:shadow-lg hover:scale-[1.01]">
+  <h2 class="text-red-700 text-xl font-semibold mb-4 tracking-wide">{title}</h2>
+  <div class="text-gray-700 text-base leading-relaxed">
+    <slot />
+  </div>
 </div>

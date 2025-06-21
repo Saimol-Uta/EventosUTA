@@ -35,12 +35,14 @@ function construirUrl(pagina: number) {
   {eventosPagina.length > 0 ? (
     eventosPagina.map((evento) => (
       <EventoCard
-        imagen={evento.img_eve}
-        titulo={evento.nom_eve}
-        estado={evento.asignaciones?.length?.toString() || "0"}
-        horas={evento.dur_eve ?? 0}
-        slug={evento.id_eve}
-      />
+  imagen={evento.img_eve}
+  titulo={evento.nom_eve}
+  resumen={evento.des_eve}
+  horas={evento.dur_eve ?? 0}
+  slug={evento.id_eve}
+/>
+
+
     ))
   ) : (
     <div class="sin-resultados">
@@ -78,16 +80,91 @@ function construirUrl(pagina: number) {
 <style>
 .contenedor {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 300px);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   place-items: center;
   justify-content: center;
-  gap: 20px;
+  align-items: stretch;
+  padding: 16px;
+  gap: 16px;
 }
 
 .card {
+  width: 100%;
   max-width: 320px;
-  margin: 0 auto;
+  background: linear-gradient(145deg, #1e1e2f, #2a2a3f);
+  color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #333347;
 }
+
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Imagen del evento */
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+/* Contenido */
+.card-content {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-content h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.card-content p {
+  font-size: 0.95rem;
+  color: #ccc;
+  margin: 0;
+}
+
+.card-footer {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #a2a2d0;
+}
+
+/* Botón o link dentro de la tarjeta */
+.card a,
+.card button {
+  background-color: #5e3eff;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
+  border: none;
+}
+
+.card a:hover,
+.card button:hover {
+  background-color: #7b5fff;
+}
+
+
 
 .sin-resultados {
   grid-column: 1 / -1;
