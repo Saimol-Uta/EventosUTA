@@ -185,7 +185,9 @@ const textoAsociar = "Asociar este usuario a la cuenta";
   <div class="bg-gray-100 min-h-screen py-10">
     <div class="max-w-3xl mx-auto px-4 text-center">
       {mensajeGuardado && (
-        <p class={`mensaje-guardado ${mostrarError ? "mensaje-error" : "mensaje-exito"}`}>
+        <p class={`mensaje-guardado ${mostrarError ? "mensaje-error" : "mensaje-exito"}`}
+          style={!mostrarError ? 'background:#d1fae5;color:#065f46;padding:1rem;border-radius:8px;margin-bottom:1.5rem;font-weight:600;' : ''}
+        >
           {mensajeGuardado}
         </p>
       )}
@@ -200,4 +202,9 @@ const textoAsociar = "Asociar este usuario a la cuenta";
       />
     </div>
   </div>
+  {!mostrarError && mensajeGuardado && (
+    <script>
+      setTimeout(() => { window.location.replace('/homeUser'); }, 2000);
+    </script>
+  )}
 </Layout>

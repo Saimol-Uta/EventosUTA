@@ -53,6 +53,7 @@ const {
             value={campo.valor}
             required={["nom_usu1", "ape_usu1", "fec_nac_usu", "num_tel_usu", "id_car_per"].includes(campo.name)}
             type={campo.name === "fec_nac_usu" ? "date" : "text"}
+            {...(campo.name === "ced_usu" ? { readonly: true } : {})}
           />
         )}
       </div>
