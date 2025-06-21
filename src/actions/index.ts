@@ -48,7 +48,7 @@ import { GenerarOrdenDePago } from './OrdenPago/generarOrden.action';
 
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
-import { guardarFavoritos } from "../actions/Eventos/guardarFavoritos";
+//import { guardarFavoritos } from "../actions/Eventos/guardarFavoritos";
 
 import { getOrganizadoresCR } from './Admin/getOrganizadores.action';
 import { eliminarOrganizador } from './Admin/eliminarOrganizador.action';
@@ -63,7 +63,7 @@ import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Ad
 
 export const server = {
     getEventos,
-    guardarFavoritos,
+
     getEventoBySlug,
     SignIn,
     getEventosPorUsuario,

@@ -108,7 +108,7 @@ async function guardarFavoritos() {
 
   console.log("Guardando eventos:", Array.from(eventosSeleccionados)); // <-- DEBUG
 
-  const res = await fetch("/actions/Eventos/guardarFavoritos", {
+  const res = await fetch("/api/guardarFavoritos", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
