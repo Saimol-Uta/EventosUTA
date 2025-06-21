@@ -3,6 +3,10 @@ import HeaderUsuario from "@components/HeaderUsuario.astro";
 import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
 
+const imagenLogo = "/img/logoFisei.png";
+const titulo1 = "FACULTAD DE INGENIERÍA";
+const titulo2 = "EN SISTEMAS, ELECTRÓNICA E INDUSTRIAL";
+
 const session = await getSession(Astro.request);
 
 
@@ -10,6 +14,7 @@ const { data: cuenta } = await Astro.callAction(
     actions.getCuentaByIdSingle,
     session?.user?.id || "",
 );
+
 
 
 const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
@@ -20,46 +25,65 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
         <HeaderUsuario
             nombreUsuario={session?.user?.name || "Administrador"}
             userImage={cuenta?.img_user || "/PerfilDefault.png"}
+            logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
+
         />
     )) ||
         (isStudent && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Estudiante"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
+                 logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
             />
         )) ||
         (isUser && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
+              logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
             />
         )) ||
         (isAdmin && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Administrador"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
+               logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
             />
         )) ||
         (isLoggedIn && (
             <HeaderUsuario
                 nombreUsuario={session?.user?.name || "Usuario"}
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
+              logoImage={imagenLogo}
+            titulo1={titulo1}
+                titulo2={titulo2}
             />
         )) || (
         <header class="header">
-    <div class="left-section">
-        <a href="/">
-            <img
-                src="/img/logoFisei.png"
-                alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
-                class="logo-full"
-            />
-        </a>
-    </div>
-
+<div class="left-section">
+    <a href="/" class="flex items-center gap-2">
+        <img
+            src={imagenLogo}
+            alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
+            class="w-16 h-auto"
+        />
+        <div class="flex flex-col leading-tight">
+            <span class="text-sm font-semibold text-red-800"> {titulo1} </span>
+            <span class="text-xs font-semibold text-red-800">{titulo2}</span>
+        </div>
+    </a>
+</div>
     <div class="right-section">
         <a href="/buscarCertificado" class="option" draggable="false">
-            <!-- certificado.svg embebido -->
+           
             <svg
                 class="icon"
                 viewBox="0 0 1710 1770"
@@ -132,33 +156,43 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
         min-width: 250px;
     }
 
-    .option {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9rem;
-        color: #660000;
-        text-decoration: none;
-        user-select: none;
-        cursor: pointer;
-        transition: color 0.3s ease;
-    }
+   .option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: #660000;
+    text-decoration: none;
+    user-select: none;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+}
 
-    .option:hover {
-        color: #a00000;
-    }
+.option:hover {
+    color: #a00000;
+}
 
-    .icon {
-        width: 24px;
-        height: 24px;
-        user-select: none;
-        pointer-events: none;
-        flex-shrink: 0;
-    }
+.text {
+    user-select: none;
+    position: relative;
+    font-weight: 500;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
 
-    .text {
-        user-select: none;
-    }
+.text::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    width: 0%;
+    height: 2px;
+    background-color: currentColor;
+    transition: width 0.4s ease;
+}
+
+    
     .icon {
         width: 32px;
         height: auto;
