@@ -110,7 +110,7 @@ upcomingEvents = resultProximos?.eventos ?? [];
             size="w-50 h-50"
         />
         <p class="text-red-800 font-semibold text-lg">
-            {session?.user?.name || "Usuario Anónimo"}
+            {(cuenta?.nom_usu1 || "") + " " + (cuenta?.nom_usu2 || "") + " " + (cuenta?.ape_usu1 || "") + " " + (cuenta?.ape_usu2 || "")}
         </p>
         <Button text="Editar Perfil" href="../PerfilUserDos" />
         <div class="text-center mt-4 text-red-800">Documentos</div>
