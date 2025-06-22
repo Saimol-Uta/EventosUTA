@@ -52,7 +52,39 @@ const {
             name={campo.name}
             value={campo.valor}
             required={["nom_usu1", "ape_usu1", "fec_nac_usu", "num_tel_usu", "id_car_per"].includes(campo.name)}
-            type={campo.name === "fec_nac_usu" ? "date" : "text"}
+            type={campo.name === "fec_nac_usu" ? "date" : campo.name === "num_tel_usu" ? "tel" : "text"}
+            {...(campo.name === "ced_usu" ? { readonly: true } : {})}
+            pattern={
+              ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"].includes(campo.name)
+                ? "[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{1,20}"
+                : campo.name === "num_tel_usu"
+                ? "\\d{10}"
+                : undefined
+            }
+            maxlength={
+              ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"].includes(campo.name)
+                ? 20
+                : campo.name === "num_tel_usu"
+                ? 10
+                : undefined
+            }
+            title={
+              ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"].includes(campo.name)
+                ? "Solo letras y máximo 20 caracteres"
+                : campo.name === "num_tel_usu"
+                ? "Debe tener exactamente 10 dígitos"
+                : campo.name === "fec_nac_usu"
+                ? "No puedes seleccionar una fecha mayor a 2006-12-31"
+                : undefined
+            }
+            oninput={
+              campo.name === "num_tel_usu"
+                ? "this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                : ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"].includes(campo.name)
+                ? "this.value=this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g,'').slice(0,20)"
+                : undefined
+            }
+            max={campo.name === "fec_nac_usu" ? "2006-12-31" : undefined}
           />
         )}
       </div>
