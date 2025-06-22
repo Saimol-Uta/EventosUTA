@@ -203,40 +203,44 @@ if (evento?.asignaciones) {
     (inscripcionResult || inscripcionError || yaInscrito) && (
         <div
             style="
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 120px;
-    margin-bottom: 2rem;
-  "
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 120px;
+                margin-bottom: 2rem;
+            "
         >
             <div
                 style={`padding: 1.5rem 2.5rem;
-      border-radius: 12px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      text-align: center;
-      box-shadow: 0 2px 12px #0001;
-      background: #fff;
-      color: ${
-          inscripcionError ||
-          (inscripcionResult && inscripcionResult.success === false)
-              ? "#c0392b"
-              : inscripcionResult && inscripcionResult.success === true
-                ? "#1e7e34"
-                : "#e67e22"
-      };
-      border: 2px solid ${
-          inscripcionError ||
-          (inscripcionResult && inscripcionResult.success === false)
-              ? "#e74c3c"
-              : inscripcionResult && inscripcionResult.success === true
-                ? "#28a745"
-                : "#f39c12"
-      };
-      max-width: 600px;
-      margin: 0 auto;`}
+                    border-radius: 12px;
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    text-align: center;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+                    background: #fafafa;
+                    color: ${
+                        inscripcionError ||
+                        (inscripcionResult &&
+                            inscripcionResult.success === false)
+                            ? "#b01025"
+                            : inscripcionResult &&
+                                inscripcionResult.success === true
+                              ? "#2c5f2d"
+                              : "#d97706"
+                    };
+                    border: 2px solid ${
+                        inscripcionError ||
+                        (inscripcionResult &&
+                            inscripcionResult.success === false)
+                            ? "#b01025"
+                            : inscripcionResult &&
+                                inscripcionResult.success === true
+                              ? "#2c5f2d"
+                              : "#d97706"
+                    };
+                    max-width: 600px;
+                    margin: 0 auto;`}
             >
                 {inscripcionError
                     ? `Error al inscribirse: ${inscripcionError.message}`
@@ -252,9 +256,9 @@ if (evento?.asignaciones) {
             yaInscrito ? (
                 <a
                     href="/homeUser"
-                    style="margin-top: 2rem; display: inline-block; background: #1e7e34; color: #fff; padding: 0.7rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 2px 8px #0001; transition: background 0.2s;"
-                    onmouseover="this.style.background='#145523'"
-                    onmouseout="this.style.background='#1e7e34'"
+                    style="margin-top: 2rem; display: inline-block; background: #b01025; color: #fff; padding: 0.7rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3); transition: all 0.2s ease;"
+                    onmouseover="this.style.background='#880f1f'; this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.background='#b01025'; this.style.transform='translateY(0)'"
                 >
                     Ir a inicio
                 </a>
@@ -279,14 +283,55 @@ if (evento?.asignaciones) {
                 name="idUsuario"
                 value={usuario?.cor_cue ?? usuario?.cuentas?.[0]?.cor_cue ?? ""}
             />
-            <input type="hidden" name="idEvento" value={evento?.id_eve || ""} />
+            <input type="hidden" name="idEvento" value={evento?.id_eve || ""} />{" "}
             <div class="form-card" style="padding: 2rem;">
-                <h2 style="font-size: 1.6rem;">Inscripción</h2>
-                <p>{new Date().toLocaleDateString("es-EC")}</p>
+                <h2 style="font-size: 1.6rem; color: #b01025; margin-bottom: 1rem;">
+                    Inscripción
+                </h2>
+                <p style="color: #666; margin-bottom: 2rem;">
+                    {new Date().toLocaleDateString("es-EC")}
+                </p>
+                {/* INFORMACIÓN DEL TIPO DE USUARIO */}
+                {(es_estudiante || informacion_academica) && (
+                    <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #b01025;">
+                        <h3 style="font-size: 1.2rem; color: #b01025; margin-bottom: 1rem;">
+                            Tipo de Usuario:{" "}
+                            <strong>
+                                {es_estudiante
+                                    ? "Estudiante Universitario"
+                                    : "Público General"}
+                            </strong>
+                        </h3>
 
-                <h3 style="font-size: 1.3rem;">Datos del Usuario</h3>
+                        {es_estudiante && informacion_academica && (
+                            <div style="margin-top: 1rem;">
+                                <p style="margin: 0.5rem 0; color: #333;">
+                                    <strong>Facultad:</strong>{" "}
+                                    {informacion_academica.facultad ||
+                                        "No definida"}
+                                </p>
+                                <p style="margin: 0.5rem 0; color: #333;">
+                                    <strong>Carrera:</strong>{" "}
+                                    {informacion_academica.carrera ||
+                                        "No definida"}
+                                </p>
+                                {informacion_academica.codigo_carrera && (
+                                    <p style="margin: 0.5rem 0; color: #333;">
+                                        <strong>Código:</strong>{" "}
+                                        {informacion_academica.codigo_carrera}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+                <h3 style="font-size: 1.3rem; color: #b01025;">
+                    Datos del Usuario
+                </h3>{" "}
                 <div class="form-group">
-                    <label>Correo electrónico</label>
+                    <label style="color: #333; font-weight: 600;">
+                        Correo electrónico
+                    </label>
                     <input
                         type="email"
                         value={
@@ -295,56 +340,70 @@ if (evento?.asignaciones) {
                             ""
                         }
                         readonly
+                        style="background: #f5f5f5; color: #666; border: 1px solid #ddd;"
                     />
-                </div>
-
+                </div>{" "}
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Nombre</label>
+                        <label style="color: #333; font-weight: 600;">
+                            Nombre
+                        </label>
                         <input
                             type="text"
                             value={usuario?.nom_usu1 ?? ""}
                             readonly
+                            style="background: #f5f5f5; color: #666; border: 1px solid #ddd;"
                         />
                     </div>
                     <div class="form-group">
-                        <label>Apellido</label>
+                        <label style="color: #333; font-weight: 600;">
+                            Apellido
+                        </label>
                         <input
                             type="text"
                             value={usuario?.ape_usu1 ?? ""}
                             readonly
+                            style="background: #f5f5f5; color: #666; border: 1px solid #ddd;"
                         />
                     </div>
-                </div>
-
+                </div>{" "}
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Tipo de Documento</label>
-                        <select disabled>
+                        <label style="color: #333; font-weight: 600;">
+                            Tipo de Documento
+                        </label>
+                        <select
+                            disabled
+                            style="background: #f5f5f5; color: #666; border: 1px solid #ddd;"
+                        >
                             <option selected>Cédula</option>
                             <option>Pasaporte</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Número de Documento</label>
+                        <label style="color: #333; font-weight: 600;">
+                            Número de Documento
+                        </label>
                         <input
                             type="text"
                             value={usuario?.ced_usu ?? ""}
                             readonly
+                            style="background: #f5f5f5; color: #666; border: 1px solid #ddd;"
                         />
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <label>Teléfono</label>
+                    <label style="color: #333; font-weight: 600;">
+                        Teléfono
+                    </label>
                     <input
                         type="tel"
                         value={usuario?.num_tel_usu ?? ""}
                         readonly
+                        style="background: #f5f5f5; color: #666; border: 1px solid #ddd;"
                     />
                 </div>
-
-                <h3 style="font-size: 1.3rem;">Requisitos</h3>
+                <h3 style="font-size: 1.3rem; color: #b01025;">Requisitos</h3>
                 <div class="requisitos-container">
                     {requisitosCompletos ? (
                         requisitos.map((req, index) => {
@@ -376,11 +435,26 @@ if (evento?.asignaciones) {
                             No hay requisitos registrados para este curso.
                         </p>
                     )}
-                </div>
-
+                </div>{" "}
                 {esPagado && (
-                    <div class="form-card" style="margin-top: 2rem;">
-                        <h2 style="font-size: 1.4rem;">Proceso de Pago</h2>
+                    <div
+                        class="form-card"
+                        style="margin-top: 2rem; background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px;"
+                    >
+                        <h2 style="font-size: 1.4rem; color: #856404; margin-bottom: 1rem;">
+                            💰 Información de Pago
+                        </h2>
+                        <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+                            <p style="color: #856404; margin: 0; font-weight: 500;">
+                                <strong>⚠️ Importante:</strong> Este evento
+                                tiene un costo de{" "}
+                                <strong>${evento?.precio || "0.00"}</strong>.
+                                <br />
+                                El proceso de pago estará disponible después de
+                                que tu inscripción sea validada por el
+                                administrador.
+                            </p>
+                        </div>
                         <div class="form-group">
                             <label for="metodoPago">Forma de pago</label>
                             <select id="metodoPago" name="metodoPago" required>
@@ -430,7 +504,6 @@ if (evento?.asignaciones) {
                         </div>
                     </div>
                 )}
-
                 {/* Detectar si el evento requiere carta de motivación */}
                 {requiereCarta && (
                     <div class="form-group" style="margin-top: 1.5rem;">
@@ -448,7 +521,6 @@ if (evento?.asignaciones) {
                         />
                     </div>
                 )}
-
                 <div class="form-row" style="margin-top: 2rem;">
                     <button
                         class="submit-button"
@@ -465,7 +537,6 @@ if (evento?.asignaciones) {
                         Inscribirse
                     </button>
                 </div>
-
                 {/* Mensaje de error visual para validación de requisitos/pago */}
                 <div
                     id="mensaje-error-validacion"
@@ -474,7 +545,6 @@ if (evento?.asignaciones) {
                     {/* El mensaje se inserta dinámicamente */}
                 </div>
             </div>
-
             <div class="vehicle-card" style="margin-top: 2rem;">
                 <h3>{evento?.nom_eve ?? "Evento no disponible"}</h3>
                 <img

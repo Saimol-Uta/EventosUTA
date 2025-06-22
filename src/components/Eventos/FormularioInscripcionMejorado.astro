@@ -114,29 +114,29 @@ function getEstadoMensaje(estado: string | null) {
             return {
                 mensaje:
                     "Tu inscripción está pendiente de revisión por parte del administrador.",
-                color: "#e67e22",
-                border: "#f39c12",
+                color: "#d97706",
+                border: "#f59e0b",
             };
         case "APROBADA":
             return {
                 mensaje:
                     "Tu inscripción ha sido aprobada. Ahora puedes proceder con el pago.",
-                color: "#1e7e34",
-                border: "#28a745",
+                color: "#2c5f2d",
+                border: "#22c55e",
             };
         case "RECHAZADA":
             return {
                 mensaje:
                     "Tu inscripción ha sido rechazada. Contacta al administrador para más información.",
-                color: "#c0392b",
-                border: "#e74c3c",
+                color: "#b01025",
+                border: "#b01025",
             };
         case "PAGADA":
             return {
                 mensaje:
                     "Tu inscripción está completa y el pago ha sido procesado.",
-                color: "#1e7e34",
-                border: "#28a745",
+                color: "#2c5f2d",
+                border: "#22c55e",
             };
         default:
             return null;
@@ -161,33 +161,34 @@ const estadoInfo = yaInscrito
                 margin-bottom: 2rem;
             "
         >
+            {" "}
             <div
                 style={`padding: 1.5rem 2.5rem;
                     border-radius: 12px;
                     font-size: 1.2rem;
                     font-weight: bold;
                     text-align: center;
-                    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-                    background: #fff;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+                    background: #fafafa;
                     color: ${
                         inscripcionError ||
                         (inscripcionResult &&
                             inscripcionResult.success === false)
-                            ? "#c0392b"
+                            ? "#b01025"
                             : inscripcionResult &&
                                 inscripcionResult.success === true
-                              ? "#1e7e34"
-                              : estadoInfo?.color || "#e67e22"
+                              ? "#2c5f2d"
+                              : estadoInfo?.color || "#d97706"
                     };
                     border: 2px solid ${
                         inscripcionError ||
                         (inscripcionResult &&
                             inscripcionResult.success === false)
-                            ? "#e74c3c"
+                            ? "#b01025"
                             : inscripcionResult &&
                                 inscripcionResult.success === true
-                              ? "#28a745"
-                              : estadoInfo?.border || "#f39c12"
+                              ? "#22c55e"
+                              : estadoInfo?.border || "#f59e0b"
                     };
                     max-width: 600px;
                     margin: 0 auto;`}
@@ -199,28 +200,26 @@ const estadoInfo = yaInscrito
                       : inscripcionResult && inscripcionResult.success === true
                         ? "¡Inscripción enviada correctamente! Espera la validación del administrador."
                         : estadoInfo?.mensaje || ""}
-            </div>
-
+            </div>{" "}
             {/* Botón para ir al área de pago si está aprobado */}
             {estadoInfo && estadoInscripcion === "APROBADA" && esPagado && (
                 <a
                     href={`/Eventos/Pago/${evento?.id_eve}`}
-                    style="margin-top: 1rem; display: inline-block; background: #28a745; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: background 0.2s;"
-                    onmouseover="this.style.background='#1e7e34'"
-                    onmouseout="this.style.background='#28a745'"
+                    style="margin-top: 1rem; display: inline-block; background: #b01025; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3); transition: all 0.2s ease;"
+                    onmouseover="this.style.background='#880f1f'; this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.background='#b01025'; this.style.transform='translateY(0)'"
                 >
                     Proceder con el pago
                 </a>
             )}
-
             {/* Botón para volver al inicio */}
             {(inscripcionResult && inscripcionResult.success === true) ||
             yaInscrito ? (
                 <a
                     href="/homeUser"
-                    style="margin-top: 1rem; display: inline-block; background: #3498db; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: background 0.2s;"
-                    onmouseover="this.style.background='#2980b9'"
-                    onmouseout="this.style.background='#3498db'"
+                    style="margin-top: 1rem; display: inline-block; background: #6b7280; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3); transition: all 0.2s ease;"
+                    onmouseover="this.style.background='#4b5563'; this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.background='#6b7280'; this.style.transform='translateY(0)'"
                 >
                     Volver al inicio
                 </a>
@@ -247,16 +246,16 @@ const estadoInfo = yaInscrito
             <input type="hidden" name="idEvento" value={evento?.id_eve || ""} />
 
             <div class="form-card" style="padding: 2rem;">
-                <h2 style="font-size: 1.8rem; color: #2c3e50; margin-bottom: 1rem;">
+                {" "}
+                <h2 style="font-size: 1.8rem; color: #b01025; margin-bottom: 1rem;">
                     Formulario de Inscripción
                 </h2>
-                <p style="color: #7f8c8d; margin-bottom: 2rem;">
+                <p style="color: #666; margin-bottom: 2rem;">
                     {new Date().toLocaleDateString("es-EC")}
                 </p>
-
                 {/* INFORMACIÓN DEL TIPO DE USUARIO */}
-                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #3498db;">
-                    <h3 style="font-size: 1.2rem; color: #2c3e50; margin-bottom: 1rem;">
+                <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #b01025;">
+                    <h3 style="font-size: 1.2rem; color: #b01025; margin-bottom: 1rem;">
                         Tipo de Usuario:{" "}
                         <strong>
                             {es_estudiante
@@ -267,17 +266,17 @@ const estadoInfo = yaInscrito
 
                     {es_estudiante && informacion_academica && (
                         <div style="margin-top: 1rem;">
-                            <p style="margin: 0.5rem 0; color: #34495e;">
+                            <p style="margin: 0.5rem 0; color: #333;">
                                 <strong>Facultad:</strong>{" "}
                                 {informacion_academica.facultad ||
                                     "No definida"}
                             </p>
-                            <p style="margin: 0.5rem 0; color: #34495e;">
+                            <p style="margin: 0.5rem 0; color: #333;">
                                 <strong>Carrera:</strong>{" "}
                                 {informacion_academica.carrera || "No definida"}
                             </p>
                             {informacion_academica.codigo_carrera && (
-                                <p style="margin: 0.5rem 0; color: #34495e;">
+                                <p style="margin: 0.5rem 0; color: #333;">
                                     <strong>Código:</strong>{" "}
                                     {informacion_academica.codigo_carrera}
                                 </p>
@@ -285,88 +284,85 @@ const estadoInfo = yaInscrito
                         </div>
                     )}
                 </div>
-
                 {/* DATOS DEL USUARIO */}
-                <h3 style="font-size: 1.3rem; color: #2c3e50; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.3rem; color: #b01025; margin-bottom: 1rem;">
                     Datos Personales
-                </h3>
-
+                </h3>{" "}
                 <div class="form-group" style="margin-bottom: 1rem;">
-                    <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #34495e;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
                         Correo electrónico
                     </label>
                     <input
                         type="email"
                         value={usuario?.cor_cue || ""}
                         readonly
-                        style="width: 100%; padding: 0.8rem; border: 2px solid #bdc3c7; border-radius: 6px; background: #ecf0f1; color: #7f8c8d;"
+                        style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
                     />
                 </div>
-
                 <div
                     class="form-row"
                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;"
                 >
+                    {" "}
                     <div class="form-group">
-                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #34495e;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
                             Cédula
                         </label>
                         <input
                             type="text"
                             value={usuario?.ced_usu || ""}
                             readonly
-                            style="width: 100%; padding: 0.8rem; border: 2px solid #bdc3c7; border-radius: 6px; background: #ecf0f1; color: #7f8c8d;"
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
                         />
                     </div>
                     <div class="form-group">
-                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #34495e;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
                             Teléfono
                         </label>
                         <input
                             type="tel"
                             value={usuario?.num_tel_usu || ""}
                             readonly
-                            style="width: 100%; padding: 0.8rem; border: 2px solid #bdc3c7; border-radius: 6px; background: #ecf0f1; color: #7f8c8d;"
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
                         />
                     </div>
                 </div>
-
                 <div
                     class="form-row"
                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;"
                 >
+                    {" "}
                     <div class="form-group">
-                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #34495e;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
                             Nombres
                         </label>
                         <input
                             type="text"
                             value={`${usuario?.nom_usu1 || ""} ${usuario?.nom_usu2 || ""}`.trim()}
                             readonly
-                            style="width: 100%; padding: 0.8rem; border: 2px solid #bdc3c7; border-radius: 6px; background: #ecf0f1; color: #7f8c8d;"
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
                         />
                     </div>
                     <div class="form-group">
-                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #34495e;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
                             Apellidos
                         </label>
                         <input
                             type="text"
                             value={`${usuario?.ape_usu1 || ""} ${usuario?.ape_usu2 || ""}`.trim()}
                             readonly
-                            style="width: 100%; padding: 0.8rem; border: 2px solid #bdc3c7; border-radius: 6px; background: #ecf0f1; color: #7f8c8d;"
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
                         />
                     </div>
-                </div>
-
+                </div>{" "}
                 {/* CARTA DE MOTIVACIÓN si es requerida */}
                 {requiereCarta && (
                     <div style="margin-bottom: 2rem;">
-                        <h3 style="font-size: 1.3rem; color: #2c3e50; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.3rem; color: #b01025; margin-bottom: 1rem;">
                             Carta de Motivación
                         </h3>
                         <div class="form-group">
-                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #34495e;">
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
                                 Explica por qué quieres participar en este
                                 evento *
                             </label>
@@ -376,15 +372,14 @@ const estadoInfo = yaInscrito
                                 rows="6"
                                 required
                                 placeholder="Escribe tu carta de motivación aquí..."
-                                style="width: 100%; padding: 0.8rem; border: 2px solid #bdc3c7; border-radius: 6px; resize: vertical; font-family: inherit;"
+                                style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; resize: vertical; font-family: inherit; focus:border-color: #b01025;"
                             />
                         </div>
                     </div>
-                )}
-
+                )}{" "}
                 {/* NOTA SOBRE EL PAGO */}
                 {esPagado && (
-                    <div style="background: #fff3cd; border: 2px solid #ffeaa7; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
                         <h4 style="color: #856404; margin-bottom: 0.8rem; font-size: 1.1rem;">
                             📋 Información sobre el pago
                         </h4>
@@ -400,7 +395,6 @@ const estadoInfo = yaInscrito
                         </p>
                     </div>
                 )}
-
                 {/* BOTÓN DE ENVÍO */}
                 <div
                     class="form-row"
@@ -408,14 +402,13 @@ const estadoInfo = yaInscrito
                 >
                     <button
                         type="submit"
-                        style="background: #28a745; color: white; padding: 1rem 3rem; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: all 0.2s;"
-                        onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'"
-                        onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'"
+                        style="background: #b01025; color: white; padding: 1rem 3rem; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3); transition: all 0.2s ease;"
+                        onmouseover="this.style.background='#880f1f'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='#b01025'; this.style.transform='translateY(0)'"
                     >
                         Enviar Inscripción
                     </button>
                 </div>
-
                 {/* Mensaje de error visual para validación */}
                 <div
                     id="mensaje-error-validacion"
@@ -428,19 +421,18 @@ const estadoInfo = yaInscrito
                 class="vehicle-card"
                 style="margin-top: 2rem; padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
             >
-                <h3 style="color: #2c3e50; font-size: 1.5rem; margin-bottom: 1rem;">
+                {" "}
+                <h3 style="color: #b01025; font-size: 1.5rem; margin-bottom: 1rem;">
                     {evento?.nom_eve ?? "Evento no disponible"}
                 </h3>
-
                 {evento?.img_eve && (
                     <img
                         src={evento.img_eve}
                         alt={evento.nom_eve}
                         style="width: 100%; max-width: 400px; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;"
                     />
-                )}
-
-                <div style="line-height: 1.6; color: #34495e;">
+                )}{" "}
+                <div style="line-height: 1.6; color: #333;">
                     <p style="margin-bottom: 0.8rem;">
                         <strong>Descripción:</strong>{" "}
                         {evento?.des_eve || "Sin descripción"}
@@ -466,7 +458,7 @@ const estadoInfo = yaInscrito
                     <p style="margin-bottom: 0.8rem;">
                         <strong>Precio:</strong>
                         <span
-                            style={`color: ${esPagado ? "#e74c3c" : "#27ae60"}; font-weight: bold;`}
+                            style={`color: ${esPagado ? "#b01025" : "#2c5f2d"}; font-weight: bold;`}
                         >
                             {esPagado
                                 ? `$${evento?.precio || "0.00"}`

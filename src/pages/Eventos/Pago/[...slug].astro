@@ -129,16 +129,17 @@ if (Astro.request.method === "POST") {
         {
             (pagoResult || pagoError) && (
                 <div style="margin-bottom: 2rem; text-align: center;">
+                    {" "}
                     <div
                         style={`padding: 1.5rem 2.5rem;
             border-radius: 12px;
             font-size: 1.2rem;
             font-weight: bold;
             text-align: center;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-            background: #fff;
-            color: ${pagoError || (pagoResult && pagoResult.success === false) ? "#c0392b" : "#1e7e34"};
-            border: 2px solid ${pagoError || (pagoResult && pagoResult.success === false) ? "#e74c3c" : "#28a745"};
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            background: #fafafa;
+            color: ${pagoError || (pagoResult && pagoResult.success === false) ? "#b01025" : "#2c5f2d"};
+            border: 2px solid ${pagoError || (pagoResult && pagoResult.success === false) ? "#b01025" : "#22c55e"};
             max-width: 600px;
             margin: 0 auto;`}
                     >
@@ -147,12 +148,13 @@ if (Astro.request.method === "POST") {
                             : pagoResult && pagoResult.success === false
                               ? `Error: ${pagoResult.message || "No se pudo procesar el pago"}`
                               : "¡Pago registrado correctamente! Espera la confirmación del administrador."}
-                    </div>
-
+                    </div>{" "}
                     {pagoResult && pagoResult.success === true && (
                         <a
                             href="/homeUser"
-                            style="margin-top: 1rem; display: inline-block; background: #28a745; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                            style="margin-top: 1rem; display: inline-block; background: #b01025; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3); transition: all 0.2s ease;"
+                            onmouseover="this.style.background='#880f1f'; this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.background='#b01025'; this.style.transform='translateY(0)'"
                         >
                             Volver al inicio
                         </a>
@@ -172,33 +174,32 @@ if (Astro.request.method === "POST") {
                     style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
                     onsubmit="return validarPago();"
                 >
-                    <h2 style="color: #2c3e50; font-size: 1.8rem; margin-bottom: 1rem; text-align: center;">
+                    {" "}
+                    <h2 style="color: #b01025; font-size: 1.8rem; margin-bottom: 1rem; text-align: center;">
                         Proceso de Pago
                     </h2>
-
                     {/* INFORMACIÓN DEL EVENTO */}
-                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #28a745;">
-                        <h3 style="color: #2c3e50; margin-bottom: 1rem;">
+                    <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #b01025;">
+                        <h3 style="color: #b01025; margin-bottom: 1rem;">
                             {evento.nom_eve}
                         </h3>
-                        <p style="margin: 0.5rem 0; color: #34495e;">
+                        <p style="margin: 0.5rem 0; color: #333;">
                             <strong>Precio:</strong>{" "}
-                            <span style="color: #e74c3c; font-size: 1.2rem; font-weight: bold;">
+                            <span style="color: #b01025; font-size: 1.2rem; font-weight: bold;">
                                 ${evento.precio}
                             </span>
                         </p>
-                        <p style="margin: 0.5rem 0; color: #34495e;">
+                        <p style="margin: 0.5rem 0; color: #333;">
                             <strong>Participante:</strong>{" "}
                             {usuario?.nom_usu1 || " "} {usuario?.ape_usu1}
                         </p>
-                    </div>
-
+                    </div>{" "}
                     {/* INFORMACIÓN BANCARIA */}
-                    <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 2px solid #28a745;">
-                        <h4 style="color: #155724; margin-bottom: 1rem;">
+                    <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 2px solid #b01025;">
+                        <h4 style="color: #b01025; margin-bottom: 1rem;">
                             📋 Información para el pago
                         </h4>
-                        <div style="color: #155724; line-height: 1.6;">
+                        <div style="color: #333; line-height: 1.6;">
                             <p>
                                 <strong>Banco:</strong> Banco del Pacífico
                             </p>
@@ -216,41 +217,40 @@ if (Astro.request.method === "POST") {
                                 <strong>RUC:</strong> 1860001550001
                             </p>
                         </div>
-                    </div>
-
+                    </div>{" "}
                     {/* MÉTODO DE PAGO */}
                     <div style="margin-bottom: 2rem;">
-                        <label style="display: block; font-weight: bold; margin-bottom: 1rem; color: #34495e; font-size: 1.1rem;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 1rem; color: #333; font-size: 1.1rem;">
                             Método de Pago *
                         </label>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <label
-                                style="display: flex; align-items: center; padding: 1rem; border: 2px solid #bdc3c7; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
-                                onmouseover="this.style.borderColor='#3498db'"
-                                onmouseout="this.style.borderColor='#bdc3c7'"
+                                style="display: flex; align-items: center; padding: 1rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.borderColor='#b01025'"
+                                onmouseout="this.style.borderColor='#ddd'"
                             >
                                 <input
                                     type="radio"
                                     name="metodoPago"
                                     value="TRANSFERENCIA"
                                     required
-                                    style="margin-right: 0.8rem; transform: scale(1.2);"
+                                    style="margin-right: 0.8rem; transform: scale(1.2); accent-color: #b01025;"
                                 />
                                 <span style="font-weight: bold;">
                                     Transferencia Bancaria
                                 </span>
                             </label>
                             <label
-                                style="display: flex; align-items: center; padding: 1rem; border: 2px solid #bdc3c7; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
-                                onmouseover="this.style.borderColor='#3498db'"
-                                onmouseout="this.style.borderColor='#bdc3c7'"
+                                style="display: flex; align-items: center; padding: 1rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.borderColor='#b01025'"
+                                onmouseout="this.style.borderColor='#ddd'"
                             >
                                 <input
                                     type="radio"
                                     name="metodoPago"
                                     value="EFECTIVO"
                                     required
-                                    style="margin-right: 0.8rem; transform: scale(1.2);"
+                                    style="margin-right: 0.8rem; transform: scale(1.2); accent-color: #b01025;"
                                 />
                                 <span style="font-weight: bold;">
                                     Pago en Efectivo
@@ -258,7 +258,6 @@ if (Astro.request.method === "POST") {
                             </label>
                         </div>
                     </div>
-
                     {/* SUBIR COMPROBANTE */}
                     <div style="margin-bottom: 2rem;">
                         <label style="display: block; font-weight: bold; margin-bottom: 1rem; color: #34495e; font-size: 1.1rem;">
@@ -291,7 +290,6 @@ if (Astro.request.method === "POST") {
                             </p>
                         </div>
                     </div>
-
                     {/* BOTÓN DE ENVÍO */}
                     <div style="text-align: center;">
                         <button
@@ -303,7 +301,6 @@ if (Astro.request.method === "POST") {
                             Registrar Pago
                         </button>
                     </div>
-
                     {/* Mensaje de error para validación */}
                     <div
                         id="mensaje-error-pago"
