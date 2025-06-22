@@ -23,7 +23,7 @@ export const getDatosInscripcion = defineAction({
             },
         });
 
-        console.log("USUARIO ENCONTRADO:", usuario);
+
 
         const evento = await prisma.eventos.findUnique({
             where: { id_eve: idEvento },

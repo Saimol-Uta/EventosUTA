@@ -37,6 +37,9 @@ const { evento } = data;
 const session = await getSession(Astro.request);
 let yaInscrito = false;
 let estadoInscripcion = null;
+let datosUsuario = null;
+let cumpleRequisitos = false;
+let mensajeRequisitos: string[] = [];
 
 if (session?.user?.id) {
     try {
@@ -49,9 +52,38 @@ if (session?.user?.id) {
             yaInscrito = true;
             estadoInscripcion = datosInscripcion.data.inscripcion.est_ins;
         }
+        
+        // Obtener datos del usuario para verificar requisitos
+        if (datosInscripcion?.data?.usuario) {
+            datosUsuario = datosInscripcion.data.usuario;
+            
+            // Verificar requisitos para inscripción
+            const requisitos = [];
+            
+            // 1. Verificar que tenga cédula subida
+            if (!datosUsuario.enl_ced_cue || datosUsuario.enl_ced_cue.trim() === '') {
+                requisitos.push("Debes subir tu cédula de identidad en tu perfil");
+            }
+            
+            // 2. Verificar datos personales completos
+            if (!datosUsuario.nom_usu1 || datosUsuario.nom_usu1.trim() === '') {
+                requisitos.push("Primer nombre es requerido");
+            }
+            if (!datosUsuario.ape_usu1 || datosUsuario.ape_usu1.trim() === '') {
+                requisitos.push("Primer apellido es requerido");
+            }
+            if (!datosUsuario.ape_usu2 || datosUsuario.ape_usu2.trim() === '') {
+                requisitos.push("Segundo apellido es requerido");
+            }
+            // Nota: NOM_USU2 puede ser opcional ya que no todas las personas tienen segundo nombre
+            
+            mensajeRequisitos = requisitos;
+            cumpleRequisitos = requisitos.length === 0;
+        }
     } catch (error) {
         // Si hay error, asumimos que no está inscrito
         yaInscrito = false;
+        cumpleRequisitos = false;
     }
 }
 
@@ -414,8 +446,7 @@ const inscripcionProximamente = () => {
                                         <div style="font-size: 1.1rem; margin-bottom: 0.2rem;">💳</div>
                                         <div>Proceder con el pago</div>
                                         <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.2rem;">${Number(evento.precio).toFixed(2)}</div>
-                                    </a>
-                                )}
+                                    </a>                                )}
                             </div>
                         ) : !session?.user ? (
                             <!-- Usuario no autenticado -->
@@ -431,7 +462,41 @@ const inscripcionProximamente = () => {
                                     <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem;">Necesitas una cuenta para inscribirte</div>
                                 </div>
                             </a>
-                        ) : inscripcionDisponible() ? (
+                        ) : !cumpleRequisitos ? (
+                            <!-- Usuario no cumple requisitos -->
+                            <div>
+                                <div
+                                    style="display: block; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 1.2rem 2rem; border-radius: 12px; font-size: 1.1rem; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); cursor: not-allowed; margin-bottom: 1rem;"
+                                >
+                                    <div style="position: relative; z-index: 2;">
+                                        <div style="font-size: 1.3rem; margin-bottom: 0.3rem;">⚠️</div>
+                                        <div>Completa tu perfil para inscribirte</div>
+                                        <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem;">Faltan algunos datos requeridos</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Lista de requisitos faltantes -->
+                                <div style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;">
+                                    <h4 style="color: #92400e; margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600;">📋 Requisitos pendientes:</h4>
+                                    <ul style="color: #92400e; margin: 0; padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.5;">
+                                        {mensajeRequisitos.map((requisito: string) => (
+                                            <li style="margin-bottom: 0.5rem;">{requisito}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                
+                                <!-- Botón para ir al perfil -->
+                                <a
+                                    href="/"
+                                    style="display: block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 1rem 2rem; border-radius: 12px; font-size: 1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: all 0.3s ease;"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.5)'"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(59, 130, 246, 0.4)'"
+                                >
+                                    <div style="font-size: 1.1rem; margin-bottom: 0.2rem;">👤</div>
+                                    <div>Completar mi perfil</div>
+                                    <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.2rem;">Actualizar datos personales</div>
+                                </a>                            </div>
+                        ) : inscripcionDisponible() && cumpleRequisitos ? (
                             <a
                                 href={`/Eventos/Evento-Inscripcion/${slug}`}
                                 style="display: block; background: linear-gradient(135deg, #b01025, #880f1f); color: white; padding: 1.2rem 2rem; border-radius: 12px; font-size: 1.1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 6px 20px rgba(176, 16, 37, 0.4); transition: all 0.3s ease; position: relative; overflow: hidden;"
@@ -445,12 +510,7 @@ const inscripcionProximamente = () => {
                                 </div>
                                 <!-- Efecto de brillo -->
                                 <div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: shimmer 2s infinite;"></div>
-                            </a>
-                                    <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem;">¡Cupos limitados!</div>
-                                
-                                <div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: shimmer 2s infinite;"></div>
-                            
-                        ) : inscripcionProximamente() ? (
+                            </a>) : inscripcionProximamente() ? (
                             <div style="background: linear-gradient(135deg, #fef3c7, #fed7aa); border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; text-align: center;">
                                 <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⏳</div>
                                 <p style="color: #92400e; margin: 0; font-weight: bold; font-size: 1.1rem;">Próximamente</p>

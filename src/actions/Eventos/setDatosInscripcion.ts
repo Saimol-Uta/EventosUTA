@@ -10,11 +10,7 @@ export const setDatosInscripcion = defineAction({
         car_mot_eve: z.string().optional(), // Carta de motivación
     }),
     handler: async ({ idUsuario, idEvento, car_mot_eve }) => {
-        console.log("DATOS RECIBIDOS EN setDatosInscripcion:", {
-            idUsuario,
-            idEvento,
-            car_mot_eve,
-        });
+
         try {
             // 1. Verificar que el usuario existe
             const usuario = await prisma.usuarios.findUnique({
@@ -58,7 +54,31 @@ export const setDatosInscripcion = defineAction({
                 };
             }
 
-            // 3. Verificar si ya está inscrito
+            // 3. Verificar requisitos del usuario
+            const requisitos = [];
+
+            // Verificar que tenga cédula subida
+            if (!usuario.enl_ced_cue || usuario.enl_ced_cue.trim() === '') {
+                requisitos.push("Debes subir tu cédula de identidad en tu perfil");
+            }
+
+            // Verificar datos personales completos
+            if (!usuario.nom_usu1 || usuario.nom_usu1.trim() === '') {
+                requisitos.push("Primer nombre es requerido");
+            }
+            if (!usuario.ape_usu1 || usuario.ape_usu1.trim() === '') {
+                requisitos.push("Primer apellido es requerido");
+            }
+            if (!usuario.ape_usu2 || usuario.ape_usu2.trim() === '') {
+                requisitos.push("Segundo apellido es requerido");
+            }
+
+            if (requisitos.length > 0) {
+                return {
+                    success: false,
+                    message: `Completa tu perfil antes de inscribirte: ${requisitos.join(', ')}`,
+                };
+            }            // 4. Verificar si ya está inscrito
             const existe = await prisma.inscripciones.findUnique({
                 where: {
                     id_usu_ins_id_eve_ins: {
@@ -73,9 +93,7 @@ export const setDatosInscripcion = defineAction({
                     success: false,
                     message: "Ya estás inscrito en este evento.",
                 };
-            }
-
-            // 4. Verificar restricciones de asignación
+            }            // 5. Verificar restricciones de asignación
             if (evento.asignaciones) {
                 const tipoAsignacion = evento.asignaciones.tip_asi;
                 const carrerasAsignacion = evento.asignaciones.detalle_asignaciones.map(det => det.carreras);
@@ -103,18 +121,12 @@ export const setDatosInscripcion = defineAction({
                         };
                     }
                 }
-            }            // 5. Determinar estado inicial de la inscripción
-            // Si el evento es gratuito, se aprueba automáticamente
-            // Si es pagado, queda pendiente de validación por el administrador
-            const esPagado = evento.precio && Number(evento.precio) > 0;
-            const estadoInicial = esPagado ? "DPendiente" : "Aprobado";
+            }            // 6. Determinar estado inicial de la inscripción
+            // Todas las inscripciones comienzan como "DPendiente"
+            // El administrador debe aprobarlas manualmente
+            const estadoInicial = "DPendiente";
 
-            console.log("DATOS QUE SE GUARDARÁN EN LA BASE:", {
-                id_usu_ins: idUsuario,
-                id_eve_ins: idEvento,
-                car_mot_inscrip: car_mot_eve,
-                est_ins: estadoInicial,
-            });
+
 
             const inscripcion = await prisma.inscripciones.create({
                 data: {
