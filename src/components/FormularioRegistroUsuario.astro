@@ -26,6 +26,14 @@ const {
   textoBotonMasTarde,
   textoBotonAsociar,
 } = Astro.props as Props;
+
+const nombre = camposFormulario.find(c => c.name === "nom_usu1")?.valor || "";
+const apellido = camposFormulario.find(c => c.name === "ape_usu1")?.valor || "";
+const nombreCompleto = `${nombre} ${apellido}`.trim();
+
+const fechaMinimaNacimiento = new Date();
+fechaMinimaNacimiento.setFullYear(fechaMinimaNacimiento.getFullYear() - 17);
+const fechaMax = fechaMinimaNacimiento.toISOString().split("T")[0];
 ---
 
 <section class="space-y-12">
@@ -39,7 +47,7 @@ const {
       <!-- Aside Panel -->
       <div class="bg-[#581517] text-white p-8 space-y-6">
         <div>
-          <h2 class="text-xl font-bold mb-1">👤 Usuario</h2>
+          <h2 class="text-xl font-bold mb-1">👤 {nombreCompleto || "Usuario"}</h2>
           <p class="text-sm text-white/80">{cedula}</p>
         </div>
 
@@ -102,7 +110,7 @@ const {
                       : campo.name === "num_tel_usu"
                       ? "Debe tener exactamente 10 dígitos"
                       : campo.name === "fec_nac_usu"
-                      ? "No puedes seleccionar una fecha mayor a 2006-12-31"
+                      ? "No puedes seleccionar una fecha mayor a la permitida"
                       : undefined
                   }
                   oninput={
@@ -112,7 +120,7 @@ const {
                       ? "this.value=this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g,'').slice(0,20)"
                       : undefined
                   }
-                  max={campo.name === "fec_nac_usu" ? "2006-12-31" : undefined}
+                  max={campo.name === "fec_nac_usu" ? fechaMax : undefined}
                   class="bg-gray-50 border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#581517] focus:outline-none shadow-inner transition-all duration-300 hover:ring-1 hover:ring-[#581517]"
                 />
               )}
