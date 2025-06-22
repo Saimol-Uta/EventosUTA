@@ -14,7 +14,7 @@ const {
   tituloVision,
   contenidoVision,
   imagenVision,
-  modoAdmin = false
+  modoAdmin = false,
 } = Astro.props;
 
 const eventosDestacados = await prisma.eventos.findMany({
@@ -32,76 +32,20 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
   slides.push(eventosDestacados.slice(i, i + 2));
 }
 ---
-<section class="py-12 bg-gray-50 text-center">
-  <h2 class="text-3xl font-bold text-red-800 mb-10">Eventos Favoritos</h2>
 
-  <div class="relative max-w-5xl mx-auto">
-    <!-- Contenedor del carrusel -->
-    <div id="carousel-container" class="overflow-hidden rounded-xl shadow-lg w-full">
-      <div
-        id="carousel-inner"
-        class="flex transition-transform duration-700 ease-in-out"
-        style="width: 100%;"
-      >
-        {slides.map((grupo, index) => (
-          <div
-            class="min-w-full flex justify-center gap-6 bg-white p-6"
-            data-slide-index={index}
-          >
-            {grupo.map((evento) => (
-              <Evento
-                imagen={evento.img_eve}
-                titulo={evento.nom_eve}
-                estado={evento.id_asi_eve?.length?.toString() || "0"}
-                horas={evento.dur_eve ?? 0}
-                slug={evento.id_eve}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
+<section class="py-12" style="background-color: rgb(245, 245, 245)">
+  <div class="flex justify-between max-w-4xl mx-auto">
+    <div>
+      <h2 class="text-4xl font-bold text-red-800 mb-8">Eventos Favoritos</h2>
     </div>
-
-    <!-- Botones -->
-    <div class="flex justify-between items-center mt-6 px-8">
-      <button
-        onclick="cambiarSlide(-1)"
-        class="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md hover:bg-red-700 transition-all"
-        aria-label="Anterior"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-
-      <button
-        onclick="cambiarSlide(1)"
-        class="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md hover:bg-red-700 transition-all"
-        aria-label="Siguiente"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    </div>
-
-    <!-- Indicadores -->
-    <div id="carousel-indicators" class="flex justify-center gap-2 mt-4">
-      {slides.map((_, index) => (
-        <div
-          class="w-3 h-3 rounded-full bg-gray-400 transition-all duration-300"
-          data-indicator-index={index}
-        ></div>
-      ))}
-    </div>
-
-    <!-- Botón Ver más -->
-    <div class="mt-10">
+    <!-- Botón Todos los eventos -->
+    <div>
       <a
         href="/cursosCompleto"
-        class="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-red-600 text-white font-semibold shadow-md hover:bg-red-700 transition"
+        class="group inline-flex items-center gap-3 px-6 py-3 text-white font-semibold shadow-md transition"
+        style="background-color: #cd982e; "
       >
-        Ver más
+        Todos los eventos
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
@@ -110,82 +54,121 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
           stroke="currentColor"
           stroke-width="2"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
         </svg>
       </a>
     </div>
   </div>
-</section>
-
-    <!-- Botones -->
-    <div class="flex justify-center gap-4 mt-6">
+  <div class="relative max-w-5xl mx-auto">
+    <!-- Contenedor del carrusel -->
+    <div id="carousel-container" class="overflow-hidden w-full relative">
+      <div
+        id="carousel-inner"
+        class="flex transition-transform duration-700 ease-in-out"
+        style="width: 100%;"
+      >
+        {
+          slides.map((grupo, index) => (
+            <div
+              class="min-w-full flex justify-center gap-6 p-2"
+              data-slide-index={index}
+            >
+              {grupo.map((evento) => (
+                <Evento
+                  imagen={evento.img_eve}
+                  titulo={evento.nom_eve}
+                  estado={evento.id_asi_eve?.length?.toString() || "0"}
+                  horas={evento.dur_eve ?? 0}
+                  slug={evento.id_eve}
+                />
+              ))}
+            </div>
+          ))
+        }
+      </div>
+      <!-- Botones -->
       <button
         onclick="cambiarSlide(-1)"
-        class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md hover:bg-red-700 transition"
+        class="w-12 h-12 rounded-full bg-white text-red-800 flex items-center justify-center shadow-md hover:bg-red-800 hover:text-white transition-all absolute left-4 top-50"
         aria-label="Anterior"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-6 h-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"></path>
         </svg>
       </button>
 
       <button
         onclick="cambiarSlide(1)"
-        class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md hover:bg-red-700 transition"
+        class="w-12 h-12 rounded-full bg-white text-red-800 flex items-center justify-center shadow-md hover:bg-red-800 hover:text-white transition-all absolute right-4 top-50"
         aria-label="Siguiente"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-6 h-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5l7 7-7 7"></path>
         </svg>
       </button>
     </div>
-  </div>
 
-  <!-- Botón Ver más -->
-  <div class="mt-10">
-    <a
-      href="/cursosCompleto"
-      class="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-red-600 text-white font-semibold shadow-md hover:bg-red-700 transition"
-    >
-      Ver más
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        stroke-width="2"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-      </svg>
-    </a>
+    <!-- Indicadores -->
+    <div id="carousel-indicators" class="flex justify-center gap-5 mt-4">
+      {
+        slides.map((_, index) => (
+          <div
+            class="w-2.75 h-2.75 rounded-full transition-all duration-300"
+            style="background-color: rgb(193, 193, 193);"
+            data-indicator-index={index}
+          />
+        ))
+      }
+    </div>
   </div>
 </section>
-    <TarjetaConImagen
-      titulo={tituloDescripcion}
-      contenido={contenidoDescripcion}
-      imagenUrl={imagenDescripcion}
-      columna="des_pag"
-      modoEdicion={modoAdmin} 
-    />
 
-    <TarjetaConImagen
-      titulo={tituloMision}
-      contenido={contenidoMision}
-      imagenUrl={imagenMision}
-      invertir={true}
-      columna="mis_pag"
-      modoEdicion={modoAdmin}
-    />
+<TarjetaConImagen
+  titulo={tituloDescripcion}
+  contenido={contenidoDescripcion}
+  imagenUrl={imagenDescripcion}
+  columna="des_pag"
+  modoEdicion={modoAdmin}
+/>
 
-    <TarjetaConImagen
-      titulo={tituloVision}
-      contenido={contenidoVision}
-      imagenUrl={imagenVision}
-      columna="vis_pag"
-      modoEdicion={modoAdmin}
-    />
-  </div>
-</div>
+<TarjetaConImagen
+  titulo={tituloMision}
+  contenido={contenidoMision}
+  imagenUrl={imagenMision}
+  invertir={true}
+  columna="mis_pag"
+  modoEdicion={modoAdmin}
+/>
+
+<TarjetaConImagen
+  titulo={tituloVision}
+  contenido={contenidoVision}
+  imagenUrl={imagenVision}
+  columna="vis_pag"
+  modoEdicion={modoAdmin}
+/>
 
 <script src="/js/eventosFavoritos.js" defer is:inline></script>
