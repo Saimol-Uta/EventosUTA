@@ -3,7 +3,11 @@ import Header from "../../components/Header.astro";
 import Layout from "../../layouts/Layout.astro";
 import Navbar from "../../components/Navbar.astro";
 import { actions } from "astro:actions";
+
 import { getSession } from "auth-astro/server";
+
+import CursoDetalleCard from "../../components/CursoDetalleCard.astro";
+
 import "../../styles/global.css";
 
 interface Props {
@@ -146,6 +150,7 @@ const inscripcionProximamente = () => {
 ---
 
 <Layout>
+
     <Header />
 
     <section style="background: linear-gradient(135deg, #b01025 0%, #880f1f 100%); color: white; padding: 2rem 0; position: relative; overflow: hidden;">
@@ -695,3 +700,22 @@ const inscripcionProximamente = () => {
         /* Mantener los colores UTA pero ajustar contrastes si es necesario */
     }
 </style>
+<!-- 
+  <Header />
+  <Navbar />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <CursoDetalleCard 
+      evento={evento} 
+      slug={slug} 
+      formatearFecha={formatearFecha} 
+      formatearDuracion={formatearDuracion} 
+      inscripcionDisponible={inscripcionDisponible} 
+      inscripcionProximamente={inscripcionProximamente}
+    />
+  </main>
+</Layout>
+
+-->
+
+
