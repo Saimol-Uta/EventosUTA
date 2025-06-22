@@ -9,8 +9,16 @@ export const setDatosInscripcion = defineAction({
         idEvento: z.string().uuid(),
         metodoPago: z.string().optional(),
         enlaceComprobante: z.string().optional(),
+        car_mot_eve: z.string().optional(), // <-- Agrega este campo
     }),
-    handler: async ({ idUsuario, idEvento, metodoPago, enlaceComprobante }) => {
+    handler: async ({ idUsuario, idEvento, metodoPago, enlaceComprobante, car_mot_eve }) => {
+        console.log("DATOS RECIBIDOS EN setDatosInscripcion:", {
+            idUsuario,
+            idEvento,
+            metodoPago,
+            enlaceComprobante,
+            car_mot_eve,
+        });
         try {
             // 1. Verificar que el usuario existe
             const usuario = await prisma.usuarios.findUnique({
@@ -100,13 +108,23 @@ export const setDatosInscripcion = defineAction({
                     }
                 }
             }      // 5. Crear la inscripción
+            console.log("DATOS QUE SE GUARDARÁN EN LA BASE:", {
+                id_usu_ins: idUsuario,
+                id_eve_ins: idEvento,
+                met_pag_ins: metodoPago,
+                enl_ord_pag_ins: enlaceComprobante,
+                car_mot_inscrip: car_mot_eve,
+                // ...otros campos...
+            });
+            const metodoPagoValido = metodoPago === "TRANSFERENCIA" || metodoPago === "EFECTIVO" ? metodoPago : null;
             const inscripcion = await prisma.inscripciones.create({
                 data: {
                     id_usu_ins: idUsuario,
                     id_eve_ins: idEvento,
-                    met_pag_ins: metodoPago && ["TRANSFERENCIA", "DEPOSITO", "ONLINE"].includes(metodoPago) ? metodoPago : null,
+                    met_pag_ins: metodoPagoValido,
                     enl_ord_pag_ins: enlaceComprobante || null,
-                    est_ins: evento.precio && Number(evento.precio) > 0 ? "PENDIENTE" : "APROBADA",
+                    car_mot_inscrip: car_mot_eve || null,
+                    est_ins: evento.precio && Number(evento.precio) > 0 ? "DPendiente" : "Aprobado",
                     est_par: "PENDIENTE",
                 },
             });

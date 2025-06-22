@@ -15,7 +15,9 @@ const { data: cuenta } = await Astro.callAction(
     session?.user?.id || "",
 );
 
+
 const idUsuario = session?.user?.id;
+
 
 let eventosUsuario: any[] = [];
 let upcomingEvents: any[] = [];
@@ -49,6 +51,9 @@ upcomingEvents = resultProximos?.eventos ?? [];
     <head>
         <meta charset="UTF-8" />
         <style>
+            body {
+                background: #fff;
+            }
             .modal-overlay {
                 display: none;
                 position: fixed;
@@ -94,155 +99,289 @@ upcomingEvents = resultProximos?.eventos ?? [];
                 height: 100%;
                 border: none;
             }
+            .event-card {
+                background: #fff;
+                border: 2px solid #b91c1c;
+                border-radius: 1rem;
+                box-shadow: 0 2px 8px rgba(185,28,28,0.08);
+                padding: 1.25rem;
+                color: #991b1b;
+                transition: box-shadow 0.2s, border 0.2s;
+            }
+            .event-card strong {
+                color: #b91c1c;
+                font-size: 1.1rem;
+            }
+            .event-card span {
+                color: #991b1b;
+            }
+            .cert-link {
+                color: #b91c1c;
+                text-decoration: underline;
+                font-weight: 500;
+                transition: color 0.2s;
+                display: block;
+                text-align: center;
+                word-break: break-word;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .cert-link:hover {
+                color: #fff;
+                background: #b91c1c;
+                border-radius: 0.5rem;
+                padding: 0 0.5rem;
+            }
+            .ver-mas-link {
+                color: #fff;
+                background: #b91c1c;
+                border-radius: 0.5rem;
+                padding: 0.25rem 0.75rem;
+                font-size: 0.95rem;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 0.5rem;
+                transition: background 0.2s, color 0.2s;
+            }
+            .ver-mas-link:hover {
+                background: #991b1b;
+                color: #fff;
+            }
+            .card-title {
+                color: #b91c1c;
+                font-weight: bold;
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+            }
+            .historial-title {
+                color: #b91c1c;
+                font-size: 1.3rem;
+                font-weight: bold;
+                margin-top: 2rem;
+            }
+            .historial-card {
+                background: #fff;
+                border: 2px solid #b91c1c;
+                border-radius: 1rem;
+                box-shadow: 0 2px 8px rgba(185,28,28,0.08);
+                padding: 1.25rem;
+                color: #991b1b;
+                margin-bottom: 0.5rem;
+            }
+            .no-eventos {
+                color: #991b1b;
+                background: #fff0f0;
+                border: 1px dashed #b91c1c;
+                border-radius: 0.75rem;
+                padding: 1rem;
+                text-align: center;
+            }
+            .main-container {
+                max-width: 98vw;
+                width: 100%;
+                margin: 0 auto;
+                padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+            .perfil-section {
+                background: #fff;
+                border-radius: 1.5rem;
+                box-shadow: 0 2px 12px rgba(185,28,28,0.07);
+                padding: 2rem 1rem 1.5rem 1rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1.2rem;
+                min-width: 220px;
+            }
+            .perfil-section .text-red-800 {
+                margin-bottom: 0.5rem;
+                text-align: center;
+                width: 100%;
+                word-break: break-word;
+            }
+            .perfil-section .flex {
+                justify-content: center;
+            }
+            .content-section {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+            .cards-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.2rem;
+            }
+            .card {
+                min-height: 220px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                background: #fff;
+                border-radius: 1.2rem;
+                box-shadow: 0 2px 12px rgba(185,28,28,0.07);
+                padding: 1.2rem 0.7rem;
+            }
+            .event-card, .historial-card {
+                min-height: 70px;
+            }
+            @media (max-width: 900px) {
+                .main-container {
+                    padding: 0.5rem 0.1rem;
+                }
+                .cards-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            @media (max-width: 700px) {
+                .main-container {
+                    gap: 0.5rem;
+                }
+                .perfil-section {
+                    padding: 1rem 0.2rem;
+                }
+                .card {
+                    padding: 0.7rem 0.2rem;
+                }
+            }
         </style>
     </head>
     <body>
         <Header />
         <NavBar />
-
-        <div class="flex flex-col md:flex-row gap-6 p-6">
-            <!-- Perfil del Usuario -->
-            <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
-                <Avatar
-                    defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
-                    size="w-50 h-50"
-                />
-                <p class="text-red-800 font-semibold text-lg">
-                    {session?.user?.name || "Usuario Anónimo"}
-                </p>
-                <Button text="Editar Perfil" href="../PerfilUserDos" />
-                <div class="text-center mt-4 text-red-800">Documentos</div>
-                <div class="flex gap-2 mt-2">
-                    <DocumentButton
-                        label="Cédula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ced_cue}
-                        fieldName="enl_ced_cue"
-                        size="w-24 h-24"
+        <div class="main-container">
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Perfil del Usuario -->
+                <div class="perfil-section w-full md:w-1/4">
+                    <Avatar
+                        defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
+                        size="w-50 h-50"
                     />
-                    <DocumentButton
-                        label="Matrícula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_mat_cue}
-                        fieldName="enl_mat_cue"
-                        size="w-24 h-24"
-                    />
-                    <!-- Extensión no disponible en la nueva estructura -->
+                    <p class="text-red-800 font-semibold text-lg">
+                        {(cuenta?.nom_usu1 || "") + " " + (cuenta?.nom_usu2 || "") + " " + (cuenta?.ape_usu1 || "") + " " + (cuenta?.ape_usu2 || "")}
+                    </p>
+                    <Button text="Editar Perfil" href="../PerfilUserDos" />
+                    <div class="text-center mt-4 text-red-800">Documentos</div>
+                    <div class="flex gap-2 mt-2">
+                        <DocumentButton
+                            label="Cédula"
+                            cuentaId={session?.user?.id}
+                            currentImage={cuenta?.enl_ced_cue}
+                            fieldName="enl_ced_cue"
+                            size="w-24 h-24"
+                        />
+                        <DocumentButton
+                            label="Matrícula"
+                            cuentaId={session?.user?.id}
+                            currentImage={cuenta?.enl_mat_cue}
+                            fieldName="enl_mat_cue"
+                            size="w-24 h-24"
+                        />
+                    </div>
                 </div>
-            </div>
-
-            <!-- Contenido principal -->
-            <div class="w-full md:w-3/4 flex flex-col gap-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-                    <!-- Eventos Próximos -->
-                    <Card title="Eventos Próximos">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                upcomingEvents.slice(0, 4).map((evento) => (
-                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                        <>
-                                            <strong>{evento.nom_eve}</strong>
-                                            <br />
-                                        </>
-                                        <span class="text-sm text-gray-600">
-                                            Inicio:{" "}
-                                            {new Date(
-                                                evento.fec_ini_eve,
-                                            ).toLocaleDateString()}
-                                        </span>
-                                    </div>
-                                ))
-                            }
-                            {
-                                upcomingEvents.length > 4 && (
-                                    <a
-                                        href="/eventosProximos"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
-                    </Card>
-                    <!-- Certificados -->
-                    <Card title="Certificados">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                certificates.length > 0 ? (
-                                    certificates
-                                        .slice(0, 4)
-                                        .map((certificado) => (
-                                            <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                                <a
-                                                    href={
-                                                        certificado.enl_cer_par
-                                                    }
-                                                    class="text-red-800 underline js-view-cert"
-                                                >
-                                                    {
-                                                        certificado.eventos
-                                                            .nom_eve
-                                                    }
-                                                </a>
+                <!-- Contenido principal -->
+                <div class="content-section w-full md:w-3/4">
+                    <div class="cards-grid">
+                        <div class="card">
+                            <Card title="Eventos Próximos">
+                                <div class="flex flex-col gap-y-4">
+                                    {
+                                        upcomingEvents.slice(0, 4).map((evento) => (
+                                            <div class="event-card">
+                                                <>
+                                                    <strong>{evento.nom_eve}</strong>
+                                                    <br />
+                                                </>
+                                                <span class="text-sm">
+                                                    Inicio: {new Date(evento.fec_ini_eve).toLocaleDateString()}
+                                                </span>
                                             </div>
                                         ))
-                                ) : (
-                                    <p class="text-sm text-gray-500">
-                                        No tienes certificados para mostrar.
-                                    </p>
-                                )
-                            }
-
-                            {
-                                certificates.length > 4 && (
-                                    <a
-                                        href="/User/certificadosUsuario"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
-                    </Card>
-                </div>
-
-                <!-- Historial de Eventos -->
-                <h1 class="text-xl font-semibold mt-8 text-red-800">
-                    Historial de Eventos
-                </h1>
-                <div class="flex flex-col gap-6">
-                    {
-                        Array.isArray(eventosUsuario) &&
-                        eventosUsuario.length > 0 ? (
-                            eventosUsuario.map((evento) => (
-                                <div class="bg-white border rounded-xl shadow-md p-4">
-                                    <div class="font-bold text-lg text-gray-800">
-                                        {evento?.nombre ||
-                                            evento?.nom_eve ||
-                                            "Sin nombre"}
-                                    </div>
-                                    <div class="text-gray-600 text-sm mt-1">
-                                        Fecha:{" "}
-                                        {evento?.fecha ||
-                                            evento?.fec_ini_eve ||
-                                            "Sin fecha"}
-                                    </div>
-                                    <div class="text-gray-600 text-sm">
-                                        Estado:{" "}
-                                        {evento?.estado ||
-                                            evento?.estado_inscripcion ||
-                                            "Inscrito"}
-                                    </div>
+                                    }
+                                    {
+                                        upcomingEvents.length > 4 && (
+                                            <a
+                                                href="/eventosProximos"
+                                                class="ver-mas-link"
+                                            >
+                                                Ver más...
+                                            </a>
+                                        )
+                                    }
                                 </div>
-                            ))
-                        ) : (
-                            <div class="text-gray-500">
-                                No tienes eventos registrados.
-                            </div>
-                        )
-                    }
+                            </Card>
+                        </div>
+                        <div class="card">
+                            <Card title="Certificados">
+                                <div class="flex flex-col gap-y-4">
+                                    {
+                                        certificates.length > 0 ? (
+                                            certificates
+                                                .slice(0, 4)
+                                                .map((certificado) => (
+                                                    <div class="event-card">
+                                                        <a
+                                                            href={certificado.enl_cer_par}
+                                                            class="cert-link js-view-cert"
+                                                            title={certificado.eventos.nom_eve}
+                                                        >
+                                                            {certificado.eventos.nom_eve}
+                                                        </a>
+                                                    </div>
+                                                ))
+                                        ) : (
+                                            <p class="no-eventos">
+                                                No tienes certificados para mostrar.
+                                            </p>
+                                        )
+                                    }
+                                    {
+                                        certificates.length > 4 && (
+                                            <a
+                                                href="/User/certificadosUsuario"
+                                                class="ver-mas-link"
+                                            >
+                                                Ver más...
+                                            </a>
+                                        )
+                                    }
+                                </div>
+                            </Card>
+                        </div>
+                    </div>
+                    <h1 class="historial-title">
+                        Historial de Eventos
+                    </h1>
+                    <div class="flex flex-col gap-6">
+                        {
+                            Array.isArray(eventosUsuario) && eventosUsuario.length > 0 ? (
+                                eventosUsuario.map((evento) => (
+                                    <div class="historial-card">
+                                        <div class="font-bold text-lg">
+                                            {evento?.nombre || evento?.nom_eve || "Sin nombre"}
+                                        </div>
+                                        <div class="text-sm mt-1">
+                                            Fecha: {evento?.fecha || evento?.fec_ini_eve || "Sin fecha"}
+                                        </div>
+                                        <div class="text-sm">
+                                            Estado: {evento?.estado || evento?.estado_inscripcion || "Inscrito"}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div class="no-eventos">
+                                    No tienes eventos registrados.
+                                </div>
+                            )
+                        }
+                    </div>
                 </div>
             </div>
         </div>

@@ -16,7 +16,7 @@ const filtros = {
 const page = parseInt(url.searchParams.get("page") || "1", 10);
 
 // Número de cursos por página (configurable)
-const cursosPorPagina = 6;
+const cursosPorPagina = 8;
 ---
 
 <Layout>
@@ -83,6 +83,10 @@ const cursosPorPagina = 6;
     color: #a10000;
     margin-bottom: 20px;
   }
+  body {
+  background: linear-gradient(to bottom, #fffaf0, #fffaf0);
+}
+
 
   .filtros-activos {
     display: flex;

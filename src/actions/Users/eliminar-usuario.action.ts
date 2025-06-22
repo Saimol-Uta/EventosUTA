@@ -5,15 +5,17 @@ import prisma from '../../db';
 export const eliminarUsuario = defineAction({
     accept: 'json',
     input: z.object({
-        id_usuario: z.string().uuid('ID de usuario inválido'),
+        id_usuario: z.string().min(1, 'ID de usuario requerido'), // Cambié de uuid a string para manejar cor_cue
     }),
     handler: async (input) => {
         try {
-            // Verificar que el usuario existe
+            // Verificar que el usuario existe usando cor_cue como identificador
             const usuarioExistente = await prisma.usuarios.findUnique({
-                where: { id_usu: input.id_usuario },
+                where: { cor_cue: input.id_usuario },
                 include: {
-                    cuentas: true // Verificar cuentas asociadas
+                    carreras: true,
+                    inscripciones: true,
+                    cambios: true
                 }
             });
 
@@ -24,36 +26,40 @@ export const eliminarUsuario = defineAction({
                 };
             }
 
-            // Verificar si el usuario tiene cuentas asociadas
-            if (usuarioExistente.cuentas.length > 0) {
+            // Verificar si el usuario tiene inscripciones
+            if (usuarioExistente.inscripciones.length > 0) {
                 return {
                     success: false,
-                    message: `No se puede eliminar el usuario porque tiene ${usuarioExistente.cuentas.length} cuenta(s) asociada(s). Debe eliminar primero las cuentas.`
+                    message: `No se puede eliminar el usuario porque tiene ${usuarioExistente.inscripciones.length} inscripción(es) relacionada(s). Debe eliminar primero las inscripciones.`
                 };
-            }            // Verificar si el usuario tiene inscripciones
-            const inscripciones = await prisma.inscripciones.count({
-                where: {
-                    id_usu_ins: input.id_usuario
-                }
-            });
+            }
 
-            if (inscripciones > 0) {
+            // Verificar si el usuario tiene cambios/solicitudes pendientes
+            const cambiosPendientes = usuarioExistente.cambios.filter(c => c.est_cam === 'PENDIENTE');
+            if (cambiosPendientes.length > 0) {
                 return {
                     success: false,
-                    message: `No se puede eliminar el usuario porque tiene ${inscripciones} inscripción(es) relacionada(s)`
+                    message: `No se puede eliminar el usuario porque tiene ${cambiosPendientes.length} solicitud(es) de cambio pendiente(s)`
                 };
+            }
+
+            // Primero eliminar cambios asociados (si los hay)
+            if (usuarioExistente.cambios.length > 0) {
+                await prisma.cambios.deleteMany({
+                    where: { id_cue_sol: input.id_usuario }
+                });
             }
 
             // Eliminar el usuario
             await prisma.usuarios.delete({
-                where: { id_usu: input.id_usuario }
+                where: { cor_cue: input.id_usuario }
             });
 
             return {
                 success: true,
                 message: 'Usuario eliminado correctamente',
                 data: {
-                    id: input.id_usuario,
+                    cor_cue: input.id_usuario,
                     nombre: `${usuarioExistente.nom_usu1} ${usuarioExistente.ape_usu1}`
                 }
             };

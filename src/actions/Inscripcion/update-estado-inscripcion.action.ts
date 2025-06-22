@@ -19,10 +19,23 @@ export const updateEstadoInscripcion = defineAction({
                 where: { id_ins: inscripcionId },
                 include: {
                     eventos: {
-                        select: { nom_eve: true }
-                    },
-                    usuarios: {
-                        select: { nom_usu1: true, nom_usu2: true, ape_usu1: true, ape_usu2: true }
+                        select: {
+                            nom_eve: true,
+                            precio: true,
+                            es_gratuito: true,
+                            requiere_carta: true,
+                            car_mot_eve: true
+                        }
+                    }, usuarios: {
+                        select: {
+                            nom_usu1: true,
+                            nom_usu2: true,
+                            ape_usu1: true,
+                            ape_usu2: true,
+                            enl_ced_cue: true,
+                            enl_mat_cue: true,
+                            rol_cue: true
+                        }
                     }
                 }
             });
@@ -33,6 +46,51 @@ export const updateEstadoInscripcion = defineAction({
                     message: "Inscripción no encontrada",
                 });
             }
+
+            // CONTROL 1: Verificar requisitos de pago
+            const evento = inscripcionExistente.eventos;
+            const esPago = !evento.es_gratuito && evento.precio && Number(evento.precio) > 0;
+
+            if (esPago && tipo === "pago" && estado === "Aprobado") {
+                // Si es un evento de pago y se intenta aprobar el pago, verificar que existe orden de pago
+                if (!inscripcionExistente.enl_ord_pag_ins) {
+                    throw new ActionError({
+                        code: "BAD_REQUEST",
+                        message: `No se puede aprobar el pago para el evento "${evento.nom_eve}". Es obligatorio subir la orden de pago para eventos con costo de $${Number(evento.precio).toFixed(2)}.`,
+                    });
+                }
+            }
+
+            // CONTROL 2: Verificar requisitos de documentación del evento
+            if (tipo === "documentacion" && estado === "Aprobado") {
+                const usuario = inscripcionExistente.usuarios;
+
+                // Verificar documentos obligatorios básicos
+                if (!usuario?.enl_ced_cue) {
+                    throw new ActionError({
+                        code: "BAD_REQUEST",
+                        message: `No se puede aprobar la documentación para el evento "${evento.nom_eve}". Es obligatorio que el usuario suba su cédula de identidad.`,
+                    });
+                }
+
+                // Si el evento requiere carta de motivación, verificar que existe
+                if (evento.requiere_carta && !inscripcionExistente.car_mot_inscrip) {
+                    throw new ActionError({
+                        code: "BAD_REQUEST",
+                        message: `No se puede aprobar la documentación para el evento "${evento.nom_eve}". Este evento requiere carta de motivación.`,
+                    });
+                }
+
+                // Verificar matrícula para estudiantes (descomentarla si es necesario)
+                if (usuario.rol_cue === "ESTUDIANTE" && !usuario.enl_mat_cue) {
+                    throw new ActionError({
+                        code: "BAD_REQUEST",
+                        message: `No se puede aprobar la documentación para el evento "${evento.nom_eve}". Es obligatorio que los estudiantes suban su matrícula.`,
+                    });
+                }
+            }
+
+            console.log("Validaciones de requisitos completadas exitosamente");
 
             // Mapear estados según los valores permitidos en la BD
             let nuevoEstado: string;
@@ -89,16 +147,30 @@ export const updateEstadoInscripcion = defineAction({
                         select: { nom_usu1: true, nom_usu2: true, ape_usu1: true, ape_usu2: true }
                     }
                 }
-            });
-
-            const nombreCompleto = `${inscripcionActualizada.usuarios?.nom_usu1 || ''} ${inscripcionActualizada.usuarios?.nom_usu2 || ''}`.trim();
+            }); const nombreCompleto = `${inscripcionActualizada.usuarios?.nom_usu1 || ''} ${inscripcionActualizada.usuarios?.nom_usu2 || ''}`.trim();
             const apellidoCompleto = `${inscripcionActualizada.usuarios?.ape_usu1 || ''} ${inscripcionActualizada.usuarios?.ape_usu2 || ''}`.trim();
+
+            // Convertir a objeto plano para serialización
+            const inscripcionSerializable = {
+                id_ins: inscripcionActualizada.id_ins,
+                est_ins: inscripcionActualizada.est_ins,
+                fec_ins: inscripcionActualizada.fec_ins?.toISOString(),
+                evento: {
+                    nom_eve: inscripcionActualizada.eventos?.nom_eve
+                },
+                usuario: {
+                    nom_usu1: inscripcionActualizada.usuarios?.nom_usu1,
+                    nom_usu2: inscripcionActualizada.usuarios?.nom_usu2,
+                    ape_usu1: inscripcionActualizada.usuarios?.ape_usu1,
+                    ape_usu2: inscripcionActualizada.usuarios?.ape_usu2
+                }
+            };
 
             return {
                 success: true,
                 message: `${mensaje} para ${nombreCompleto} ${apellidoCompleto}`,
                 data: {
-                    inscripcion: inscripcionActualizada,
+                    inscripcion: inscripcionSerializable,
                     nuevoEstado: nuevoEstado,
                     tipo: tipo,
                     accion: estado === "Rechazado" ? "rechazado" : "aprobado"
