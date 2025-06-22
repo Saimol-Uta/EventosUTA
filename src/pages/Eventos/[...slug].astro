@@ -92,170 +92,476 @@ const inscripcionProximamente = () => {
 
 <Layout>
     <Header />
-    <Navbar />
-</Layout>
 
-<div
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"
->
-</div>
-
-<section
-    style="max-width: 1000px; margin: auto; padding: 2rem; font-family: Arial, sans-serif;"
->
-    <h2 style="text-align: center; margin-bottom: 1rem;">
-        Curso: <span style="font-weight: 600;">{evento.nom_eve}</span>
-    </h2>
-
-    <div class="flex justify-center mb-8">
-        <img
-            src={evento.img_eve}
-            alt="Imagen del evento"
-            class="w-full max-w-xl h-auto rounded-lg shadow-lg"
-        />
-    </div>
-
-    <p
-        style="text-align: center; color: #555; font-size: 15px; margin-bottom: 2rem;"
-    >
-        <strong>Categoría del evento:</strong>
-        {evento.categorias_eventos.nom_cat}
-    </p>
-
-    <div
-        style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;"
-    >
-        <strong style="display: block; margin-bottom: 0.5rem;"
-            >Descripción del curso:</strong
-        >
-        <p style="margin: 0;">
-            {evento.des_eve}
-        </p>
-    </div>
-    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-        <div style="flex: 1;">
-            <strong>Lugar de celebración:</strong>
-            <p>{evento.ubi_eve}</p>
+    <section style="background: linear-gradient(135deg, #b01025 0%, #880f1f 100%); color: white; padding: 2rem 0; position: relative; overflow: hidden;">
+        <!-- Patrón de fondo sutil -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='2' fill='rgba(255,255,255,0.1)'/></svg>') repeat; opacity: 0.3;">
         </div>
-        <div style="flex: 1;">
-            <strong>Duración:</strong>
-            <p>
-                {
-                    evento.dur_eve
-                        ? formatearDuracion(evento.dur_eve)
-                        : "No especificada"
-                }
-            </p>
-        </div>
-    </div>
+        
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; position: relative;">
+            <div style="display: grid; grid-template-columns: 1fr 400px; gap: 4rem; align-items: center;">
+                <div>
+                    <!-- Breadcrumb -->
+                    <nav style="margin-bottom: 1.5rem; opacity: 0.8;">
+                        <a href="/" style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem;">Inicio</a>
+                        <span style="margin: 0 0.5rem; color: rgba(255,255,255,0.5);">›</span>
+                        <a href="/cursosCompleto" style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem;">Eventos</a>
+                        <span style="margin: 0 0.5rem; color: rgba(255,255,255,0.5);">›</span>
+                        <span style="color: white; font-size: 0.9rem;">{evento.nom_eve}</span>
+                    </nav>
 
-    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-        <div style="flex: 1;">
-            <strong>Fecha de inicio:</strong>
-            <p>{formatearFecha(evento.fec_ini_eve)}</p>
-        </div>
-        <div style="flex: 1;">
-            <strong>Fecha de finalización:</strong>
-            <p>
-                {
-                    evento.fec_fin_eve
-                        ? formatearFecha(evento.fec_fin_eve)
-                        : "No especificada"
-                }
-            </p>
-        </div>
-    </div>
-
-    {
-        evento.asignaciones && (
-            <div style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;">
-                <strong style="display: block; margin-bottom: 0.5rem;">
-                    Dirigido a:
-                </strong>
-                <div style="margin: 0; padding-left: 1.5rem;">
-                    <p>
-                        <strong>Tipo de asignación:</strong>{" "}
-                        {evento.asignaciones.nom_asi}
-                    </p>
-                    <p>
-                        <strong>Descripción:</strong>{" "}
-                        {evento.asignaciones.des_asi}
-                    </p>
-
-                    {evento.asignaciones.detalle_asignaciones &&
-                        evento.asignaciones.detalle_asignaciones.length > 0 && (
-                            <div style="margin-top: 1rem;">
-                                <strong>Carreras incluidas:</strong>
-                                <ul style="margin-top: 0.5rem;">
-                                    {evento.asignaciones.detalle_asignaciones.map(
-                                        (detalle: any) => (
-                                            <li>{detalle.carreras.nom_car}</li>
-                                        ),
-                                    )}
-                                </ul>
-                            </div>
+                    <h1 style="font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; margin-bottom: 1.5rem; line-height: 1.2; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+                        {evento.nom_eve}
+                    </h1>
+                    
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem; margin-bottom: 2rem;">
+                        <span style="background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); padding: 0.6rem 1.2rem; border-radius: 25px; font-size: 0.9rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.2);">
+                            📚 {evento.categorias_eventos.nom_cat}
+                        </span>
+                        {evento.precio && Number(evento.precio) > 0 ? (
+                            <span style="background: linear-gradient(45deg, #f59e0b, #f97316); color: #000; padding: 0.6rem 1.2rem; border-radius: 25px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">
+                                💰 ${Number(evento.precio).toFixed(2)}
+                            </span>
+                        ) : (
+                            <span style="background: linear-gradient(45deg, #22c55e, #16a34a); color: #fff; padding: 0.6rem 1.2rem; border-radius: 25px; font-weight: bold; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);">
+                                ✨ Gratuito
+                            </span>
                         )}
+                        {evento.asignaciones && (
+                            <span style="background: rgba(245, 158, 11, 0.9); color: #000; padding: 0.6rem 1.2rem; border-radius: 25px; font-weight: 600; font-size: 0.85rem;">
+                                🎯 Estudiantes UTA
+                            </span>
+                        )}
+                    </div>
+                    
+                    <p style="font-size: 1.2rem; line-height: 1.6; opacity: 0.95; margin-bottom: 2rem; text-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        {evento.des_eve}
+                    </p>
+
+                    <!-- Datos clave rápidos -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.3rem;">📅 Inicia</div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">{formatearFecha(evento.fec_ini_eve)}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.3rem;">📍 Lugar</div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">{evento.ubi_eve}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.3rem;">⏱️ Duración</div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">
+                                {evento.dur_eve ? formatearDuracion(evento.dur_eve) : "No especificada"}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="position: relative;">
+                        <img
+                            src={evento.img_eve}
+                            alt={evento.nom_eve}
+                            style="width: 100%; max-width: 400px; height: 300px; object-fit: cover; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 3px solid rgba(255,255,255,0.2);"
+                        />
+                        <!-- Badge de estado en la imagen -->
+                        <div style="position: absolute; top: 1rem; right: 1rem;">
+                            {inscripcionDisponible() ? (
+                                <span style="background: #22c55e; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);">
+                                    ✅ Abierto
+                                </span>
+                            ) : inscripcionProximamente() ? (
+                                <span style="background: #f59e0b; color: #000; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);">
+                                    ⏳ Próximamente
+                                </span>
+                            ) : (
+                                <span style="background: #ef4444; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);">
+                                    ❌ Cerrado
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
-        )
+        </div>
+    </section>    <!-- Información Principal -->
+    <section style="max-width: 1200px; margin: 0 auto; padding: 4rem 2rem 3rem;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 4rem;">
+            
+            <!-- Columna Principal -->
+            <div>
+                <!-- Detalles del Evento -->
+                <div style="background: #ffffff; border-radius: 16px; padding: 3rem; margin-bottom: 3rem; box-shadow: 0 8px 30px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #f1f5f9;">
+                        <div style="background: linear-gradient(135deg, #b01025, #880f1f); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3);">
+                            <span style="font-size: 1.5rem;">📅</span>
+                        </div>
+                        <div>
+                            <h2 style="color: #b01025; font-size: 1.8rem; margin: 0; font-weight: 700;">Información del Evento</h2>
+                            <p style="color: #64748b; margin: 0; font-size: 1rem;">Detalles completos sobre fechas, duración y ubicación</p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                        <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 2rem; border-radius: 12px; border-left: 5px solid #b01025; position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
+                                <span style="font-size: 1.2rem;">📍</span>
+                                <h3 style="color: #1e293b; font-size: 1.1rem; margin: 0; font-weight: 600;">Ubicación</h3>
+                            </div>
+                            <p style="color: #475569; margin: 0; font-size: 1rem; line-height: 1.5;">{evento.ubi_eve}</p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 2rem; border-radius: 12px; border-left: 5px solid #b01025; position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
+                                <span style="font-size: 1.2rem;">⏱️</span>
+                                <h3 style="color: #1e293b; font-size: 1.1rem; margin: 0; font-weight: 600;">Duración</h3>
+                            </div>
+                            <p style="color: #475569; margin: 0; font-size: 1rem; line-height: 1.5;">
+                                {evento.dur_eve ? formatearDuracion(evento.dur_eve) : "No especificada"}
+                            </p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 2rem; border-radius: 12px; border-left: 5px solid #b01025; position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
+                                <span style="font-size: 1.2rem;">🗓️</span>
+                                <h3 style="color: #1e293b; font-size: 1.1rem; margin: 0; font-weight: 600;">Fecha de inicio</h3>
+                            </div>
+                            <p style="color: #475569; margin: 0; font-size: 1rem; line-height: 1.5;">{formatearFecha(evento.fec_ini_eve)}</p>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 2rem; border-radius: 12px; border-left: 5px solid #b01025; position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
+                                <span style="font-size: 1.2rem;">🏁</span>
+                                <h3 style="color: #1e293b; font-size: 1.1rem; margin: 0; font-weight: 600;">Fecha de finalización</h3>
+                            </div>
+                            <p style="color: #475569; margin: 0; font-size: 1rem; line-height: 1.5;">
+                                {evento.fec_fin_eve ? formatearFecha(evento.fec_fin_eve) : "No especificada"}
+                            </p>
+                        </div>
+                    </div>
+                </div>                <!-- Dirigido a (si existe asignación) -->
+                {evento.asignaciones && (
+                    <div style="background: #ffffff; border-radius: 16px; padding: 3rem; margin-bottom: 3rem; box-shadow: 0 8px 30px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #f1f5f9;">
+                            <div style="background: linear-gradient(135deg, #f59e0b, #f97316); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">
+                                <span style="font-size: 1.5rem;">🎯</span>
+                            </div>
+                            <div>
+                                <h2 style="color: #b01025; font-size: 1.8rem; margin: 0; font-weight: 700;">Dirigido a</h2>
+                                <p style="color: #64748b; margin: 0; font-size: 1rem;">Este evento está dirigido específicamente a estudiantes de carreras seleccionadas</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #fef3c7, #fed7aa); padding: 2.5rem; border-radius: 16px; border: 2px solid #f59e0b; position: relative; overflow: hidden;">
+                            <!-- Patrón decorativo -->
+                            <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; transform: rotate(45deg);"></div>
+                            <div style="position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; background: rgba(245, 158, 11, 0.05); border-radius: 50%;"></div>
+                            
+                            <div style="position: relative;">
+                                <h3 style="color: #b01025; font-size: 1.3rem; margin-bottom: 1.2rem; font-weight: 700;">{evento.asignaciones.nom_asi}</h3>
+                                <p style="color: #475569; margin-bottom: 2rem; line-height: 1.6; font-size: 1.05rem;">{evento.asignaciones.des_asi}</p>
+                                
+                                {evento.asignaciones.detalle_asignaciones && evento.asignaciones.detalle_asignaciones.length > 0 && (
+                                    <div>
+                                        <h4 style="color: #1e293b; font-size: 1.1rem; margin-bottom: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                                            <span style="background: #b01025; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">🎓</span>
+                                            Carreras incluidas:
+                                        </h4>
+                                        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                                            {evento.asignaciones.detalle_asignaciones.map((detalle: any) => (
+                                                <div style="background: linear-gradient(135deg, #b01025, #880f1f); color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-size: 0.95rem; font-weight: 600; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3); transition: all 0.2s ease; cursor: default;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(176, 16, 37, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(176, 16, 37, 0.3)'">
+                                                    {detalle.carreras.nom_car}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <!-- Nota importante -->
+                                <div style="background: rgba(176, 16, 37, 0.1); border: 1px solid #b01025; border-radius: 12px; padding: 1.5rem; margin-top: 2rem;">
+                                    <div style="display: flex; align-items: start; gap: 0.8rem;">
+                                        <span style="background: #b01025; color: white; width: 59px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; margin-top: 0.2rem;">!</span>
+                                        <div>
+                                            <h5 style="color: #b01025; font-size: 1rem; margin: 0 0 0.5rem 0; font-weight: 600;">Importante:</h5>
+                                            <p style="color: #475569; margin: 0; font-size: 0.95rem; line-height: 1.5;">Solo los estudiantes registrados en las carreras mencionadas pueden inscribirse a este evento. Se verificará la información académica durante el proceso de registro.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}                <!-- Organizador -->
+                <div style="background: #ffffff; border-radius: 16px; padding: 3rem; box-shadow: 0 8px 30px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #f1f5f9;">
+                        <div style="background: linear-gradient(135deg, #16a34a, #15803d); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);">
+                            <span style="font-size: 1.5rem;">👨‍🏫</span>
+                        </div>
+                        <div>
+                            <h2 style="color: #b01025; font-size: 1.8rem; margin: 0; font-weight: 700;">Organizador</h2>
+                            <p style="color: #64748b; margin: 0; font-size: 1rem;">Información del responsable del evento</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 2.5rem; border-radius: 16px; border-left: 5px solid #16a34a; position: relative; overflow: hidden;">
+                        <!-- Decoración de fondo -->
+                        <div style="position: absolute; top: -10px; right: -10px; width: 60px; height: 60px; background: rgba(22, 163, 74, 0.1); border-radius: 50%; transform: rotate(45deg);"></div>
+                        
+                        <div style="position: relative;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                <div style="background: #16a34a; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">
+                                    {evento.organizadores.nom_org1.charAt(0)}{evento.organizadores.ape_org1.charAt(0)}
+                                </div>
+                                <div>
+                                    <p style="color: #1e293b; margin: 0; font-size: 1.2rem; font-weight: 700; line-height: 1.3;">
+                                        {evento.organizadores.tit_aca_org}
+                                        {evento.organizadores.nom_org1}
+                                        {evento.organizadores.nom_org2 ? ` ${evento.organizadores.nom_org2}` : ""}
+                                        {` ${evento.organizadores.ape_org1}`}
+                                        {evento.organizadores.ape_org2 ? ` ${evento.organizadores.ape_org2}` : ""}
+                                    </p>
+                                    <p style="color: #64748b; margin: 0; font-size: 0.95rem;">Organizador principal del evento</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Información adicional del organizador -->
+                            <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(22, 163, 74, 0.2);">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem;">
+                                    <span style="color: #16a34a;">📧</span>
+                                    <span style="color: #475569; font-size: 0.9rem;">Contacto disponible a través de la plataforma</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: #16a34a;">🏛️</span>
+                                    <span style="color: #475569; font-size: 0.9rem;">Universidad Técnica de Ambato</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>            <!-- Sidebar -->
+            <div>
+                <!-- Estado de Inscripción -->
+                <div style="background: #ffffff; border-radius: 16px; padding: 2.5rem; margin-bottom: 2rem; box-shadow: 0 8px 30px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; position: sticky; top: 2rem;">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="background: linear-gradient(135deg, #b01025, #880f1f); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; box-shadow: 0 6px 20px rgba(176, 16, 37, 0.3);">
+                            <span style="font-size: 1.8rem;">📝</span>
+                        </div>
+                        <h3 style="color: #b01025; font-size: 1.5rem; margin: 0; font-weight: 700;">Inscripción</h3>
+                        <p style="color: #64748b; margin: 0.5rem 0 0 0; font-size: 0.95rem;">¡Únete a este evento!</p>
+                    </div>
+                    
+                    <!-- Periodo de inscripción -->
+                    <div style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid #e2e8f0;">
+                        <div style="text-align: center;">
+                            <p style="color: #64748b; margin: 0 0 0.8rem 0; font-size: 0.9rem; font-weight: 500;">📅 Periodo de inscripción</p>
+                            <div style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                <p style="color: #1e293b; margin: 0; font-weight: 600; font-size: 0.95rem;">
+                                    {formatearFecha(evento.fec_ini_ins_eve)} 
+                                    <span style="color: #64748b; font-weight: normal; margin: 0 0.5rem;">hasta</span> 
+                                    {formatearFecha(evento.fec_fin_ins_eve)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de acción principal -->
+                    <div style="margin-bottom: 2rem;">
+                        {inscripcionDisponible() ? (
+                            <a
+                                href={`/Eventos/Evento-Inscripcion/${slug}`}
+                                style="display: block; background: linear-gradient(135deg, #b01025, #880f1f); color: white; padding: 1.2rem 2rem; border-radius: 12px; font-size: 1.1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 6px 20px rgba(176, 16, 37, 0.4); transition: all 0.3s ease; position: relative; overflow: hidden;"
+                                onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(176, 16, 37, 0.5)'"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(176, 16, 37, 0.4)'"
+                            >
+                                <div style="position: relative; z-index: 2;">
+                                    <div style="font-size: 1.3rem; margin-bottom: 0.3rem;">✅</div>
+                                    <div>Registrarme ahora</div>
+                                    <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem;">¡Cupos limitados!</div>
+                                </div>
+                                <!-- Efecto de brillo -->
+                                <div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: shimmer 2s infinite;"></div>
+                            </a>
+                        ) : inscripcionProximamente() ? (
+                            <div style="background: linear-gradient(135deg, #fef3c7, #fed7aa); border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; text-align: center;">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⏳</div>
+                                <p style="color: #92400e; margin: 0; font-weight: bold; font-size: 1.1rem;">Próximamente</p>
+                                <p style="color: #a16207; margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                                    Desde: {formatearFecha(evento.fec_ini_ins_eve)}
+                                </p>
+                            </div>
+                        ) : (
+                            <div style="background: linear-gradient(135deg, #fee2e2, #fecaca); border: 2px solid #ef4444; border-radius: 12px; padding: 1.5rem; text-align: center;">
+                                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">❌</div>
+                                <p style="color: #dc2626; margin: 0; font-weight: bold; font-size: 1.1rem;">Inscripciones cerradas</p>
+                                <p style="color: #b91c1c; margin: 0.5rem 0 0 0; font-size: 0.9rem;">El periodo ha finalizado</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div style="border-top: 2px solid #f1f5f9; padding-top: 1.5rem;">
+                        <h4 style="color: #1e293b; font-size: 1rem; margin: 0 0 1rem 0; font-weight: 600;">📋 Detalles del evento</h4>
+                        
+                        <div style="space-y: 0.8rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid #f1f5f9;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: #b01025;">🏛️</span>
+                                    <span style="color: #64748b; font-size: 0.9rem;">Modalidad</span>
+                                </div>
+                                <span style="color: #1e293b; font-weight: 600; font-size: 0.9rem;">Presencial</span>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid #f1f5f9;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: #16a34a;">🏆</span>
+                                    <span style="color: #64748b; font-size: 0.9rem;">Certificado</span>
+                                </div>
+                                <span style="color: #16a34a; font-weight: 600; font-size: 0.9rem;">✓ Incluido</span>
+                            </div>
+                            
+                            {evento.precio && Number(evento.precio) > 0 ? (
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; background: linear-gradient(135deg, #fef3c7, #fed7aa); margin: 0.5rem -1rem; padding: 1rem; border-radius: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="color: #f59e0b;">💰</span>
+                                        <span style="color: #92400e; font-size: 0.9rem; font-weight: 600;">Precio</span>
+                                    </div>
+                                    <span style="color: #b45309; font-weight: bold; font-size: 1.2rem;">${Number(evento.precio).toFixed(2)}</span>
+                                </div>
+                            ) : (
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; background: linear-gradient(135deg, #d1fae5, #a7f3d0); margin: 0.5rem -1rem; padding: 1rem; border-radius: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="color: #16a34a;">✨</span>
+                                        <span style="color: #065f46; font-size: 0.9rem; font-weight: 600;">Precio</span>
+                                    </div>
+                                    <span style="color: #065f46; font-weight: bold; font-size: 1.2rem;">¡Gratuito!</span>
+                                </div>
+                            )}
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: #8b5cf6;">👥</span>
+                                    <span style="color: #64748b; font-size: 0.9rem;">Disponibilidad</span>
+                                </div>
+                                <span style="color: #16a34a; font-weight: 600; font-size: 0.9rem;">Cupos limitados</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>        </div>
+    </section>
+</Layout>
+
+<style>
+    /* Animación para el efecto de brillo */
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
     }
-
-    {
-        evento.precio && Number(evento.precio) > 0 && (
-            <div style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;">
-                <strong style="display: block; margin-bottom: 0.5rem;">
-                    Información de pago:
-                </strong>
-                <p style="margin: 0;">
-                    <strong>Precio:</strong> ${Number(evento.precio).toFixed(2)}
-                    {evento.es_gratuito && (
-                        <span style="color: green;"> (Evento gratuito)</span>
-                    )}
-                </p>
-            </div>
-        )
-    }
-
-    <div style="margin-bottom: 2rem;">
-        <strong>Organizador:</strong>
-        <p>
-            {evento.organizadores.tit_aca_org}
-            {evento.organizadores.nom_org1}
-            {
-                evento.organizadores.nom_org2
-                    ? ` ${evento.organizadores.nom_org2}`
-                    : ""
-            }
-            {` ${evento.organizadores.ape_org1}`}
-            {
-                evento.organizadores.ape_org2
-                    ? ` ${evento.organizadores.ape_org2}`
-                    : ""
-            }
-        </p>
-    </div>
-
-    <div class="text-center mb-8">
-        {
-            inscripcionDisponible() ? (
-                <a
-                    href={`/Eventos/Evento-Inscripcion/${slug}`}
-                    class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
-                >
-                    Registrarme en el curso
-                </a>
-            ) : inscripcionProximamente() ? (
-                <span style="color: #b91c1c; font-weight: bold; font-size: 1.2rem;">
-                    Evento próximamente. Inscripciones desde: <br />
-                    <span style="color: #222;">
-                        {formatearFecha(evento.fec_ini_ins_eve)}
-                    </span>
-                </span>
-            ) : (
-                <span style="color: #b91c1c; font-weight: bold; font-size: 1.2rem;">
-                    Fecha límite superada para inscribirse
-                </span>
-            )
+    
+    /* Responsivo para tablets */
+    @media (max-width: 1024px) {
+        section[style*="grid-template-columns: 1fr 400px"] > div {
+            grid-template-columns: 1fr !important;
+            gap: 2rem !important;
         }
-    </div>
-</section>
+        
+        section[style*="max-width: 1200px"] > div {
+            grid-template-columns: 1fr !important;
+            gap: 2rem !important;
+        }
+        
+        div[style*="position: sticky"] {
+            position: static !important;
+        }
+    }
+    
+    /* Responsivo para móviles */
+    @media (max-width: 768px) {
+        section[style*="padding: 4rem 0"] {
+            padding: 2rem 0 !important;
+        }
+        
+        section[style*="padding: 4rem 2rem 3rem"] {
+            padding: 2rem 1rem !important;
+        }
+        
+        h1 {
+            font-size: 1.8rem !important;
+        }
+        
+        div[style*="display: grid"][style*="repeat(auto-fit, minmax(280px, 1fr))"] {
+            grid-template-columns: 1fr !important;
+        }
+        
+        div[style*="display: grid"][style*="repeat(auto-fit, minmax(200px, 1fr))"] {
+            grid-template-columns: 1fr !important;
+        }
+        
+        div[style*="padding: 3rem"] {
+            padding: 1.5rem !important;
+        }
+        
+        div[style*="padding: 2.5rem"] {
+            padding: 1.5rem !important;
+        }
+        
+        /* Ajustes para las tarjetas de información */
+        div[style*="background: linear-gradient(135deg, #f8fafc, #f1f5f9)"] {
+            padding: 1.5rem !important;
+        }
+        
+        /* Breadcrumb en móvil */
+        nav span, nav a {
+            font-size: 0.8rem !important;
+        }
+        
+        /* Tags/badges más pequeños en móvil */
+        span[style*="border-radius: 25px"] {
+            padding: 0.4rem 0.8rem !important;
+            font-size: 0.8rem !important;
+        }
+        
+        /* Imagen del evento más pequeña en móvil */
+        img[style*="height: 300px"] {
+            height: 200px !important;
+        }
+    }
+    
+    /* Responsivo para pantallas muy pequeñas */
+    @media (max-width: 480px) {
+        div[style*="gap: 4rem"] {
+            gap: 1.5rem !important;
+        }
+        
+        div[style*="gap: 3rem"] {
+            gap: 1.5rem !important;
+        }
+        
+        div[style*="gap: 2rem"] {
+            gap: 1rem !important;
+        }
+        
+        /* Flexbox para tags en móvil pequeño */
+        div[style*="display: flex; flex-wrap: wrap"] {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        
+        span[style*="border-radius: 25px"] {
+            text-align: center !important;
+            margin-bottom: 0.5rem !important;
+        }
+    }
+    
+    /* Mejoras de accesibilidad */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+    
+    /* Modo oscuro opcional */
+    @media (prefers-color-scheme: dark) {
+        /* Mantener los colores UTA pero ajustar contrastes si es necesario */
+    }
+</style>

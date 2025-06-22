@@ -103,13 +103,11 @@ export const setDatosInscripcion = defineAction({
                         };
                     }
                 }
-            }
-
-            // 5. Determinar estado inicial de la inscripción
+            }            // 5. Determinar estado inicial de la inscripción
             // Si el evento es gratuito, se aprueba automáticamente
             // Si es pagado, queda pendiente de validación por el administrador
             const esPagado = evento.precio && Number(evento.precio) > 0;
-            const estadoInicial = esPagado ? "DPendiente" : "APROBADA";
+            const estadoInicial = esPagado ? "DPendiente" : "Aprobado";
 
             console.log("DATOS QUE SE GUARDARÁN EN LA BASE:", {
                 id_usu_ins: idUsuario,

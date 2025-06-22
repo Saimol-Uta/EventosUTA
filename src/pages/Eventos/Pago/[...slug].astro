@@ -34,7 +34,7 @@ if (error || !data?.data || !data.data.evento) {
 const { usuario, evento, inscripcion } = data.data;
 
 // Verificar que la inscripción existe y está aprobada
-if (!inscripcion || inscripcion.est_ins !== "APROBADA") {
+if (!inscripcion || inscripcion.est_ins !== "Aprobado") {
     return new Response(
         `
     <html>

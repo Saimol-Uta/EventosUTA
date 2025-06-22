@@ -18,9 +18,7 @@ export const actualizarPagoInscripcion = defineAction({
 
             if (!inscripcionExistente) {
                 throw new Error("Inscripción no encontrada");
-            }
-
-            if (inscripcionExistente.est_ins !== 'APROBADA') {
+            } if (inscripcionExistente.est_ins !== 'Aprobado') {
                 throw new Error("La inscripción debe estar aprobada para procesar el pago");
             }
 
@@ -30,7 +28,7 @@ export const actualizarPagoInscripcion = defineAction({
                 data: {
                     met_pag_ins: metodoPago,
                     enl_ord_pag_ins: enlaceComprobante,
-                    est_ins: 'PAGADA', // Cambiar estado a pagada
+                    est_ins: 'FPendiente', // Cambiar estado a pago pendiente de validación
                 },
             });
 

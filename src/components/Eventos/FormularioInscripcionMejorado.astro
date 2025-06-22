@@ -117,21 +117,21 @@ function getEstadoMensaje(estado: string | null) {
                 color: "#d97706",
                 border: "#f59e0b",
             };
-        case "APROBADA":
+        case "Aprobado":
             return {
                 mensaje:
                     "Tu inscripción ha sido aprobada. Ahora puedes proceder con el pago.",
                 color: "#2c5f2d",
                 border: "#22c55e",
             };
-        case "RECHAZADA":
+        case "Rechazado":
             return {
                 mensaje:
                     "Tu inscripción ha sido rechazada. Contacta al administrador para más información.",
                 color: "#b01025",
                 border: "#b01025",
             };
-        case "PAGADA":
+        case "FPendiente":
             return {
                 mensaje:
                     "Tu inscripción está completa y el pago ha sido procesado.",
@@ -202,7 +202,7 @@ const estadoInfo = yaInscrito
                         : estadoInfo?.mensaje || ""}
             </div>{" "}
             {/* Botón para ir al área de pago si está aprobado */}
-            {estadoInfo && estadoInscripcion === "APROBADA" && esPagado && (
+            {estadoInfo && estadoInscripcion === "Aprobado" && esPagado && (
                 <a
                     href={`/Eventos/Pago/${evento?.id_eve}`}
                     style="margin-top: 1rem; display: inline-block; background: #b01025; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3); transition: all 0.2s ease;"
