@@ -3,7 +3,7 @@ import "../../styles/CarruselUTA.css";
 ---
 
 <div class="slider">
-<div class="list">
+  <div class="list">
     <div class="item active">
       <div class="image-container">
         <img src="/img/Home/carrusel_1_1.jpg" alt="Imagen 1" />
@@ -12,8 +12,10 @@ import "../../styles/CarruselUTA.css";
       <div class="content">
         <div class="title">Eventos</div>
         <div class="description">
-          Incentivar la investigación en los campos afines a sus áreas de trabajo.
+          Participa en eventos de todas las áreas de la ingeniería y la
+          tecnología.
         </div>
+        <a href="/cursosCompleto" class="btn-informacion"> Ver Eventos </a>
       </div>
     </div>
 
@@ -25,8 +27,9 @@ import "../../styles/CarruselUTA.css";
       <div class="content">
         <div class="title">Cursos</div>
         <div class="description">
-          Disponibilidad para todas las personas que deseen expandir sus conocimientos.
+          Expande tus conocimientos con el apoyo de los mejores profesionales
         </div>
+        <a href="/cursosCompleto" class="btn-informacion"> Ver Cursos </a>
       </div>
     </div>
 
@@ -36,108 +39,136 @@ import "../../styles/CarruselUTA.css";
         <div class="image-overlay"></div>
       </div>
       <div class="content">
-        <div class="title">Tecnología</div>
+        <div class="title">Certificados</div>
         <div class="description">
-          Compromiso con el desarrollo tecnológico.
+          Impulsa tu currículum con certificados avalados y reconocidos.
         </div>
+        <a href="/buscarCertificado" class="btn-informacion">
+          Verificar certificado
+        </a>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="navigation-buttons">
-    <button class="nav-btn" data-index="0"></button>
-    <button class="nav-btn" data-index="1"></button>
-    <button class="nav-btn" data-index="2"></button>
-  </div>
+<div class="navigation-buttons">
+  <button class="nav-btn active" data-index="0"></button>
+  <button class="nav-btn" data-index="1"></button>
+  <button class="nav-btn" data-index="2"></button>
 </div>
 
 <script>
-let currentIndex = 0;
+  let currentIndex = 0;
+  let slideInterval: ReturnType<typeof setInterval>; // guarda el intervalo
 
-window.addEventListener("DOMContentLoaded", () => {
-  const sliderList = document.querySelector(".slider .list") as HTMLElement | null;
-  if (!sliderList) return;
-  
-  const slides = sliderList.querySelectorAll(".item") as NodeListOf<HTMLElement>;
-  const navButtons = document.querySelectorAll(".nav-btn") as NodeListOf<HTMLElement>;
+  window.addEventListener("DOMContentLoaded", () => {
+    const sliderList = document.querySelector(
+      ".slider .list"
+    ) as HTMLElement | null;
+    if (!sliderList) return;
 
-  // Función para reiniciar y aplicar animaciones
-  function applySlideAnimations(slide: HTMLElement) {
-    const image = slide.querySelector('img') as HTMLImageElement;
-    const title = slide.querySelector('.title') as HTMLElement;
-    const description = slide.querySelector('.description') as HTMLElement;
-    
-    // Reiniciar animación de la imagen
-    image.style.animation = 'none';
-    void image.offsetWidth; // Forzar reflow
-    image.style.animation = 'zoomInSlow 10s ease-in-out forwards';
-    
-    // Reiniciar animación del texto
-    title.style.animation = 'none';
-    description.style.animation = 'none';
-    void title.offsetWidth;
-    void description.offsetWidth;
-    title.style.animation = 'textIn 0.6s ease-out forwards';
-    description.style.animation = 'textIn 0.6s ease-out forwards 0.2s';
-  }
+    const slides = sliderList.querySelectorAll(
+      ".item"
+    ) as NodeListOf<HTMLElement>;
+    const navButtons = document.querySelectorAll(
+      ".nav-btn"
+    ) as NodeListOf<HTMLElement>;
 
-  // Aplicar animaciones iniciales
-  setTimeout(() => {
-    const activeSlide = document.querySelector('.item.active');
-    if (activeSlide) applySlideAnimations(activeSlide as HTMLElement);
-  }, 50);
+    function startSlideInterval() {
+      slideInterval = setInterval(() => {
+        const nextIndex = (currentIndex + 1) % slides.length;
+        goToSlide(nextIndex);
+      }, 7000);
+    }
 
-  // Función para animar el texto de salida
-  async function animateTextOut(slide: HTMLElement) {
-    const title = slide.querySelector('.title') as HTMLElement;
-    const description = slide.querySelector('.description') as HTMLElement;
-    
-    title.style.animation = 'textOut 0.6s ease-in forwards';
-    description.style.animation = 'textOut 0.6s ease-in forwards';
-    
-    await Promise.all([
-      new Promise(resolve => title.addEventListener('animationend', resolve, {once: true})),
-      new Promise(resolve => description.addEventListener('animationend', resolve, {once: true}))
-    ]);
-  }
+    // Función para reiniciar y aplicar animaciones
+    function applySlideAnimations(slide: HTMLElement) {
+      const image = slide.querySelector("img") as HTMLImageElement;
+      const title = slide.querySelector(".title") as HTMLElement;
+      const description = slide.querySelector(".description") as HTMLElement;
+      const button = slide.querySelector(".btn-informacion") as HTMLElement;
 
-  // Función principal para cambiar de slide
-  async function goToSlide(index: number) {
-    if (index === currentIndex || index < 0 || index >= slides.length) return;
+      image.style.animation = "none";
+      void image.offsetWidth;
+      image.style.animation = "zoomInSlow 10s ease-in-out forwards";
 
-    const currentSlide = slides[currentIndex];
-    const nextSlide = slides[index];
-    
-    // Animación de salida del slide actual
-    await animateTextOut(currentSlide);
-    
-    // Cambiar slides
-    currentSlide.classList.remove("active");
-    currentSlide.classList.add("prev");
-    currentIndex = index;
-    nextSlide.classList.add("active");
+      [title, description, button].forEach((el, i) => {
+        if (el) {
+          el.classList.remove("animate-out");
+          void el.offsetWidth;
+          el.classList.add("animate-in");
+        }
+      });
+    }
 
+    // Aplicar animaciones iniciales
     setTimeout(() => {
-      currentSlide.classList.remove("prev");
-    }, 1000);
+      const activeSlide = document.querySelector(".item.active");
+      if (activeSlide) applySlideAnimations(activeSlide as HTMLElement);
+    }, 50);
 
-    // Aplicar animaciones al nuevo slide
-    applySlideAnimations(nextSlide);
+    // Función para animar el texto de salida
+    async function animateTextOut(slide: HTMLElement) {
+      const title = slide.querySelector(".title") as HTMLElement;
+      const description = slide.querySelector(".description") as HTMLElement;
+      const button = slide.querySelector(".btn-informacion") as HTMLElement;
 
-    // Actualizar estado de los botones
-    navButtons.forEach((btn, i) => {
-      btn.classList.toggle("active", i === currentIndex);
+      [title, description, button].forEach((el) => {
+        if (el) {
+          el.classList.remove("animate-in");
+          el.classList.add("animate-out");
+        }
+      });
+
+      await Promise.all(
+        [title, description, button].map((el) =>
+          el
+            ? new Promise((resolve) =>
+                el.addEventListener("animationend", resolve, { once: true })
+              )
+            : Promise.resolve()
+        )
+      );
+    }
+
+    // Función principal para cambiar de slide
+    async function goToSlide(index: number) {
+      if (index === currentIndex || index < 0 || index >= slides.length) return;
+
+      // 🔄 Reiniciar tiempo del intervalo
+      clearInterval(slideInterval);
+      startSlideInterval();
+
+      const currentSlide = slides[currentIndex];
+      const nextSlide = slides[index];
+
+      // Animación de salida del slide actual
+      await animateTextOut(currentSlide);
+
+      // Cambiar slides
+      currentSlide.classList.remove("active");
+      currentSlide.classList.add("prev");
+      currentIndex = index;
+      nextSlide.classList.add("active");
+
+      setTimeout(() => {
+        currentSlide.classList.remove("prev");
+      }, 1000);
+
+      // Aplicar animaciones al nuevo slide
+      applySlideAnimations(nextSlide);
+
+      // Actualizar estado de los botones
+      navButtons.forEach((btn, i) => {
+        btn.classList.toggle("active", i === currentIndex);
+      });
+    }
+
+    // Agregar event listeners a los botones de navegación
+    navButtons.forEach((button, index) => {
+      button.addEventListener("click", () => goToSlide(index));
     });
-  }
 
-  // Agregar event listeners a los botones de navegación
-  navButtons.forEach((button, index) => {
-    button.addEventListener("click", () => goToSlide(index));
+    startSlideInterval();
   });
-
-  setInterval(() => {
-    const nextIndex = (currentIndex + 1) % slides.length;
-    goToSlide(nextIndex);
-  }, 7000);
-});
 </script>

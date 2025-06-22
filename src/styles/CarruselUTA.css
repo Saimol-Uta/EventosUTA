@@ -1,13 +1,12 @@
 body {
   margin: 0;
   background-color: #000;
-  color: #eee;
   font-size: 12px;
 }
 
 .slider {
   position: relative;
-  height: 90vh;
+  height: 85vh;
   width: 100vw;
   overflow: hidden;
 }
@@ -35,28 +34,21 @@ body {
   z-index: 1;
 }
 
-.slider .list .item img {
+
+.slider .item img {
+  position: relative;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform-origin: center center;
-}
-
-@keyframes zoomInSlow {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.15);
-  }
+  transform: scale(1); /* Asegurar que comience desde scale(1) */
 }
 
 .slider .list .item .content {
   position: absolute;
-  top: 65%;
+  top: 53%;
   width: 1140px;
   max-width: 80%;
-  left: 42%;
+  left: 46%;
   transform: translateX(-50%);
   padding-right: 30%;
   box-sizing: border-box;
@@ -65,65 +57,13 @@ body {
 }
 
 .slider .list .item .content .title{
-  font-size: 5em;
-  font-weight: bold;
+  font-size: 4em;
+  font-weight: 700;
   line-height: 1.3em;
 }
-.slider .list .item .type {
-  color: #14ff72cb;
-}
-.slider .list .item .button {
-  display: grid;
-  grid-template-columns: repeat(2, 130px);
-  grid-template-rows: 40px;
-  gap: 5px;
-  margin-top: 20px;
-}
+
 .description {
   font-size: 2em;
-
-}
-.slider .list .item .button button {
-  border: none;
-  background-color: #eee;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.4s;
-  letter-spacing: 2px;
-}
-.slider .list .item .button button:hover {
-  letter-spacing: 3px;
-}
-.slider .list .item .button button:nth-child(2) {
-  background-color: transparent;
-  border: 1px solid #fff;
-  color: #eee;
-}
-
-.nextPrevArrows {
-  position: absolute;
-  top: 80%;
-  right: 50%;
-  transform: translateX(50%);
-  z-index: 100;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.nextPrevArrows button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #14ff72cb;
-  border: none;
-  color: #fff;
-  font-weight: bold;
-  transition: 0.5s;
-  cursor: pointer;
-}
-.nextPrevArrows button:hover {
-  background-color: #fff;
-  color: #000;
 }
 
 @media screen and (max-width: 678px) {
@@ -164,6 +104,23 @@ body {
   transform: scale(1.2);
 }
 
+.btn-informacion {
+  display: inline-block; /* necesario para aplicar transform */
+  padding: 12px 20px;
+  font-size: 14px;
+  background-color: #cd982e;
+  color: white;
+  margin-top: 40px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: background-color 0.25s ease;
+}
+
+.btn-informacion:hover {
+  background-color: white;
+  color: rgb(108, 19, 19);
+}
+
 .image-container {
   position: relative;
   width: 100%;
@@ -186,20 +143,11 @@ body {
   z-index: 2;
 }
 
-.slider .item img {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1); /* Asegurar que comience desde scale(1) */
-}
-
-/* Animaciones para el texto */
+/* Animaciones */
 .content .title,
 .content .description {
   opacity: 0;
   transform: translateY(20px);
-  transition: none; /* Desactivamos transiciones para las animaciones */
 }
 
 .animate-in {
@@ -208,10 +156,6 @@ body {
 
 .animate-out {
   animation: textOut 0.6s ease-in forwards;
-}
-
-.zoom-animation {
-  animation: zoomInSlow 10s ease-in-out forwards;
 }
 
 @keyframes zoomInSlow {
@@ -233,8 +177,6 @@ body {
     transform: translateY(0);
   }
 }
-
-
 
 @keyframes textOut {
   from {
