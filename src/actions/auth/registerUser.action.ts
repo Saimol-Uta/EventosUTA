@@ -71,20 +71,20 @@ export const SignIn = defineAction({
                 throw new Error('El correo electrónico ya está registrado.');
             }
 
-            //   if (!correoLimpio.endsWith('@uta.edu.ec')) {
-            //     const isEmailValid = await validateEmail(correoLimpio);
-            //     if (!isEmailValid) {
-            //       return {
-            //         success: false,
-            //         error: 'El correo no parece ser válido o no existe.',
-            //       };
-            //     }
-            //   }
+            if (!correoLimpio.endsWith('@uta.edu.ec')) {
+                const isEmailValid = await validateEmail(correoLimpio);
+                if (!isEmailValid) {
+                    return {
+                        success: false,
+                        error: 'El correo no parece ser válido o no existe.',
+                    };
+                }
+            }
 
             const [nom_usu1, ...nom_usu2Rest] = nombre.split(' ');
             const nom_usu2 = nom_usu2Rest.join(' ');
             const [ape_usu1, ...ape_usu2Rest] = apellido.split(' ');
-            const ape_usu2 = ape_usu2Rest.join(' '); 
+            const ape_usu2 = ape_usu2Rest.join(' ');
             const hashedPassword = await bcrypt.hash(contrasena, 10);
             const rolAsignado = correoLimpio.endsWith('@uta.edu.ec') ? 'ESTUDIANTE' : 'USUARIO';
 
