@@ -2,7 +2,7 @@
 import { getSession } from "auth-astro/server";
 import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
-import FormularioInscripcion2 from "@/components/Eventos/FormularioInscripcion.astro";
+import FormularioInscripcion from "@/components/Eventos/FormularioInscripcion.astro";
 import "@styles/global.css";
 
 
@@ -35,7 +35,7 @@ if (error || !data?.data || !data.data.evento) {
 }
 
 
-const { usuario, evento, inscripcion, requisitos } = data.data;
+const { usuario, evento, inscripcion } = data.data;
 
 
 
@@ -48,7 +48,7 @@ const campoArchivo = "Suba su documento";
 ---
 
 <Layout>
- <FormularioInscripcion2
+ <FormularioInscripcion
   campoTitle={evento.nom_eve}
   campoTexto1={campoTexto1}
   campoTexto2={campoTexto2}
@@ -58,8 +58,6 @@ const campoArchivo = "Suba su documento";
   campoArchivo={campoArchivo}
   usuario={usuario}
   evento={evento}
-  requisitos={requisitos}
   inscripcion={inscripcion}
 />
 </Layout>
-

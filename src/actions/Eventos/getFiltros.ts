@@ -8,9 +8,11 @@ export const getEventosFiltrados = defineAction({
     input: z.object({
         categoria: z.string().optional(),
         duracion: z.string().optional(),
+        page: z.number().optional(),
+        cursosPorPagina: z.number().optional(),
     }),
 
-    handler: async ({ categoria, duracion }) => {
+    handler: async ({ categoria, duracion, page = 1, cursosPorPagina = 8 }) => {
         try {
             const condiciones: any[] = [];
 
@@ -38,9 +40,19 @@ export const getEventosFiltrados = defineAction({
                 }
             }
 
+            // Obtener el total de eventos filtrados
+            const totalEventos = await prisma.eventos.count({
+                where: condiciones.length > 0 ? { AND: condiciones } : undefined,
+            });
+
+            // Paginación
+            const skip = (page - 1) * cursosPorPagina;
+            const take = cursosPorPagina;
             const eventos = await prisma.eventos.findMany({
                 where: condiciones.length > 0 ? { AND: condiciones } : undefined,
                 orderBy: { nom_eve: 'asc' },
+                skip,
+                take,
                 include: {
                     categorias_eventos: true,
                     organizadores: true,
@@ -56,6 +68,7 @@ export const getEventosFiltrados = defineAction({
             return {
                 success: true,
                 eventos,
+                totalEventos,
             };
         } catch (error) {
             return {
