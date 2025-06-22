@@ -92,22 +92,17 @@ const inscripcionProximamente = () => {
 ---
 
 <Layout>
-    <Header />
-    <Navbar />
+  <Header />
+  <Navbar />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <CursoDetalleCard 
+      evento={evento} 
+      slug={slug} 
+      formatearFecha={formatearFecha} 
+      formatearDuracion={formatearDuracion} 
+      inscripcionDisponible={inscripcionDisponible} 
+      inscripcionProximamente={inscripcionProximamente}
+    />
+  </main>
 </Layout>
-
-<div
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"
->
-</div>
-
-<CursoDetalleCard 
-  evento={evento} 
-  slug={slug} 
-  formatearFecha={formatearFecha} 
-  formatearDuracion={formatearDuracion} 
-  inscripcionDisponible={inscripcionDisponible} 
-  inscripcionProximamente={inscripcionProximamente}
-/>
-
-
