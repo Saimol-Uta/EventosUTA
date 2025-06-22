@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar.astro";
 import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
 import Evento from "../components/EventoCard.astro";
-
+import CarruselUTA from "@/components/Home/CarruselUTA.astro";
 import prisma from "@/db";
 import { actions } from "astro:actions";
 
@@ -29,7 +29,8 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 <Layout>
     <Header />
     <Navbar />
-
+    <CarruselUTA />
+<!-- -->
     <InformacionFacultad
         tituloFacultad="Facultad de Ingenieria en Sistemas Electronica e Industrial"
         tituloDescripcion="Descripción"
