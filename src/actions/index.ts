@@ -1,5 +1,6 @@
 import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras } from './Eventos';
 import { finalizarEvento } from './Eventos/finalizar-evento.action';
+import { actualizarPagoInscripcion } from './Eventos/actualizarPagoInscripcion.action';
 
 // Importaciones de Facultades
 import { getAllFacultades, getFacultadById } from './Facultades/get-facultades.action';
@@ -90,6 +91,7 @@ export const server = {
 
     getDatosInscripcion,
     setDatosInscripcion,
+    actualizarPagoInscripcion,
     uploadComprobante,
     GenerarCertificado,
     generarCertificadoPublico,

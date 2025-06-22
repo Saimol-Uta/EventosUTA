@@ -12,12 +12,8 @@ export const getAllCarreras = defineAction({
                     facultades: {
                         select: {
                             id_fac: true,
-
-                            nom_fac: true,
-
                             nom_fac: true,
                             des_fac: true
-
                         }
                     },
                     detalle_asignaciones: {
@@ -35,16 +31,11 @@ export const getAllCarreras = defineAction({
                         select: {
                             cor_cue: true,
                             nom_usu1: true,
-
-                            ape_usu1: true,
-                            ced_usu: true,
-
                             nom_usu2: true,
                             ape_usu1: true,
                             ape_usu2: true,
                             ced_usu: true,
                             rol_cue: true
-
                         }
                     }
                 },
@@ -101,17 +92,12 @@ export const getCarreraById = defineAction({
     async handler(input) {
         try {
             const carrera = await prisma.carreras.findUnique({
-                where: { id_car: input.id_car },
-                include: {
+                where: { id_car: input.id_car }, include: {
                     facultades: {
                         select: {
                             id_fac: true,
-
-                            nom_fac: true,
-
                             nom_fac: true,
                             des_fac: true
-
                         }
                     },
                     detalle_asignaciones: {
@@ -120,12 +106,8 @@ export const getCarreraById = defineAction({
                                 select: {
                                     id_asi: true,
                                     nom_asi: true,
-
-                                    des_asi: true,
-
                                     des_asi: true,
                                     tip_asi: true
-
                                 }
                             }
                         }
