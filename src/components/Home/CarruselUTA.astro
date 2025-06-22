@@ -1,0 +1,99 @@
+---
+import "../../styles/CarruselUTA.css";
+---
+
+<div class="slider">
+  <div class="list">
+    <div class="item active">
+      <img src="/img/Home/carrusel_1.png" alt="Imagen 1" />
+      <div class="content">
+        <div class="title">Eventos</div>
+        <div class="description">
+          Incentivar la investigación en los campos afines a sus áreas de trabajo.
+        </div>
+
+      </div>
+    </div>
+
+    <div class="item">
+      <img src="/img/Home/carrusel_2.jpeg" alt="Imagen 2" />
+      <div class="content">
+        <div class="title">Cursos</div>
+        <div class="description">
+          Disponibilidad para todas las personas que deseen expandir sus conocimientos.
+        </div>
+
+      </div>
+    </div>
+
+    <div class="item">
+      <img src="/img/Home/carrusel_4.jpeg" alt="Imagen 3" />
+      <div class="content">
+        <div class="title">Tecnología</div>
+        <div class="description">
+          Compromiso con el desarrollo tecnológico.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="nextPrevArrows">
+    <button class="prev">‹</button>
+    <button class="next">›</button>
+  </div>
+</div>
+
+<script>
+  let currentIndex = 0;
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const sliderList = document.querySelector(".slider .list") as HTMLElement | null;
+    const nextBtn = document.querySelector(".next") as HTMLElement | null;
+    const prevBtn = document.querySelector(".prev") as HTMLElement | null;
+
+    if (!sliderList) return;
+    const slides = sliderList.querySelectorAll(".item") as NodeListOf<HTMLElement>;
+
+    // ✅ Aplicar animación al primer slide visible en el inicio
+    const initialImage = slides[0]?.querySelector("img") as HTMLImageElement | null;
+    if (initialImage) {
+      initialImage.style.animation = "none";
+      void initialImage.offsetWidth;
+      initialImage.style.animation = "zoomInSlow 8s ease-in-out forwards";
+    }
+
+    function updateSlides(direction: "next" | "prev") {
+      if (slides.length === 0) return;
+
+      const currentSlide = slides[currentIndex];
+      currentSlide.classList.remove("active");
+      currentSlide.classList.add("prev");
+
+      if (direction === "next") {
+        currentIndex = (currentIndex + 1) % slides.length;
+      } else {
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+      }
+
+      const nextSlide = slides[currentIndex];
+      nextSlide.classList.add("active");
+
+      setTimeout(() => {
+        currentSlide.classList.remove("prev");
+      }, 1000);
+
+      const image = nextSlide.querySelector("img") as HTMLImageElement | null;
+      if (image) {
+        image.style.animation = "none";
+        void image.offsetWidth;
+        image.style.animation = "zoomInSlow 10s ease-in-out forwards";
+      }
+    }
+
+    nextBtn?.addEventListener("click", () => updateSlides("next"));
+    prevBtn?.addEventListener("click", () => updateSlides("prev"));
+
+    setInterval(() => updateSlides("next"), 7000);
+  });
+</script>

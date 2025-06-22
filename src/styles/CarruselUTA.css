@@ -1,0 +1,136 @@
+body {
+  margin: 0;
+  background-color: #000;
+  color: #eee;
+  font-size: 12px;
+}
+
+.slider {
+  position: relative;
+  height: 90vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.slider .list {
+  position: relative;
+  height: 100%;
+}
+
+.slider .list .item {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.slider .list .item.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.slider .list .item.prev {
+  opacity: 0;
+  z-index: 1;
+}
+
+.slider .list .item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center center;
+}
+
+@keyframes zoomInSlow {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.15);
+  }
+}
+
+.slider .list .item .content {
+  position: absolute;
+  top: 65%;
+  width: 1140px;
+  max-width: 80%;
+  left: 42%;
+  transform: translateX(-50%);
+  padding-right: 30%;
+  box-sizing: border-box;
+  color: #fff;
+  text-shadow: 0 5px 10px #0004;
+}
+
+.slider .list .item .content .title{
+  font-size: 5em;
+  font-weight: bold;
+  line-height: 1.3em;
+}
+.slider .list .item .type {
+  color: #14ff72cb;
+}
+.slider .list .item .button {
+  display: grid;
+  grid-template-columns: repeat(2, 130px);
+  grid-template-rows: 40px;
+  gap: 5px;
+  margin-top: 20px;
+}
+.description {
+  font-size: 2em;
+
+}
+.slider .list .item .button button {
+  border: none;
+  background-color: #eee;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.4s;
+  letter-spacing: 2px;
+}
+.slider .list .item .button button:hover {
+  letter-spacing: 3px;
+}
+.slider .list .item .button button:nth-child(2) {
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: #eee;
+}
+
+.nextPrevArrows {
+  position: absolute;
+  top: 80%;
+  right: 50%;
+  transform: translateX(50%);
+  z-index: 100;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.nextPrevArrows button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #14ff72cb;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  transition: 0.5s;
+  cursor: pointer;
+}
+.nextPrevArrows button:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+@media screen and (max-width: 678px) {
+  .slider .list .item .content {
+    padding-right: 0;
+  }
+  .slider .list .item .content .title {
+    font-size: 50px;
+  }
+}
