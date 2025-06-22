@@ -176,29 +176,31 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
     display: flex;
     justify-content: flex-end;
     margin-bottom: 20px;
-    gap: 8px;
+    
   }
 
   .input-busqueda {
     padding: 8px 12px;
     width: 220px;
     border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: 10px 0px 0px 10px;
     font-size: 14px;
+    background-color: transparent;
   }
 
   .btn-buscar {
     padding: 8px 14px;
-    background-color: #a10000;
+    background-color: #d60404;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 0px 10px 10px 0px;
     cursor: pointer;
     font-size: 16px;
+    
   }
 
   .btn-buscar:hover {
-    background-color: #880000;
+    background-color: #8e0404;
   }
 
   .sin-resultados {
