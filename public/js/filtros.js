@@ -77,7 +77,6 @@ let eventosSeleccionados = new Set();
 
   function toggleFavorito(boton) {
   const id = boton.dataset.id;
-  console.log("Clic en favorito:", id); // <-- DEBUG
 
   if (eventosSeleccionados.has(id)) {
     eventosSeleccionados.delete(id);
@@ -91,7 +90,6 @@ let eventosSeleccionados = new Set();
     boton.classList.add("activo");
   }
 
-  console.log("Seleccionados:", Array.from(eventosSeleccionados)); // <-- DEBUG
   actualizarBotonGuardar();
 }
   function actualizarBotonGuardar() {
@@ -106,8 +104,6 @@ async function guardarFavoritos() {
     return;
   }
 
-  console.log("Guardando eventos:", Array.from(eventosSeleccionados)); // <-- DEBUG
-
   const res = await fetch("/api/guardarFavoritos", {
     method: "POST",
     headers: {
@@ -119,3 +115,4 @@ async function guardarFavoritos() {
   const data = await res.json();
   alert(data.message);
 }
+
