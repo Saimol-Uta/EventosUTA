@@ -3,6 +3,7 @@ import Header from "../../components/Header.astro";
 import Layout from "../../layouts/Layout.astro";
 import Navbar from "../../components/Navbar.astro";
 import { actions } from "astro:actions";
+import CursoDetalleCard from "../../components/CursoDetalleCard.astro";
 import "../../styles/global.css";
 
 interface Props {
@@ -91,171 +92,17 @@ const inscripcionProximamente = () => {
 ---
 
 <Layout>
-    <Header />
-    <Navbar />
+  <Header />
+  <Navbar />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <CursoDetalleCard 
+      evento={evento} 
+      slug={slug} 
+      formatearFecha={formatearFecha} 
+      formatearDuracion={formatearDuracion} 
+      inscripcionDisponible={inscripcionDisponible} 
+      inscripcionProximamente={inscripcionProximamente}
+    />
+  </main>
 </Layout>
-
-<div
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"
->
-</div>
-
-<section
-    style="max-width: 1000px; margin: auto; padding: 2rem; font-family: Arial, sans-serif;"
->
-    <h2 style="text-align: center; margin-bottom: 1rem;">
-        Curso: <span style="font-weight: 600;">{evento.nom_eve}</span>
-    </h2>
-
-    <div class="flex justify-center mb-8">
-        <img
-            src={evento.img_eve}
-            alt="Imagen del evento"
-            class="w-full max-w-xl h-auto rounded-lg shadow-lg"
-        />
-    </div>
-
-    <p
-        style="text-align: center; color: #555; font-size: 15px; margin-bottom: 2rem;"
-    >
-        <strong>Categoría del evento:</strong>
-        {evento.categorias_eventos.nom_cat}
-    </p>
-
-    <div
-        style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;"
-    >
-        <strong style="display: block; margin-bottom: 0.5rem;"
-            >Descripción del curso:</strong
-        >
-        <p style="margin: 0;">
-            {evento.des_eve}
-        </p>
-    </div>
-    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-        <div style="flex: 1;">
-            <strong>Lugar de celebración:</strong>
-            <p>{evento.ubi_eve}</p>
-        </div>
-        <div style="flex: 1;">
-            <strong>Duración:</strong>
-            <p>
-                {
-                    evento.dur_eve
-                        ? formatearDuracion(evento.dur_eve)
-                        : "No especificada"
-                }
-            </p>
-        </div>
-    </div>
-
-    <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-        <div style="flex: 1;">
-            <strong>Fecha de inicio:</strong>
-            <p>{formatearFecha(evento.fec_ini_eve)}</p>
-        </div>
-        <div style="flex: 1;">
-            <strong>Fecha de finalización:</strong>
-            <p>
-                {
-                    evento.fec_fin_eve
-                        ? formatearFecha(evento.fec_fin_eve)
-                        : "No especificada"
-                }
-            </p>
-        </div>
-    </div>
-
-    {
-        evento.asignaciones && (
-            <div style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;">
-                <strong style="display: block; margin-bottom: 0.5rem;">
-                    Dirigido a:
-                </strong>
-                <div style="margin: 0; padding-left: 1.5rem;">
-                    <p>
-                        <strong>Tipo de asignación:</strong>{" "}
-                        {evento.asignaciones.nom_asi}
-                    </p>
-                    <p>
-                        <strong>Descripción:</strong>{" "}
-                        {evento.asignaciones.des_asi}
-                    </p>
-
-                    {evento.asignaciones.detalle_asignaciones &&
-                        evento.asignaciones.detalle_asignaciones.length > 0 && (
-                            <div style="margin-top: 1rem;">
-                                <strong>Carreras incluidas:</strong>
-                                <ul style="margin-top: 0.5rem;">
-                                    {evento.asignaciones.detalle_asignaciones.map(
-                                        (detalle: any) => (
-                                            <li>{detalle.carreras.nom_car}</li>
-                                        ),
-                                    )}
-                                </ul>
-                            </div>
-                        )}
-                </div>
-            </div>
-        )
-    }
-
-    {
-        evento.precio && Number(evento.precio) > 0 && (
-            <div style="border: 1px solid #ccc; padding: 1.2rem; margin-bottom: 2rem; border-radius: 8px;">
-                <strong style="display: block; margin-bottom: 0.5rem;">
-                    Información de pago:
-                </strong>
-                <p style="margin: 0;">
-                    <strong>Precio:</strong> ${Number(evento.precio).toFixed(2)}
-                    {evento.es_gratuito && (
-                        <span style="color: green;"> (Evento gratuito)</span>
-                    )}
-                </p>
-            </div>
-        )
-    }
-
-    <div style="margin-bottom: 2rem;">
-        <strong>Organizador:</strong>
-        <p>
-            {evento.organizadores.tit_aca_org}
-            {evento.organizadores.nom_org1}
-            {
-                evento.organizadores.nom_org2
-                    ? ` ${evento.organizadores.nom_org2}`
-                    : ""
-            }
-            {` ${evento.organizadores.ape_org1}`}
-            {
-                evento.organizadores.ape_org2
-                    ? ` ${evento.organizadores.ape_org2}`
-                    : ""
-            }
-        </p>
-    </div>
-
-    <div class="text-center mb-8">
-        {
-            inscripcionDisponible() ? (
-                <a
-                    href={`/Eventos/Evento-Inscripcion/${slug}`}
-                    class="bg-red-700 hover:bg-red-800 text-white py-3 px-8 text-lg rounded transition-colors duration-300 inline-block"
-                >
-                    Registrarme en el curso
-                </a>
-            ) : inscripcionProximamente() ? (
-                <span style="color: #b91c1c; font-weight: bold; font-size: 1.2rem;">
-                    Evento próximamente. Inscripciones desde: <br />
-                    <span style="color: #222;">
-                        {formatearFecha(evento.fec_ini_ins_eve)}
-                    </span>
-                </span>
-            ) : (
-                <span style="color: #b91c1c; font-weight: bold; font-size: 1.2rem;">
-                    Fecha límite superada para inscribirse
-                </span>
-            )
-        }
-    </div>
-</section>
