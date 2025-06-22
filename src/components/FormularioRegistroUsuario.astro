@@ -47,7 +47,11 @@ const {
           {camposFormulario.map((campo) => (
             <div class="text-sm">
               <p class="font-semibold">{campo.titulo}</p>
-              <p class="text-white/70 truncate">{campo.valor || "Sin datos"}</p>
+              <p class="text-white/70 truncate">
+                {campo.name === "id_car_per"
+                  ? campo.opciones?.find(op => op.valor === campo.valor)?.texto || "Sin datos"
+                  : campo.valor || "Sin datos"}
+              </p>
             </div>
           ))}
         </div>
