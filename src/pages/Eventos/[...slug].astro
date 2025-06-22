@@ -3,6 +3,7 @@ import Header from "../../components/Header.astro";
 import Layout from "../../layouts/Layout.astro";
 import Navbar from "../../components/Navbar.astro";
 import { actions } from "astro:actions";
+import { getSession } from "auth-astro/server";
 import "../../styles/global.css";
 
 interface Props {
@@ -31,6 +32,28 @@ if (error) {
 }
 
 const { evento } = data;
+
+// Verificar si el usuario está autenticado y si ya está inscrito
+const session = await getSession(Astro.request);
+let yaInscrito = false;
+let estadoInscripcion = null;
+
+if (session?.user?.id) {
+    try {
+        const { data: datosInscripcion } = await Astro.callAction(actions.getDatosInscripcion, {
+            idUsuario: session.user.id,
+            idEvento: evento.id_eve,
+        });
+        
+        if (datosInscripcion?.data?.inscripcion) {
+            yaInscrito = true;
+            estadoInscripcion = datosInscripcion.data.inscripcion.est_ins;
+        }
+    } catch (error) {
+        // Si hay error, asumimos que no está inscrito
+        yaInscrito = false;
+    }
+}
 
 // Formatear fechas para mostrar
 const formatearFecha = (fecha: string | Date) => {
@@ -362,10 +385,53 @@ const inscripcionProximamente = () => {
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Botón de acción principal -->
-                    <div style="margin-bottom: 2rem;">
-                        {inscripcionDisponible() ? (
+                      <!-- Botón de acción principal -->
+                    <div style="margin-bottom: 2rem;">                        {yaInscrito ? (
+                            <!-- Usuario ya inscrito -->
+                            <div>
+                                <div
+                                    style="display: block; background: linear-gradient(135deg, #6b7280, #4b5563); color: white; padding: 1.2rem 2rem; border-radius: 12px; font-size: 1.1rem; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3); cursor: not-allowed; opacity: 0.8; margin-bottom: 1rem;"
+                                >
+                                    <div style="position: relative; z-index: 2;">
+                                        <div style="font-size: 1.3rem; margin-bottom: 0.3rem;">✓</div>
+                                        <div>Ya registrado</div>
+                                        <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem;">
+                                            Estado: {estadoInscripcion === 'Aprobado' ? 'Aprobado' : 
+                                                    estadoInscripcion === 'DPendiente' ? 'Pendiente de revisión' :
+                                                    estadoInscripcion === 'FPendiente' ? 'Pago procesado' : 'Rechazado'}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Botón de pago si está aprobado y el evento es pagado -->
+                                {estadoInscripcion === 'Aprobado' && evento.precio && Number(evento.precio) > 0 && (
+                                    <a
+                                        href={`/Eventos/Pago/${evento.id_eve}`}
+                                        style="display: block; background: linear-gradient(135deg, #16a34a, #15803d); color: white; padding: 1rem 2rem; border-radius: 12px; font-size: 1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4); transition: all 0.3s ease;"
+                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(22, 163, 74, 0.5)'"
+                                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(22, 163, 74, 0.4)'"
+                                    >
+                                        <div style="font-size: 1.1rem; margin-bottom: 0.2rem;">💳</div>
+                                        <div>Proceder con el pago</div>
+                                        <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.2rem;">${Number(evento.precio).toFixed(2)}</div>
+                                    </a>
+                                )}
+                            </div>
+                        ) : !session?.user ? (
+                            <!-- Usuario no autenticado -->
+                            <a
+                                href="/login"
+                                style="display: block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 1.2rem 2rem; border-radius: 12px; font-size: 1.1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); transition: all 0.3s ease; position: relative; overflow: hidden;"
+                                onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(59, 130, 246, 0.5)'"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.4)'"
+                            >
+                                <div style="position: relative; z-index: 2;">
+                                    <div style="font-size: 1.3rem; margin-bottom: 0.3rem;">🔐</div>
+                                    <div>Iniciar sesión para registrarse</div>
+                                    <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem;">Necesitas una cuenta para inscribirte</div>
+                                </div>
+                            </a>
+                        ) : inscripcionDisponible() ? (
                             <a
                                 href={`/Eventos/Evento-Inscripcion/${slug}`}
                                 style="display: block; background: linear-gradient(135deg, #b01025, #880f1f); color: white; padding: 1.2rem 2rem; border-radius: 12px; font-size: 1.1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 6px 20px rgba(176, 16, 37, 0.4); transition: all 0.3s ease; position: relative; overflow: hidden;"
@@ -380,6 +446,10 @@ const inscripcionProximamente = () => {
                                 <!-- Efecto de brillo -->
                                 <div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: shimmer 2s infinite;"></div>
                             </a>
+                                    <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 0.2rem;">¡Cupos limitados!</div>
+                                
+                                <div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation: shimmer 2s infinite;"></div>
+                            
                         ) : inscripcionProximamente() ? (
                             <div style="background: linear-gradient(135deg, #fef3c7, #fed7aa); border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; text-align: center;">
                                 <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⏳</div>
