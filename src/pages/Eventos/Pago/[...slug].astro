@@ -1,0 +1,382 @@
+---
+import { getSession } from "auth-astro/server";
+import { actions } from "astro:actions";
+import Layout from "@/layouts/Layout.astro";
+import "@styles/global.css";
+
+const { slug } = Astro.params;
+if (!slug) {
+    return Astro.redirect("/404");
+}
+const idEvento = Array.isArray(slug) ? slug[0] : slug;
+
+const session = await getSession(Astro.request);
+if (!session?.user) {
+    return Astro.redirect("/login");
+}
+
+const idUsuario = session.user.id;
+
+if (!idUsuario) {
+    throw new Error("El usuario no tiene un ID válido.");
+}
+
+// Verificar la inscripción del usuario
+const { data, error } = await Astro.callAction(actions.getDatosInscripcion, {
+    idUsuario,
+    idEvento,
+});
+
+if (error || !data?.data || !data.data.evento) {
+    return Astro.redirect("/404");
+}
+
+const { usuario, evento, inscripcion } = data.data;
+
+// Verificar que la inscripción existe y está aprobada
+if (!inscripcion || inscripcion.est_ins !== "APROBADA") {
+    return new Response(
+        `
+    <html>
+      <head><title>Acceso No Autorizado</title></head>
+      <body style="font-family: Arial, sans-serif; text-align: center; padding: 2rem;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 2rem; border: 2px solid #e74c3c; border-radius: 12px; background: #fff0f0;">
+          <h2 style="color: #c0392b;">Acceso No Autorizado</h2>
+          <p style="font-size: 1.1rem; color: #666;">
+            ${
+                !inscripcion
+                    ? "No tienes una inscripción para este evento."
+                    : "Tu inscripción aún no ha sido aprobada por el administrador."
+            }
+          </p>
+          <a href="/homeUser" style="display: inline-block; margin-top: 1rem; background: #3498db; color: white; padding: 0.8rem 2rem; text-decoration: none; border-radius: 6px;">Volver al inicio</a>
+        </div>
+      </body>
+    </html>
+  `,
+        {
+            status: 403,
+            headers: {
+                "Content-Type": "text/html; charset=utf-8",
+            },
+        },
+    );
+}
+
+// Verificar que el evento requiere pago
+const esPagado = Number(evento?.precio ?? 0) > 0;
+if (!esPagado) {
+    return Astro.redirect(`/Eventos/Evento-Inscripcion/${idEvento}`);
+}
+
+// Procesar el pago si se envía el formulario
+let pagoResult = null;
+let pagoError = null;
+
+if (Astro.request.method === "POST") {
+    const formData = await Astro.request.formData();
+    const metodoPago = formData.get("metodoPago") ?? "";
+
+    try {
+        let enlaceComprobante: string | undefined = undefined;
+
+        // Procesar el comprobante si existe
+        const comprobante = formData.get("comprobante");
+        if (
+            comprobante &&
+            typeof comprobante === "object" &&
+            comprobante instanceof File &&
+            comprobante.name &&
+            comprobante.size > 0
+        ) {
+            const uploadResult = await Astro.callAction(
+                actions.uploadComprobante,
+                formData,
+            );
+            if (uploadResult?.data?.url) {
+                enlaceComprobante = uploadResult.data.url;
+            } else {
+                throw new Error("Error al subir el comprobante de pago.");
+            }
+        }
+
+        // Actualizar la inscripción con los datos de pago
+        const { data: updateData, error: updateError } = await Astro.callAction(
+            actions.actualizarPagoInscripcion,
+            {
+                idInscripcion: inscripcion.id_ins,
+                metodoPago: metodoPago.toString().toUpperCase(),
+                enlaceComprobante,
+            },
+        );
+
+        pagoResult = updateData;
+        pagoError = updateError;
+    } catch (err) {
+        pagoError = {
+            message:
+                err && typeof err === "object" && "message" in err
+                    ? err.message
+                    : "Error inesperado al procesar el pago.",
+        };
+    }
+}
+---
+
+<Layout>
+    <div style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+        {/* MENSAJE DE RESULTADO */}
+        {
+            (pagoResult || pagoError) && (
+                <div style="margin-bottom: 2rem; text-align: center;">
+                    <div
+                        style={`padding: 1.5rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            background: #fff;
+            color: ${pagoError || (pagoResult && pagoResult.success === false) ? "#c0392b" : "#1e7e34"};
+            border: 2px solid ${pagoError || (pagoResult && pagoResult.success === false) ? "#e74c3c" : "#28a745"};
+            max-width: 600px;
+            margin: 0 auto;`}
+                    >
+                        {pagoError
+                            ? `Error al procesar el pago: ${pagoError.message}`
+                            : pagoResult && pagoResult.success === false
+                              ? `Error: ${pagoResult.message || "No se pudo procesar el pago"}`
+                              : "¡Pago registrado correctamente! Espera la confirmación del administrador."}
+                    </div>
+
+                    {pagoResult && pagoResult.success === true && (
+                        <a
+                            href="/homeUser"
+                            style="margin-top: 1rem; display: inline-block; background: #28a745; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                        >
+                            Volver al inicio
+                        </a>
+                    )}
+                </div>
+            )
+        }
+
+        {
+            /* FORMULARIO DE PAGO - Solo se muestra si no se ha procesado el pago */
+        }
+        {
+            !pagoResult && (
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
+                    style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+                    onsubmit="return validarPago();"
+                >
+                    <h2 style="color: #2c3e50; font-size: 1.8rem; margin-bottom: 1rem; text-align: center;">
+                        Proceso de Pago
+                    </h2>
+
+                    {/* INFORMACIÓN DEL EVENTO */}
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #28a745;">
+                        <h3 style="color: #2c3e50; margin-bottom: 1rem;">
+                            {evento.nom_eve}
+                        </h3>
+                        <p style="margin: 0.5rem 0; color: #34495e;">
+                            <strong>Precio:</strong>{" "}
+                            <span style="color: #e74c3c; font-size: 1.2rem; font-weight: bold;">
+                                ${evento.precio}
+                            </span>
+                        </p>
+                        <p style="margin: 0.5rem 0; color: #34495e;">
+                            <strong>Participante:</strong>{" "}
+                            {usuario?.nom_usu1 || " "} {usuario?.ape_usu1}
+                        </p>
+                    </div>
+
+                    {/* INFORMACIÓN BANCARIA */}
+                    <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 2px solid #28a745;">
+                        <h4 style="color: #155724; margin-bottom: 1rem;">
+                            📋 Información para el pago
+                        </h4>
+                        <div style="color: #155724; line-height: 1.6;">
+                            <p>
+                                <strong>Banco:</strong> Banco del Pacífico
+                            </p>
+                            <p>
+                                <strong>Tipo de cuenta:</strong> Corriente
+                            </p>
+                            <p>
+                                <strong>Número de cuenta:</strong> 1234567890
+                            </p>
+                            <p>
+                                <strong>Beneficiario:</strong> Universidad
+                                Técnica de Ambato
+                            </p>
+                            <p>
+                                <strong>RUC:</strong> 1860001550001
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* MÉTODO DE PAGO */}
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 1rem; color: #34495e; font-size: 1.1rem;">
+                            Método de Pago *
+                        </label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <label
+                                style="display: flex; align-items: center; padding: 1rem; border: 2px solid #bdc3c7; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.borderColor='#3498db'"
+                                onmouseout="this.style.borderColor='#bdc3c7'"
+                            >
+                                <input
+                                    type="radio"
+                                    name="metodoPago"
+                                    value="TRANSFERENCIA"
+                                    required
+                                    style="margin-right: 0.8rem; transform: scale(1.2);"
+                                />
+                                <span style="font-weight: bold;">
+                                    Transferencia Bancaria
+                                </span>
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; padding: 1rem; border: 2px solid #bdc3c7; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+                                onmouseover="this.style.borderColor='#3498db'"
+                                onmouseout="this.style.borderColor='#bdc3c7'"
+                            >
+                                <input
+                                    type="radio"
+                                    name="metodoPago"
+                                    value="EFECTIVO"
+                                    required
+                                    style="margin-right: 0.8rem; transform: scale(1.2);"
+                                />
+                                <span style="font-weight: bold;">
+                                    Pago en Efectivo
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* SUBIR COMPROBANTE */}
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 1rem; color: #34495e; font-size: 1.1rem;">
+                            Comprobante de Pago *
+                        </label>
+                        <div style="border: 2px dashed #bdc3c7; border-radius: 8px; padding: 2rem; text-align: center; background: #f8f9fa;">
+                            <input
+                                type="file"
+                                name="comprobante"
+                                id="file-upload"
+                                accept="image/jpeg,image/png,image/jpg,application/pdf"
+                                required
+                                onchange="mostrarNombreArchivo(event)"
+                                style="display: none;"
+                            />
+                            <label
+                                for="file-upload"
+                                style="cursor: pointer; color: #3498db; font-weight: bold; font-size: 1.1rem;"
+                            >
+                                📁 Seleccionar archivo
+                            </label>
+                            <p
+                                id="nombre-archivo"
+                                style="margin-top: 0.8rem; color: #7f8c8d; font-style: italic;"
+                            >
+                                No se ha seleccionado ningún archivo
+                            </p>
+                            <p style="margin-top: 0.5rem; color: #95a5a6; font-size: 0.9rem;">
+                                Formatos permitidos: JPG, PNG, PDF (máximo 5MB)
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* BOTÓN DE ENVÍO */}
+                    <div style="text-align: center;">
+                        <button
+                            type="submit"
+                            style="background: #28a745; color: white; padding: 1rem 3rem; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: all 0.2s;"
+                            onmouseover="this.style.background='#218838'; this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)'"
+                        >
+                            Registrar Pago
+                        </button>
+                    </div>
+
+                    {/* Mensaje de error para validación */}
+                    <div
+                        id="mensaje-error-pago"
+                        style="display:none; margin-top:1rem; text-align:center;"
+                    />
+                </form>
+            )
+        }
+    </div>
+</Layout>
+
+<script is:inline>
+    function mostrarNombreArchivo(e) {
+        const input = e.target;
+        const p = document.getElementById("nombre-archivo");
+        if (input.files && input.files.length > 0) {
+            p.textContent = input.files[0].name;
+            p.style.color = "#27ae60";
+            p.style.fontStyle = "normal";
+        } else {
+            p.textContent = "No se ha seleccionado ningún archivo";
+            p.style.color = "#7f8c8d";
+            p.style.fontStyle = "italic";
+        }
+    }
+
+    function mostrarErrorPago(msg) {
+        const div = document.getElementById("mensaje-error-pago");
+        if (div) {
+            div.style.display = "block";
+            div.innerHTML = `
+        <span style="
+          display:inline-block;
+          background:#fff0f0;
+          color:#c0392b;
+          border:1.5px solid #e74c3c;
+          border-radius:8px;
+          padding:0.8rem 1.2rem;
+          font-weight:bold;
+          font-size:1.1rem;
+          box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        ">${msg}</span>
+      `;
+        }
+    }
+
+    function validarPago() {
+        const metodoPago = document.querySelector(
+            'input[name="metodoPago"]:checked',
+        );
+        const archivo = document.getElementById("file-upload");
+
+        // Ocultar errores previos
+        const errorDiv = document.getElementById("mensaje-error-pago");
+        if (errorDiv) errorDiv.style.display = "none";
+
+        if (!metodoPago) {
+            mostrarErrorPago("Debes seleccionar un método de pago.");
+            return false;
+        }
+
+        if (!archivo || !archivo.files.length) {
+            mostrarErrorPago("Debes subir el comprobante de pago.");
+            return false;
+        }
+
+        // Validar tamaño del archivo (5MB máximo)
+        const archivo_seleccionado = archivo.files[0];
+        if (archivo_seleccionado.size > 5 * 1024 * 1024) {
+            mostrarErrorPago("El archivo no debe superar los 5MB.");
+            return false;
+        }
+
+        return true;
+    }
+</script>

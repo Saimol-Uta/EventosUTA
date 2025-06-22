@@ -5,11 +5,26 @@ import { actions } from "astro:actions";
 interface CampoProps {
     usuario: any;
     evento: any;
-    requisitos: any[];
+    requisitos?: any[];
     inscripcion?: any;
+    es_estudiante: boolean;
+    tipo_usuario: string;
+    informacion_academica?: {
+        carrera?: string;
+        facultad?: string;
+        codigo_carrera?: string;
+    } | null;
 }
 
-const { usuario, evento, requisitos } = Astro.props as CampoProps;
+const {
+    usuario,
+    evento,
+    requisitos = [],
+    inscripcion,
+    es_estudiante,
+    tipo_usuario,
+    informacion_academica,
+} = Astro.props as CampoProps;
 
 const usuarioPlano = {
     cor_cue: usuario?.cor_cue,
@@ -31,7 +46,7 @@ const esPagado = Number(evento?.precio ?? 0) > 0;
 const requiereCarta = Boolean(evento?.requiere_carta);
 
 // Inicialización
-let inscripcion = null;
+
 let inscripcionResult = null;
 let inscripcionError = null;
 
@@ -51,7 +66,10 @@ if (Astro.request.method === "POST") {
     if (requiereCarta) {
         cartaMotivacion = formData.get("car_mot_eve")?.toString().trim();
         if (!cartaMotivacion) {
-            inscripcionError = { message: "Debes escribir la carta de motivación para inscribirte." };
+            inscripcionError = {
+                message:
+                    "Debes escribir la carta de motivación para inscribirte.",
+            };
         }
     }
 
@@ -154,21 +172,27 @@ let restriccionAsignacion = null;
 if (evento?.asignaciones) {
     const tipoAsignacion = evento.asignaciones.tip_asi;
     // Aplana el array de carreras y tipa los objetos
-    const carrerasAsignacion = (evento.asignaciones.detalle_asignaciones?.flatMap((det: { carreras: { id_car?: string; id_fac_per?: string }[] }) => det.carreras) ?? []) as { id_car?: string; id_fac_per?: string }[];
+    const carrerasAsignacion =
+        (evento.asignaciones.detalle_asignaciones?.flatMap(
+            (det: { carreras: { id_car?: string; id_fac_per?: string }[] }) =>
+                det.carreras,
+        ) ?? []) as { id_car?: string; id_fac_per?: string }[];
 
-    if (tipoAsignacion === 'CARRERA') {
-        const carreraPermitida = carrerasAsignacion.some(carrera =>
-            carrera.id_car === usuario?.id_car_per
+    if (tipoAsignacion === "CARRERA") {
+        const carreraPermitida = carrerasAsignacion.some(
+            (carrera) => carrera.id_car === usuario?.id_car_per,
         );
         if (!carreraPermitida) {
-            restriccionAsignacion = "No tienes acceso a este evento según tu carrera.";
+            restriccionAsignacion =
+                "No tienes acceso a este evento según tu carrera.";
         }
-    } else if (tipoAsignacion === 'FACULTAD') {
-        const facultadPermitida = carrerasAsignacion.some(carrera =>
-            carrera.id_fac_per === usuario?.carreras?.id_fac_per
+    } else if (tipoAsignacion === "FACULTAD") {
+        const facultadPermitida = carrerasAsignacion.some(
+            (carrera) => carrera.id_fac_per === usuario?.carreras?.id_fac_per,
         );
         if (!facultadPermitida) {
-            restriccionAsignacion = "No tienes acceso a este evento según tu facultad.";
+            restriccionAsignacion =
+                "No tienes acceso a este evento según tu facultad.";
         }
     }
 }
@@ -196,14 +220,16 @@ if (evento?.asignaciones) {
       box-shadow: 0 2px 12px #0001;
       background: #fff;
       color: ${
-          inscripcionError || (inscripcionResult && inscripcionResult.success === false)
+          inscripcionError ||
+          (inscripcionResult && inscripcionResult.success === false)
               ? "#c0392b"
               : inscripcionResult && inscripcionResult.success === true
                 ? "#1e7e34"
                 : "#e67e22"
       };
       border: 2px solid ${
-          inscripcionError || (inscripcionResult && inscripcionResult.success === false)
+          inscripcionError ||
+          (inscripcionResult && inscripcionResult.success === false)
               ? "#e74c3c"
               : inscripcionResult && inscripcionResult.success === true
                 ? "#28a745"
@@ -215,14 +241,15 @@ if (evento?.asignaciones) {
                 {inscripcionError
                     ? `Error al inscribirse: ${inscripcionError.message}`
                     : inscripcionResult && inscripcionResult.success === false
-                        ? `Error al inscribirse: ${inscripcionResult.message}`
-                        : inscripcionResult && inscripcionResult.success === true
-                            ? "Inscripción realizada correctamente. Estado: pendiente de revisión."
-                            : yaInscrito
-                                ? "Ya estás inscrito en este evento."
-                                : ""}
+                      ? `Error al inscribirse: ${inscripcionResult.message}`
+                      : inscripcionResult && inscripcionResult.success === true
+                        ? "Inscripción realizada correctamente. Estado: pendiente de revisión."
+                        : yaInscrito
+                          ? "Ya estás inscrito en este evento."
+                          : ""}
             </div>
-            {(inscripcionResult && inscripcionResult.success === true) || yaInscrito ? (
+            {(inscripcionResult && inscripcionResult.success === true) ||
+            yaInscrito ? (
                 <a
                     href="/homeUser"
                     style="margin-top: 2rem; display: inline-block; background: #1e7e34; color: #fff; padding: 0.7rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 2px 8px #0001; transition: background 0.2s;"
@@ -262,7 +289,11 @@ if (evento?.asignaciones) {
                     <label>Correo electrónico</label>
                     <input
                         type="email"
-                        value={usuario?.cor_cue ?? usuario?.cuentas?.[0]?.cor_cue ?? ""}
+                        value={
+                            usuario?.cor_cue ??
+                            usuario?.cuentas?.[0]?.cor_cue ??
+                            ""
+                        }
                         readonly
                     />
                 </div>
@@ -354,7 +385,9 @@ if (evento?.asignaciones) {
                             <label for="metodoPago">Forma de pago</label>
                             <select id="metodoPago" name="metodoPago" required>
                                 <option value="EFECTIVO">Efectivo</option>
-                                <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+                                <option value="TRANSFERENCIA">
+                                    Transferencia Bancaria
+                                </option>
                             </select>
                         </div>
 
@@ -402,7 +435,8 @@ if (evento?.asignaciones) {
                 {requiereCarta && (
                     <div class="form-group" style="margin-top: 1.5rem;">
                         <label for="car_mot_eve" style="font-weight: bold;">
-                            Carta de motivación <span style="color: red;">*</span>
+                            Carta de motivación{" "}
+                            <span style="color: red;">*</span>
                         </label>
                         <textarea
                             id="car_mot_eve"
@@ -411,7 +445,7 @@ if (evento?.asignaciones) {
                             required={requiereCarta}
                             placeholder="Escribe aquí tu carta de motivación para inscribirte en este evento..."
                             style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;"
-                        ></textarea>
+                        />
                     </div>
                 )}
 
@@ -514,7 +548,9 @@ if (evento?.asignaciones) {
         const esPagado = !!JSON.parse(
             document.getElementById("es-pagado").value,
         );
-        const requiereCarta = !!JSON.parse(document.getElementById("requiere-carta").value);
+        const requiereCarta = !!JSON.parse(
+            document.getElementById("requiere-carta").value,
+        );
         ocultarErrorValidacion();
         if (!datosUsuarioCompletos) {
             mostrarErrorValidacion(
@@ -541,7 +577,9 @@ if (evento?.asignaciones) {
         if (requiereCarta) {
             const carta = document.getElementById("car_mot_eve");
             if (!carta || !carta.value.trim()) {
-                mostrarErrorValidacion("Debes escribir la carta de motivación para inscribirte.");
+                mostrarErrorValidacion(
+                    "Debes escribir la carta de motivación para inscribirte.",
+                );
                 return false;
             }
         }
@@ -583,4 +621,8 @@ if (evento?.asignaciones) {
     value={JSON.stringify(!!datosUsuarioCompletos)}
 />
 <input type="hidden" id="es-pagado" value={JSON.stringify(!!esPagado)} />
-<input type="hidden" id="requiere-carta" value={JSON.stringify(!!requiereCarta)} />
+<input
+    type="hidden"
+    id="requiere-carta"
+    value={JSON.stringify(!!requiereCarta)}
+/>
