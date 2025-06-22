@@ -23,47 +23,56 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
 {
     (isMaster && (
         <HeaderUsuario
-            nombreUsuario={session?.user?.name || "Administrador"}
+            nombreUsuario={
+                `${cuenta?.nom_usu1 || ""} ${cuenta?.nom_usu2 || ""} ${cuenta?.ape_usu1 || ""} ${cuenta?.ape_usu2 || ""}`.trim() || "Administrador"
+            }
             userImage={cuenta?.img_user || "/PerfilDefault.png"}
             logoImage={imagenLogo}
             titulo1={titulo1}
-                titulo2={titulo2}
-
+            titulo2={titulo2}
         />
     )) ||
         (isStudent && (
             <HeaderUsuario
-                nombreUsuario={session?.user?.name || "Estudiante"}
+                nombreUsuario={
+                    `${cuenta?.nom_usu1 || ""} ${cuenta?.nom_usu2 || ""} ${cuenta?.ape_usu1 || ""} ${cuenta?.ape_usu2 || ""}`.trim() || "Estudiante"
+                }
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
-                 logoImage={imagenLogo}
-            titulo1={titulo1}
+                logoImage={imagenLogo}
+                titulo1={titulo1}
                 titulo2={titulo2}
             />
         )) ||
         (isUser && (
             <HeaderUsuario
-                nombreUsuario={session?.user?.name || "Usuario"}
+                nombreUsuario={
+                    `${cuenta?.nom_usu1 || ""} ${cuenta?.nom_usu2 || ""} ${cuenta?.ape_usu1 || ""} ${cuenta?.ape_usu2 || ""}`.trim() || "Usuario"
+                }
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
-              logoImage={imagenLogo}
-            titulo1={titulo1}
+                logoImage={imagenLogo}
+                titulo1={titulo1}
                 titulo2={titulo2}
             />
         )) ||
         (isAdmin && (
             <HeaderUsuario
-                nombreUsuario={session?.user?.name || "Administrador"}
+                nombreUsuario={
+                    `${cuenta?.nom_usu1 || ""} ${cuenta?.nom_usu2 || ""} ${cuenta?.ape_usu1 || ""} ${cuenta?.ape_usu2 || ""}`.trim() || "Administrador"
+                }
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
-               logoImage={imagenLogo}
-            titulo1={titulo1}
+                logoImage={imagenLogo}
+                titulo1={titulo1}
                 titulo2={titulo2}
             />
         )) ||
         (isLoggedIn && (
             <HeaderUsuario
-                nombreUsuario={session?.user?.name || "Usuario"}
+                nombreUsuario={
+                    `${cuenta?.nom_usu1 || ""} ${cuenta?.nom_usu2 || ""} ${cuenta?.ape_usu1 || ""} ${cuenta?.ape_usu2 || ""}`.trim() || "Usuario"
+                }
                 userImage={cuenta?.img_user || "/PerfilDefault.png"}
-              logoImage={imagenLogo}
-            titulo1={titulo1}
+                logoImage={imagenLogo}
+                titulo1={titulo1}
                 titulo2={titulo2}
             />
         )) || (
