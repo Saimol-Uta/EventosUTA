@@ -7,16 +7,12 @@ export const setDatosInscripcion = defineAction({
     input: z.object({
         idUsuario: z.string(), // Correo del usuario
         idEvento: z.string().uuid(),
-        metodoPago: z.string().optional(),
-        enlaceComprobante: z.string().optional(),
-        car_mot_eve: z.string().optional(), // <-- Agrega este campo
+        car_mot_eve: z.string().optional(), // Carta de motivación
     }),
-    handler: async ({ idUsuario, idEvento, metodoPago, enlaceComprobante, car_mot_eve }) => {
+    handler: async ({ idUsuario, idEvento, car_mot_eve }) => {
         console.log("DATOS RECIBIDOS EN setDatosInscripcion:", {
             idUsuario,
             idEvento,
-            metodoPago,
-            enlaceComprobante,
             car_mot_eve,
         });
         try {
@@ -107,25 +103,31 @@ export const setDatosInscripcion = defineAction({
                         };
                     }
                 }
-            }      // 5. Crear la inscripción
+            }
+
+            // 5. Determinar estado inicial de la inscripción
+            // Si el evento es gratuito, se aprueba automáticamente
+            // Si es pagado, queda pendiente de validación por el administrador
+            const esPagado = evento.precio && Number(evento.precio) > 0;
+            const estadoInicial = esPagado ? "DPendiente" : "APROBADA";
+
             console.log("DATOS QUE SE GUARDARÁN EN LA BASE:", {
                 id_usu_ins: idUsuario,
                 id_eve_ins: idEvento,
-                met_pag_ins: metodoPago,
-                enl_ord_pag_ins: enlaceComprobante,
                 car_mot_inscrip: car_mot_eve,
-                // ...otros campos...
+                est_ins: estadoInicial,
             });
-            const metodoPagoValido = metodoPago === "TRANSFERENCIA" || metodoPago === "EFECTIVO" ? metodoPago : null;
+
             const inscripcion = await prisma.inscripciones.create({
                 data: {
                     id_usu_ins: idUsuario,
                     id_eve_ins: idEvento,
-                    met_pag_ins: metodoPagoValido,
-                    enl_ord_pag_ins: enlaceComprobante || null,
                     car_mot_inscrip: car_mot_eve || null,
-                    est_ins: evento.precio && Number(evento.precio) > 0 ? "DPendiente" : "Aprobado",
+                    est_ins: estadoInicial,
                     est_par: "PENDIENTE",
+                    // Los campos de pago se establecen como null inicialmente
+                    met_pag_ins: null,
+                    enl_ord_pag_ins: null,
                 },
             });
 
