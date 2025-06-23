@@ -3,6 +3,8 @@ import prisma from '../../db';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { validateEmail } from './verificacionCorreo.ts';
+import crypto from 'crypto';
+import { sendVerificationEmail } from './sendEmail.ts';
 
 function validarCedula(cedula: string): boolean {
     if (!/^\d{10}$/.test(cedula)) return false;
@@ -87,6 +89,8 @@ export const SignIn = defineAction({
             const ape_usu2 = ape_usu2Rest.join(' ');
             const hashedPassword = await bcrypt.hash(contrasena, 10);
             const rolAsignado = correoLimpio.endsWith('@uta.edu.ec') ? 'ESTUDIANTE' : 'USUARIO';
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const expirationDate = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
             // Crear usuario directamente en la tabla usuarios con toda la información
             const usuario = await prisma.usuarios.create({
@@ -100,6 +104,9 @@ export const SignIn = defineAction({
                     ape_usu1,
                     ape_usu2: ape_usu2 || null,
                     fec_nac_usu: new Date(fechNac),
+                    cod_ver: verificationToken,
+                    fec_exp_cod: expirationDate,
+                    verificado: false,
                     num_tel_usu: null,
                     id_car_per: null,
                     enl_ced_cue: null,
@@ -108,6 +115,7 @@ export const SignIn = defineAction({
                 },
             });
 
+            await sendVerificationEmail(correoLimpio, verificationToken);
             return { success: true, userId: usuario.cor_cue };
 
         } catch (error: any) {

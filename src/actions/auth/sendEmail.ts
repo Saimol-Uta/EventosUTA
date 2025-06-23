@@ -57,12 +57,7 @@ async function createTransporter() {
 }
 
 // Acción para enviar el correo de verificación
-export const sendVerificationEmail = defineAction({
-    input: z.object({
-        email: z.string().email(),
-        token: z.string(),
-    }),
-    handler: async ({ email, token }) => {
+export async function sendVerificationEmail(email: string, token: string): Promise<void> {
         try {
             const verificationLink = `${WEBSITE_URL}/verificar-cuenta?token=${token}`;
             const transporter = await createTransporter();
@@ -70,28 +65,29 @@ export const sendVerificationEmail = defineAction({
             await transporter.sendMail({
                 from: `"Talleres Tecnológicos" <${EMAIL_USER}>`,
                 to: email,
-                subject: 'Verifica tu cuenta',
+                subject: 'Verifica tu cuenta en Talleres Tecnológicos',
                 text: `¡Gracias por registrarte! Por favor, haz clic en el siguiente enlace para verificar tu cuenta: ${verificationLink}`,
-                html: `
-                    <div style="font-family: Arial, sans-serif; text-align: center; color: #333;">
-                        <h2>¡Bienvenido a Talleres Tecnológicos!</h2>
-                        <p>Estamos muy contentos de que te unas a nuestra comunidad.</p>
-                        <p>Solo falta un paso más. Por favor, verifica tu dirección de correo electrónico haciendo clic en el botón de abajo.</p>
-                        <a href="${verificationLink}" style="background-color: #a00; color: white; padding: 15px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-size: 16px; margin: 20px 0;">
-                            Verificar mi cuenta
-                        </a>
-                        <p>Si no puedes hacer clic en el botón, copia y pega el siguiente enlace en tu navegador:</p>
-                        <p><a href="${verificationLink}">${verificationLink}</a></p>
-                        <hr>
-                        <p style="font-size: 12px; color: #777;">Si no te registraste en nuestro sitio, por favor ignora este correo.</p>
-                    </div>
-                `,
-            });
+            html: `
+                <div style="font-family: Arial, sans-serif; text-align: center; color: #333; padding: 20px;">
+                    <h2 style="color: #a00;">¡Bienvenido a Talleres Tecnológicos!</h2>
+                    <p>Estamos muy contentos de que te unas a nuestra comunidad.</p>
+                    <p>Solo falta un paso más. Por favor, verifica tu dirección de correo electrónico haciendo clic en el botón de abajo.</p>
+                    <a href="${verificationLink}" style="background-color: #a00; color: white; padding: 15px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-size: 16px; margin: 20px 0;">
+                        Verificar mi Cuenta
+                    </a>
+                    <p>Este enlace es válido por 15 minutos.</p>
+                    <p style="font-size: 12px;">Si no puedes hacer clic en el botón, copia y pega el siguiente enlace en tu navegador:</p>
+                    <p style="font-size: 12px;"><a href="${verificationLink}">${verificationLink}</a></p>
+                    <hr style="margin-top: 30px;">
+                    <p style="font-size: 12px; color: #777;">Si no te registraste en nuestro sitio, por favor ignora este correo.</p>
+                </div>
+            `,
+        });
 
-            return { success: true, message: 'Correo de verificación enviado.' };
-        } catch (error) {
-            console.error('Error al enviar el correo de verificación:', error);
-            return { success: false, error: 'No se pudo enviar el correo de verificación.' };
-        }
+        console.log(`Correo de verificación enviado a ${email}`);
+    } catch (error) {
+        console.error('Error al enviar el correo de verificación:', error);
+        // Lanzamos el error para que la acción que lo llama pueda manejarlo.
+        throw new Error('No se pudo enviar el correo de verificación.');
     }
-});
+}
