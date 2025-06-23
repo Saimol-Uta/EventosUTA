@@ -1,0 +1,190 @@
+body {
+  margin: 0;
+  background-color: #000;
+  font-size: 12px;
+}
+
+.slider {
+  position: relative;
+  height: 85vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.slider .list {
+  position: relative;
+  height: 100%;
+}
+
+.slider .list .item {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.slider .list .item.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.slider .list .item.prev {
+  opacity: 0;
+  z-index: 1;
+}
+
+
+.slider .item img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1); /* Asegurar que comience desde scale(1) */
+}
+
+.slider .list .item .content {
+  position: absolute;
+  top: 53%;
+  width: 1140px;
+  max-width: 80%;
+  left: 46%;
+  transform: translateX(-50%);
+  padding-right: 30%;
+  box-sizing: border-box;
+  color: #fff;
+  text-shadow: 0 5px 10px #0004;
+}
+
+.slider .list .item .content .title{
+  font-size: 4em;
+  font-weight: 700;
+  line-height: 1.3em;
+}
+
+.description {
+  font-size: 2em;
+}
+
+@media screen and (max-width: 678px) {
+  .slider .list .item .content {
+    padding-right: 0;
+  }
+  .slider .list .item .content .title {
+    font-size: 50px;
+  }
+}
+
+.navigation-buttons {
+  position: absolute;
+  bottom: 80px;
+  left: 88%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 30px;
+  z-index: 10;
+}
+
+.nav-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background-color: #fff;
+}
+
+.nav-btn.active {
+  background-color: #fff;
+  transform: scale(1.2);
+}
+
+.btn-informacion {
+  display: inline-block; /* necesario para aplicar transform */
+  padding: 12px 20px;
+  font-size: 14px;
+  background-color: #cd982e;
+  color: white;
+  margin-top: 40px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: background-color 0.25s ease;
+}
+
+.btn-informacion:hover {
+  background-color: white;
+  color: rgb(108, 19, 19);
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Animaciones */
+.content .title,
+.content .description {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.animate-in {
+  animation: textIn 0.6s ease-out forwards;
+}
+
+.animate-out {
+  animation: textOut 0.6s ease-in forwards;
+}
+
+@keyframes zoomInSlow {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes textIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes textOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
