@@ -42,7 +42,7 @@ const {
     }
 
     {
-      estadoPago === "DPendiente" && (
+      estadoPago === "FPendiente" && (
         <button
           class="btn-pago js-download-order"
           data-inscripcionid={inscripcionId}
@@ -53,7 +53,7 @@ const {
     }
 
     {
-      !certificadoDisponible && estadoPago !== "DPendiente" && (
+      !certificadoDisponible && estadoPago !== "FPendiente" && (
         <p class="texto-inactivo">🚫 Sin acciones disponibles</p>
       )
     }

@@ -117,6 +117,8 @@ import "../styles/ModalDetallesInscripcion.css";
 </div>
 
 <script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
     declare global {
         interface Window {
             cerrarModalPagoInscripcion: () => void;
@@ -221,82 +223,21 @@ import "../styles/ModalDetallesInscripcion.css";
     }
 
     function cargarComprobantePago(inscripcionId: string) {
-        console.log("Cargando comprobante para inscripción:", inscripcionId);
-        try {
-            // Obtener datos de inscripción desde el contexto global
-            const inscripcionesData = (window as any).inscripcionesData || [];
-            const inscripcion = inscripcionesData.find(
-                (ins: any) => ins.id_ins === inscripcionId,
-            );
+        const inscripcionesData = (window as any).inscripcionesData || [];
+        const inscripcion = inscripcionesData.find((ins: any) => ins.id_ins === inscripcionId);
+        if (!inscripcion) return;
 
-            if (!inscripcion) {
-                console.warn(
-                    "No se encontraron datos de inscripción:",
-                    inscripcionId,
-                );
-                mostrarComprobanteNoDisponible();
-                return;
-            }
+        const enlaceComprobanteBtn = document.getElementById("enlace-comprobante-pago") as HTMLButtonElement;
+        const sinComprobanteSpan = document.getElementById("sin-comprobante") as HTMLSpanElement;
 
-            console.log("Datos del comprobante:", {
-                comprobante: inscripcion.enl_ord_pag_ins,
-            });
-
-            // Referencias a elementos DOM
-            const enlaceComprobante = document.getElementById(
-                "enlace-comprobante-pago",
-            ) as HTMLButtonElement;
-            const sinComprobante = document.getElementById(
-                "sin-comprobante",
-            ) as HTMLSpanElement; // Configurar botón del comprobante de pago
-            if (isValidDocumentLink(inscripcion.enl_ord_pag_ins)) {
-                console.log("Comprobante válido, configurando botón...");
-                console.log(
-                    "URL del comprobante:",
-                    inscripcion.enl_ord_pag_ins,
-                );
-
-                // Limpiar eventos anteriores
-                enlaceComprobante.onclick = null;
-                enlaceComprobante.removeEventListener(
-                    "click",
-                    handleComprobanteClick,
-                );
-
-                function handleComprobanteClick() {
-                    console.log("🔍 Click en botón comprobante detectado");
-                    console.log("🔍 URL a abrir:", inscripcion.enl_ord_pag_ins);
-                    console.log(
-                        "🔍 Función abrirModalDocumentoPago existe:",
-                        typeof window.abrirModalDocumentoPago,
-                    );
-
-                    abrirModalDocumentoPago(
-                        inscripcion.enl_ord_pag_ins,
-                        "Comprobante de Pago",
-                    );
-                }
-                enlaceComprobante.addEventListener(
-                    "click",
-                    handleComprobanteClick,
-                );
-                enlaceComprobante.style.display = "inline-block";
-                sinComprobante.style.display = "none";
-
-                console.log("✅ Botón de comprobante configurado y mostrado");
-                console.log("✅ Estado del botón:", {
-                    display: enlaceComprobante.style.display,
-                    visible: enlaceComprobante.offsetWidth > 0,
-                    disabled: enlaceComprobante.disabled,
-                });
-            } else {
-                console.log("Comprobante no válido, ocultando botón...");
-                enlaceComprobante.style.display = "none";
-                sinComprobante.style.display = "inline";
-            }
-        } catch (error) {
-            console.error("Error al cargar comprobante de pago:", error);
-            mostrarComprobanteNoDisponible();
+        if (inscripcion.enl_ord_pag_ins && inscripcion.enl_ord_pag_ins !== "null") {
+            enlaceComprobanteBtn.style.display = "inline-block";
+            sinComprobanteSpan.style.display = "none";
+            // ✅ Asignamos el onclick para llamar a nuestra nueva función robusta
+            enlaceComprobanteBtn.onclick = () => abrirModalDocumentoPago(inscripcion.enl_ord_pag_ins, "Comprobante de Pago");
+        } else {
+            enlaceComprobanteBtn.style.display = "none";
+            sinComprobanteSpan.style.display = "inline";
         }
     }
 
@@ -322,7 +263,7 @@ import "../styles/ModalDetallesInscripcion.css";
                 `${usuario.nom_usu1 || ""} ${usuario.nom_usu2 || ""}`.trim();
             const apellidoCompleto =
                 `${usuario.ape_usu1 || ""} ${usuario.ape_usu2 || ""}`.trim();
-            const correo = usuario.cuentas?.[0]?.cor_cue || "No disponible";
+            const correo = usuario.cor_cue || "No disponible";
 
             // Actualizar título del evento
             const tituloEvento = document.querySelector(
@@ -410,161 +351,60 @@ import "../styles/ModalDetallesInscripcion.css";
     }
     function cerrarModalDocumentoPago() {
         const modal = document.getElementById("modalVisualizarDocumentoPago");
-        if (modal) modal.style.display = "none";
-
-        // Limpiar contenido
-        const previewImagen = document.getElementById(
-            "preview-imagen-pago",
-        ) as HTMLImageElement;
-        const previewPdf = document.getElementById(
-            "preview-pdf-pago",
-        ) as HTMLIFrameElement;
-        const previewTexto = document.getElementById("preview-texto-pago");
-
-        if (previewImagen) {
-            previewImagen.style.display = "none";
-            previewImagen.src = "";
-        }
+        if (!modal) return;
+        modal.style.display = "none";
+        
+        const previewPdf = modal.querySelector("#preview-pdf-pago") as HTMLIFrameElement;
         if (previewPdf) {
-            previewPdf.style.display = "none";
-            previewPdf.src = "";
-        }
-        if (previewTexto) {
-            previewTexto.style.display = "none";
-            const contenidoTexto = document.getElementById(
-                "contenido-texto-pago",
-            );
-            if (contenidoTexto) contenidoTexto.textContent = "";
+            if (previewPdf.src.startsWith("blob:")) {
+                URL.revokeObjectURL(previewPdf.src);
+            }
+            previewPdf.src = 'about:blank';
         }
     }
-    function abrirModalDocumentoPago(url: string, titulo: string) {
-        console.log("🔥 INICIO abrirModalDocumentoPago");
-        console.log("🔥 Parámetros recibidos:", { url, titulo });
 
+    async function abrirModalDocumentoPago(url: string, titulo: string) {
         const modal = document.getElementById("modalVisualizarDocumentoPago");
-        console.log("🔥 Modal encontrado:", !!modal);
+        if (!modal || !url) return;
+
         const tituloElemento = document.getElementById("titulo-documento-pago");
-        const previewImagen = document.getElementById(
-            "preview-imagen-pago",
-        ) as HTMLImageElement;
-        const previewPdf = document.getElementById(
-            "preview-pdf-pago",
-        ) as HTMLIFrameElement;
-        const previewTexto = document.getElementById("preview-texto-pago");
         const cargando = document.getElementById("cargando-documento-pago");
-        const error = document.getElementById("error-documento-pago");
+        const errorDiv = document.getElementById("error-documento-pago");
+        const previewPdf = document.getElementById("preview-pdf-pago") as HTMLIFrameElement;
 
-        console.log("🔥 Elementos encontrados:", {
-            modal: !!modal,
-            titulo: !!tituloElemento,
-            imagen: !!previewImagen,
-            pdf: !!previewPdf,
-            texto: !!previewTexto,
-            cargando: !!cargando,
-            error: !!error,
-        });
-
-        if (!modal || !url) {
-            console.error("❌ Modal o URL no encontrados", {
-                modal: !!modal,
-                url,
-            });
-            return;
-        } // Mostrar modal
-        modal.style.display = "block";
-        console.log(
-            "✅ Modal de comprobante mostrado, display:",
-            modal.style.display,
-        );
-
-        // Verificar que el modal sea visible después de un pequeño delay
-        setTimeout(() => {
-            console.log("🔍 Verificación del modal después de 100ms:");
-            console.log("🔍 Display:", modal.style.display);
-            console.log(
-                "🔍 Visible:",
-                modal.offsetWidth > 0 && modal.offsetHeight > 0,
-            );
-            console.log("🔍 Z-index:", getComputedStyle(modal).zIndex);
-            console.log("🔍 Position:", getComputedStyle(modal).position);
-        }, 100);
-
-        // Actualizar título
-        if (tituloElemento) {
-            tituloElemento.textContent = titulo;
-        } // Mostrar indicador de carga
+        // Resetear y mostrar modal en estado de carga
+        if (tituloElemento) tituloElemento.textContent = titulo;
         if (cargando) cargando.style.display = "block";
-        if (error) error.style.display = "none";
-        if (previewImagen) previewImagen.style.display = "none";
+        if (errorDiv) errorDiv.style.display = "none";
         if (previewPdf) previewPdf.style.display = "none";
-        if (previewTexto) previewTexto.style.display = "none";
+        modal.style.display = "block";
 
-        // Detectar tipo de archivo por extensión
-        const extension = url.split(".").pop()?.toLowerCase();
-        const esImagen = ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(
-            extension || "",
-        );
-        const esPdf = extension === "pdf";
+        try {
+            // Llamamos a la action para obtener el contenido del PDF
+            const result = await actions.recuperarCertificadoDesdeUrl({ url });
 
-        console.log("Tipo de archivo detectado:", {
-            extension,
-            esImagen,
-            esPdf,
-        });
-
-        if (esImagen) {
-            // Cargar imagen
-            previewImagen.onload = () => {
-                console.log("Imagen cargada exitosamente");
-                if (cargando) cargando.style.display = "none";
-                previewImagen.style.display = "block";
-            };
-            previewImagen.onerror = () => {
-                console.error("Error al cargar imagen");
-                if (cargando) cargando.style.display = "none";
-                if (error) error.style.display = "block";
-            };
-            previewImagen.src = url;
-        } else if (esPdf) {
-            // Cargar PDF
-            try {
-                previewPdf.onload = () => {
-                    console.log("PDF cargado exitosamente");
-                    if (cargando) cargando.style.display = "none";
-                    previewPdf.style.display = "block";
-                };
-                previewPdf.onerror = () => {
-                    console.error("Error al cargar PDF");
-                    if (cargando) cargando.style.display = "none";
-                    if (error) error.style.display = "block";
-                };
-                previewPdf.src = url;
-            } catch (err) {
-                console.error("Error al configurar PDF:", err);
-                if (cargando) cargando.style.display = "none";
-                if (error) error.style.display = "block";
-            }
-        } else {
-            // URL inválida o tipo de archivo no soportado
-            console.log("URL inválida o tipo de archivo no soportado:", url);
-            if (cargando) cargando.style.display = "none";
-
-            // Verificar si es una URL válida
-            try {
-                new URL(url);
-                // Es una URL válida pero tipo no soportado, abrir en nueva pestaña
-                window.open(url, "_blank");
-                cerrarModalDocumentoPago();
-            } catch {
-                // URL inválida, mostrar error
-                if (error) {
-                    error.style.display = "block";
-                    const errorText = error.querySelector("p");
-                    if (errorText) {
-                        errorText.textContent =
-                            "URL de comprobante inválida: " + url;
-                    }
+            if (result.data?.success && result.data.data?.pdfBase64) {
+                const base64 = result.data.data.pdfBase64;
+                const byteCharacters = atob(base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
                 }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: "application/pdf" });
+                const blobUrl = URL.createObjectURL(blob);
+                
+                previewPdf.src = blobUrl;
+                if (cargando) cargando.style.display = "none";
+                previewPdf.style.display = "block";
+            } else {
+                throw new Error(result.error?.message || "No se pudo cargar el comprobante.");
+            }
+        } catch (error: any) {
+            if (cargando) cargando.style.display = "none";
+            if (errorDiv) {
+                errorDiv.style.display = "block";
+                (errorDiv.querySelector('p') as HTMLElement).textContent = error.message;
             }
         }
     }

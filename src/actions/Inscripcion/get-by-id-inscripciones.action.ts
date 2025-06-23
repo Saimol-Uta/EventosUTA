@@ -8,120 +8,30 @@ export const getByIdInscripcion = defineAction({
         id: z.string().min(1)
     }),
     async handler({ id }) {
-        try {
-            const inscripciones = await prisma.inscripciones.findMany({
-                where: {
-                    id_eve_ins: id
-                },
-                select: {
-                    // TODOS los campos de inscripciones
-                    id_ins: true,
-                    id_usu_ins: true,
-                    id_eve_ins: true,
-                    fec_ins: true,
-                    est_ins: true,
-                    est_par: true,
-                    not_par: true,
-                    asi_par: true,
-                    met_pag_ins: true,
-                    enl_ord_pag_ins: true,
-                    car_mot_inscrip: true, // Campo que faltaba
-                    usuarios: {
-                        select: {
-                            cor_cue: true,
-                            ced_usu: true,
-                            nom_usu1: true,
-                            nom_usu2: true,
-                            ape_usu1: true,
-                            ape_usu2: true,
-                            fec_nac_usu: true,
-                            num_tel_usu: true,
-                            rol_cue: true,
-                            enl_ced_cue: true,
-                            enl_mat_cue: true,
+        try {
+            const inscripciones = await prisma.inscripciones.findMany({
+                where: { id_eve_ins: id },
+                // ✅ 'include' es más limpio que 'select' si quieres traer todo
+                include: {
+                    usuarios: {
+                        include: {
                             carreras: {
-                                select: {
-                                    id_car: true,
-                                    nom_car: true,
-                                    cod_car: true,
-                                    des_car: true,
-                                    facultades: {
-                                        select: {
-                                            nom_fac: true,
-                                            des_fac: true,
-                                        }
-                                    }
+                                include: {
+                                    facultades: true
                                 }
                             }
                         }
                     },
-                    eventos: {
-                        select: {
-                            id_eve: true,
-                            nom_eve: true,
-                            fec_ini_eve: true,
-                            fec_fin_eve: true,
-                            des_eve: true,
-                            img_eve: true,
-                            precio: true, // Campo que faltaba
-                            es_gratuito: true, // Campo que faltaba
-                            requiere_carta: true, // Campo que faltaba
-                            car_mot_eve: true,
-                            estado_evento: true,
-                            categorias_eventos: {
-                                select: {
-                                    id_cat: true,
-                                    nom_cat: true,
-                                    des_cat: true,
-                                    pun_apr_cat: true,
-                                    asi_cat: true,
-                                    requiere_puntaje: true,
-                                    requiere_asistencia: true,
-                                    brinda_certificado: true
-                                }
-                            },
-                            organizadores: {
-                                select: {
-                                    nom_org1: true,
-                                    nom_org2: true,
-                                    ape_org1: true,
-                                    ape_org2: true,
-                                    tit_aca_org: true,
-                                }
-                            },
-                            asignaciones: {
-                                select: {
-                                    id_asi: true,
-                                    nom_asi: true,
-                                    des_asi: true,
-                                    tip_asi: true,
-                                    detalle_asignaciones: {
-                                        select: {
-                                            carreras: {
-                                                select: {
-                                                    id_car: true,
-                                                    nom_car: true,
-                                                    cod_car: true,
-                                                    des_car: true,
-                                                    facultades: {
-                                                        select: {
-                                                            nom_fac: true,
-                                                            des_fac: true
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    eventos: {
+                        include: {
+                            categorias_eventos: true,
+                            organizadores: true,
                         }
-                    }
-                },
-                orderBy: {
-                    fec_ins: 'desc'
-                }
-            });
+                    },
+                },
+                orderBy: { fec_ins: 'desc' }
+            });
+
 
             // Serializar fechas y decimales para evitar problemas de serialización
             const inscripcionesSerializadas = inscripciones.map(inscripcion => ({
@@ -154,6 +64,6 @@ export const getByIdInscripcion = defineAction({
                 inscripciones: [],
                 total: 0
             };
-        }
-    },
+        }
+    },
 });

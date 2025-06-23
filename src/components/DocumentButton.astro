@@ -1,19 +1,17 @@
 ---
 const {
-    label = "Subir Imagen",
+    label = "Subir PDF",
     cuentaId,
-    currentImage = null,
-    size = "w-20 h-20",
-    fieldName = "imagen_documento",
+    // La prop sigue llamándose currentImage, pero ahora contendrá la URL de un PDF
+    currentImage = null, 
+    size = "w-24 h-24", // Podrías querer ajustar el tamaño
+    fieldName = "documento_pdf",
 } = Astro.props;
 
-const hasImage = currentImage && currentImage !== null;
-const initialColor = hasImage ? "bg-green-600" : "bg-red-800";
-const initialLabel = hasImage ? "✓ Imagen" : label;
-
-// ✅ Debug props
+const hasDocument = currentImage && currentImage !== null;
+const initialColor = hasDocument ? "bg-green-600" : "bg-red-800";
+const initialLabel = hasDocument ? "✓ Subido" : label;
 ---
-
 <!-- ✅ Cambio: Usar un único contenedor con todos los datos -->
 <div
     class={`relative ${size}`}
@@ -30,7 +28,7 @@ const initialLabel = hasImage ? "✓ Imagen" : label;
 
     <input
         type="file"
-        accept="image/*"
+        accept=".pdf, application/pdf"
         class="upload-input absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
     />
 
@@ -87,29 +85,15 @@ const initialLabel = hasImage ? "✓ Imagen" : label;
         }
 
         // Validaciones del archivo
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/jpg",
-            "image/webp",
-        ];
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        const allowedType = "application/pdf";
 
         if (file.size > maxSize) {
-            showToast(
-                container,
-                "El archivo es demasiado grande. Máximo 5MB.",
-                "error",
-            );
+            showToast(container, "El PDF es demasiado grande. Máximo 10MB.", "error");
             return;
         }
-
-        if (!allowedTypes.includes(file.type)) {
-            showToast(
-                container,
-                "Tipo de archivo no permitido. Solo JPEG, PNG, JPG y WebP.",
-                "error",
-            );
+        if (file.type !== allowedType) {
+            showToast(container, "Tipo de archivo no permitido. Solo se aceptan PDFs.", "error");
             return;
         }
 
@@ -132,59 +116,30 @@ const initialLabel = hasImage ? "✓ Imagen" : label;
             // Crear FormData
             const formData = new FormData();
             formData.append("cuentaId", cuentaId);
-            formData.append("imagen", file);
+            formData.append("pdf", file);
             formData.append("fieldName", fieldName);
 
             console.log("📤 Enviando a uploadDocumentImage...");
 
             // Llamar a la action
-            const result = await actions.uploadDocumentImage(formData);
+            const result = await actions.uploadDocumentPdf(formData);
 
             console.log("📥 Respuesta recibida:", result);
 
             if (result.data?.success) {
-                updateButtonState(
-                    uploadContainer,
-                    uploadLabel,
-                    true,
-                    "✓ Imagen",
-                );
-                showToast(container, "Imagen subida exitosamente", "success");
-
-                // Actualizar el atributo de imagen actual
-                container.setAttribute(
-                    "data-current-image",
-                    result.data.data?.imagen_url || "",
-                );
-
-                // Emitir evento personalizado
-                const customEvent = new CustomEvent("imageUploaded", {
-                    detail: {
-                        fieldName: fieldName,
-                        imageUrl: result.data.data?.imagen_url,
-                        fileName: file.name,
-                    },
-                });
-                document.dispatchEvent(customEvent);
+                updateButtonState(uploadContainer, uploadLabel, true, "✓ Subido");
+                showToast(container, "PDF subido exitosamente", "success");
             } else {
                 updateButtonState(uploadContainer, uploadLabel, false, "Error");
-                showToast(
-                    container,
-                    result.data?.message || "Error al subir la imagen",
-                    "error",
-                );
+                showToast(container, result.data?.message || "Error al subir el PDF", "error");
             }
         } catch (error) {
-            console.error("❌ Error al subir imagen:", error);
+            console.error("❌ Error al subir PDF:", error);
             updateButtonState(uploadContainer, uploadLabel, false, "Error");
-            showToast(
-                container,
-                "Error inesperado al subir la imagen",
-                "error",
-            );
+            showToast(container, "Error inesperado al subir el PDF", "error");
         } finally {
             showLoading(loadingIndicator, false);
-            target.value = ""; // Limpiar input
+            target.value = "";
         }
     });
 
