@@ -23,7 +23,7 @@ export const getDatosInscripcion = defineAction({
             },
         });
 
-        console.log("USUARIO ENCONTRADO:", usuario);
+
 
         const evento = await prisma.eventos.findUnique({
             where: { id_eve: idEvento },
@@ -52,35 +52,47 @@ export const getDatosInscripcion = defineAction({
                     },
                 },
             })
-            : null;
-
-        // Verificar si el usuario puede inscribirse según la asignación del evento
+            : null;        // Verificar si el usuario puede inscribirse según la asignación del evento
         let puedeInscribirse = true;
         let razonRestricciones = '';
+        let esEstudiante = false;
+        let tipoUsuario = 'PUBLICO_GENERAL';
 
-        if (evento?.asignaciones && usuario) {
+        // Determinar tipo de usuario
+        if (usuario?.carreras && usuario.id_car_per) {
+            esEstudiante = true;
+            tipoUsuario = 'ESTUDIANTE';
+        }
+
+        if (evento?.asignaciones) {
             const tipoAsignacion = evento.asignaciones.tip_asi;
             const carrerasAsignacion = evento.asignaciones.detalle_asignaciones.map(det => det.carreras);
 
-            if (tipoAsignacion === 'CARRERA') {
-                // Verificar si la carrera del usuario está en las carreras permitidas
-                const carreraPermitida = carrerasAsignacion.some(carrera =>
-                    carrera.id_car === usuario.id_car_per
-                );
+            // Si el evento requiere estudiantes pero el usuario no es estudiante
+            if ((tipoAsignacion === 'CARRERA' || tipoAsignacion === 'FACULTAD') && !esEstudiante) {
+                puedeInscribirse = false;
+                razonRestricciones = 'Este evento está restringido solo para estudiantes de la universidad';
+            }
+            // Si es estudiante, verificar restricciones específicas
+            else if (esEstudiante && usuario) {
+                if (tipoAsignacion === 'CARRERA') {
+                    const carreraPermitida = carrerasAsignacion.some(carrera =>
+                        carrera.id_car === usuario.id_car_per
+                    );
 
-                if (!carreraPermitida) {
-                    puedeInscribirse = false;
-                    razonRestricciones = 'Este evento está restringido a carreras específicas';
-                }
-            } else if (tipoAsignacion === 'FACULTAD') {
-                // Verificar si la facultad del usuario está en las facultades permitidas
-                const facultadPermitida = carrerasAsignacion.some(carrera =>
-                    carrera.id_fac_per === usuario.carreras?.id_fac_per
-                );
+                    if (!carreraPermitida) {
+                        puedeInscribirse = false;
+                        razonRestricciones = `Este evento está restringido a carreras específicas. Tu carrera (${usuario.carreras?.nom_car || 'No definida'}) no tiene acceso`;
+                    }
+                } else if (tipoAsignacion === 'FACULTAD') {
+                    const facultadPermitida = carrerasAsignacion.some(carrera =>
+                        carrera.id_fac_per === usuario.carreras?.id_fac_per
+                    );
 
-                if (!facultadPermitida) {
-                    puedeInscribirse = false;
-                    razonRestricciones = 'Este evento está restringido a facultades específicas';
+                    if (!facultadPermitida) {
+                        puedeInscribirse = false;
+                        razonRestricciones = `Este evento está restringido a facultades específicas. Tu facultad (${usuario.carreras?.facultades?.nom_fac || 'No definida'}) no tiene acceso`;
+                    }
                 }
             }
             // GENERAL y EXTERNO permiten cualquier usuario
@@ -88,20 +100,24 @@ export const getDatosInscripcion = defineAction({
 
         if (!evento) {
             throw new Error("Evento no encontrado");
-        }
-
-        return {
+        } return {
             data: {
                 usuario,
                 evento: {
                     ...evento,
                     requiere_carta: evento.requiere_carta,
-                    // otros campos...
                 },
                 inscripcion,
                 puede_inscribirse: puedeInscribirse,
                 razon_restricciones: razonRestricciones,
+                es_estudiante: esEstudiante,
+                tipo_usuario: tipoUsuario,
                 carreras_asignacion: evento.asignaciones?.detalle_asignaciones.map(det => det.carreras) || [],
+                informacion_academica: esEstudiante ? {
+                    carrera: usuario?.carreras?.nom_car,
+                    facultad: usuario?.carreras?.facultades?.nom_fac,
+                    codigo_carrera: usuario?.carreras?.cod_car
+                } : null
             }
         };
     },
