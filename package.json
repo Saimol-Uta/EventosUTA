@@ -3,7 +3,10 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev:astro": "astro dev",
+    "dev:cron": "node --loader ts-node/esm local-cron-runner.ts",
+    "dev": "concurrently \"npm:dev:astro\" \"npm:dev:cron\"",
+    "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -13,10 +16,12 @@
     "@auth/core": "^0.37.4",
     "@prisma/client": "^6.8.2",
     "@tailwindcss/vite": "^4.1.6",
+    "@types/node-cron": "^3.0.11",
     "astro": "^5.7.13",
     "auth-astro": "^4.2.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.1",
+    "concurrently": "^9.2.0",
     "cookie": "^1.0.2",
     "date-fns": "^4.1.0",
     "googleapis": "^150.0.1",
@@ -31,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.12",
-    "@types/nodemailer": "^6.4.17"
+    "@types/nodemailer": "^6.4.17",
+    "ts-node": "^10.9.2"
   }
 }
