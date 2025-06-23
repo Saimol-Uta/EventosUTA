@@ -372,6 +372,11 @@ import "../styles/ModalDetallesInscripcion.css";
         const errorDiv = document.getElementById("error-documento");
         const previewPdf = document.getElementById("preview-pdf") as HTMLIFrameElement;
 
+        const previewImagen = document.getElementById("preview-imagen") as HTMLImageElement;
+        const previewTexto = document.getElementById("preview-texto");
+        if (previewImagen) previewImagen.style.display = "none";
+        if (previewTexto) previewTexto.style.display = "none";
+
         // Resetear y mostrar modal en estado de carga
         if (tituloElemento) tituloElemento.textContent = titulo;
         if (cargando) cargando.style.display = "block";
@@ -416,6 +421,12 @@ import "../styles/ModalDetallesInscripcion.css";
         const tituloElemento = document.getElementById("titulo-documento");
         const previewTexto = document.getElementById("preview-texto");
         const contenidoTexto = document.getElementById("contenido-texto");
+
+        const previewImagen = document.getElementById("preview-imagen") as HTMLImageElement;
+        const previewPdf = document.getElementById("preview-pdf") as HTMLIFrameElement;
+        if (previewImagen) previewImagen.style.display = "none";
+        if (previewPdf) previewPdf.style.display = "none";
+
         
         // Ocultar otros visores y mostrar el de texto
         (document.getElementById("preview-pdf") as HTMLElement).style.display = "none";
