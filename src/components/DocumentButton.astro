@@ -10,7 +10,7 @@ const {
 
 const hasDocument = currentImage && currentImage !== null;
 const initialColor = hasDocument ? "bg-green-600" : "bg-red-800";
-const initialLabel = hasDocument ? "✓ Documento" : label;
+const initialLabel = hasDocument ? "✓ Subido" : label;
 ---
 <!-- ✅ Cambio: Usar un único contenedor con todos los datos -->
 <div
@@ -28,7 +28,7 @@ const initialLabel = hasDocument ? "✓ Documento" : label;
 
     <input
         type="file"
-        accept="image/*"
+        accept=".pdf, application/pdf"
         class="upload-input absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
     />
 
