@@ -268,12 +268,24 @@ if (errorFromUrl && errorFromUrl !== "CredentialsSignin") {
     const error = urlParams.get("error");
     // NUEVO: También verificar si hay mensaje de éxito
     const message = urlParams.get("message");
+    const code = urlParams.get("code");
 
     // Limpiar URL inmediatamente, antes de mostrar algo
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
 
-    if (error === "CredentialsSignin") {
+    if (error === "CredentialsSignin" && code === "unverified-account") {
+      const { default: Swal } = await import("sweetalert2");
+      await Swal.fire({
+        icon: "error",
+        title: "Error al Ingresar",
+        text: "Usuario no verificado.",
+        confirmButtonColor: "#a00",
+        heightAuto: false,
+      });
+    }
+
+    else if (error === "CredentialsSignin" && code === "credentials") {
       const { default: Swal } = await import("sweetalert2");
       await Swal.fire({
         icon: "error",
@@ -283,6 +295,7 @@ if (errorFromUrl && errorFromUrl !== "CredentialsSignin") {
         heightAuto: false,
       });
     }
+
     // También mostrar SweetAlert para perfil actualizado
     else if (message === "perfil-actualizado") {
       const { default: Swal } = await import("sweetalert2");
