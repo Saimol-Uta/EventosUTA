@@ -180,7 +180,20 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         </div>
     </div>
 </div>
-
+<div id="pdf-viewer-modal" class="modal-viewer-overlay">
+    <div class="modal-viewer-content">
+        <button
+            id="pdf-viewer-close"
+            class="modal-viewer-close-btn"
+            title="Cerrar">&times;</button
+        >
+        <iframe
+            id="pdf-viewer-iframe"
+            src=""
+            frameborder="0"
+            title="Visor de PDF"></iframe>
+    </div>
+</div>
 <style>
     .info-grid {
         display: grid;
@@ -311,6 +324,53 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
+
+    .modal-viewer-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.75);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-viewer-content {
+        position: relative;
+        background-color: #fff;
+        padding: 8px;
+        border-radius: 8px;
+        width: 90%;
+        height: 90%;
+        max-width: 1000px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    .modal-viewer-close-btn {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        background-color: #333;
+        color: white;
+        border: 2px solid white;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        font-size: 24px;
+        line-height: 30px;
+        text-align: center;
+        cursor: pointer;
+        z-index: 1001;
+    }
+    #pdf-viewer-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
     @media (max-width: 768px) {
         .info-grid {
             grid-template-columns: 1fr;
@@ -348,6 +408,73 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
 
     // Variable global para almacenar el usuario actual
     let usuarioActual: any = null;
+
+    const pdfViewerModal = document.getElementById("pdf-viewer-modal");
+    const pdfViewerCloseBtn = document.getElementById("pdf-viewer-close");
+    const pdfIframe = document.getElementById(
+        "pdf-viewer-iframe",
+    ) as HTMLIFrameElement;
+
+    function openPdfViewer(blobUrl: string) {
+        if (pdfIframe && pdfViewerModal) {
+            pdfIframe.src = blobUrl;
+            pdfViewerModal.style.display = "flex";
+        }
+    }
+
+    function closePdfViewer() {
+        if (pdfViewerModal && pdfIframe) {
+            pdfViewerModal.style.display = "none";
+            if (pdfIframe.src.startsWith("blob:")) {
+                URL.revokeObjectURL(pdfIframe.src);
+            }
+            pdfIframe.src = "";
+        }
+    }
+
+    pdfViewerCloseBtn?.addEventListener("click", closePdfViewer);
+    pdfViewerModal?.addEventListener("click", (event) => {
+        if (event.target === pdfViewerModal) closePdfViewer();
+    });
+
+
+    const handleDocumentClick = async (url: string) => {
+        if (!url) return;
+
+        const { default: Swal } = await import("sweetalert2");
+        const { actions } = await import("astro:actions");
+
+        Swal.fire({
+            title: 'Cargando documento...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            const result = await actions.recuperarCertificadoDesdeUrl({ url });
+
+            if (result.data?.success && result.data.data?.pdfBase64) {
+                const base64 = result.data.data.pdfBase64;
+                const byteCharacters = atob(base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: "application/pdf" });
+                const blobUrl = URL.createObjectURL(blob);
+
+                Swal.close();
+                openPdfViewer(blobUrl);
+
+            } else {
+                throw new Error(result.error?.message || 'No se pudo cargar el PDF.');
+            }
+        } catch (error: any) {
+            Swal.fire('Error', error.message, 'error');
+        }
+    };
+    
     function cerrarModalDetallesUsuario() {
         const modal = document.getElementById("modalDetallesUsuario");
         if (modal) {
@@ -726,6 +853,10 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             if (linkCedula) {
                 linkCedula.href = usuario.enl_ced_cue;
                 linkCedula.style.display = "inline";
+                linkCedula.onclick = async (event) => {
+                    event.preventDefault();
+                    handleDocumentClick(usuario.enl_ced_cue);
+                };
             }
             if (noCedula) (noCedula as HTMLElement).style.display = "none";
         } else {
@@ -741,6 +872,11 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             if (linkMatricula) {
                 linkMatricula.href = usuario.enl_mat_cue;
                 linkMatricula.style.display = "inline";
+
+                linkMatricula.onclick = async (event) => {
+                    event.preventDefault();
+                    handleDocumentClick(usuario.enl_mat_cue);
+                };
             }
             if (noMatricula)
                 (noMatricula as HTMLElement).style.display = "none";
