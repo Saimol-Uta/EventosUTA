@@ -43,7 +43,7 @@ import { getPerfilCompleto } from './Users/get-perfil-completo.action';
 import { actualizarUsuario } from './Users/actualizar-usuario.action';
 import { crearUsuario } from './Users/crear-usuario.action';
 
-import { getDatosInscripcion } from './Eventos';
+import { getDatosInscripcion, getDetallesEventoCompleto } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
 import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser, uploadDocumentPdf, getDashboardData } from './Users';
 import { crearCuenta } from './Users/crear-cuenta.action';
@@ -156,6 +156,7 @@ export const server = {
     getCuentaByIdSingle,
     getDashboardData,
     getEventosFiltrados,
+    getDetallesEventoCompleto,
 
     // Nuevas acciones para Facultades
     getAllFacultades,

@@ -5,92 +5,55 @@ import Navbar from "../../components/Navbar.astro";
 import { actions } from "astro:actions";
 
 import { getSession } from "auth-astro/server";
-
+import { Image } from "astro:assets";
 import CursoDetalleCard from "../../components/CursoDetalleCard.astro";
 
 import "../../styles/global.css";
 
-interface Props {
-    title?: string;
-    category?: string;
-    description?: string;
-    location?: string;
-    duration?: string;
-    startDate?: string;
-    endDate?: string;
-    targetAudience?: string[];
-    organizer?: string;
-    image?: string;
-    slug: string;
-}
-
 const { slug } = Astro.params;
+const session = await getSession(Astro.request);
 
-const { data, error } = await Astro.callAction(
-    actions.getEventoBySlug,
-    slug ?? "",
-);
+const { data: result, error } = await Astro.callAction(actions.getDetallesEventoCompleto, {
+    slug: slug ?? "",
+    idUsuario: session?.user?.id,
+});
 
-if (error) {
+if (error || !result?.data?.evento) {
     return Astro.redirect("/404");
 }
 
-const { evento } = data;
+// Extraemos los 3 datos que ahora nos devuelve la acción
+const { evento, inscripcion, usuario } = result.data;
 
-// Verificar si el usuario está autenticado y si ya está inscrito
-const session = await getSession(Astro.request);
-let yaInscrito = false;
-let estadoInscripcion = null;
-let datosUsuario = null;
+const yaInscrito = !!inscripcion;
+const estadoInscripcion = inscripcion?.est_ins;
+
+// ✅ LÓGICA DE REQUISITOS REINTRODUCIDA Y CORREGIDA
 let cumpleRequisitos = false;
 let mensajeRequisitos: string[] = [];
 
-if (session?.user?.id) {
-    try {
-        const { data: datosInscripcion } = await Astro.callAction(actions.getDatosInscripcion, {
-            idUsuario: session.user.id,
-            idEvento: evento.id_eve,
-        });
-        
-        if (datosInscripcion?.data?.inscripcion) {
-            yaInscrito = true;
-            estadoInscripcion = datosInscripcion.data.inscripcion.est_ins;
-        }
-        
-        // Obtener datos del usuario para verificar requisitos
-        if (datosInscripcion?.data?.usuario) {
-            datosUsuario = datosInscripcion.data.usuario;
-            
-            // Verificar requisitos para inscripción
-            const requisitos = [];
-            
-            // 1. Verificar que tenga cédula subida
-            if (!datosUsuario.enl_ced_cue || datosUsuario.enl_ced_cue.trim() === '') {
-                requisitos.push("Debes subir tu cédula de identidad en tu perfil");
-            }
-            
-            // 2. Verificar datos personales completos
-            if (!datosUsuario.nom_usu1 || datosUsuario.nom_usu1.trim() === '') {
-                requisitos.push("Primer nombre es requerido");
-            }
-            if (!datosUsuario.ape_usu1 || datosUsuario.ape_usu1.trim() === '') {
-                requisitos.push("Primer apellido es requerido");
-            }
-            if (!datosUsuario.ape_usu2 || datosUsuario.ape_usu2.trim() === '') {
-                requisitos.push("Segundo apellido es requerido");
-            }
-            // Nota: NOM_USU2 puede ser opcional ya que no todas las personas tienen segundo nombre
-            
-            mensajeRequisitos = requisitos;
-            cumpleRequisitos = requisitos.length === 0;
-        }
-    } catch (error) {
-        // Si hay error, asumimos que no está inscrito
-        yaInscrito = false;
-        cumpleRequisitos = false;
+if (session?.user?.id && usuario) {
+    const requisitos = [];
+    
+    // 1. Verificar que tenga cédula subida
+    if (!usuario.enl_ced_cue || usuario.enl_ced_cue.trim() === '') {
+        requisitos.push("Debes subir tu cédula de identidad en tu perfil");
     }
+    
+    // 2. Verificar datos personales completos
+    if (!usuario.nom_usu1 || usuario.nom_usu1.trim() === '') {
+        requisitos.push("Primer nombre es requerido");
+    }
+    if (!usuario.ape_usu1 || usuario.ape_usu1.trim() === '') {
+        requisitos.push("Primer apellido es requerido");
+    }
+    if (!usuario.ape_usu2 || usuario.ape_usu2.trim() === '') {
+        requisitos.push("Segundo apellido es requerido");
+    }
+    
+    mensajeRequisitos = requisitos;
+    cumpleRequisitos = requisitos.length === 0;
 }
-
 // Formatear fechas para mostrar
 const formatearFecha = (fecha: string | Date) => {
     const date = typeof fecha === "string" ? new Date(fecha) : fecha;
