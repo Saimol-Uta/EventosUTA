@@ -15,4 +15,5 @@ export * from './modificar-cuenta.action';
 export * from './modificar-usuario.action';
 export * from './setUsers.action';
 export * from './uploadDocumentImage.action';
+export * from './uploadDocumentPdf.action';
 export * from './uploadImgeUser.action';
