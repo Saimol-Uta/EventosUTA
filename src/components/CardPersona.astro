@@ -1,12 +1,32 @@
 ---
-const { titulo, nombre, apellido, facultad, master, rol, imagen } = Astro.props;
+const { titulo, nombre, apellido, facultad, master, rol, imagen, modoEdit= false } = Astro.props;
 ---
-<figure class="flex flex-col items-center bg-white shadow-md rounded-2xl p-6 w-64 text-center">
+
+<figure class="flex flex-col items-center bg-white shadow-md rounded-2xl p-6 w-64 text-center relative">
   <img src={imagen} alt={`${nombre} ${apellido}`} class="w-50 h-50 object-cover rounded-lg mb-5" />
+  
+  {modoEdit && (
+    <button class="absolute top-4 right-4 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-sm">
+      Cambiar imagen
+    </button>
+  )}
+
   <figcaption>
-    <p class="text-xl font-semibold text-black">{titulo} {nombre} {apellido}{master}</p>
-      <p class="text-base text-gray-600 mt-1">{rol}</p>
+    <p class="text-xl font-semibold text-black">
+      {titulo} {nombre} {apellido}{master}
+    </p>
+    <p class="text-base text-gray-600 mt-1">{rol}</p>
     <p class="text-sm text-gray-800 mt-1">{facultad}</p>
 
+    {modoEdit && (
+      <div class="mt-3 space-y-2">
+        <button class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-sm w-full">
+          Editar texto
+        </button>
+        <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm w-full">
+          Eliminar persona
+        </button>
+      </div>
+    )}
   </figcaption>
 </figure>

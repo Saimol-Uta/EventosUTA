@@ -101,7 +101,7 @@ model organizadores {
 
 model usuarios {
   cor_cue       String          @id @db.VarChar(150)
-  ced_usu       String          @unique @db.VarChar(10)
+  ced_usu       String          @db.VarChar(10)
   nom_usu1      String          @db.VarChar(20)
   nom_usu2      String?         @db.VarChar(20)
   ape_usu1      String          @db.VarChar(20)
