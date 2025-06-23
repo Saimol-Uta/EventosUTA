@@ -8,43 +8,25 @@ import Card from "../components/Card.astro";
 import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
 
+// 1. Obtenemos la sesión como antes
 const session = await getSession(Astro.request);
-
-const { data: cuenta } = await Astro.callAction(
-    actions.getCuentaByIdSingle,
-    session?.user?.id || "",
-);
-
-
 const idUsuario = session?.user?.id;
 
+// 2. Hacemos UNA ÚNICA LLAMADA a nuestra nueva acción
+const { data: dashboardData } = await Astro.callAction(actions.getDashboardData, { idUsuario });
 
-let eventosUsuario: any[] = [];
-let upcomingEvents: any[] = [];
-let certificates: any[] = [];
+// 3. Extraemos todos los datos del objeto resultante
+const cuenta = dashboardData?.cuenta;
+const upcomingEvents = dashboardData?.eventosProximos ?? [];
+const eventosUsuarioRaw = dashboardData?.eventosUsuario ?? [];
+const certificates = dashboardData?.certificados ?? [];
 
-if (idUsuario && typeof idUsuario === "string") {
-    const { data: eventosData } = await Astro.callAction(
-        actions.getEventosPorUsuario,
-        {
-            idUsuario,
-        },
-    );
-    eventosUsuario = eventosData?.eventos ?? [];
-
-    // CORRECCIÓN: Leemos la propiedad 'certificados' que ahora devuelve la action
-    const { data: resultCertificados } = await Astro.callAction(
-        actions.getCertificadosPorUsuario,
-        { idUsuario },
-    );
-    certificates = resultCertificados?.certificados ?? [];
-}
-
-const { data: resultProximos } = await Astro.callAction(
-    actions.getEventosProximos,
-    {},
-);
-upcomingEvents = resultProximos?.eventos ?? [];
+// 4. NORMALIZAMOS LOS DATOS (si todavía es necesario)
+const eventosUsuario = eventosUsuarioRaw.map(inscripcion => ({
+    nombre: inscripcion.eventos.nom_eve,
+    fecha: inscripcion.eventos.fec_ini_eve,
+    estado: inscripcion.est_ins,
+}));
 ---
 
 <html lang="es">
@@ -365,13 +347,13 @@ upcomingEvents = resultProximos?.eventos ?? [];
                                 eventosUsuario.map((evento) => (
                                     <div class="historial-card">
                                         <div class="font-bold text-lg">
-                                            {evento?.nombre || evento?.nom_eve || "Sin nombre"}
+                                            {evento.nombre || "Sin nombre"}
                                         </div>
                                         <div class="text-sm mt-1">
-                                            Fecha: {evento?.fecha || evento?.fec_ini_eve || "Sin fecha"}
+                                            Fecha: {evento.fecha || "Sin fecha"}
                                         </div>
                                         <div class="text-sm">
-                                            Estado: {evento?.estado || evento?.estado_inscripcion || "Inscrito"}
+                                            Estado: {evento.estado || "Inscrito"}
                                         </div>
                                     </div>
                                 ))

@@ -45,7 +45,7 @@ import { crearUsuario } from './Users/crear-usuario.action';
 
 import { getDatosInscripcion } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
-import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser, uploadDocumentPdf } from './Users';
+import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser, uploadDocumentPdf, getDashboardData } from './Users';
 import { crearCuenta } from './Users/crear-cuenta.action';
 import { modificarCuenta } from './Users/modificar-cuenta.action';
 import { eliminarCuenta } from './Users/eliminar-cuenta.action';
@@ -153,6 +153,7 @@ export const server = {
     updatePaginaPrincipal,
     getInfo,
     getCuentaByIdSingle,
+    getDashboardData,
 
     // Nuevas acciones para Facultades
     getAllFacultades,

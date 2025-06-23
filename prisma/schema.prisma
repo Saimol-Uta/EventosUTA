@@ -101,7 +101,7 @@ model organizadores {
 
 model usuarios {
   cor_cue       String          @id @db.VarChar(150)
-  ced_usu       String          @unique @db.VarChar(10)
+  ced_usu       String          @db.VarChar(10)
   nom_usu1      String          @db.VarChar(20)
   nom_usu2      String?         @db.VarChar(20)
   ape_usu1      String          @db.VarChar(20)
@@ -121,6 +121,8 @@ model usuarios {
   cambios       cambios[]
   inscripciones inscripciones[]
   carreras      carreras?       @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([id_car_per], map: "idx_usuarios_on_id_car_per")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.

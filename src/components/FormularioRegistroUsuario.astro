@@ -3,7 +3,7 @@ interface CampoFormulario {
   titulo: string;
   valor: string;
   name: string;
-  tipo?: "select";
+  tipo?: "select" | "email"; 
   opciones?: { valor: string; texto: string }[];
 }
 
