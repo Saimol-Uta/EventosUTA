@@ -62,11 +62,26 @@ export const getInscripcionesByUser = defineAction({
                 }
             });
 
+            const serializableInscripciones = inscripciones.map(inscripcion => ({
+                ...inscripcion, // Copiamos todos los campos del objeto original
+                // Y AHORA SOBREESCRIBIMOS LOS PROBLEMÁTICOS CON EL TIPO CORRECTO EN LA MISMA DECLARACIÓN
+                fec_ins: inscripcion.fec_ins.toISOString(),
+                not_par: inscripcion.not_par ? inscripcion.not_par.toNumber() : null,
+                fec_cer_par: inscripcion.fec_cer_par ? inscripcion.fec_cer_par.toISOString() : null,
+                // Hacemos lo mismo para el objeto anidado 'eventos'
+                eventos: inscripcion.eventos ? {
+                    ...inscripcion.eventos,
+                    fec_ini_eve: inscripcion.eventos.fec_ini_eve.toISOString(),
+                    fec_fin_eve: inscripcion.eventos.fec_fin_eve ? inscripcion.eventos.fec_fin_eve.toISOString() : null,
+                    precio: inscripcion.eventos.precio ? inscripcion.eventos.precio.toNumber() : null,
+                } : null,
+            }));
+
             return {
                 success: true,
-                data: inscripciones,
-                total: inscripciones.length,
-                message: `Se encontraron ${inscripciones.length} inscripciones para el usuario`
+                data: serializableInscripciones, 
+                total: serializableInscripciones.length,
+                message: `Se encontraron ${serializableInscripciones.length} inscripciones para el usuario`
             };
 
         } catch (error) {
