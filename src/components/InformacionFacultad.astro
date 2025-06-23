@@ -2,6 +2,7 @@
 import TarjetaConImagen from "../components/ContenedorInfo.astro";
 import "../styles/global.css";
 import Evento from "../components/CardCarousel.astro";
+import TarjetaPersona from '../components/CardPersona.astro';
 import prisma from "@/db";
 const {
   tituloDescripcion,
@@ -31,6 +32,39 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
   slides.push(eventosDestacados.slice(i, i + 2));
 }
 ---
+  <section class="py-12 bg-gray-100 text-center">
+  <h2 class="text-2xl font-bold text-red-800 mb-6">Equipo Académico</h2>
+  <div class="flex flex-wrap justify-center gap-6">
+    <TarjetaPersona
+    titulo="Ing."
+      nombre="Franklin"
+      apellido="Mayorga"
+      master=", Mg."
+      rol="Decano"
+      facultad="FISEI"
+      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/franklin_mayorga.png"
+    />
+    <TarjetaPersona
+      titulo="Ing."
+      nombre="Luis"
+      apellido="Morales"
+      master=", Mg."
+      rol="Subdecano"
+      facultad="FISEI"
+      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/luis_morales.png"
+    />
+    <TarjetaPersona
+      titulo="Ing."
+      nombre="Daniel"
+      apellido="Jerez"
+      master=", Mg."
+      rol="Responsable"
+      facultad="FISEI"
+      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/daniel_jerez.jpeg"
+    />
+  </div>
+</section>
+     
 
 <section class="py-12" style="background-color: rgb(245, 245, 245)">
   <div class="flex justify-between max-w-4xl mx-auto">

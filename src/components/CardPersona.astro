@@ -1,0 +1,12 @@
+---
+const { titulo, nombre, apellido, facultad, master, rol, imagen } = Astro.props;
+---
+<figure class="flex flex-col items-center bg-white shadow-md rounded-2xl p-6 w-64 text-center">
+  <img src={imagen} alt={`${nombre} ${apellido}`} class="w-50 h-50 object-cover rounded-lg mb-5" />
+  <figcaption>
+    <p class="text-xl font-semibold text-black">{titulo} {nombre} {apellido}{master}</p>
+      <p class="text-base text-gray-600 mt-1">{rol}</p>
+    <p class="text-sm text-gray-800 mt-1">{facultad}</p>
+
+  </figcaption>
+</figure>
