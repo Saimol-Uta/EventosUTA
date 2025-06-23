@@ -65,6 +65,9 @@ model eventos {
   asignaciones       asignaciones?      @relation(fields: [id_asi_eve], references: [id_asi], onDelete: NoAction, onUpdate: NoAction)
   categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
   inscripciones      inscripciones[]
+
+  @@index([dur_eve], map: "idx_eventos_on_dur_eve")
+  @@index([nom_eve], map: "idx_eventos_on_nom_eve")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
