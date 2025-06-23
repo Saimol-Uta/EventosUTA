@@ -201,6 +201,27 @@
         return digitoVerificador === digitoCalculado;
       }
 
+      function validarContrasena(contrasena: string): {
+        valido: boolean;
+        mensaje: string;
+      } 
+      {
+        if (contrasena.length < 6) {
+          return {
+            valido: false,
+            mensaje: "La contraseña debe tener al menos 6 caracteres.",
+          };
+        }
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(contrasena) || !/[A-Z]/.test(contrasena) || !/[a-z]/.test(contrasena)) {
+          return {
+            valido: false,
+            mensaje:
+              "La contraseña debe contener al menos una letra mayuscula, una letra minuscula y un carácter especial.",
+          };
+        }
+        return { valido: true, mensaje: "" };
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         const fechaInput = document.getElementById(
           "fechNac",
@@ -265,6 +286,20 @@
               icon: "error",
               title: "Cédula Inválida",
               text: "Por favor, ingresa un número de cédula ecuatoriana válido.",
+              confirmButtonColor: "#a00",
+              heightAuto: false,
+            }).then(() => {
+              submitButton.disabled = false;
+            });
+            return;
+          }
+
+          const resultadoContrasena = validarContrasena(contrasena);
+          if (!resultadoContrasena.valido) {
+            Swal.fire({
+              icon: "error",
+              title: "Contraseña no segura",
+              text: resultadoContrasena.mensaje,
               confirmButtonColor: "#a00",
               heightAuto: false,
             }).then(() => {
