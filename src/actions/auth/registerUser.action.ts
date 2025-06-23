@@ -60,7 +60,7 @@ export const SignIn = defineAction({
     handler: async (input) => {
 
         const { cedula, nombre, apellido, correo, contrasena, fechNac } = input;
-
+        let usuarioCreadoCorreo: string | null = null;
         const correoLimpio = correo.trim().toLowerCase(); try {
             // Verificar si el correo ya existe antes de crear.
             const usuarioExistente = await prisma.usuarios.findUnique({
@@ -93,7 +93,7 @@ export const SignIn = defineAction({
             const expirationDate = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
             // Crear usuario directamente en la tabla usuarios con toda la información
-            const usuario = await prisma.usuarios.create({
+            const nuevoUsuario = await prisma.usuarios.create({
                 data: {
                     cor_cue: correoLimpio,
                     cont_cuenta: hashedPassword,
@@ -115,11 +115,25 @@ export const SignIn = defineAction({
                 },
             });
 
+            usuarioCreadoCorreo = nuevoUsuario.cor_cue;
+
             await sendVerificationEmail(correoLimpio, verificationToken);
-            return { success: true, userId: usuario.cor_cue };
+            return { success: true,  message: "¡Registro exitoso! Revisa tu correo para verificar tu cuenta." };
 
         } catch (error: any) {
             console.error('Error en registro (action):', error);
+
+            // Si hubo un error y el usuario llegó a crearse, lo eliminamos.
+            if (usuarioCreadoCorreo) {
+                console.log(`Error detectado. Revirtiendo creación del usuario: ${usuarioCreadoCorreo}`);
+                await prisma.usuarios.delete({
+                    where: { cor_cue: usuarioCreadoCorreo }
+                }).catch(deleteError => {
+                    // Loguear si la eliminación falla, pero el error principal es más importante.
+                    console.error(`FALLO CRÍTICO: No se pudo revertir la creación del usuario ${usuarioCreadoCorreo}.`, deleteError);
+                });
+            }
+
             return {
                 success: false,
                 error: { message: error.message || 'Error interno del servidor.' }
