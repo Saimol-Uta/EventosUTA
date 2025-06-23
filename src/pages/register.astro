@@ -430,13 +430,14 @@
               Swal.fire({
                 icon: "success",
                 title: "¡Registro exitoso!",
-                text: "Ahora serás redirigido.",
+                text: "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor, revisa tu bandeja de entrada (y la carpeta de spam).",
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false,
                 heightAuto: false,
                 willClose: () => {
                   window.location.href = "/login";
+                  // form.reset();
                 },
               });
             } else {

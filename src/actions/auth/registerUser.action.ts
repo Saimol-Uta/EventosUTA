@@ -3,6 +3,8 @@ import prisma from '../../db';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { validateEmail } from './verificacionCorreo.ts';
+import crypto from 'crypto';
+import { sendVerificationEmail } from './sendEmail.ts';
 
 function validarCedula(cedula: string): boolean {
     if (!/^\d{10}$/.test(cedula)) return false;
@@ -58,7 +60,7 @@ export const SignIn = defineAction({
     handler: async (input) => {
 
         const { cedula, nombre, apellido, correo, contrasena, fechNac } = input;
-
+        let usuarioCreadoCorreo: string | null = null;
         const correoLimpio = correo.trim().toLowerCase(); try {
             // Verificar si el correo ya existe antes de crear.
             const usuarioExistente = await prisma.usuarios.findUnique({
@@ -87,9 +89,11 @@ export const SignIn = defineAction({
             const ape_usu2 = ape_usu2Rest.join(' ');
             const hashedPassword = await bcrypt.hash(contrasena, 10);
             const rolAsignado = correoLimpio.endsWith('@uta.edu.ec') ? 'ESTUDIANTE' : 'USUARIO';
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const expirationDate = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
             // Crear usuario directamente en la tabla usuarios con toda la información
-            const usuario = await prisma.usuarios.create({
+            const nuevoUsuario = await prisma.usuarios.create({
                 data: {
                     cor_cue: correoLimpio,
                     cont_cuenta: hashedPassword,
@@ -100,6 +104,9 @@ export const SignIn = defineAction({
                     ape_usu1,
                     ape_usu2: ape_usu2 || null,
                     fec_nac_usu: new Date(fechNac),
+                    cod_ver: verificationToken,
+                    fec_exp_cod: expirationDate,
+                    verificado: false,
                     num_tel_usu: null,
                     id_car_per: null,
                     enl_ced_cue: null,
@@ -108,10 +115,25 @@ export const SignIn = defineAction({
                 },
             });
 
-            return { success: true, userId: usuario.cor_cue };
+            usuarioCreadoCorreo = nuevoUsuario.cor_cue;
+
+            await sendVerificationEmail(correoLimpio, verificationToken);
+            return { success: true,  message: "¡Registro exitoso! Revisa tu correo para verificar tu cuenta." };
 
         } catch (error: any) {
             console.error('Error en registro (action):', error);
+
+            // Si hubo un error y el usuario llegó a crearse, lo eliminamos.
+            if (usuarioCreadoCorreo) {
+                console.log(`Error detectado. Revirtiendo creación del usuario: ${usuarioCreadoCorreo}`);
+                await prisma.usuarios.delete({
+                    where: { cor_cue: usuarioCreadoCorreo }
+                }).catch(deleteError => {
+                    // Loguear si la eliminación falla, pero el error principal es más importante.
+                    console.error(`FALLO CRÍTICO: No se pudo revertir la creación del usuario ${usuarioCreadoCorreo}.`, deleteError);
+                });
+            }
+
             return {
                 success: false,
                 error: { message: error.message || 'Error interno del servidor.' }
