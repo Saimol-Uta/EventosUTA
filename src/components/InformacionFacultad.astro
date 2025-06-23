@@ -36,14 +36,13 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
 <section class="py-12" style="background-color: rgb(245, 245, 245)">
   <div class="flex justify-between max-w-4xl mx-auto">
     <div>
-      <h2 class="text-4xl font-bold text-red-800 mb-8">Eventos Favoritos</h2>
+      <h2 class="text-4xl font-bold text-red-900 mb-8">Eventos Destacados</h2>
     </div>
     <!-- Botón Todos los eventos -->
     <div>
       <a
         href="/cursosCompleto"
-        class="group inline-flex items-center gap-3 px-6 py-3 text-white font-semibold shadow-md transition"
-        style="background-color: #cd982e; "
+        class="boton-eventos group inline-flex items-center gap-3 px-6 py-3 text-white font-semibold shadow-md transition"
       >
         Todos los eventos
         <svg
@@ -62,9 +61,9 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
       </a>
     </div>
   </div>
-  <div class="relative max-w-5xl mx-auto">
+  <div class="relative max-w-4xl mx-auto relative">
     <!-- Contenedor del carrusel -->
-    <div id="carousel-container" class="overflow-hidden w-full relative">
+    <div id="carousel-container" class="overflow-hidden w-full">
       <div
         id="carousel-inner"
         class="flex transition-transform duration-700 ease-in-out"
@@ -81,7 +80,9 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
                   imagen={evento.img_eve}
                   titulo={evento.nom_eve}
                   estado={evento.id_asi_eve?.length?.toString() || "0"}
-                  horas={evento.dur_eve ?? 0}
+                  minutos={evento.dur_eve}
+                  precio={evento.precio ?? 0}
+                  fechaIni={evento.fec_ini_eve ?? null}
                   slug={evento.id_eve}
                 />
               ))}
@@ -89,56 +90,68 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
           ))
         }
       </div>
-      <!-- Botones -->
-      <button
-        onclick="cambiarSlide(-1)"
-        class="w-12 h-12 rounded-full bg-white text-red-800 flex items-center justify-center shadow-md hover:bg-red-800 hover:text-white transition-all absolute left-4 top-50"
-        aria-label="Anterior"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-6 h-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"></path>
-        </svg>
-      </button>
-
-      <button
-        onclick="cambiarSlide(1)"
-        class="w-12 h-12 rounded-full bg-white text-red-800 flex items-center justify-center shadow-md hover:bg-red-800 hover:text-white transition-all absolute right-4 top-50"
-        aria-label="Siguiente"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-6 h-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 5l7 7-7 7"></path>
-        </svg>
-      </button>
     </div>
+
+    <style>
+      .boton-eventos {
+        background-color: #cd982e;
+        transition: background-color 0.3s ease;
+      }
+
+      .boton-eventos:hover {
+        background-color: #916500; /* Color personalizado al hacer hover */
+      }
+    </style>
+
+    <!-- Botones -->
+    <button
+      onclick="cambiarSlide(-1)"
+      class="w-12 h-12 rounded-full bg-white text-red-900 flex items-center justify-center shadow-md hover:bg-red-900 hover:text-white transition-all absolute -left-4 top-50"
+      aria-label="Anterior"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <button
+      onclick="cambiarSlide(1)"
+      class="w-12 h-12 rounded-full bg-white text-red-900 flex items-center justify-center shadow-md hover:bg-red-900 hover:text-white transition-all absolute -right-4 top-50"
+      aria-label="Siguiente"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
 
     <!-- Indicadores -->
     <div id="carousel-indicators" class="flex justify-center gap-5 mt-4">
       {
         slides.map((_, index) => (
           <div
-            class="w-2.75 h-2.75 rounded-full transition-all duration-300"
-            style="background-color: rgb(193, 193, 193);"
+            class="w-2.75 h-2.75 rounded-full transition-all duration-300 cursor-pointer"
             data-indicator-index={index}
+            onclick={`irASlide(${index})`}
           />
         ))
       }
