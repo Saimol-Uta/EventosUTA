@@ -69,6 +69,7 @@ import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Ad
 
 export const server = {
     getEventos,
+
     getEventoBySlug,
     SignIn,
     getEventosPorUsuario,
@@ -88,6 +89,8 @@ export const server = {
     crearCuenta,
     modificarCuenta,
     eliminarCuenta,
+    
+
 
     getDatosInscripcion,
     setDatosInscripcion,
