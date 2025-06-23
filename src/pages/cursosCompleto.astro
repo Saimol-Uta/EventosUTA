@@ -2,7 +2,11 @@
 import Header from "../components/Header.astro";
 import Navbar from "../components/Navbar.astro";
 import Layout from "../layouts/Layout.astro";
+import MenuAdmin from "../components/MenuAdministrador.astro";
 import Filtros from "../components/filtros.astro";
+import { actions } from "astro:actions";
+import type { CustomUser } from "../../auth.config";
+import { getSession } from "auth-astro/server";
 import ContenedorEventos from "../components/ContenedorEvento.astro";
 
 // Extraer filtros desde la URL
@@ -16,12 +20,26 @@ const filtros = {
 const page = parseInt(url.searchParams.get("page") || "1", 10);
 
 // Número de cursos por página (configurable)
-const cursosPorPagina = 8;
+const cursosPorPagina = 6;
+
+const session = await getSession(Astro.request);
+let esAdmin = false;
+
+if (session && session.user) {
+    const user = session.user as CustomUser;
+    const rol = user.rol?.toUpperCase();
+    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+        esAdmin = true;
+    }
+}
+
+const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 ---
 
 <Layout>
   <Header />
-  <Navbar />
+  {esAdmin ? <MenuAdmin/> : <Navbar />}
+  
   <Filtros />
 
   <section class="seccion-principal">
@@ -56,9 +74,15 @@ const cursosPorPagina = 8;
     </div>
 
     <!-- Eventos filtrados con paginación -->
-    <ContenedorEventos filtros={filtros} page={page} cursosPorPagina={cursosPorPagina} />
+    <ContenedorEventos filtros={filtros} page={page} cursosPorPagina={cursosPorPagina} modoAdmin={esAdmin} />
+{esAdmin && (
+  <div style="margin-top: 20px; text-align: right;">
+    <button id="btn-guardar-favoritos" class="btn-buscar" disabled onclick="guardarFavoritos()">Guardar Eventos Favoritos</button>
+  </div>
+)}
 
-    <!-- Sin resultados (por si quieres mostrarlo manualmente) -->
+
+   
     <div class="cursos-sin-resultados" style="display: none;">
       <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
         <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
@@ -72,7 +96,7 @@ const cursosPorPagina = 8;
   </section>
 </Layout>
 
-<!-- ✅ Estilos -->
+
 <style>
   .seccion-principal {
     padding: 20px 40px;
@@ -152,29 +176,31 @@ const cursosPorPagina = 8;
     display: flex;
     justify-content: flex-end;
     margin-bottom: 20px;
-    gap: 8px;
+    
   }
 
   .input-busqueda {
     padding: 8px 12px;
     width: 220px;
     border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: 10px 0px 0px 10px;
     font-size: 14px;
+    background-color: transparent;
   }
 
   .btn-buscar {
     padding: 8px 14px;
-    background-color: #a10000;
+    background-color: #d60404;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 0px 10px 10px 0px;
     cursor: pointer;
     font-size: 16px;
+    
   }
 
   .btn-buscar:hover {
-    background-color: #880000;
+    background-color: #8e0404;
   }
 
   .sin-resultados {
@@ -210,6 +236,18 @@ const cursosPorPagina = 8;
   font-size: 0.95rem;
   color: #444;
 }
+.btn-favorito {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.btn-favorito.activo {
+  color: rgb(229, 5, 16);
+}
+
 
 </style>
 

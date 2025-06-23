@@ -5,6 +5,8 @@ interface NavLink {
 }
 
 const links = [
+    { label: "Inicio", href:"/"},
+    { label: "Cursos", href:"/cursosCompleto"},
     { label: "Eventos", href: "/Admin/EventosCRUD" },
     { label: "Usuarios", href: "/Admin/UsuariosCRUD" },
     { label: "Organizadores", href: "/Admin/OrganizadoresCRUD" },
@@ -12,8 +14,11 @@ const links = [
     { label: "Categorías", href: "/Admin/CategoriasCRUD" },
     { label: "Carreras", href: "/Admin/CarrerasCRUD" },
     { label: "Asignaciones", href: "/Admin/Asignaciones" },
+    
+    
 ];
 ---
+  
 
 <nav class="border-b border-gray-300">
     <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">
@@ -34,18 +39,24 @@ const links = [
         </label>
 
         <div
-            class="hidden peer-checked:flex flex-col md:flex md:flex-row gap-4 md:gap-10 mt-4 md:mt-0"
+            class="hidden peer-checked:flex flex-col md:flex md:flex-row gap-4 md:items-center md:gap-x-12"
         >
             {
                 links.map((link) => (
                     <a
                         href={link.href}
-                        class="text-brown-900 font-semibold px-2 py-1 rounded hover:text-red-700 hover:bg-gray-100 transition-colors"
+                        class="relative text-red-800 text-sm font-semibold tracking-wide transition-colors duration-200 drop-shadow-sm before:content-[''] before:absolute before:left-0 before:-bottom-0.5 before:h-[2px] before:w-0 before:bg-red-800 before:transition-all before:duration-300 hover:before:w-full"
                     >
                         {link.label}
                     </a>
                 ))
             }
+             <a
+        href="/homeAdmin"
+        class="ml-auto bg-gradient-to-r from-red-800 to-red-600 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 animate-pulse"
+      >
+        Panel Admin
+      </a>
         </div>
     </div>
 </nav>
