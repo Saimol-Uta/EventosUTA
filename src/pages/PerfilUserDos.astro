@@ -16,7 +16,7 @@ type CampoFormulario = {
   titulo: string;
   valor: string;
   name: string;
-  tipo?: "select";
+  tipo?: "select" | "email"; 
   opciones?: { valor: string; texto: string }[];
 };
 
@@ -28,7 +28,7 @@ type ResultadoSetUser = {
   error?: string;
 };
 
-type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string; cor_cue?: string };
+type UsuarioParcial = Omit<Usuario, "id_usu"> & { id_usu?: string; cor_cue?: string; cor_rec?: string };
 
 let usuario: UsuarioParcial | null = null;
 let mensajeGuardado: string | null = null;
@@ -65,6 +65,7 @@ const nombresCampos: Record<string, string> = {
   fec_nac_usu: "Fecha de nacimiento",
   num_tel_usu: "Teléfono",
   id_car_per: "Carrera",
+  cor_rec: "Correo de recuperación",
 };
 
 
@@ -85,6 +86,11 @@ if (accion === "guardarInfo" && formData.has("nom_usu1")) {
     if (!formData.get(campo)) {
       errores.push(`El campo ${nombresCampos[campo] || campo} es obligatorio.`);
     }
+  }
+  
+  const correoRec = formData.get("cor_rec")?.toString() ?? "";
+  if (correoRec && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoRec)) {
+    errores.push("El correo de recuperación no tiene un formato válido.");
   }
 
   // Validación de cédula: exactamente 10 dígitos numéricos
@@ -178,6 +184,7 @@ const camposFormulario: CampoFormulario[] = [
   { titulo: "Segundo apellido", valor: usuario?.ape_usu2 ?? "", name: "ape_usu2" },
   { titulo: "Fecha de nacimiento", valor: formatDate(usuario?.fec_nac_usu ?? null), name: "fec_nac_usu" },
   { titulo: "Teléfono", valor: usuario?.num_tel_usu ?? "", name: "num_tel_usu" },
+  { titulo: "Correo de recuperación", valor: usuario?.cor_rec ?? "", name: "cor_rec", tipo: "email" },
 ];
 
 // Solo agregar carrera si el correo es institucional
@@ -186,6 +193,7 @@ if (correo.endsWith("@uta.edu.ec")) {
     titulo: "Carrera",
     valor: usuario?.id_car_per ?? "",
     name: "id_car_per",
+
     tipo: "select",
     opciones: listaCarreras.map((car: any) => ({
       valor: car.id_car,
@@ -193,7 +201,6 @@ if (correo.endsWith("@uta.edu.ec")) {
     })),
   });
 }
-
 
 const textoGuardarInfo = "Guardar Información";
 const textoCancelar = "Cancelar";
