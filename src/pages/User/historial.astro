@@ -44,9 +44,15 @@ if (usuarioId) {
   eventosParaTarjeta = inscripciones.map((inscripcion) => {
     const asistenciaNum = inscripcion.asi_par ?? 0;
     const calificacionNum = (inscripcion.not_par as Decimal)?.toNumber() ?? 0.0;
+    
+    // Verificamos si el evento ya finalizó
+    const fechaFinEvento = inscripcion.eventos.fec_fin_eve;
+    const fechaActual = new Date();
+    const eventoFinalizado = fechaFinEvento ? fechaFinEvento < fechaActual : false;
 
     // Lógica para determinar si el certificado está disponible
     const esCertificadoDisponible =
+      eventoFinalizado && // El evento debe haber finalizado
       asistenciaNum >= 70 &&
       calificacionNum >= 7.0 &&
       inscripcion.est_par === "APROBADA";
