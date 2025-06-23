@@ -1,0 +1,559 @@
+---
+import "../../styles/Inscripcion.css";
+import { actions } from "astro:actions";
+
+interface CampoProps {
+    usuario: any;
+    evento: any;
+    inscripcion?: any;
+    es_estudiante: boolean;
+    tipo_usuario: string;
+    informacion_academica?: {
+        carrera?: string;
+        facultad?: string;
+        codigo_carrera?: string;
+    } | null;
+}
+
+const {
+    usuario,
+    evento,
+    inscripcion,
+    es_estudiante,
+    tipo_usuario,
+    informacion_academica,
+} = Astro.props as CampoProps;
+
+const datosUsuarioCompletos =
+    usuario?.nom_usu1 && usuario?.ape_usu1 && usuario?.ced_usu;
+const esPagado = Number(evento?.precio ?? 0) > 0;
+const requiereCarta = Boolean(evento?.requiere_carta);
+
+// Inicialización
+let inscripcionResult = null;
+let inscripcionError = null;
+
+const idUsuarioBusqueda = usuario?.cor_cue || "";
+const idEventoBusqueda = evento?.id_eve || "";
+
+// Verificar si ya está inscrito
+let yaInscrito = false;
+let estadoInscripcion = null;
+if (idUsuarioBusqueda && idEventoBusqueda) {
+    const { data } = await Astro.callAction(actions.getDatosInscripcion, {
+        idUsuario: idUsuarioBusqueda,
+        idEvento: idEventoBusqueda,
+    });
+    yaInscrito = Boolean(data?.data?.inscripcion?.id_ins);
+    estadoInscripcion = data?.data?.inscripcion?.est_ins;
+}
+
+// Procesamiento del POST (solo para inscripción inicial)
+if (Astro.request.method === "POST") {
+    const formData = await Astro.request.formData();
+    const idUsuario = formData.get("idUsuario") ?? "";
+    const idEvento = formData.get("idEvento") ?? "";
+
+    // Obtener carta de motivación si es requerida
+    let cartaMotivacion: string | undefined = undefined;
+    if (requiereCarta) {
+        cartaMotivacion = formData.get("car_mot_eve")?.toString().trim();
+        if (!cartaMotivacion) {
+            inscripcionError = {
+                message:
+                    "Debes escribir la carta de motivación para inscribirte.",
+            };
+        }
+    }
+
+    try {
+        // Parámetros para la inscripción inicial (sin pago)
+        const params: {
+            idUsuario: string;
+            idEvento: string;
+            car_mot_eve?: string;
+        } = {
+            idUsuario:
+                typeof idUsuario === "string" ? idUsuario : String(idUsuario),
+            idEvento:
+                typeof idEvento === "string" ? idEvento : String(idEvento),
+        };
+
+        // Agregar carta de motivación si existe
+        if (requiereCarta && cartaMotivacion) {
+            params.car_mot_eve = cartaMotivacion;
+        }
+
+        // Si hay error por carta de motivación, no continuar
+        if (inscripcionError) throw inscripcionError;
+
+        console.log("PARAMS ENVIADOS A setDatosInscripcion:", params);
+
+        const { data, error } = await Astro.callAction(
+            actions.setDatosInscripcion,
+            params,
+        );
+        inscripcionResult = data;
+        inscripcionError = error;
+
+        console.log("RESULTADO DE setDatosInscripcion:", { data, error });
+    } catch (err) {
+        inscripcionError = {
+            message:
+                err && typeof err === "object" && "message" in err
+                    ? err.message
+                    : "Error inesperado al inscribir.",
+        };
+    }
+}
+
+// Determinar el mensaje de estado basado en la inscripción
+function getEstadoMensaje(estado: string | null) {
+    switch (estado) {
+        case "DPendiente":
+            return {
+                mensaje:
+                    "Tu inscripción está pendiente de revisión por parte del administrador.",
+                color: "#d97706",
+                border: "#f59e0b",
+            };
+        case "Aprobado":
+            return {
+                mensaje:
+                    "Tu inscripción ha sido aprobada. Ahora puedes proceder con el pago.",
+                color: "#2c5f2d",
+                border: "#22c55e",
+            };
+        case "Rechazado":
+            return {
+                mensaje:
+                    "Tu inscripción ha sido rechazada. Contacta al administrador para más información.",
+                color: "#b01025",
+                border: "#b01025",
+            };
+        case "FPendiente":
+            return {
+                mensaje:
+                    "Tu inscripción está completa y el pago ha sido procesado.",
+                color: "#2c5f2d",
+                border: "#22c55e",
+            };
+        default:
+            return null;
+    }
+}
+
+const estadoInfo = yaInscrito
+    ? getEstadoMensaje(estadoInscripcion ?? null)
+    : null;
+---
+
+{/* MENSAJE DE ESTADO DE INSCRIPCIÓN */}
+{
+    (inscripcionResult || inscripcionError || estadoInfo) && (
+        <div
+            style="
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 120px;
+                margin-bottom: 2rem;
+            "
+        >
+            {" "}
+            <div
+                style={`padding: 1.5rem 2.5rem;
+                    border-radius: 12px;
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    text-align: center;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+                    background: #fafafa;
+                    color: ${
+                        inscripcionError ||
+                        (inscripcionResult &&
+                            inscripcionResult.success === false)
+                            ? "#b01025"
+                            : inscripcionResult &&
+                                inscripcionResult.success === true
+                              ? "#2c5f2d"
+                              : estadoInfo?.color || "#d97706"
+                    };
+                    border: 2px solid ${
+                        inscripcionError ||
+                        (inscripcionResult &&
+                            inscripcionResult.success === false)
+                            ? "#b01025"
+                            : inscripcionResult &&
+                                inscripcionResult.success === true
+                              ? "#22c55e"
+                              : estadoInfo?.border || "#f59e0b"
+                    };
+                    max-width: 600px;
+                    margin: 0 auto;`}
+            >
+                {inscripcionError
+                    ? `Error al inscribirse: ${inscripcionError.message}`
+                    : inscripcionResult && inscripcionResult.success === false
+                      ? `Error: ${inscripcionResult.message || "No se pudo completar la inscripción"}`
+                      : inscripcionResult && inscripcionResult.success === true
+                        ? "¡Inscripción enviada correctamente! Espera la validación del administrador."
+                        : estadoInfo?.mensaje || ""}
+            </div>{" "}
+            {/* Botón para ir al área de pago si está aprobado */}
+            {estadoInfo && estadoInscripcion === "Aprobado" && esPagado && (
+                <a
+                    href={`/Eventos/Pago/${evento?.id_eve}`}
+                    style="margin-top: 1rem; display: inline-block; background: #b01025; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3); transition: all 0.2s ease;"
+                    onmouseover="this.style.background='#880f1f'; this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.background='#b01025'; this.style.transform='translateY(0)'"
+                >
+                    Proceder con el pago
+                </a>
+            )}
+            {/* Botón para volver al inicio */}
+            {(inscripcionResult && inscripcionResult.success === true) ||
+            yaInscrito ? (
+                <a
+                    href="/homeUser"
+                    style="margin-top: 1rem; display: inline-block; background: #6b7280; color: #fff; padding: 0.8rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: bold; text-decoration: none; box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3); transition: all 0.2s ease;"
+                    onmouseover="this.style.background='#4b5563'; this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.background='#6b7280'; this.style.transform='translateY(0)'"
+                >
+                    Volver al inicio
+                </a>
+            ) : null}
+        </div>
+    )
+}
+
+{/* FORMULARIO DE INSCRIPCIÓN - Solo se muestra si NO está inscrito */}
+{
+    !yaInscrito && !inscripcionResult && (
+        <form
+            id="form-inscripcion"
+            class="container"
+            style="max-width: 1200px; margin: 0 auto; font-size: 1.05rem;"
+            method="POST"
+            onsubmit="return validarFormulario();"
+        >
+            <input
+                type="hidden"
+                name="idUsuario"
+                value={usuario?.cor_cue ?? ""}
+            />
+            <input type="hidden" name="idEvento" value={evento?.id_eve || ""} />
+
+            <div class="form-card" style="padding: 2rem;">
+                {" "}
+                <h2 style="font-size: 1.8rem; color: #b01025; margin-bottom: 1rem;">
+                    Formulario de Inscripción
+                </h2>
+                <p style="color: #666; margin-bottom: 2rem;">
+                    {new Date().toLocaleDateString("es-EC")}
+                </p>
+                {/* INFORMACIÓN DEL TIPO DE USUARIO */}
+                <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #b01025;">
+                    <h3 style="font-size: 1.2rem; color: #b01025; margin-bottom: 1rem;">
+                        Tipo de Usuario:{" "}
+                        <strong>
+                            {es_estudiante
+                                ? "Estudiante Universitario"
+                                : "Público General"}
+                        </strong>
+                    </h3>
+
+                    {es_estudiante && informacion_academica && (
+                        <div style="margin-top: 1rem;">
+                            <p style="margin: 0.5rem 0; color: #333;">
+                                <strong>Facultad:</strong>{" "}
+                                {informacion_academica.facultad ||
+                                    "No definida"}
+                            </p>
+                            <p style="margin: 0.5rem 0; color: #333;">
+                                <strong>Carrera:</strong>{" "}
+                                {informacion_academica.carrera || "No definida"}
+                            </p>
+                            {informacion_academica.codigo_carrera && (
+                                <p style="margin: 0.5rem 0; color: #333;">
+                                    <strong>Código:</strong>{" "}
+                                    {informacion_academica.codigo_carrera}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+                {/* DATOS DEL USUARIO */}
+                <h3 style="font-size: 1.3rem; color: #b01025; margin-bottom: 1rem;">
+                    Datos Personales
+                </h3>{" "}
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
+                        Correo electrónico
+                    </label>
+                    <input
+                        type="email"
+                        value={usuario?.cor_cue || ""}
+                        readonly
+                        style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
+                    />
+                </div>
+                <div
+                    class="form-row"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;"
+                >
+                    {" "}
+                    <div class="form-group">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
+                            Cédula
+                        </label>
+                        <input
+                            type="text"
+                            value={usuario?.ced_usu || ""}
+                            readonly
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
+                            Teléfono
+                        </label>
+                        <input
+                            type="tel"
+                            value={usuario?.num_tel_usu || ""}
+                            readonly
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
+                        />
+                    </div>
+                </div>
+                <div
+                    class="form-row"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;"
+                >
+                    {" "}
+                    <div class="form-group">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
+                            Nombres
+                        </label>
+                        <input
+                            type="text"
+                            value={`${usuario?.nom_usu1 || ""} ${usuario?.nom_usu2 || ""}`.trim()}
+                            readonly
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
+                            Apellidos
+                        </label>
+                        <input
+                            type="text"
+                            value={`${usuario?.ape_usu1 || ""} ${usuario?.ape_usu2 || ""}`.trim()}
+                            readonly
+                            style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; background: #f5f5f5; color: #666;"
+                        />
+                    </div>
+                </div>{" "}
+                {/* CARTA DE MOTIVACIÓN si es requerida */}
+                {requiereCarta && (
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="font-size: 1.3rem; color: #b01025; margin-bottom: 1rem;">
+                            Carta de Motivación
+                        </h3>
+                        <div class="form-group">
+                            <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #333;">
+                                Explica por qué quieres participar en este
+                                evento *
+                            </label>
+                            <textarea
+                                id="car_mot_eve"
+                                name="car_mot_eve"
+                                rows="6"
+                                required
+                                placeholder="Escribe tu carta de motivación aquí..."
+                                style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 6px; resize: vertical; font-family: inherit; focus:border-color: #b01025;"
+                            />
+                        </div>
+                    </div>
+                )}{" "}
+                {/* NOTA SOBRE EL PAGO */}
+                {esPagado && (
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <h4 style="color: #856404; margin-bottom: 0.8rem; font-size: 1.1rem;">
+                            📋 Información sobre el pago
+                        </h4>
+                        <p style="color: #856404; margin: 0; line-height: 1.5;">
+                            <strong>
+                                Este evento tiene un costo de $
+                                {evento?.precio || "0.00"}.
+                            </strong>
+                            <br />
+                            El proceso de pago estará disponible una vez que tu
+                            inscripción sea validada y aprobada por el
+                            administrador.
+                        </p>
+                    </div>
+                )}
+                {/* BOTÓN DE ENVÍO */}
+                <div
+                    class="form-row"
+                    style="margin-top: 2rem; text-align: center;"
+                >
+                    <button
+                        type="submit"
+                        style="background: #b01025; color: white; padding: 1rem 3rem; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(176, 16, 37, 0.3); transition: all 0.2s ease;"
+                        onmouseover="this.style.background='#880f1f'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='#b01025'; this.style.transform='translateY(0)'"
+                    >
+                        Enviar Inscripción
+                    </button>
+                </div>
+                {/* Mensaje de error visual para validación */}
+                <div
+                    id="mensaje-error-validacion"
+                    style="display:none; margin-top:1rem; text-align:center;"
+                />
+            </div>
+
+            {/* INFORMACIÓN DEL EVENTO */}
+            <div
+                class="vehicle-card"
+                style="margin-top: 2rem; padding: 2rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+            >
+                {" "}
+                <h3 style="color: #b01025; font-size: 1.5rem; margin-bottom: 1rem;">
+                    {evento?.nom_eve ?? "Evento no disponible"}
+                </h3>
+                {evento?.img_eve && (
+                    <img
+                        src={evento.img_eve}
+                        alt={evento.nom_eve}
+                        style="width: 100%; max-width: 400px; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;"
+                    />
+                )}{" "}
+                <div style="line-height: 1.6; color: #333;">
+                    <p style="margin-bottom: 0.8rem;">
+                        <strong>Descripción:</strong>{" "}
+                        {evento?.des_eve || "Sin descripción"}
+                    </p>
+                    <p style="margin-bottom: 0.8rem;">
+                        <strong>Fecha de inicio:</strong>{" "}
+                        {evento?.fec_ini_eve
+                            ? new Date(evento.fec_ini_eve).toLocaleDateString(
+                                  "es-EC",
+                              )
+                            : "No definida"}
+                    </p>
+                    <p style="margin-bottom: 0.8rem;">
+                        <strong>Ubicación:</strong>{" "}
+                        {evento?.ubi_eve || "No definida"}
+                    </p>
+                    <p style="margin-bottom: 0.8rem;">
+                        <strong>Duración:</strong>{" "}
+                        {evento?.dur_eve
+                            ? `${evento.dur_eve} horas`
+                            : "No definida"}
+                    </p>
+                    <p style="margin-bottom: 0.8rem;">
+                        <strong>Precio:</strong>
+                        <span
+                            style={`color: ${esPagado ? "#b01025" : "#2c5f2d"}; font-weight: bold;`}
+                        >
+                            {esPagado
+                                ? `$${evento?.precio || "0.00"}`
+                                : "Gratuito"}
+                        </span>
+                    </p>
+                    <p style="margin-bottom: 0.8rem;">
+                        <strong>Organizador:</strong>{" "}
+                        {evento?.organizadores?.nom_org1 || ""}{" "}
+                        {evento?.organizadores?.ape_org1 || ""}
+                    </p>
+                </div>
+            </div>
+        </form>
+    )
+}
+
+<script is:inline>
+    function mostrarErrorValidacion(msg) {
+        const div = document.getElementById("mensaje-error-validacion");
+        if (div) {
+            div.style.display = "block";
+            div.innerHTML = `
+                <span style="
+                    display:inline-block;
+                    background:#fff0f0;
+                    color:#c0392b;
+                    border:1.5px solid #e74c3c;
+                    border-radius:8px;
+                    padding:0.8rem 1.2rem;
+                    font-weight:bold;
+                    font-size:1.1rem;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+                ">${msg}</span>
+            `;
+        }
+    }
+
+    function ocultarErrorValidacion() {
+        const div = document.getElementById("mensaje-error-validacion");
+        if (div) {
+            div.style.display = "none";
+            div.innerHTML = "";
+        }
+    }
+
+    function validarFormulario() {
+        const datosUsuarioCompletos =
+            document.querySelector('input[name="idUsuario"]').value.trim() !==
+            "";
+        const requiereCarta = document.getElementById("car_mot_eve") !== null;
+
+        ocultarErrorValidacion();
+
+        if (!datosUsuarioCompletos) {
+            mostrarErrorValidacion(
+                "Datos de usuario incompletos. Por favor contacta al administrador.",
+            );
+            return false;
+        }
+
+        if (requiereCarta) {
+            const carta = document.getElementById("car_mot_eve");
+            if (!carta || !carta.value.trim()) {
+                mostrarErrorValidacion(
+                    "Debes escribir la carta de motivación para inscribirte.",
+                );
+                return false;
+            }
+        }
+
+        ocultarErrorValidacion();
+        return true;
+    }
+
+    // Ocultar error si el usuario corrige la acción
+    document.addEventListener("DOMContentLoaded", () => {
+        const carta = document.getElementById("car_mot_eve");
+        if (carta) {
+            carta.addEventListener("input", () => {
+                ocultarErrorValidacion();
+            });
+        }
+    });
+</script>
+
+<!-- Inputs ocultos para el script -->
+<input
+    type="hidden"
+    id="datos-usuario-completos"
+    value={JSON.stringify(!!datosUsuarioCompletos)}
+/>
+<input type="hidden" id="es-pagado" value={JSON.stringify(!!esPagado)} />
+<input
+    type="hidden"
+    id="requiere-carta"
+    value={JSON.stringify(!!requiereCarta)}
+/>

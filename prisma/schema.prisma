@@ -60,6 +60,10 @@ model eventos {
   requiere_carta     Boolean?           @default(false)
   es_destacado       Boolean?           @default(false)
   id_asi_eve         String?            @db.Uuid
+<<<<<<< HEAD
+=======
+  estado_evento      String?            @default("ACTIVO") @db.VarChar(15)
+>>>>>>> ac2f0fd6a7d7f0b63f96fbae90c21c9bab03d1a1
   organizadores      organizadores      @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
   asignaciones       asignaciones?      @relation(fields: [id_asi_eve], references: [id_asi], onDelete: NoAction, onUpdate: NoAction)
   categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
@@ -113,6 +117,10 @@ model usuarios {
   enl_ced_cue   String?
   enl_mat_cue   String?
   img_user      String?
+  cor_rec       String?         @db.VarChar(150)
+  cod_ver       String?
+  fec_exp_cod   DateTime?       @db.Timestamptz(6)
+  verificado    Boolean         @default(false)
   cambios       cambios[]
   inscripciones inscripciones[]
   carreras      carreras?       @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)

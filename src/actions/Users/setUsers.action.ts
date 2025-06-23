@@ -1,6 +1,7 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import prisma from '../../db';
+import { getSession } from 'auth-astro/server';
 
 export const setUser = defineAction({
     accept: 'form',
@@ -14,10 +15,15 @@ export const setUser = defineAction({
         fec_nac_usu: z.string().nullable().optional(),
         num_tel_usu: z.string().optional().nullable(),
         id_car_per: z.string().optional().nullable(),
+        // NO incluyas cont_cuenta aquí
     }),
-    handler: async (input) => {
+    handler: async (input, { request }) => {
         try {
-            console.log("Datos recibidos en setUser:", input);
+            const session = await getSession(request);
+            const correoSesion = session?.user?.email;
+            if (!correoSesion) {
+                throw new Error("No se pudo obtener el correo de la sesión.");
+            }
 
             let fechaValida: Date;
             if (input.fec_nac_usu) {
@@ -27,11 +33,27 @@ export const setUser = defineAction({
                 fechaValida = new Date("1900-01-01");
             }
 
-            const existingUser = await prisma.usuarios.findUnique({
-                where: { ced_usu: input.ced_usu },
-            });
+            // Buscar usuario por cédula o correo
+            let existingUser = null;
+            if (input.ced_usu) {
+                existingUser = await prisma.usuarios.findUnique({
+                    where: { ced_usu: input.ced_usu },
+                });
+            }
+            if (!existingUser && correoSesion) {
+                existingUser = await prisma.usuarios.findUnique({
+                    where: { cor_cue: correoSesion },
+                });
+            }
+
+            let rol_cue = "USUARIO";
+            if (correoSesion.endsWith("@uta.edu.ec")) {
+                rol_cue = "ESTUDIANTE";
+            }
 
             const dataToSave = {
+                // cor_cue: correoSesion, // No lo actualices, solo úsalo para buscar
+                ced_usu: input.ced_usu,
                 nom_usu1: input.nom_usu1,
                 nom_usu2: input.nom_usu2 ?? null,
                 ape_usu1: input.ape_usu1,
@@ -39,57 +61,27 @@ export const setUser = defineAction({
                 fec_nac_usu: fechaValida,
                 num_tel_usu: input.num_tel_usu ?? null,
                 id_car_per: input.id_car_per ?? null,
-                ced_usu: input.ced_usu,
+                rol_cue,
             };
 
+            let usuarioFinal;
             if (existingUser) {
-                // Actualizar el usuario existente
-                const updatedUser = await prisma.usuarios.update({
-                    where: { ced_usu: input.ced_usu },
-                    data: dataToSave,
+                usuarioFinal = await prisma.usuarios.update({
+                    where: existingUser.cor_cue
+                        ? { cor_cue: existingUser.cor_cue }
+                        : { ced_usu: existingUser.ced_usu },
+                    data: dataToSave, // sin cor_cue ni cont_cuenta
                 });
-
-                // Si se proporciona id_usu (ID de la cuenta), actualizar esa cuenta específica
-                if (input.id_usu) {
-                    await prisma.cuentas.update({
-                        where: { id_cue: input.id_usu },
-                        data: { id_usu_per: updatedUser.id_usu }
-                    });
-                    console.log("Cuenta actualizada con ID del usuario:", updatedUser.id_usu);
-                }
-
-                const requireReauth = true;
-
-                const response = {
-                    success: true,
-                    created: false,
-                    requireReauth
-                };
-                console.log("Retornando desde setUser (usuario existente):", response);
-                return response;
             } else {
-                // Crear nuevo usuario
-                const newUser = await prisma.usuarios.create({
-                    data: dataToSave,
-                });
-
-                // Si se proporciona id_usu (ID de la cuenta), actualizar esa cuenta con el nuevo usuario
-                if (input.id_usu) {
-                    await prisma.cuentas.update({
-                        where: { id_cue: input.id_usu },
-                        data: { id_usu_per: newUser.id_usu }
-                    });
-                    console.log("Cuenta actualizada con nuevo usuario ID:", newUser.id_usu);
-                }
-
-                const response = {
-                    success: true,
-                    created: true,
-                    requireReauth: true
-                };
-                console.log("Retornando desde setUser (usuario nuevo):", response);
-                return response;
+                // Solo al crear usuario, debes pedir la contraseña y el correo
+                throw new Error("El usuario no existe. No se puede actualizar.");
             }
+
+            return {
+                success: true,
+                created: false,
+                requireReauth: true
+            };
         } catch (error) {
             console.error("Error en setUser:", error);
             return {

@@ -1,0 +1,191 @@
+---
+import "../styles/global.css";
+const { imagen, titulo, resumen, minutos, slug, precio, fechaIni } = Astro.props;
+
+const formatearDuracion = (minutos: number) => {
+  if (minutos < 60) {
+    return `${minutos} minutos`;
+  } else if (minutos < 1440) {
+    const horas = Math.floor(minutos / 60);
+    const minutosRestantes = minutos % 60;
+    return minutosRestantes > 0
+      ? `${horas}h ${minutosRestantes}m`
+      : `${horas} horas`;
+  } else {
+    const dias = Math.floor(minutos / 1440);
+    const horasRestantes = Math.floor((minutos % 1440) / 60);
+    return horasRestantes > 0
+      ? `${dias} días ${horasRestantes}h`
+      : `${dias} días`;
+  }
+};
+
+const formatearFecha = (fecha?: string | Date | null): string => {
+  if (!fecha) return "Fecha no disponible";
+
+  const date = typeof fecha === "string" ? new Date(fecha) : fecha;
+
+  if (!(date instanceof Date) || isNaN(date.getTime())) return "Fecha inválida";
+
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+
+---
+
+<a class="card-evento" href={`/Eventos/${slug}`}>
+  <img
+    class="card-img"
+    src={imagen || "/img/logo-fisei.png"}
+    alt="Imagen del evento"
+  />
+
+  <div class="info-overlay">
+    <h3 class="titulo">{titulo}</h3>
+    <p class="resumen">{resumen}</p>
+
+    <div class="etiquetas-footer">
+      <div class="contenedor-etiquetas">
+        <div class="etiqueta horas">{formatearDuracion(minutos)}</div>
+
+        {
+          precio == 0 ? (
+            <div class="etiqueta gratis">Gratis</div>
+          ) : (
+            <div class="etiqueta precio">${precio.toFixed(2)}</div>
+          )
+        }
+      </div>
+      <div class="fecha-ini">
+        Inicia el {formatearFecha(fechaIni)}
+      </div>
+    </div>
+  </div>
+</a>
+
+<style>
+  .card-evento {
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    box-shadow: 0 0px 10px rgba(0, 0, 0, 0.25);
+    text-decoration: none;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-evento:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0px 15px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Imagen arriba */
+  .card-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  /* Contenido estilo vidrio */
+  .info-overlay {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 160px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .titulo {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: rgb(108, 19, 19);
+    margin: 0;
+  }
+
+  .resumen {
+    font-size: 1rem;
+    color: #444;
+    margin: 0;
+    line-height: 1.5;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    display: -webkit-box;
+  }
+
+  .etiquetas-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .contenedor-etiquetas {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .etiqueta {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+  }
+
+  .etiqueta.horas {
+    color: rgb(213, 153, 33);
+    background-color: rgba(205, 152, 46, 0.106);
+  }
+
+  .etiqueta.gratis {
+    color: #1c8f39;
+    background-color: rgba(28, 143, 57, 0.1);
+  }
+
+  .etiqueta.precio {
+    color: #b30000;
+    background-color: rgba(179, 0, 0, 0.1);
+  }
+
+  @media (max-width: 640px) {
+    .card-evento {
+      margin: 16px;
+    }
+
+    .card-img {
+      height: 160px;
+    }
+
+    .info-overlay {
+      padding: 16px;
+    }
+
+    .titulo {
+      font-size: 1.1rem;
+    }
+
+    .resumen {
+      -webkit-line-clamp: 2;
+    }
+  }
+
+  .fecha-ini {
+    font-size: 14px;
+  }
+</style>

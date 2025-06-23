@@ -14,6 +14,7 @@ export const getByIdInscripcion = defineAction({
                     id_eve_ins: id
                 },
                 select: {
+                    // TODOS los campos de inscripciones
                     id_ins: true,
                     id_usu_ins: true,
                     id_eve_ins: true,
@@ -23,29 +24,33 @@ export const getByIdInscripcion = defineAction({
                     not_par: true,
                     asi_par: true,
                     met_pag_ins: true,
-                    enl_ord_pag_ins: true, // Campo de enlace del comprobante de pago
+                    enl_ord_pag_ins: true,
+                    car_mot_inscrip: true, // Campo que faltaba
                     usuarios: {
                         select: {
-                            id_usu: true,
+                            cor_cue: true,
+                            ced_usu: true,
                             nom_usu1: true,
                             nom_usu2: true,
                             ape_usu1: true,
                             ape_usu2: true,
-                            ced_usu: true,
                             fec_nac_usu: true,
                             num_tel_usu: true,
-                            cuentas: {
-                                select: {
-                                    cor_cue: true,
-                                    enl_ced_cue: true, // Enlace cédula
-                                    enl_mat_cue: true, // Enlace certificado matrícula
-                                    enl_ext_cue: true  // Enlace documento externo/carta motivación
-                                }
-                            },
+                            rol_cue: true,
+                            enl_ced_cue: true,
+                            enl_mat_cue: true,
                             carreras: {
                                 select: {
+                                    id_car: true,
                                     nom_car: true,
-                                    cod_car: true
+                                    cod_car: true,
+                                    des_car: true,
+                                    facultades: {
+                                        select: {
+                                            nom_fac: true,
+                                            des_fac: true,
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -55,7 +60,61 @@ export const getByIdInscripcion = defineAction({
                             id_eve: true,
                             nom_eve: true,
                             fec_ini_eve: true,
-                            fec_fin_eve: true
+                            fec_fin_eve: true,
+                            des_eve: true,
+                            img_eve: true,
+                            precio: true, // Campo que faltaba
+                            es_gratuito: true, // Campo que faltaba
+                            requiere_carta: true, // Campo que faltaba
+                            car_mot_eve: true,
+                            estado_evento: true,
+                            categorias_eventos: {
+                                select: {
+                                    id_cat: true,
+                                    nom_cat: true,
+                                    des_cat: true,
+                                    pun_apr_cat: true,
+                                    asi_cat: true,
+                                    requiere_puntaje: true,
+                                    requiere_asistencia: true,
+                                    brinda_certificado: true
+                                }
+                            },
+                            organizadores: {
+                                select: {
+                                    nom_org1: true,
+                                    nom_org2: true,
+                                    ape_org1: true,
+                                    ape_org2: true,
+                                    tit_aca_org: true,
+                                }
+                            },
+                            asignaciones: {
+                                select: {
+                                    id_asi: true,
+                                    nom_asi: true,
+                                    des_asi: true,
+                                    tip_asi: true,
+                                    detalle_asignaciones: {
+                                        select: {
+                                            carreras: {
+                                                select: {
+                                                    id_car: true,
+                                                    nom_car: true,
+                                                    cod_car: true,
+                                                    des_car: true,
+                                                    facultades: {
+                                                        select: {
+                                                            nom_fac: true,
+                                                            des_fac: true
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -64,12 +123,26 @@ export const getByIdInscripcion = defineAction({
                 }
             });
 
-            // Convertir a objetos planos
-            const inscripcionesPlanas = JSON.parse(JSON.stringify(inscripciones));
+            // Serializar fechas y decimales para evitar problemas de serialización
+            const inscripcionesSerializadas = inscripciones.map(inscripcion => ({
+                ...inscripcion,
+                fec_ins: inscripcion.fec_ins?.toISOString(),
+                not_par: inscripcion.not_par ? Number(inscripcion.not_par) : null,
+                eventos: {
+                    ...inscripcion.eventos,
+                    fec_ini_eve: inscripcion.eventos.fec_ini_eve?.toISOString(),
+                    fec_fin_eve: inscripcion.eventos.fec_fin_eve?.toISOString(),
+                    precio: inscripcion.eventos.precio ? Number(inscripcion.eventos.precio) : null, // Serializar precio
+                },
+                usuarios: {
+                    ...inscripcion.usuarios,
+                    fec_nac_usu: inscripcion.usuarios.fec_nac_usu?.toISOString(),
+                }
+            }));
 
             return {
                 success: true,
-                inscripciones: inscripcionesPlanas,
+                inscripciones: inscripcionesSerializadas,
                 total: inscripciones.length
             };
 

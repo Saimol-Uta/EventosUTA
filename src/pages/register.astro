@@ -1,111 +1,220 @@
 ---
+
 ---
+
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <title>Registro - Talleres Tecnológicos</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        background-color: #fff;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #fdf2f2, #ead8d8);
+        height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        margin: 0;
       }
 
-      .login-container {
-        border: 1px solid #ccc;
-        padding: 30px 40px;
-        text-align: center;
-        max-width: 350px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      .login-wrapper {
+        display: flex;
+        width: 900px;
+        height: auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
       }
 
-      .login-container img {
-        width: 100%;
-        max-width: 280px;
-        margin-bottom: 20px;
-      }
-
-      .login-container input {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-
-      .login-container button {
-        background-color: #a00;
+      .login-left {
+        background: linear-gradient(135deg, #6b1111, #b11d1d);
         color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
+        width: 45%;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        text-align: center;
       }
 
-      .login-container button:hover {
-        background-color: #800000;
+      .login-left .logo {
+        max-width: 120px;
+        margin: 0 auto 30px;
       }
 
-      .login-container a {
-        display: block;
-        margin-top: 10px;
+      .login-left h1 {
+        font-size: 32px;
+        margin-bottom: 12px;
+      }
+
+      .login-left p {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .login-left .volver {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: #fdd;
         font-size: 14px;
         text-decoration: none;
-        color: #800000;
       }
 
-      .login-container a:hover {
+      .login-left .volver:hover {
         text-decoration: underline;
       }
 
-      .volver {
-        position: absolute;
-        top: 10px;
-        right: 20px;
+      .login-right {
+        width: 55%;
+        padding: 50px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .login-right form {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .login-right input {
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+
+      .login-right button {
+        background: #932020;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .login-right button:hover {
+        background: #cd1a1a;
+      }
+
+      .login-right a {
         font-size: 14px;
-        color: #800000;
+        text-decoration: none;
+        color: #a31616;
       }
 
-      .volver:hover {
+      .login-right a:hover {
         text-decoration: underline;
+      }
+
+      .login-wrapper {
+        opacity: 0;
+        transform: translateY(30px);
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
+      }
+
+      .login-wrapper.appear {
+        opacity: 1;
+        transform: translateY(0);
       }
     </style>
   </head>
   <body>
-    <a class="volver" href="/">Regresar</a>
+    <div class="login-wrapper">
+      <div class="login-left">
+        <img src="/FISEX.png" alt="Logo Facultad de Ingeniería" class="logo" />
+        <h1>Regístrate</h1>
+        <p>Crea una cuenta para participar en nuestros eventos.</p>
+        <a href="/" class="volver">← Regresar</a>
+      </div>
 
-    <div class="login-container">
-      <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
-      <form id="registroForm">
-        <input type="text" name="nombre" placeholder="Nombre" required />
-        <input type="text" name="apellido" placeholder="Apellido" required />
-        <input type="email" name="correo" placeholder="Correo" required />
-        <input type="password" name="contrasena" placeholder="Contraseña" required />
-        <input type="date" id="fechNac" name="fechNac" required />
-        <p id="edadResultado"></p>
-        <button type="submit">Registrarse</button>
-        <p>¿Ya tiene una cuenta?</p>
-        <a href="/login">Inicia sesión aquí</a>
-      </form>
+      <div class="login-right">
+        <form id="registroForm">
+          <input
+            type="text"
+            name="cedula"
+            placeholder="Cédula"
+            required
+            maxlength="10"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+            title="Ingrese su número de cédula de 10 dígitos"
+          />
+          <input type="text" name="nombre" placeholder="Nombre" required />
+          <input type="text" name="apellido" placeholder="Apellido" required />
+          <input type="email" name="correo" placeholder="Correo" required />
+          <input
+            type="password"
+            name="contrasena"
+            placeholder="Contraseña"
+            required
+          />
+          <input type="date" id="fechNac" name="fechNac" required />
+          <p id="edadResultado"></p>
+          <button type="submit">Registrarse</button>
+          <p>¿Ya tiene una cuenta? <a href="/login">Inicia sesión aquí</a></p>
+        </form>
+      </div>
     </div>
+
     <script>
-      import { actions } from 'astro:actions';
-      import Swal from 'sweetalert2';
-      import 'sweetalert2/dist/sweetalert2.min.css';
+      import { actions } from "astro:actions";
+      import Swal from "sweetalert2";
+      import "sweetalert2/dist/sweetalert2.min.css";
+
+      function validarCedula(cedula: string): boolean {
+        if (!/^\d{10}$/.test(cedula)) return false;
+        const provincia = parseInt(cedula.substring(0, 2), 10);
+        if (provincia < 1 || provincia > 24) return false;
+
+        const digitos = cedula.split("").map(Number);
+        const digitoVerificador = digitos[9];
+        let suma = 0;
+
+        for (let i = 0; i < 9; i++) {
+          let val = digitos[i];
+          if (i % 2 === 0) {
+            // Coeficiente 2 para posiciones pares
+            val *= 2;
+            if (val > 9) {
+              val -= 9;
+            }
+          }
+          suma += val;
+        }
+
+        const decenaSuperior = Math.ceil(suma / 10) * 10;
+        const digitoCalculado = decenaSuperior - suma;
+
+        if (digitoCalculado === 10) {
+          return digitoVerificador === 0;
+        }
+
+        return digitoVerificador === digitoCalculado;
+      }
 
       document.addEventListener("DOMContentLoaded", () => {
-        const fechaInput = document.getElementById("fechNac") as HTMLInputElement;
+        const fechaInput = document.getElementById(
+          "fechNac",
+        ) as HTMLInputElement;
         const form = document.getElementById("registroForm") as HTMLFormElement;
-        const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        const submitButton = form.querySelector(
+          'button[type="submit"]',
+        ) as HTMLButtonElement | null;
 
         if (!fechaInput || !form || !submitButton) {
-            console.error("No se encontraron elementos esenciales del formulario.");
-            return;
+          console.error(
+            "No se encontraron elementos esenciales del formulario.",
+          );
+          return;
         }
 
         const hoy = new Date();
@@ -119,42 +228,63 @@
         fechaInput.setAttribute("max", fechaMax);
         fechaInput.setAttribute("min", fechaMin);
 
-        form.addEventListener('submit', async (event) => {
+        form.addEventListener("submit", async (event) => {
           event.preventDefault();
           submitButton.disabled = true;
 
           const formData = new FormData(form);
-          const nombre = formData.get('nombre') as string;
-          const apellido = formData.get('apellido') as string;
-          const correo = formData.get('correo') as string;
-          const contrasena = formData.get('contrasena') as string;
-          const fechNac = formData.get('fechNac') as string;
+          const nombre = formData.get("nombre") as string;
+          const apellido = formData.get("apellido") as string;
+          const cedula = formData.get("cedula") as string;
+          const correo = formData.get("correo") as string;
+          const contrasena = formData.get("contrasena") as string;
+          const fechNac = formData.get("fechNac") as string;
 
-          if (!nombre || !apellido || !correo || !contrasena || !fechNac) {
+          if (
+            !nombre ||
+            !apellido ||
+            !cedula ||
+            !correo ||
+            !contrasena ||
+            !fechNac
+          ) {
             Swal.fire({
-              icon: 'error',
-              title: 'Campos incompletos',
-              text: 'Por favor, rellena todos los campos obligatorios.',
-              confirmButtonColor: '#a00',
-              heightAuto: false // <-- AÑADIDO
+              icon: "error",
+              title: "Campos incompletos",
+              text: "Por favor, rellena todos los campos obligatorios.",
+              confirmButtonColor: "#a00",
+              heightAuto: false, // <-- AÑADIDO
             }).then(() => {
-                submitButton.disabled = false; 
+              submitButton.disabled = false;
+            });
+            return;
+          }
+
+          if (!validarCedula(cedula)) {
+            Swal.fire({
+              icon: "error",
+              title: "Cédula Inválida",
+              text: "Por favor, ingresa un número de cédula ecuatoriana válido.",
+              confirmButtonColor: "#a00",
+              heightAuto: false,
+            }).then(() => {
+              submitButton.disabled = false;
             });
             return;
           }
 
           const nacimiento = new Date(fechNac);
           if (isNaN(nacimiento.getTime())) {
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Fecha inválida',
-                  text: 'Por favor, ingresa una fecha de nacimiento válida.',
-                  confirmButtonColor: '#a00',
-                  heightAuto: false // <-- AÑADIDO
-              }).then(() => {
-                submitButton.disabled = false; 
+            Swal.fire({
+              icon: "error",
+              title: "Fecha inválida",
+              text: "Por favor, ingresa una fecha de nacimiento válida.",
+              confirmButtonColor: "#a00",
+              heightAuto: false, // <-- AÑADIDO
+            }).then(() => {
+              submitButton.disabled = false;
             });
-              return;
+            return;
           }
 
           let edad = hoy.getFullYear() - nacimiento.getFullYear();
@@ -165,139 +295,188 @@
 
           if (edad < 18) {
             Swal.fire({
-              icon: 'error',
-              title: 'Menor de edad',
-              text: 'Debes tener al menos 18 años para registrarte.',
-              confirmButtonColor: '#a00',
-              heightAuto: false // <-- AÑADIDO
+              icon: "error",
+              title: "Menor de edad",
+              text: "Debes tener al menos 18 años para registrarte.",
+              confirmButtonColor: "#a00",
+              heightAuto: false, // <-- AÑADIDO
             }).then(() => {
-                submitButton.disabled = false; 
+              submitButton.disabled = false;
             });
             return;
           }
-          
+
           Swal.fire({
-            title: 'Registrando...',
-            text: 'Por favor espera.',
-            didOpen: () => { Swal.showLoading(); },
+            title: "Registrando...",
+            text: "Por favor espera.",
+            didOpen: () => {
+              Swal.showLoading();
+            },
             allowOutsideClick: false,
             allowEscapeKey: false,
             showConfirmButton: false,
-            heightAuto: false // <-- AÑADIDO
+            heightAuto: false, // <-- AÑADIDO
           });
 
           try {
-            const { data: response, error: directActionError } = await actions.SignIn({
-              nombre, apellido, correo, contrasena, fechNac,
-            });
+            const { data: response, error: directActionError } =
+              await actions.SignIn({
+                cedula,
+                nombre,
+                apellido,
+                correo,
+                contrasena,
+                fechNac,
+              });
 
             if (directActionError) {
-              let swalTitle = 'Error de Acción';
-              let errorMessagesToShow = [directActionError.message || 'No se pudo procesar la acción.'];
-              
+              let swalTitle = "Error de Acción";
+              let errorMessagesToShow = [
+                directActionError.message || "No se pudo procesar la acción.",
+              ];
+
               // @ts-ignore
-              const validationErrorObject = directActionError.validationError; 
+              const validationErrorObject = directActionError.validationError;
               if (validationErrorObject) {
-                swalTitle = 'Por favor, corrige lo siguiente:';
+                swalTitle = "Por favor, corrige lo siguiente:";
                 let collectedMessages: string[] = [];
-                
-                if (validationErrorObject.formErrors && validationErrorObject.formErrors.length > 0) {
+
+                if (
+                  validationErrorObject.formErrors &&
+                  validationErrorObject.formErrors.length > 0
+                ) {
                   collectedMessages.push(...validationErrorObject.formErrors);
                 }
                 if (validationErrorObject.fieldErrors) {
                   for (const field in validationErrorObject.fieldErrors) {
                     // @ts-ignore
-                    if (validationErrorObject.fieldErrors[field] && validationErrorObject.fieldErrors[field].length > 0) {
+                    if (
+                      validationErrorObject.fieldErrors[field] &&
+                      validationErrorObject.fieldErrors[field].length > 0
+                    ) {
                       // @ts-ignore
-                      collectedMessages.push(...validationErrorObject.fieldErrors[field]);
+                      collectedMessages.push(
+                        ...validationErrorObject.fieldErrors[field],
+                      );
                     }
                   }
                 }
                 if (collectedMessages.length > 0) {
                   errorMessagesToShow = collectedMessages;
                 } else if (directActionError.message) {
-                    errorMessagesToShow = [directActionError.message];
+                  errorMessagesToShow = [directActionError.message];
                 }
-
-              } else if (directActionError.message && directActionError.message.startsWith("Failed to validate: ")) {
-                swalTitle = 'Por favor, corrige lo siguiente:';
+              } else if (
+                directActionError.message &&
+                directActionError.message.startsWith("Failed to validate: ")
+              ) {
+                swalTitle = "Por favor, corrige lo siguiente:";
                 const zodErrorPrefix = "Failed to validate: ";
                 try {
-                  const jsonString = directActionError.message.substring(zodErrorPrefix.length);
+                  const jsonString = directActionError.message.substring(
+                    zodErrorPrefix.length,
+                  );
                   const errors = JSON.parse(jsonString);
                   if (Array.isArray(errors) && errors.length > 0) {
-                    const parsedMessages = errors.map(err => err.message).filter(msg => msg);
+                    const parsedMessages = errors
+                      .map((err) => err.message)
+                      .filter((msg) => msg);
                     if (parsedMessages.length > 0) {
                       errorMessagesToShow = parsedMessages;
                     } else {
-                      errorMessagesToShow = ['Error de validación. Revisa los datos ingresados.'];
+                      errorMessagesToShow = [
+                        "Error de validación. Revisa los datos ingresados.",
+                      ];
                     }
                   } else {
-                    errorMessagesToShow = ['Error de validación. Revisa los datos ingresados.'];
+                    errorMessagesToShow = [
+                      "Error de validación. Revisa los datos ingresados.",
+                    ];
                   }
                 } catch (parseError) {
-                  console.error("Failed to parse Zod error JSON string:", parseError);
+                  console.error(
+                    "Failed to parse Zod error JSON string:",
+                    parseError,
+                  );
                 }
               }
 
               Swal.fire({
-                icon: 'error',
+                icon: "error",
                 title: swalTitle,
-                html: errorMessagesToShow.join('<br/>'),
-                confirmButtonColor: '#a00',
-                heightAuto: false
+                html: errorMessagesToShow.join("<br/>"),
+                confirmButtonColor: "#a00",
+                heightAuto: false,
               }).then(() => {
                 submitButton.disabled = false;
               });
-
-            } else if (response && response.success === false && response.error && typeof response.error === 'object' && 'message' in response.error) {
+            } else if (
+              response &&
+              response.success === false &&
+              response.error &&
+              typeof response.error === "object" &&
+              "message" in response.error
+            ) {
               Swal.fire({
-                icon: 'error',
-                title: 'Error en el registro',
+                icon: "error",
+                title: "Error en el registro",
                 text: response.error.message,
-                confirmButtonColor: '#a00',
-                heightAuto: false
+                confirmButtonColor: "#a00",
+                heightAuto: false,
               }).then(() => {
                 submitButton.disabled = false;
               });
             } else if (response && response.success) {
               Swal.fire({
-                icon: 'success',
-                title: '¡Registro exitoso!',
-                text: 'Ahora serás redirigido.',
+                icon: "success",
+                title: "¡Registro exitoso!",
+                text: "Hemos enviado un enlace de verificación a tu correo electrónico. Por favor, revisa tu bandeja de entrada (y la carpeta de spam).",
                 timer: 2000,
                 timerProgressBar: true,
                 showConfirmButton: false,
                 heightAuto: false,
                 willClose: () => {
-                  window.location.href = '/login'; 
-                }
+                  window.location.href = "/login";
+                  // form.reset();
+                },
               });
             } else {
               Swal.fire({
-                icon: 'warning',
-                title: 'Respuesta del servidor no reconocida',
-                text: 'La estructura de la respuesta no fue la esperada.',
-                confirmButtonColor: '#a00',
-                heightAuto: false
+                icon: "warning",
+                title: "Respuesta del servidor no reconocida",
+                text: "La estructura de la respuesta no fue la esperada.",
+                confirmButtonColor: "#a00",
+                heightAuto: false,
               }).then(() => {
                 submitButton.disabled = false;
               });
-              console.log('Respuesta inesperada del servidor:', response);
+              console.log("Respuesta inesperada del servidor:", response);
             }
           } catch (e: any) {
             Swal.fire({
-              icon: 'error',
-              title: 'Error de conexión',
-              text: e.message || 'No se pudo conectar con el servidor. Inténtalo de nuevo.',
-              confirmButtonColor: '#a00',
-              heightAuto: false
+              icon: "error",
+              title: "Error de conexión",
+              text:
+                e.message ||
+                "No se pudo conectar con el servidor. Inténtalo de nuevo.",
+              confirmButtonColor: "#a00",
+              heightAuto: false,
             }).then(() => {
-                submitButton.disabled = false;
+              submitButton.disabled = false;
             });
             console.error("Error en el submit (catch general):", e);
           }
         });
+      });
+    </script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const wrapper = document.querySelector(".login-wrapper");
+        if (wrapper) {
+          setTimeout(() => {
+            wrapper.classList.add("appear");
+          }, 50);
+        }
       });
     </script>
   </body>

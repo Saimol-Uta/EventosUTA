@@ -1,66 +1,97 @@
 ---
 import "../styles/global.css";
-const { imagen, estado, horas, titulo, slug } = Astro.props;
+const { imagen, estado, horas, titulo, slug, modoAdmin = false, idEvento, esDestacado = false } = Astro.props;
 ---
 
-<a class="card" data-titulo={titulo.toLowerCase()} href={`/Eventos/${slug}`}>
-  <div>
+<div class="card" data-titulo={titulo.toLowerCase()} style="position: relative;">
+  <a href={`/Eventos/${slug}`}>
     <img src={imagen} alt="Imagen del evento" />
     <div class="info">
       <div class="row">
         <span>{estado}</span>
-        <span>{horas}</span>
+        <span>{horas}h</span>
       </div>
       <div class="titulo">{titulo}</div>
     </div>
-  </div>
-</a>
+  </a>
+
+  {modoAdmin && (
+    <button
+      class={`btn-favorito ${esDestacado ? "activo" : ""}`}
+      data-id={idEvento}
+      onclick="toggleFavorito(this)"
+      title="Marcar como destacado"
+    >{"★"}</button>
+  )}
+
+ 
+</div>
 
 <style>
-    .card {
-        width: 100%;
-        max-width: 300px;
-        margin: 0 auto;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        background-color: white;
-        transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease;
-        font-family: "Segoe UI", sans-serif;
-    }
+.card {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: "Segoe UI", sans-serif;
+  position: relative;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+.card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+.info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #171717;
+  font-weight: 500;
+}
+.titulo {
+  color: #8b0000;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
 
-    .card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-    }
+.btn-favorito {
+  background-color: white;
+  border-radius: 50%;
+  font-size: 20px;
+  width: 34px;
+  height: 34px;
+  color: #bbb;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  transition: all 0.2s ease;
+   justify-content: center;  /* centra horizontalmente */
+  align-items: center;      /* centra verticalmente */
+  text-align: center; 
+}
 
-    .card img {
-        width: 100%;
-        height: 160px;
-        object-fit: cover;
-    }
+.btn-favorito.activo {
+  color: gold;
 
-    .info {
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
+}
 
-    .row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 14px;
-        color: #171717;
-        font-weight: 500;
-    }
 
-    .titulo {
-        color: #8b0000;
-        font-size: 18px;
-        font-weight: bold;
-        text-align: center;
-    }
 </style>
+
+
