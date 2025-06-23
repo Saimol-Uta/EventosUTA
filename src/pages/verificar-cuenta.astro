@@ -1,0 +1,52 @@
+---
+import prisma from '../db';
+
+// 1. Obtener el token de la URL.
+const token = Astro.url.searchParams.get('token');
+
+// Si no hay token, redirige con un error.
+if (!token) {
+    return Astro.redirect('/login?error=token-invalido');
+}
+
+try {
+    // Buscar al usuario con el token proporcionado.
+    const user = await prisma.usuarios.findFirst({
+        where: {
+            cod_ver: token,
+        },
+    });
+
+    // Si el token no corresponde a ningún usuario, es inválido.
+    if (!user) {
+        return Astro.redirect('/login?error=token-invalido');
+    }
+
+    // Verificar si el token ha expirado.
+    if (user.fec_exp_cod && user.fec_exp_cod.getTime() < Date.now()) {
+        // Si ha expirado, se elimina el registro del usuario para que pueda volver a registrarse.
+        await prisma.usuarios.delete({
+            where: { cor_cue: user.cor_cue }
+        });
+        return Astro.redirect('/login?error=token-expirado');
+    }
+
+    // Si el token es válido y no ha expirado, se actualiza el usuario.
+    await prisma.usuarios.update({
+        where: { cor_cue: user.cor_cue },
+        data: {
+            verificado: true,
+            cod_ver: null, // Se limpia el token para que no pueda ser reutilizado.
+            fec_exp_cod: null, // Se limpia la fecha de expiración.
+        },
+    });
+
+    // Redirigir a la página de login con un mensaje de éxito.
+    return Astro.redirect('/login?message=cuenta-verificada-exitosamente');
+
+} catch (error) {
+    console.error('Error durante la verificación de la cuenta:', error);
+    // En caso de un error inesperado en el servidor, redirige con un mensaje de error genérico.
+    return Astro.redirect('/login?error=error-verificacion');
+}
+---
