@@ -3,6 +3,7 @@ import { getSession } from "auth-astro/server";
 import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
 import "@styles/global.css";
+import { PdfUpload } from "@/utils/PdfUpload"; 
 
 const { slug } = Astro.params;
 if (!slug) {
@@ -82,21 +83,25 @@ if (Astro.request.method === "POST") {
 
         // Procesar el comprobante si existe
         const comprobante = formData.get("comprobante");
+
         if (
             comprobante &&
-            typeof comprobante === "object" &&
             comprobante instanceof File &&
-            comprobante.name &&
             comprobante.size > 0
         ) {
-            const uploadResult = await Astro.callAction(
-                actions.uploadComprobante,
-                formData,
-            );
-            if (uploadResult?.data?.url) {
-                enlaceComprobante = uploadResult.data.url;
-            } else {
-                throw new Error("Error al subir el comprobante de pago.");
+            // Validamos que sea un PDF
+            if (comprobante.type !== 'application/pdf') {
+                throw new Error("El comprobante debe ser un archivo PDF.");
+            }
+            
+            // Creamos un nombre único para el archivo en Cloudinary
+            const publicId = `comprobante_pago_${inscripcion.id_ins}`;
+            
+            // Llamamos directamente a nuestra utilidad de subida
+            enlaceComprobante = await PdfUpload.upload(comprobante, publicId);
+
+            if (!enlaceComprobante) {
+                throw new Error("Error al subir el comprobante de pago a Cloudinary.");
             }
         }
 
@@ -109,6 +114,8 @@ if (Astro.request.method === "POST") {
                 enlaceComprobante,
             },
         );
+
+        if (updateError) throw new Error(updateError.message);
 
         pagoResult = updateData;
         pagoError = updateError;
@@ -268,7 +275,7 @@ if (Astro.request.method === "POST") {
                                 type="file"
                                 name="comprobante"
                                 id="file-upload"
-                                accept="image/jpeg,image/png,image/jpg,application/pdf"
+                                accept=".pdf, application/pdf"
                                 required
                                 onchange="mostrarNombreArchivo(event)"
                                 style="display: none;"
@@ -286,7 +293,7 @@ if (Astro.request.method === "POST") {
                                 No se ha seleccionado ningún archivo
                             </p>
                             <p style="margin-top: 0.5rem; color: #95a5a6; font-size: 0.9rem;">
-                                Formatos permitidos: JPG, PNG, PDF (máximo 5MB)
+                                Formatos permitidos: PDF (máximo 5MB)
                             </p>
                         </div>
                     </div>
@@ -362,14 +369,20 @@ if (Astro.request.method === "POST") {
             return false;
         }
 
-        if (!archivo || !archivo.files.length) {
+        if (!archivo || !archivo.files.length || archivo.files.length === 0) {
             mostrarErrorPago("Debes subir el comprobante de pago.");
             return false;
         }
 
         // Validar tamaño del archivo (5MB máximo)
         const archivo_seleccionado = archivo.files[0];
-        if (archivo_seleccionado.size > 5 * 1024 * 1024) {
+
+        if (archivo_seleccionado.type !== 'application/pdf') {
+            mostrarErrorPago("El archivo debe estar en formato PDF.");
+            return false;
+        }
+        
+        if (archivo_seleccionado.size > 5 * 1024 * 1024) { // 5MB
             mostrarErrorPago("El archivo no debe superar los 5MB.");
             return false;
         }
