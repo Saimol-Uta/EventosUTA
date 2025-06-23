@@ -1,62 +1,119 @@
 ---
 interface NavLink {
-    label: string;
-    href: string;
+  label: string;
+  href: string;
+  subRoutes?: string[];
 }
 
 const links = [
-    { label: "Inicio", href:"/"},
-    { label: "Cursos", href:"/cursosCompleto"},
-    { label: "Eventos", href: "/Admin/EventosCRUD" },
-    { label: "Usuarios", href: "/Admin/UsuariosCRUD" },
-    { label: "Organizadores", href: "/Admin/OrganizadoresCRUD" },
-    { label: "Inscripciones", href: "/Admin/gestionEventos" },
-    { label: "Categorías", href: "/Admin/CategoriasCRUD" },
-    { label: "Carreras", href: "/Admin/CarrerasCRUD" },
-    { label: "Asignaciones", href: "/Admin/Asignaciones" },
-    
-    
+  { label: "Inicio", href: "/" },
+  { label: "Usuarios", href: "/Admin/UsuariosCRUD" },
+  { label: "Organizadores", href: "/Admin/OrganizadoresCRUD" },
+  { label: "Inscripciones", href: "/Admin/gestionEventos" },
+  { label: "Categorías", href: "/Admin/CategoriasCRUD" },
+  { label: "Carreras", href: "/Admin/CarrerasCRUD" },
+  { label: "Asignaciones", href: "/Admin/Asignaciones" },
+  {
+    label: "Eventos",
+    href: "#",
+    subRoutes: ["/Admin/EventosCRUD", "/cursosCompleto"],
+  },
 ];
+
+// Obtener ruta actual
+const currentUrl = new URL(Astro.request.url);
+const currentPath = currentUrl.pathname;
+
+// Función para verificar ruta activa
+const isActive = (href: string, subRoutes?: string[]) => {
+  if (href === "#" && subRoutes) {
+    return subRoutes.some(route => currentPath.includes(route));
+  }
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+};
 ---
-  
-
-<nav class="border-b border-gray-300">
-    <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">
-        <input type="checkbox" id="menu-toggle" class="hidden peer" />
-        <label for="menu-toggle" class="md:hidden cursor-pointer">
-            <svg
-                class="w-6 h-6 text-brown-900"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </label>
-
-        <div
-            class="hidden peer-checked:flex flex-col md:flex md:flex-row gap-4 md:items-center md:gap-x-12"
-        >
-            {
-                links.map((link) => (
-                    <a
-                        href={link.href}
-                        class="relative text-red-800 text-sm font-semibold tracking-wide transition-colors duration-200 drop-shadow-sm before:content-[''] before:absolute before:left-0 before:-bottom-0.5 before:h-[2px] before:w-0 before:bg-red-800 before:transition-all before:duration-300 hover:before:w-full"
-                    >
-                        {link.label}
-                    </a>
-                ))
-            }
-             <a
-        href="/homeAdmin"
-        class="ml-auto bg-gradient-to-r from-red-800 to-red-600 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 animate-pulse"
+<nav class="bg-red-900 relative z-50">
+  <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">
+    <input type="checkbox" id="menu-toggle" class="hidden peer" />
+    <label for="menu-toggle" class="md:hidden cursor-pointer">
+      <svg
+        class="w-6 h-6 text-white"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
       >
-        Panel Admin
-      </a>
-        </div>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M4 6h16M4 12h16M4 18h16"
+        ></path>
+      </svg>
+    </label>
+
+    <!-- Menú principal -->
+    <div class="w-full hidden peer-checked:flex flex-col items-center justify-center md:flex md:flex-row md:justify-center gap-4 md:gap-x-12">
+      {links.map((link) => (
+        link.href !== "#" ? (
+          <!-- Items normales del menú -->
+          <a
+            href={link.href}
+            class={`py-2 relative text-white text-[14px] tracking-wide transition-colors duration-200 drop-shadow-sm
+                   before:content-[''] before:absolute before:left-0 before:bottom-1 before:h-[2px] before:bg-white
+                   before:transition-all before:duration-300
+                   ${isActive(link.href) ? 'before:w-full' : 'before:w-0 hover:before:w-full'}`}
+          >
+            {link.label}
+          </a>
+        ) : (
+          <!-- Dropdown de Eventos -->
+          <div class="relative group transition-all duration-300">
+            <div class="py-2 relative">
+              <div class="px-2 py-2 -mx-2 -my-2 relative inline-block">
+                <span class="text-white text-[14px] tracking-wide drop-shadow-sm cursor-pointer">
+                  Eventos
+                  <svg class="w-4 h-4 inline ml-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </span>
+                <!-- Subrayado condicional -->
+                <div
+                  class={`absolute left-2 right-2 bottom-1 h-[2px] bg-white transition-all duration-300
+                         ${isActive(link.href, link.subRoutes) ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'}`}
+                ></div>
+              </div>
+            </div>
+
+            <!-- Submenú -->
+            <div
+              class="absolute top-full left-0 pt-2 flex flex-col bg-white text-gray-800 w-56 rounded-md shadow-lg border border-gray-200 z-50
+                     opacity-0 invisible 
+                     group-hover:opacity-100 group-hover:visible
+                     translate-y-1 group-hover:translate-y-0
+                     transition-all duration-200 ease-out"
+            >
+              <div class="absolute -top-2 left-6 w-4 h-4 bg-white rotate-45 transform border-l border-t border-gray-200"></div>
+              <div class="h-2 -mt-2"></div>
+              <a
+                href="/cursosCompleto"
+                class="block px-5 py-3 text-xs text-gray-500 hover:text-red-900 transition-colors duration-150"
+              >
+                Mostrar eventos
+              </a>
+              <a
+                href="/Admin/EventosCRUD"
+                class="block px-5 py-3 text-xs text-gray-500 hover:text-red-900 transition-colors duration-150"
+              >
+                Administrar eventos
+              </a>
+            </div>
+          </div>
+        )
+      ))}
     </div>
+  </div>
 </nav>

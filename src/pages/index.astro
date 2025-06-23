@@ -32,7 +32,6 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 <Layout>
     <Header />
     {esAdmin ? <MenuAdmin /> : <Navbar/>}
-    <Navbar />
     <CarruselUTA />
     <InformacionFacultad
         tituloFacultad="Facultad de Ingenieria en Sistemas Electronica e Industrial"
