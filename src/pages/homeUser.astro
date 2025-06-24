@@ -56,21 +56,22 @@ upcomingEvents = resultProximos?.eventos ?? [];
     <Header />
     <NavBar />
 
-    <main class="max-w-screen-xl mx-auto px-4 py-6">
-      <div class="flex flex-col md:flex-row gap-6">
-        <!-- Perfil del Usuario -->
-        <section class="bg-white rounded-2xl shadow-md p-6 w-full md:w-1/4 flex flex-col items-center gap-4">
-          <Avatar defaultSrc={cuenta?.img_user || "/PerfilDefault.png"} size="w-40 h-40" />
+ 
+      <div class="flex flex-col md:flex-row gap-6 p-6">
+       <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
+          <Avatar defaultSrc={cuenta?.img_user || "/PerfilDefault.png"} size="w-50 h-50" />
           <p class="text-gray-800 font-semibold text-center">
             {(cuenta?.nom_usu1 || "") + " " + (cuenta?.nom_usu2 || "") + " " + (cuenta?.ape_usu1 || "") + " " + (cuenta?.ape_usu2 || "")}
           </p>
-          <Button text="Editar Perfil" href="../PerfilUserDos" />
+          <Button text="Editar Perfil" href="/PerfilUserDos" />
           <div class="text-center text-red-700 font-medium">Documentos</div>
-          <div class="flex gap-2">
+           <div class="flex gap-2 mt-2">
             <DocumentButton label="Cédula" cuentaId={session?.user?.id} currentImage={cuenta?.enl_ced_cue} fieldName="enl_ced_cue" size="w-20 h-20" />
             <DocumentButton label="Matrícula" cuentaId={session?.user?.id} currentImage={cuenta?.enl_mat_cue} fieldName="enl_mat_cue" size="w-20 h-20" />
+            
+             </div>
           </div>
-        </section>
+  
 
         <!-- Contenido Principal -->
         <section class="flex-1 flex flex-col gap-6">
@@ -133,7 +134,7 @@ upcomingEvents = resultProximos?.eventos ?? [];
           </div>
         </section>
       </div>
-    </main>
+
 
     <!-- Modal PDF -->
     <div id="pdf-modal-overlay" class="fixed inset-0 bg-black bg-opacity-75 hidden justify-center items-center z-50">
