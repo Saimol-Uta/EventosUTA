@@ -79,31 +79,52 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
           class="flex flex-col items-center gap-4"
         >
          <div class="group relative cursor-pointer text-sm text-white">
-  <label for="imagen" class="cursor-pointer">
-    Cambiar imagen
-  </label>
   <span
     class="absolute left-0 -bottom-0.5 h-0.5 w-0 bg-white transition-all duration-300 group-hover:w-full"
   ></span>
 </div>
-          <input
-            type="file"
-            id="imagen"
-            name="imagen"
-            accept="image/*"
-            class="hidden"
-            required
-          />
+     <input
+  type="file"
+  id="input-imagen"
+  name="imagen"
+  accept="image/jpeg, image/png"
+  class="hidden"
+  onchange="mostrarNombreArchivo(this)"
+/>
 
-        <button
-  type="submit"
+<button
+  type="button"
+  onclick="document.getElementById('input-imagen').click()"
   class="bg-gradient-to-r from-red-700 via-red-800 to-red-900 text-white text-sm px-5 py-2.5 rounded-full shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-800 transition-all duration-300 font-semibold tracking-wide"
 >
- Guardar imagen
+  Seleccionar imagen
 </button>
 
+<p id="nombre-archivo" class="text-sm text-white text-center italic"></p>
+
+<button
+  type="submit"
+  id="btn-guardar-imagen"
+  class="bg-gradient-to-r from-red-700 via-red-800 to-red-900 text-white text-sm px-5 py-2.5 rounded-full shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-800 transition-all duration-300 font-semibold tracking-wide hidden"
+>
+  Guardar imagen
+</button>
         </form>
       </div>
     )}
   </div>
 </section>
+<script type="module">
+  window.mostrarNombreArchivo = function (input) {
+    const label = document.getElementById("nombre-archivo");
+    const botonGuardar = document.getElementById("btn-guardar-imagen");
+
+    if (input.files.length > 0) {
+      label.textContent = "Archivo seleccionado: " + input.files[0].name;
+      botonGuardar.classList.remove("hidden");
+    } else {
+      label.textContent = "";
+      botonGuardar.classList.add("hidden");
+    }
+  };
+</script>
