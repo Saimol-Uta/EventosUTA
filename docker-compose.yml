@@ -8,7 +8,7 @@ services:
     ports:
       - "4321:4321"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y2FyZWZ1bC1lYXJ3aWctMjAuY2xlcmsuYWNjb3VudHMuZGV2JA
       - CLERK_SECRET_KEY=sk_test_x9r0RrwKJOZp6KZ1AvMAKwlXYGc6TtAbf4zSNGPPtZ
       - DATABASE_URL=postgresql://EventosUTA_owner:npg_X3Zey2knOlfD@ep-nameless-queen-ach5gx2n-pooler.sa-east-1.aws.neon.tech/EventosUTA?sslmode=require
@@ -19,3 +19,4 @@ services:
       - CLOUDINARY_API_SECRET=Z7yF6Cfv9wnZl9Tpep9jOBjKxso
       - VERIFALIA_SID=brayan7102
       - VERIFALIA_AUTH_TOKEN=brayanstiv2002
+      - AUTH_ORIGIN=http://localhost:4321 
