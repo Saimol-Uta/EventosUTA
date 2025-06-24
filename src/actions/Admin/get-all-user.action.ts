@@ -1,6 +1,6 @@
 import { defineAction } from 'astro:actions';
-import { z } from 'zod';
-import prisma from '../../db';
+import prisma from '@/db';
+import { z } from 'astro:schema';
 
 export const getAllUsers = defineAction({
     accept: 'json',
