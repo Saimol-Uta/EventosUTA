@@ -28,8 +28,11 @@ COPY --from=build /app/package.json ./package.json
 # ¡¡LA LÍNEA MÁS IMPORTANTE QUE FALTABA!!
 COPY --from=build /app/prisma ./prisma
 
-# Exponemos el puerto estándar de Astro SSR
+ENV HOST=0.0.0.0
+ENV PORT=4321
+
+# Exponemos el puerto del contenedor.
 EXPOSE 4321
 
 # El comando para arrancar el servidor
-CMD ["node", "./dist/server/entry.mjs"]
+CMD ["node", "dist/server/entry.mjs"]
