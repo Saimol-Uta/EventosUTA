@@ -5,7 +5,7 @@ export const getInfo = defineAction({
     accept: 'json',
     handler: async () => {
         try {
-            const info = await prisma.pagina_principal.findUnique({
+            const info = await prisma.facultades.findUnique({
                 where: {
                     id_pag: 1 // Siempre será 1
                 }
