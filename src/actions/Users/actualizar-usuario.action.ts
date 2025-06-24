@@ -21,107 +21,45 @@ export const actualizarUsuario = defineAction({
     }),
     handler: async (input) => {
         try {
-            // Verificar que el usuario existe
-            const usuarioExistente = await prisma.usuarios.findUnique({
-                where: { cor_cue: input.cor_cue }
-            });
+            const { cor_cue, ...datosParaActualizar } = input;
 
-            if (!usuarioExistente) {
-                return {
-                    success: false,
-                    message: 'Usuario no encontrado'
-                };
-            }
-
-            // Si se proporciona una nueva cédula, verificar que no esté en uso
-            if (input.ced_usu && input.ced_usu !== usuarioExistente.ced_usu) {
-                const cedulaExistente = await prisma.usuarios.findUnique({
-                    where: { ced_usu: input.ced_usu }
-                });
-
-                if (cedulaExistente) {
-                    return {
-                        success: false,
-                        message: 'La cédula ya está registrada por otro usuario'
-                    };
+            
+            // Lógica para la fecha
+            let fechaActualizada: Date | undefined = undefined;
+            if (input.fec_nac_usu) {
+                fechaActualizada = new Date(input.fec_nac_usu);
+                if (isNaN(fechaActualizada.getTime())) {
+                    return { success: false, error: 'El formato de la fecha de nacimiento no es válido.' };
                 }
             }
 
-            // Si se proporciona una carrera, verificar que existe
-            if (input.id_car_per) {
-                const carreraExistente = await prisma.carreras.findUnique({
-                    where: { id_car: input.id_car_per }
-                });
-
-                if (!carreraExistente) {
-                    return {
-                        success: false,
-                        message: 'La carrera especificada no existe'
-                    };
-                }
-            }
-
-            // Preparar datos para actualización (solo campos que se proporcionaron)
-            const datosActualizacion: any = {};
-
-            if (input.ced_usu !== undefined) datosActualizacion.ced_usu = input.ced_usu;
-            if (input.nom_usu1 !== undefined) datosActualizacion.nom_usu1 = input.nom_usu1;
-            if (input.nom_usu2 !== undefined) datosActualizacion.nom_usu2 = input.nom_usu2;
-            if (input.ape_usu1 !== undefined) datosActualizacion.ape_usu1 = input.ape_usu1;
-            if (input.ape_usu2 !== undefined) datosActualizacion.ape_usu2 = input.ape_usu2;
-            if (input.fec_nac_usu !== undefined) {
-                datosActualizacion.fec_nac_usu = typeof input.fec_nac_usu === 'string'
-                    ? new Date(input.fec_nac_usu)
-                    : input.fec_nac_usu;
-            }
-            if (input.num_tel_usu !== undefined) datosActualizacion.num_tel_usu = input.num_tel_usu;
-            if (input.id_car_per !== undefined) datosActualizacion.id_car_per = input.id_car_per;
-            if (input.rol_cue !== undefined) datosActualizacion.rol_cue = input.rol_cue;
-            if (input.img_user !== undefined) datosActualizacion.img_user = input.img_user;
-            if (input.enl_ced_cue !== undefined) datosActualizacion.enl_ced_cue = input.enl_ced_cue;
-            if (input.enl_mat_cue !== undefined) datosActualizacion.enl_mat_cue = input.enl_mat_cue;
-
-            // Actualizar usuario
+            // Actualización atómica y segura
+            // No necesitamos buscar si el usuario existe primero. 'update' fallará si no lo encuentra.
             const usuarioActualizado = await prisma.usuarios.update({
-                where: { cor_cue: input.cor_cue },
-                data: datosActualizacion,
-                include: {
-                    carreras: {
-                        include: {
-                            facultades: true
-                        }
-                    }
-                }
+                where: {
+                    cor_cue: cor_cue, // Usamos la llave primaria para identificar al usuario
+                },
+                data: {
+                    ...datosParaActualizar,
+                    fec_nac_usu: fechaActualizada, // Usamos la fecha ya validada
+                },
             });
 
             return {
                 success: true,
                 message: 'Usuario actualizado correctamente',
-                data: usuarioActualizado
+                data: usuarioActualizado,
             };
 
         } catch (error: any) {
             console.error('Error al actualizar usuario:', error);
-
-            // Manejo específico de errores de Prisma
-            if (error.code === 'P2002') {
-                return {
-                    success: false,
-                    message: 'Ya existe un usuario con esos datos únicos (cédula o correo)'
-                };
+            
+            // Manejo de errores de Prisma (ej: el usuario a actualizar no se encontró)
+            if (error.code === 'P2025') {
+                 return { success: false, error: 'Error: El usuario que intentas actualizar no existe.' };
             }
 
-            if (error.code === 'P2003') {
-                return {
-                    success: false,
-                    message: 'Error de referencia: carrera o facultad no válida'
-                };
-            }
-
-            return {
-                success: false,
-                message: 'Error interno del servidor al actualizar el usuario'
-            };
+            return { success: false, error: 'Error interno del servidor al actualizar el usuario.' };
         }
-    }
+    },
 });
