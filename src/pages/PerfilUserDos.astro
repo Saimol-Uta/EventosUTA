@@ -58,9 +58,10 @@ if (Astro.request.method === "POST") {
         // --- Bloque de Validaciones (tu lógica original) ---
         const camposObligatorios = ["ced_usu", "nom_usu1", "ape_usu1", "fec_nac_usu"];
         const correoForm = formData.get("cor_cue")?.toString() ?? "";
-        //if (correoForm.endsWith("@uta.edu.ec")) {
-        //    camposObligatorios.push("id_car_per");
-        //}
+        if (correoForm.endsWith("@uta.edu.ec")) {
+            camposObligatorios.push("id_car_per");
+        }
+        
         for (const campo of camposObligatorios) {
             if (!formData.get(campo)) {
                 errores.push(`El campo ${nombresCampos[campo] || campo} es obligatorio.`);
@@ -103,9 +104,9 @@ if (Astro.request.method === "POST") {
             errores.push("El número de teléfono debe tener exactamente 10 dígitos.");
         }
         const carrera = formData.get("id_car_per")?.toString() ?? "";
-        //if (correoForm.endsWith("@uta.edu.ec") && !carrera) {
-        //    errores.push("Debes seleccionar una carrera.");
-        //}
+        if (correoForm.endsWith("@uta.edu.ec") && !carrera) {
+            errores.push("Debes seleccionar una carrera.");
+        }
 
         // --- Fin del Bloque de Validaciones ---
 
@@ -169,7 +170,7 @@ const camposFormulario: CampoFormulario[] = [
     { titulo: "Teléfono", valor: usuario?.num_tel_usu ?? "", name: "num_tel_usu" },
     { titulo: "Correo de recuperación", valor: usuario?.cor_rec ?? "", name: "cor_rec", tipo: "email" },
 ];
-/*
+
 if (correo.endsWith("@uta.edu.ec")) {
     camposFormulario.push({
         titulo: "Carrera",
@@ -182,7 +183,7 @@ if (correo.endsWith("@uta.edu.ec")) {
         })),
     });
 }
-*/
+
 const textoGuardarInfo = "Guardar Información";
 const textoCancelar = "Cancelar";
 const textoMasTarde = "Más Tarde";
