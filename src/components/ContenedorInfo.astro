@@ -20,7 +20,6 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
   <!-- Capa oscura encima de la imagen -->
   <div class="absolute inset-0 bg-black/50"></div>
 
-  <!-- Contenido encima de la imagen -->
   <div
     class={`relative z-10 max-w-6xl mx-auto flex flex-col ${
       invertir ? "lg:flex-row-reverse" : "lg:flex-row"
@@ -34,18 +33,9 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
         enctype="multipart/form-data"
         class="flex flex-col gap-4 items-center lg:items-start"
       >
-        {modoEdicion ? (
-          <input
-            type="text"
-            name={`titulo-${columna}`}
-            value={titulo}
-            placeholder="Título"
-            class="text-4xl lg:text-5xl font-extrabold bg-transparent w-full placeholder:text-gray-200 focus:outline-none border-b border-white pb-1 text-white drop-shadow-lg"
-          />
-        ) : (
-          <h2 class="text-4xl lg:text-5xl font-extrabold drop-shadow-lg">{titulo}</h2>
-        )}
-
+  <h2 class="text-4xl lg:text-5xl font-extrabold drop-shadow-lg">
+  {titulo}
+</h2>
         {modoEdicion ? (
           <>
             <textarea
@@ -54,14 +44,14 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
               class="w-full bg-transparent p-2 text-lg focus:outline-none resize-none placeholder:text-gray-300 border-b border-white text-white drop-shadow"
               rows="6"
               required
-              placeholder="Escribe contenido..."
+              placeholder="Escribe algo"
             >{contenido}</textarea>
 
             <button
               type="submit"
-              class="bg-[#7c0a0a] text-white text-sm px-6 py-2 rounded-full shadow-md hover:shadow-lg hover:brightness-110 transition-all duration-300"
+           class="bg-gradient-to-r from-red-700 via-red-800 to-red-900 text-white text-sm px-5 py-2.5 rounded-full shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-800 transition-all duration-300 font-semibold tracking-wide"
             >
-              Guardar texto
+              Guardar Contenido
             </button>
           </>
         ) : (
@@ -90,13 +80,12 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
         >
          <div class="group relative cursor-pointer text-sm text-white">
   <label for="imagen" class="cursor-pointer">
-    Cambiar imagen de fondo
+    Cambiar imagen
   </label>
   <span
     class="absolute left-0 -bottom-0.5 h-0.5 w-0 bg-white transition-all duration-300 group-hover:w-full"
   ></span>
 </div>
-
           <input
             type="file"
             id="imagen"
@@ -106,12 +95,13 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
             required
           />
 
-          <button
-            type="submit"
-            class="bg-[#7c0a0a] text-white text-sm px-4 py-2 rounded-full shadow hover:shadow-md hover:brightness-110 transition-all"
-          >
-            Guardar imagen
-          </button>
+        <button
+  type="submit"
+  class="bg-gradient-to-r from-red-700 via-red-800 to-red-900 text-white text-sm px-5 py-2.5 rounded-full shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-800 transition-all duration-300 font-semibold tracking-wide"
+>
+ Guardar imagen
+</button>
+
         </form>
       </div>
     )}
