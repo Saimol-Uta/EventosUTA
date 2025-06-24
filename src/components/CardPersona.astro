@@ -1,32 +1,69 @@
 ---
-const { titulo, nombre, apellido, facultad, master, rol, imagen, modoEdit= false } = Astro.props;
+const { titulo, nombre, apellido, facultad, master, rol, imagen, modoEdit = false } = Astro.props;
 ---
 
-<figure class="flex flex-col items-center bg-white shadow-md rounded-2xl p-6 w-64 text-center relative">
-  <img src={imagen} alt={`${nombre} ${apellido}`} class="w-50 h-50 object-cover rounded-lg mb-5" />
-  
-  {modoEdit && (
-    <button class="absolute top-4 right-4 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-sm">
-      Cambiar imagen
-    </button>
-  )}
+<figure class="flex flex-col items-center bg-white shadow-lg rounded-2xl p-6 w-72 text-center relative transition hover:shadow-xl">
+  <div class="relative w-40 h-40 mb-4 group">
+    <label for="imagen-upload" class="block cursor-pointer w-full h-full">
+      <img
+        src={imagen}
+        alt={`${nombre} ${apellido}`}
+        class="w-full h-full object-cover rounded-xl border border-gray-200 shadow-sm hover:opacity-80 transition"
+      />
+    </label>
+    {modoEdit && (
+      <input
+        type="file"
+        id="imagen-upload"
+        accept="image/png, image/jpeg"
+        class="hidden"
+        on:change="handleImagenSeleccionada(event)"
+      />
+       <button onclick="document.getElementById('imagen-upload').click()"
+          class="bg-red-600 text-white py-1.5 rounded-lg shadow-md hover:bg-red-700 transition text-sm font-medium">
+          Cambiar imagen
+        </button>
+    )}
+  </div>
 
-  <figcaption>
-    <p class="text-xl font-semibold text-black">
+  <figcaption class="w-full">
+    <p class="text-lg font-semibold text-gray-800">
       {titulo} {nombre} {apellido}{master}
     </p>
-    <p class="text-base text-gray-600 mt-1">{rol}</p>
-    <p class="text-sm text-gray-800 mt-1">{facultad}</p>
+    <p class="text-sm text-gray-600 mt-1">{rol}</p>
+    <p class="text-sm text-gray-700 mt-1">{facultad}</p>
 
     {modoEdit && (
-      <div class="mt-3 space-y-2">
-        <button class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 text-sm w-full">
+      <div class="mt-5 flex flex-col gap-2">
+       
+        <button class="bg-red-600 text-white py-1.5 rounded-lg shadow-md hover:bg-red-700 transition text-sm font-medium">
           Editar texto
         </button>
-        <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm w-full">
-          Eliminar persona
-        </button>
+    
       </div>
     )}
   </figcaption>
+
+  {modoEdit && (
+    <script type="module">
+      function handleImagenSeleccionada(event) {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const isValid = file.type === "image/png" || file.type === "image/jpeg";
+        if (!isValid) {
+          alert("Solo se permiten imágenes PNG o JPG.");
+          return;
+        }
+
+    
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = document.querySelector("img[alt]");
+          if (img) img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    </script>
+  )}
 </figure>
