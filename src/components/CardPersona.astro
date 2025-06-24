@@ -1,32 +1,39 @@
 ---
+// Props recibidas
 const { titulo, nombre, apellido, facultad, master, rol, imagen, modoEdit = false } = Astro.props;
 ---
 
-<figure class="flex flex-col items-center bg-white shadow-lg rounded-2xl p-6 w-72 text-center relative transition hover:shadow-xl">
+<figure class="flex flex-col items-center bg-white shadow-xl rounded-2xl p-6 w-72 text-center relative transition hover:shadow-2xl">
+
   <div class="relative w-40 h-40 mb-4 group">
-    <label for="imagen-upload" class="block cursor-pointer w-full h-full">
+    <label for="imagen-upload" class="block cursor-pointer w-full h-full z-0">
       <img
         src={imagen}
         alt={`${nombre} ${apellido}`}
-        class="w-full h-full object-cover rounded-xl border border-gray-200 shadow-sm hover:opacity-80 transition"
+        class="w-full h-full object-cover rounded-xl border border-gray-300 shadow-md hover:opacity-85 transition duration-300"
       />
     </label>
+
     {modoEdit && (
-      <input
-        type="file"
-        id="imagen-upload"
-        accept="image/png, image/jpeg"
-        class="hidden"
-        on:change="handleImagenSeleccionada(event)"
-      />
-       <button onclick="document.getElementById('imagen-upload').click()"
-          class="bg-red-600 text-white py-1.5 rounded-lg shadow-md hover:bg-red-700 transition text-sm font-medium">
+      <>
+        <input
+          type="file"
+          id="imagen-upload"
+          accept="image/png, image/jpeg"
+          class="hidden"
+          on:change="handleImagenSeleccionada(event)"
+        />
+        <button
+          onclick="document.getElementById('imagen-upload').click()"
+          class="absolute bottom-[-12px] left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-red-700 to-red-900 text-white py-1 px-3 rounded-lg shadow-lg hover:from-red-600 hover:to-red-800 transition text-xs font-semibold z-10"
+        >
           Cambiar imagen
         </button>
+      </>
     )}
   </div>
 
-  <figcaption class="w-full">
+  <figcaption class="w-full mt-4">
     <p class="text-lg font-semibold text-gray-800">
       {titulo} {nombre} {apellido}{master}
     </p>
@@ -34,12 +41,10 @@ const { titulo, nombre, apellido, facultad, master, rol, imagen, modoEdit = fals
     <p class="text-sm text-gray-700 mt-1">{facultad}</p>
 
     {modoEdit && (
-      <div class="mt-5 flex flex-col gap-2">
-       
-        <button class="bg-red-600 text-white py-1.5 rounded-lg shadow-md hover:bg-red-700 transition text-sm font-medium">
+      <div class="mt-6">
+        <button class="w-full bg-gradient-to-r from-red-700 to-red-900 text-white py-2 rounded-lg shadow-md hover:from-red-600 hover:to-red-800 transition text-sm font-semibold">
           Editar texto
         </button>
-    
       </div>
     )}
   </figcaption>
@@ -56,7 +61,6 @@ const { titulo, nombre, apellido, facultad, master, rol, imagen, modoEdit = fals
           return;
         }
 
-    
         const reader = new FileReader();
         reader.onload = () => {
           const img = document.querySelector("img[alt]");
