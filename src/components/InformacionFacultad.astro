@@ -4,6 +4,7 @@ import "../styles/global.css";
 import Evento from "../components/CardCarousel.astro";
 import TarjetaPersona from '../components/CardPersona.astro';
 import prisma from "@/db";
+import { actions } from "astro:actions";
 const {
   tituloDescripcion,
   contenidoDescripcion,
@@ -39,8 +40,7 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
   <div class="flex flex-wrap justify-center gap-6">
     <TarjetaPersona
     titulo="Ing."
-      nombre="Franklin"
-      apellido="Mayorga"
+      nombre={prisma.facultades}
       master=", Mg."
       rol="Decano"
       facultad="FISEI"
