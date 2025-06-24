@@ -117,31 +117,32 @@ if (Astro.request.method === "POST") {
           const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
 
           if (resultadoGuardarRaw.error) {
-            mostrarError = true;
-            
-            // Usamos '(as any)' para decirle a TypeScript que confíe en nosotros
-            // y nos deje inspeccionar el objeto de error en busca de 'issues'.
-            const errorConIssues = resultadoGuardarRaw.error as any;
-
-            // Comprobamos si el error contiene una lista de problemas de validación
-            if (errorConIssues.issues && Array.isArray(errorConIssues.issues) && errorConIssues.issues.length > 0) {
-                // Si los hay, unimos todos los mensajes de error en uno solo
-                mensajeGuardado = errorConIssues.issues.map((issue: any) => issue.message).join(" ");
-            } else {
-                // Si no, es un error genérico, usamos su mensaje principal
-                mensajeGuardado = resultadoGuardarRaw.error.message;
-            }
-
-          } else if (resultadoGuardarRaw.data?.success) {
-              // La lógica de recarga de datos que te gusta se mantiene
-              mensajeGuardado = resultadoGuardarRaw.data.value?.message || "Usuario actualizado correctamente.";
+              mostrarError = true;
+              mensajeGuardado = resultadoGuardarRaw.error.message;
+          } 
+          // 2. Si no hay error de Zod, revisamos el resultado de NUESTRA lógica dentro de la acción
+          else if (resultadoGuardarRaw.data) {
               
-              const resultadoUsuarioActualizado = await Astro.callAction(actions.getUserByCedula, { idUsuario: id_usu });
-              if (resultadoUsuarioActualizado.data?.success && resultadoUsuarioActualizado.data.usuario) {
-                  usuario = resultadoUsuarioActualizado.data.usuario as UsuarioParcial;
+              // 2a. Si nuestra lógica fue exitosa...
+              if (resultadoGuardarRaw.data.success) {
+                  mostrarError = false;
+                  mensajeGuardado = resultadoGuardarRaw.data.value?.message || "Usuario actualizado correctamente.";
+                  
+                  // Refrescamos los datos del usuario para mostrar la info actualizada
+                  const resultadoUsuarioActualizado = await Astro.callAction(actions.getUserByCedula, { idUsuario: id_usu });
+                  if (resultadoUsuarioActualizado.data?.success && resultadoUsuarioActualizado.data.usuario) {
+                      usuario = resultadoUsuarioActualizado.data.usuario as UsuarioParcial;
+                  }
+              } 
+              // 2b. Si nuestra lógica interna falló (ej: Verifalia dijo que el correo no es válido)
+              else {
+                  mostrarError = true;
+                  // Leemos el mensaje de error específico que enviamos desde la acción
+                  mensajeGuardado = resultadoGuardarRaw.data.error || "Ocurrió un error en la validación del servidor.";
               }
-
-          } else {
+          }
+          // 3. Como último recurso, para cualquier otro caso inesperado
+          else {
               mostrarError = true;
               mensajeGuardado = "Ocurrió un error inesperado al guardar.";
           }

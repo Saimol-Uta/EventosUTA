@@ -2,6 +2,7 @@ import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import prisma from '../../db';
 import { getSession } from 'auth-astro/server';
+import { validateEmail } from '../auth/verificacionCorreo';
 
 export const setUser = defineAction({
     accept: 'form',
@@ -19,7 +20,32 @@ export const setUser = defineAction({
     }),
     handler: async (input, { request }) => {
         try {
+            const usuarioActual = await prisma.usuarios.findUnique({
+                where: { cor_cue: input.id_usu },
+                select: { cor_rec: true } // Solo necesitamos el correo de recuperación actual
+            });
 
+            if (!usuarioActual) {
+                throw new Error("No se pudo encontrar el usuario para actualizar.");
+            }
+
+            const nuevoCorreoRec = input.cor_rec;
+            const correoRecExistente = usuarioActual.cor_rec;
+
+            if (nuevoCorreoRec && nuevoCorreoRec !== correoRecExistente && !nuevoCorreoRec.endsWith('@uta.edu.ec')) {
+                
+                console.log(`El correo de recuperación cambió. Iniciando validación con Verifalia para: ${nuevoCorreoRec}`);
+                const esValido = await validateEmail(nuevoCorreoRec);
+
+                if (!esValido) {
+                    return {
+                        success: false,
+                        error: `El nuevo correo de recuperación "${nuevoCorreoRec}" no es válido.`,
+                    };
+                }
+                console.log(`Validación de Verifalia exitosa para: ${nuevoCorreoRec}`);
+            }
+            
             const datosParaActualizar = {
                 ced_usu: input.ced_usu,
                 nom_usu1: input.nom_usu1,
