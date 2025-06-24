@@ -24,15 +24,11 @@ if (!isLoggedIn || !user?.id) {
 }
 const id_usu = user.id;
 
-// --- Carga de Datos en Paralelo ---
+let usuario: UsuarioParcial | null = null;
 const [usuarioActionResult, carrerasActionResult] = await Promise.all([
     Astro.callAction(actions.getUserByCedula, { idUsuario: id_usu }), 
     Astro.callAction(actions.getCarreras, {})
 ]);
-
-// --- Declaración de Variables ---
-let usuario: UsuarioParcial | null = null;
-const listaCarreras = carrerasActionResult?.data?.carreras ?? [];
 
 if (usuarioActionResult?.data?.success && usuarioActionResult.data.usuario) {
     usuario = usuarioActionResult.data.usuario as UsuarioParcial;
@@ -40,8 +36,8 @@ if (usuarioActionResult?.data?.success && usuarioActionResult.data.usuario) {
     console.error("Error al cargar el perfil de usuario:", usuarioActionResult.data.error);
 }
 
-// ✅ SE HA ELIMINADO TODA LA LÓGICA DE 'cumpleRequisitos' Y 'mensajeRequisitos'
-// porque, como bien dijiste, no es necesaria en esta página.
+// --- Declaración de Variables ---
+const listaCarreras = carrerasActionResult?.data?.carreras ?? [];
 
 // --- Lógica para el Envío del Formulario (POST) ---
 let mensajeGuardado: string | null = null;
@@ -117,16 +113,39 @@ if (Astro.request.method === "POST") {
             mostrarError = true;
             mensajeGuardado = errores.join(" ");
         } else {
-            formData.set("id_usu", id_usu);
-            const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
-            const resultadoGuardar = resultadoGuardarRaw?.data as SafeResult<ResultadoSetUser> | undefined;
+          formData.set("id_usu", id_usu);
+          const resultadoGuardarRaw = await Astro.callAction(actions.setUser, formData);
 
-            if (resultadoGuardar?.success) {
-                mensajeGuardado = resultadoGuardar.value?.created ? "Se guardó con éxito." : "Usuario actualizado correctamente.";
+          if (resultadoGuardarRaw.error) {
+            mostrarError = true;
+            
+            // Usamos '(as any)' para decirle a TypeScript que confíe en nosotros
+            // y nos deje inspeccionar el objeto de error en busca de 'issues'.
+            const errorConIssues = resultadoGuardarRaw.error as any;
+
+            // Comprobamos si el error contiene una lista de problemas de validación
+            if (errorConIssues.issues && Array.isArray(errorConIssues.issues) && errorConIssues.issues.length > 0) {
+                // Si los hay, unimos todos los mensajes de error en uno solo
+                mensajeGuardado = errorConIssues.issues.map((issue: any) => issue.message).join(" ");
             } else {
-                mostrarError = true;
-                mensajeGuardado = resultadoGuardar?.error || "No se pudo guardar.";
+                // Si no, es un error genérico, usamos su mensaje principal
+                mensajeGuardado = resultadoGuardarRaw.error.message;
             }
+
+          } else if (resultadoGuardarRaw.data?.success) {
+              // La lógica de recarga de datos que te gusta se mantiene
+              mensajeGuardado = resultadoGuardarRaw.data.value?.message || "Usuario actualizado correctamente.";
+              
+              const resultadoUsuarioActualizado = await Astro.callAction(actions.getUserByCedula, { idUsuario: id_usu });
+              if (resultadoUsuarioActualizado.data?.success && resultadoUsuarioActualizado.data.usuario) {
+                  usuario = resultadoUsuarioActualizado.data.usuario as UsuarioParcial;
+              }
+
+          } else {
+              mostrarError = true;
+              mensajeGuardado = "Ocurrió un error inesperado al guardar.";
+          }
+
         }
     }
 }
