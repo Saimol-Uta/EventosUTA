@@ -1,30 +1,54 @@
 ---
 import "../styles/global.css";
-const { imagen, estado, horas, titulo, slug, modoAdmin = false, idEvento, esDestacado = false } = Astro.props;
----
+import { Image } from "astro:assets";
+const imagenPorDefecto = "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop";
+
+const { 
+    imagen, 
+    estado, 
+    horas, 
+    titulo, 
+    slug, 
+    modoAdmin = false, 
+    idEvento, 
+    esDestacado = false 
+} = Astro.props;
+
+// ✅ 3. Usamos la imagen del evento, o la de por defecto si no existe
+const imagenSrc = imagen || imagenPorDefecto;---
 
 <div class="card" data-titulo={titulo.toLowerCase()} style="position: relative;">
-  <a href={`/Eventos/${slug}`}>
-    <img src={imagen} alt="Imagen del evento" />
-    <div class="info">
-      <div class="row">
-        <span>{estado}</span>
-        <span>{horas}h</span>
-      </div>
-      <div class="titulo">{titulo}</div>
-    </div>
-  </a>
+    <a href={`/Eventos/${slug}`}>
+        
+        <Image
+            src={imagenSrc}
+            alt={`Imagen del evento: ${titulo}`}
+            width={300}
+            height={160}
+            class="evento-imagen"
+            loading="lazy"
+            decoding="async"
+        />
 
-  {modoAdmin && (
-    <button
-      class={`btn-favorito ${esDestacado ? "activo" : ""}`}
-      data-id={idEvento}
-      onclick="toggleFavorito(this)"
-      title="Marcar como destacado"
-    >{"★"}</button>
-  )}
+        <div class="info">
+            <div class="row">
+                <span>{estado}</span>
+                <span>{horas}h</span>
+            </div>
+            <div class="titulo">{titulo}</div>
+        </div>
+    </a>
 
- 
+    {modoAdmin && (
+        <button
+            class={`btn-favorito ${esDestacado ? "activo" : ""}`}
+            data-id={idEvento}
+            onclick="toggleFavorito(this)"
+            title="Marcar como destacado"
+        >
+            {"★"}
+        </button>
+    )}
 </div>
 
 <style>
