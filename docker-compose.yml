@@ -9,7 +9,7 @@ services:
       - "4321:4321"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgres://postgres:2lrGAGDus24ESi0I28AQQh7Sslch2mUyD6OYAF6RAC18imV4L3uCkwbwtzGqQKNG@mi-app-db:5432/postgres
+      - DATABASE_URL=postgres://postgres:2lrGAGDus24ESi0I28AQQh7Sslch2mUyD6OYAF6RAC18imV4L3uCkwbwtzGqQKNG@l4oooc0kokcsoccckwccwwwk:5432/postgres
       - AUTH_SECRET=dfd34e83f5ab41ff0a3eafdf8ace99a7
       - AUTH_TRUST_HOST=true
       # Para Coolify + Cloudflare
