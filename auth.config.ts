@@ -99,7 +99,7 @@ export default defineConfig({
         sessionToken: {
             // USA EL NOMBRE EXACTO QUE VISTE EN TU NAVEGADOR
             // Ejemplo, si viste 'authjs.session-token':
-            name: `authjs.session-token`,
+
             // Si viste '__Secure-authjs.session-token', usa ese.
             // Es crucial que este nombre coincida.
             options: {
@@ -108,9 +108,21 @@ export default defineConfig({
                 path: '/',     // Usualmente es '/'
                 // 'secure' debe ser true en producción (HTTPS)
                 // import.meta.env.PROD es una forma común de manejarlo en Astro/Vite
-                secure: import.meta.env.PROD,
+
+                secure: true,
+                domain: "eventouta.sjproyects.tech",
             }
         },
+        csrfToken: {
+            name: `__Host-authjs.csrf-token`,
+            options: {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/",
+                secure: true,
+                domain: "eventouta.sjproyects.tech"
+            }
+        }
     },
 
     callbacks: {
