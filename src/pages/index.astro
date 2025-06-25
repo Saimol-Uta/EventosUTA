@@ -38,15 +38,15 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
         decanoImagen={pagina?.data?.dec_img ?? ""}
         subdecano={pagina?.data?.sub_fac ?? ""}
         subdecanoImagen={pagina?.data?.sub_img ?? ""}
-        tituloFacultad="Facultad de Ingenieria en Sistemas Electronica e Industrial"
+        tituloFacultad={pagina?.data?.nom_fac ?? ""}
         tituloDescripcion="Descripción"
-        contenidoDescripcion={pagina?.data?.des_pag ?? ""}
+        contenidoDescripcion={pagina?.data?.dec_fac ?? ""}
         imagenDescripcion="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
         tituloMision="Misión"
-        contenidoMision={pagina?.data?.mis_pag ?? ""}
+        contenidoMision={pagina?.data?.mis_fac ?? ""}
         imagenMision="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80"
         tituloVision="Visión"
-        contenidoVision={pagina?.data?.vis_pag ?? ""}
+        contenidoVision={pagina?.data?.vis_fac ?? ""}
         imagenVision="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
         modoAdmin={esAdmin}
     />
