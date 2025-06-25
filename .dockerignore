@@ -1,0 +1,17 @@
+# Ignorar la carpeta de dependencias. Se instalarán dentro del contenedor.
+node_modules
+
+# Ignorar la carpeta de build local.
+dist
+.astro
+
+# Ignorar archivos de entorno local.
+.env
+.env.*
+!.env.example
+
+# Logs y archivos de caché
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
