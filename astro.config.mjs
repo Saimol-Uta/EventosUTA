@@ -1,11 +1,8 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-
+import auth from 'auth-astro'; // <-- Reactívalo
+import node from '@astrojs/node';
 import tailwindcss from '@tailwindcss/vite';
-
-import netlify from '@astrojs/netlify';
-
-import auth from 'auth-astro';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,5 +11,7 @@ export default defineConfig({
         plugins: [tailwindcss()]
     },
     output: 'server',
-    adapter: netlify(),
+    adapter: node({
+        mode: 'standalone'
+    })
 });

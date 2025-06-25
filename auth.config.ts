@@ -14,6 +14,7 @@ export interface CustomUser {
 }
 
 export default defineConfig({
+    secret: process.env.AUTH_SECRET,
     trustHost: true,
     providers: [
         Credentials({
