@@ -97,39 +97,35 @@ export default defineConfig({
     },
     cookies: {
         sessionToken: {
-            // USA EL NOMBRE EXACTO QUE VISTE EN TU NAVEGADOR
-            // Ejemplo, si viste 'authjs.session-token':
-            name: `authjs.session-token`,
-            // Si viste '__Secure-authjs.session-token', usa ese.
-            // Es crucial que este nombre coincida.
+            name: import.meta.env.PROD ? `__Secure-authjs.session-token` : `authjs.session-token`,
             options: {
                 httpOnly: true,
-                sameSite: 'lax', // 'lax' es un buen default, 'none' requiere Secure=true
-                path: '/',     // Usualmente es '/'
-                // 'secure' debe ser true en producción (HTTPS)
-                // import.meta.env.PROD es una forma común de manejarlo en Astro/Vite
-                secure: import.meta.env.PROD,
+                sameSite: 'lax',
+                path: '/',
+                // Solo usar secure en producción Y cuando sea HTTPS
+                secure: import.meta.env.PROD && process.env.AUTH_ORIGIN?.startsWith('https'),
+                // Solo usar dominio específico en producción
+                ...(import.meta.env.PROD && { domain: '.sjproyects.tech' })
             }
         },
     },
 
     callbacks: {
-
-
         jwt: ({ token, user }) => {
-
+            console.log('[JWT Callback] Token:', !!token, 'User:', !!user);
             if (user) {
-
+                console.log('[JWT Callback] Setting user in token:', user.email);
                 token.user = user;
             }
-
-
             return token;
-
         },
 
         session: ({ session, token }) => {
-            session.user = token?.user as AdapterUser;
+            console.log('[Session Callback] Session:', !!session, 'Token:', !!token);
+            if (token?.user) {
+                console.log('[Session Callback] Setting user in session:', (token.user as any).email);
+                session.user = token?.user as AdapterUser;
+            }
             return session;
         },
     },
