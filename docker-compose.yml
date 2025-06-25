@@ -9,7 +9,7 @@ services:
       - "4321:4321"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://EventosUTA_owner:npg_X3Zey2knOlfD@ep-nameless-queen-ach5gx2n-pooler.sa-east-1.aws.neon.tech/EventosUTA?sslmode=require
+      - DATABASE_URL=postgres://postgres:2lrGAGDus24ESi0I28AQQh7Sslch2mUyD6OYAF6RAC18imV4L3uCkwbwtzGqQKNG@mi-app-db:5432/postgres
       - AUTH_SECRET=dfd34e83f5ab41ff0a3eafdf8ace99a7
       - AUTH_TRUST_HOST=true
       # Para Coolify + Cloudflare
