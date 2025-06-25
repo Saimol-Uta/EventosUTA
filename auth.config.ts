@@ -15,7 +15,7 @@ export interface CustomUser {
 
 export default defineConfig({
     secret: process.env.AUTH_SECRET,
-    trustHost: true,
+    trustHost: true, // Muy importante para Coolify
     providers: [
         Credentials({
             credentials: {
@@ -104,10 +104,11 @@ export default defineConfig({
                 httpOnly: true,
                 sameSite: 'lax',
                 path: '/',
-                secure: process.env.AUTH_ORIGIN?.startsWith('https://') ?? false,
+                // Para Coolify + Cloudflare: siempre usar secure en producción
+                secure: process.env.NODE_ENV === 'production',
+                // NO usar domain específico con Coolify
                 ...(process.env.NODE_ENV === 'production' && 
-                    process.env.AUTH_ORIGIN?.startsWith('https://') && 
-                    { domain: '.sjproyects.tech' })
+                    { domain: undefined }) // Remover domain para Coolify
             }
         },
         callbackUrl: {
@@ -115,10 +116,8 @@ export default defineConfig({
             options: {
                 sameSite: 'lax',
                 path: '/',
-                secure: process.env.AUTH_ORIGIN?.startsWith('https://') ?? false,
-                ...(process.env.NODE_ENV === 'production' && 
-                    process.env.AUTH_ORIGIN?.startsWith('https://') && 
-                    { domain: '.sjproyects.tech' })
+                secure: process.env.NODE_ENV === 'production',
+                // NO usar domain específico
             }
         },
         csrfToken: {
@@ -127,37 +126,45 @@ export default defineConfig({
                 httpOnly: true,
                 sameSite: 'lax',
                 path: '/',
-                secure: process.env.AUTH_ORIGIN?.startsWith('https://') ?? false
+                secure: process.env.NODE_ENV === 'production'
             }
         }
     },
     callbacks: {
         redirect({ url, baseUrl }) {
-            // Forzar HTTPS en producción para redirects
-            if (process.env.NODE_ENV === 'production') {
-                const httpsBaseUrl = baseUrl.replace('http://', 'https://');
-                if (url.startsWith('/')) {
-                    return `${httpsBaseUrl}${url}`;
-                }
-                if (url.startsWith(baseUrl.replace('https://', 'http://'))) {
-                    return url.replace('http://', 'https://');
-                }
-                return httpsBaseUrl;
+            console.log('[Redirect] URL:', url, 'BaseURL:', baseUrl);
+            
+            // Para Coolify + Cloudflare
+            const publicUrl = 'https://eventouta.sjproyects.tech';
+            
+            if (url.startsWith('/')) {
+                return `${publicUrl}${url}`;
             }
-            return url.startsWith('/') ? `${baseUrl}${url}` : url;
+            
+            // Si viene con HTTP interno de Coolify, cambiar a HTTPS público
+            if (url.includes('://') && !url.startsWith(publicUrl)) {
+                try {
+                    const urlObj = new URL(url);
+                    return `${publicUrl}${urlObj.pathname}${urlObj.search}${urlObj.hash}`;
+                } catch {
+                    return `${publicUrl}/dashboard`;
+                }
+            }
+            
+            return url.startsWith(publicUrl) ? url : `${publicUrl}/dashboard`;
         },
         jwt: ({ token, user }) => {
-            console.log('[JWT Callback] Token:', !!token, 'User:', !!user);
+            console.log('[JWT Callback] Token exists:', !!token, 'User exists:', !!user);
             if (user) {
-                console.log('[JWT Callback] Setting user in token:', user.email);
+                console.log('[JWT Callback] User email:', user.email);
                 token.user = user;
             }
             return token;
         },
         session: ({ session, token }) => {
-            console.log('[Session Callback] Session:', !!session, 'Token:', !!token);
+            console.log('[Session Callback] Session exists:', !!session, 'Token exists:', !!token);
             if (token?.user) {
-                console.log('[Session Callback] Setting user in session:', (token.user as any).email);
+                console.log('[Session Callback] Setting user in session');
                 session.user = token?.user as AdapterUser;
             }
             return session;

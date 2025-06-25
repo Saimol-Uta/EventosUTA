@@ -12,8 +12,12 @@ services:
       - DATABASE_URL=postgresql://EventosUTA_owner:npg_X3Zey2knOlfD@ep-nameless-queen-ach5gx2n-pooler.sa-east-1.aws.neon.tech/EventosUTA?sslmode=require
       - AUTH_SECRET=dfd34e83f5ab41ff0a3eafdf8ace99a7
       - AUTH_TRUST_HOST=true
-      # Usar solo HTTPS en producción
+      # Para Coolify + Cloudflare
       - AUTH_ORIGIN=https://eventouta.sjproyects.tech
+      - NEXTAUTH_URL=https://eventouta.sjproyects.tech
+      # Para que Auth.js sepa que está detrás de un proxy HTTPS
+      - FORWARDED_HOST=eventouta.sjproyects.tech
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
       - CLOUDINARY_CLOUD_NAME=dwwvecqnu
       - CLOUDINARY_API_KEY=768872357128941
       - CLOUDINARY_API_SECRET=Z7yF6Cfv9wnZl9Tpep9jOBjKxso
