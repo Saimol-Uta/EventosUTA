@@ -20,4 +20,4 @@ services:
       - CLOUDINARY_API_SECRET=Z7yF6Cfv9wnZl9Tpep9jOBjKxso
       - VERIFALIA_SID=brayan7102
       - VERIFALIA_AUTH_TOKEN=brayanstiv2002
-      
+      - AUTH_ORIGIN=http://eventouta.sjproyects.tech
