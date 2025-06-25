@@ -34,6 +34,10 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
     {esAdmin ? <MenuAdmin /> : <Navbar/>}
     <CarruselUTA modoAdmin={esAdmin}/>
     <InformacionFacultad
+        decano={pagina?.data?.dec_fac ?? ""}
+        decanoImagen={pagina?.data?.dec_img ?? ""}
+        subdecano={pagina?.data?.sub_fac ?? ""}
+        subdecanoImagen={pagina?.data?.sub_img ?? ""}
         tituloFacultad="Facultad de Ingenieria en Sistemas Electronica e Industrial"
         tituloDescripcion="Descripción"
         contenidoDescripcion={pagina?.data?.des_pag ?? ""}
