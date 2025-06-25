@@ -88,7 +88,7 @@ export default defineConfig({
         }),
     ],
     session: {
-        strategy: "jwt", // <- Esto es lo que faltaba
+        strategy: "jwt",
     },
     pages: {
         signIn: '/login',
@@ -97,20 +97,55 @@ export default defineConfig({
     },
     cookies: {
         sessionToken: {
-            name: import.meta.env.PROD ? `__Secure-authjs.session-token` : `authjs.session-token`,
+            name: process.env.NODE_ENV === 'production' 
+                ? `__Secure-authjs.session-token` 
+                : `authjs.session-token`,
             options: {
                 httpOnly: true,
                 sameSite: 'lax',
                 path: '/',
-                // Solo usar secure en producción Y cuando sea HTTPS
-                secure: import.meta.env.PROD && process.env.AUTH_ORIGIN?.startsWith('https'),
-                // Solo usar dominio específico en producción
-                ...(import.meta.env.PROD && { domain: '.sjproyects.tech' })
+                secure: process.env.AUTH_ORIGIN?.startsWith('https://') ?? false,
+                ...(process.env.NODE_ENV === 'production' && 
+                    process.env.AUTH_ORIGIN?.startsWith('https://') && 
+                    { domain: '.sjproyects.tech' })
             }
         },
+        callbackUrl: {
+            name: `authjs.callback-url`,
+            options: {
+                sameSite: 'lax',
+                path: '/',
+                secure: process.env.AUTH_ORIGIN?.startsWith('https://') ?? false,
+                ...(process.env.NODE_ENV === 'production' && 
+                    process.env.AUTH_ORIGIN?.startsWith('https://') && 
+                    { domain: '.sjproyects.tech' })
+            }
+        },
+        csrfToken: {
+            name: `authjs.csrf-token`,
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: process.env.AUTH_ORIGIN?.startsWith('https://') ?? false
+            }
+        }
     },
-
     callbacks: {
+        redirect({ url, baseUrl }) {
+            // Forzar HTTPS en producción para redirects
+            if (process.env.NODE_ENV === 'production') {
+                const httpsBaseUrl = baseUrl.replace('http://', 'https://');
+                if (url.startsWith('/')) {
+                    return `${httpsBaseUrl}${url}`;
+                }
+                if (url.startsWith(baseUrl.replace('https://', 'http://'))) {
+                    return url.replace('http://', 'https://');
+                }
+                return httpsBaseUrl;
+            }
+            return url.startsWith('/') ? `${baseUrl}${url}` : url;
+        },
         jwt: ({ token, user }) => {
             console.log('[JWT Callback] Token:', !!token, 'User:', !!user);
             if (user) {
@@ -119,7 +154,6 @@ export default defineConfig({
             }
             return token;
         },
-
         session: ({ session, token }) => {
             console.log('[Session Callback] Session:', !!session, 'Token:', !!token);
             if (token?.user) {

@@ -233,7 +233,7 @@ if (errorFromUrl && errorFromUrl !== "CredentialsSignin") {
         {mensajeExito && <div class="mensaje-exito">{mensajeExito}</div>}
         {mensajeError && <div class="mensaje-error">{mensajeError}</div>}
 
-        <form>
+        <form method="POST" action="/api/auth/signin/credentials">
           <input type="email" name="email" placeholder="Usuario" required />
           <input
             type="password"
@@ -241,6 +241,8 @@ if (errorFromUrl && errorFromUrl !== "CredentialsSignin") {
             placeholder="Contraseña"
             required
           />
+          <!-- Agregar callbackUrl explícito para HTTPS -->
+          <input type="hidden" name="callbackUrl" value="https://eventouta.sjproyects.tech/dashboard" />
           <div class="form-extras">
             <label><input type="checkbox" /> Recordarme</label>
             <a href="#">¿Olvidaste tu contraseña?</a>
@@ -326,6 +328,7 @@ if (errorFromUrl && errorFromUrl !== "CredentialsSignin") {
         await signIn("credentials", {
           email: formData.get("email"),
           password: formData.get("password"),
+          callbackUrl: "https://eventouta.sjproyects.tech/dashboard",
         });
       });
     }
