@@ -7,17 +7,20 @@ services:
     restart: unless-stopped
     ports:
       - "4321:4321"
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=development
-      - PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y2FyZWZ1bC1lYXJ3aWctMjAuY2xlcmsuYWNjb3VudHMuZGV2JA
-      - CLERK_SECRET_KEY=sk_test_x9r0RrwKJOZp6KZ1AvMAKwlXYGc6TtAbf4zSNGPPtZ
-      - DATABASE_URL=postgres://postgres:2lrGAGDus24ESi0I28AQQh7Sslch2mUyD6OYAF6RAC18imV4L3uCkwbwtzGqQKNG@mi-app-db:5432/postgres
-      - AUTH_SECRET=dfd34e83f5ab41ff0a3eafdf8ace99a7
-      - AUTH_TRUST_HOST=true
-      - AUTH_ORIGIN=http://localhost:4321
-      - CLOUDINARY_CLOUD_NAME=dwwvecqnu
-      - CLOUDINARY_API_KEY=768872357128941
-      - CLOUDINARY_API_SECRET=Z7yF6Cfv9wnZl9Tpep9jOBjKxso
-      - VERIFALIA_SID=brayan7102
-      - VERIFALIA_AUTH_TOKEN=brayanstiv2002
-      - AUTH_ORIGIN=http://localhost:4321 
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_TRUST_HOST=${AUTH_TRUST_HOST:-true}
+      - AUTH_ORIGIN=${AUTH_ORIGIN}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - FORWARDED_HOST=${FORWARDED_HOST}
+      - NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED:-0}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - VERIFALIA_SID=${VERIFALIA_SID}
+      - VERIFALIA_AUTH_TOKEN=${VERIFALIA_AUTH_TOKEN}
+
