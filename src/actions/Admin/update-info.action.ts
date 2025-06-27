@@ -18,16 +18,16 @@ export const updatePaginaPrincipal = defineAction({
             if (mis_pag !== undefined) updateData.mis_pag = mis_pag;
             if (vis_pag !== undefined) updateData.vis_pag = vis_pag;
 
-            const paginaPrincipal = await prisma.pagina_principal.upsert({
+            const paginaPrincipal = await prisma.facultades.upsert({
                 where: {
-                    id_pag: 1
+                    id_fac: ''
                 },
                 update: updateData,
                 create: {
-                    id_pag: 1,
-                    des_pag: des_pag || '',
-                    mis_pag: mis_pag || '',
-                    vis_pag: vis_pag || ''
+                    id_fac: '',
+                    des_fac: des_pag || '',
+                    mis_fac: mis_pag || '',
+                    vis_fac: vis_pag || ''
                 }
             });
 
