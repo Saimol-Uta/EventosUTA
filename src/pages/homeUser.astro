@@ -59,48 +59,46 @@ const eventosUsuario = eventosUsuarioRaw.map(inscripcion => ({
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card title="Eventos Próximos">
               <div class="flex flex-col gap-3">
-                {upcomingEvents.slice(0, 4).map((evento) => (
-                  <div class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300">
-                    <strong class="block text-gray-800 text-lg font-semibold mb-1">{evento.nom_eve}</strong>
-                    <span class="text-sm text-gray-600 italic">Inicio: {new Date(evento.fec_ini_eve).toLocaleDateString()}</span>
-                  </div>
-                ))}
+                {upcomingEvents.length > 0 ? (
+                  upcomingEvents.slice(0, 4).map((evento) => (
+                    <div class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300">
+                      <strong class="block text-gray-800 text-lg font-semibold mb-1">{evento.nom_eve}</strong>
+                      <span class="text-sm text-gray-600 italic">Inicio: {new Date(evento.fec_ini_eve).toLocaleDateString()}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p class="text-gray-700 bg-gray-50 border border-dashed border-gray-400 rounded-xl p-4 text-center">
+                    No hay eventos próximos disponibles.
+                  </p>
+                )}
                 {upcomingEvents.length > 4 && (
                   <a href="/eventosProximos" class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit">Ver más...</a>
                 )}
               </div>
             </Card>
 
-            <Card title={`Certificados (${certificates.length})`}>
+            <Card title="Certificados">
               <div class="flex flex-col gap-3">
                 {certificates.length > 0 ? (
-                  <>
-                    {certificates.slice(0, 4).map((certificado) => (
-                      <div class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300">
-                        <span
-                          class="text-gray-800 font-medium block cursor-pointer js-view-cert text-ellipsis overflow-hidden whitespace-nowrap"
-                          title={certificado.eventos.nom_eve}
-                          data-url={certificado.enl_cer_par}
-                        >
-                          {certificado.eventos.nom_eve}
-                        </span>
-                      </div>
-                    ))}
-                    {certificates.length > 4 ? (
-                      <a href="/User/historial" class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit mt-2">
-                        Ver más certificados ({certificates.length - 4} más)
-                      </a>
-                    ) : certificates.length > 0 ? (
-                      <a href="/User/historial" class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit mt-2">
-                        Ver todos los certificados
-                      </a>
-                    ) : null}
-                  </>
+                  certificates.slice(0, 4).map((certificado) => (
+                    <div class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300">
+                      <span
+                        class="text-gray-800 font-medium block cursor-pointer js-view-cert text-ellipsis overflow-hidden whitespace-nowrap"
+                        title={certificado.eventos.nom_eve}
+                        data-url={certificado.enl_cer_par}
+                      >
+                        {certificado.eventos.nom_eve}
+                      </span>
+                    </div>
+                  ))
                 ) : (
                   <p class="text-gray-700 bg-red-50 border border-dashed border-red-400 rounded-xl p-4 text-center">
                     No tienes certificados para mostrar.
                   </p>
                 )}
+                <a href="/User/historial" class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit mt-2">
+                  Ver más
+                </a>
               </div>
             </Card>
           </div>
