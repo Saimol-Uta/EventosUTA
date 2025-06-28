@@ -9,6 +9,7 @@ const {
   eventoId,
   inscripcionId,
   estadoPago,
+  mensajeCertificado,
 } = Astro.props;
 ---
 
@@ -54,7 +55,14 @@ const {
 
     {
       !certificadoDisponible && estadoPago !== "FPendiente" && (
-        <p class="texto-inactivo">🚫 Sin acciones disponibles</p>
+        <div class={`mensaje-certificado ${
+          mensajeCertificado?.includes("no ha finalizado") ? "evento-pendiente" :
+          "requisitos-faltantes"
+        }`}>
+          <p class="texto-mensaje">
+            {mensajeCertificado || "🚫 Sin acciones disponibles"}
+          </p>
+        </div>
       )
     }
   </div>
@@ -167,6 +175,46 @@ const {
     font-size: 0.85rem;
     color: #999;
     font-style: italic;
+  }
+  .mensaje-certificado {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid;
+  }
+  .evento-pendiente {
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+  }
+  .evento-pendiente .texto-mensaje {
+    color: #1565c0;
+  }
+  .sin-certificado {
+    background-color: #fafafa;
+    border-color: #e0e0e0;
+  }
+  .sin-certificado .texto-mensaje {
+    color: #616161;
+  }
+  .requisitos-faltantes {
+    background-color: #ffebee;
+    border-color: #ffcdd2;
+  }
+  .requisitos-faltantes .texto-mensaje {
+    color: #c62828;
+  }
+  .icono-info {
+    font-size: 1.2rem;
+  }
+  .texto-mensaje {
+    margin: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
   }
   .btn-certificado:disabled,
   .btn-pago:disabled {
