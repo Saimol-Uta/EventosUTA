@@ -43,9 +43,9 @@ import { getPerfilCompleto } from './Users/get-perfil-completo.action';
 import { actualizarUsuario } from './Users/actualizar-usuario.action';
 import { crearUsuario } from './Users/crear-usuario.action';
 
-import { getDatosInscripcion } from './Eventos';
+import { getDatosInscripcion, getDetallesEventoCompleto } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
-import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser } from './Users';
+import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser, uploadDocumentPdf, getDashboardData } from './Users';
 import { crearCuenta } from './Users/crear-cuenta.action';
 import { modificarCuenta } from './Users/modificar-cuenta.action';
 import { eliminarCuenta } from './Users/eliminar-cuenta.action';
@@ -55,6 +55,7 @@ import { GenerarOrdenDePago } from './OrdenPago/generarOrden.action';
 
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
+import { getEventosFiltrados } from '../actions/Eventos/getFiltros';
 
 import { getOrganizadoresCR } from './Admin/getOrganizadores.action';
 import { eliminarOrganizador } from './Admin/eliminarOrganizador.action';
@@ -86,6 +87,7 @@ export const server = {
     modificarUsuario,
     uploadImageUser, getCuentaById,
     uploadDocumentImage,
+    uploadDocumentPdf,
     crearCuenta,
     modificarCuenta,
     eliminarCuenta,
@@ -152,6 +154,9 @@ export const server = {
     updatePaginaPrincipal,
     getInfo,
     getCuentaByIdSingle,
+    getDashboardData,
+    getEventosFiltrados,
+    getDetallesEventoCompleto,
 
     // Nuevas acciones para Facultades
     getAllFacultades,

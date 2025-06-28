@@ -1,53 +1,69 @@
 ---
 import "../../styles/CarruselUTA.css";
+const { modoAdmin = false } = Astro.props;
 ---
 
 <div class="slider">
   <div class="list">
-    <div class="item active">
-      <div class="image-container">
-        <img src="/img/Home/carrusel_1_1.jpg" alt="Imagen 1" />
-        <div class="image-overlay"></div>
-      </div>
-      <div class="content">
-        <div class="title">Eventos</div>
-        <div class="description">
-          Participa en eventos de todas las áreas de la ingeniería y la
-          tecnología.
-        </div>
-        <a href="/cursosCompleto" class="btn-informacion"> Ver Eventos </a>
-      </div>
-    </div>
+    {[
+      {
+        img: "/img/Home/carrusel_1_1.jpg",
+        alt: "Imagen 1",
+        title: "Eventos",
+        desc: "Participa en eventos de todas las áreas de la ingeniería y la tecnología.",
+        href: "/cursosCompleto",
+        btn: "Ver Eventos",
+        name: "img1"
+      },
+      {
+        img: "/img/Home/carrusel_2.jpeg",
+        alt: "Imagen 2",
+        title: "Cursos",
+        desc: "Expande tus conocimientos con el apoyo de los mejores profesionales",
+        href: "/cursosCompleto",
+        btn: "Ver Cursos",
+        name: "img2"
+      },
+      {
+        img: "/img/Home/carrusel_4.jpeg",
+        alt: "Imagen 3",
+        title: "Certificados",
+        desc: "Impulsa tu currículum con certificados avalados y reconocidos.",
+        href: "/buscarCertificado",
+        btn: "Verificar certificado",
+        name: "img3"
+      },
+    ].map((item, index) => (
+      <div class={`item ${index === 0 ? "active" : ""}`}>
+        <div class="image-container relative group">
+          <img
+            id={item.name}
+            src={item.img}
+            alt={item.alt}
+            class="w-full h-full object-cover"
+          />
+          <div class="image-overlay"></div>
 
-    <div class="item">
-      <div class="image-container">
-        <img src="/img/Home/carrusel_2.jpeg" alt="Imagen 2" />
-        <div class="image-overlay"></div>
-      </div>
-      <div class="content">
-        <div class="title">Cursos</div>
-        <div class="description">
-          Expande tus conocimientos con el apoyo de los mejores profesionales
+          {modoAdmin && (
+            <>
+              <input type="file" class="hidden" accept="image/*" id={`file-${item.name}`} on:change={`previewImage(event, '${item.name}')`} />
+          <button
+  type="button"
+  onclick={`document.getElementById('file-${item.name}').click()`}
+  class="absolute top-2 right-6 bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 text-xs font-semibold rounded-full shadow-md hover:from-red-500 hover:to-red-700 transition duration-300 z-20"
+>
+  ✎ Cambiar imagen
+</button>
+            </>
+          )}
         </div>
-        <a href="/cursosCompleto" class="btn-informacion"> Ver Cursos </a>
-      </div>
-    </div>
-
-    <div class="item">
-      <div class="image-container">
-        <img src="/img/Home/carrusel_4.jpeg" alt="Imagen 3" />
-        <div class="image-overlay"></div>
-      </div>
-      <div class="content">
-        <div class="title">Certificados</div>
-        <div class="description">
-          Impulsa tu currículum con certificados avalados y reconocidos.
+        <div class="content">
+          <div class="title">{item.title}</div>
+          <div class="description">{item.desc}</div>
+          <a href={item.href} class="btn-informacion">{item.btn}</a>
         </div>
-        <a href="/buscarCertificado" class="btn-informacion">
-          Verificar certificado
-        </a>
       </div>
-    </div>
+    ))}
   </div>
 </div>
 
@@ -56,6 +72,29 @@ import "../../styles/CarruselUTA.css";
   <button class="nav-btn" data-index="1"></button>
   <button class="nav-btn" data-index="2"></button>
 </div>
+
+{modoAdmin && (
+  <script type="module">
+    function previewImage(event, id) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const isValid = file.type.startsWith("image/");
+      if (!isValid) {
+        alert("Solo se permiten imágenes.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imgElement = document.getElementById(id);
+        if (imgElement) imgElement.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+)}
+
 
 <script>
   let currentIndex = 0;

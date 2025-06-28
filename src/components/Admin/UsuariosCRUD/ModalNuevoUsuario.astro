@@ -598,20 +598,16 @@ const carreras = carrerasData?.carreras || [];
                     ced_usu: formData.get("ced_usu") as string,
                     cont_cuenta: formData.get("cont_cuenta") as string,
                     nom_usu1: formData.get("nom_usu1") as string,
-                    nom_usu2: (formData.get("nom_usu2") as string) || undefined,
+                    nom_usu2: (formData.get("nom_usu2") as string) || null,
                     ape_usu1: formData.get("ape_usu1") as string,
-                    ape_usu2: (formData.get("ape_usu2") as string) || undefined,
+                    ape_usu2: (formData.get("ape_usu2") as string) || null,
                     fec_nac_usu: formData.get("fec_nac_usu") as string,
-                    num_tel_usu:
-                        (formData.get("num_tel_usu") as string) || undefined,
-                    id_car_per:
-                        (formData.get("id_car_per") as string) || undefined,
-                    rol_cue: formData.get("rol_cue") as string,
-                    enl_ced_cue:
-                        (formData.get("enl_ced_cue") as string) || undefined,
-                    enl_mat_cue:
-                        (formData.get("enl_mat_cue") as string) || undefined,
-                    img_user: (formData.get("img_user") as string) || undefined,
+                    num_tel_usu: (formData.get("num_tel_usu") as string) || null,
+                    id_car_per: (formData.get("id_car_per") as string) || null,
+                    rol_cue: formData.get("rol_cue") as "ESTUDIANTE" | "ADMINISTRADOR" | "USUARIO",
+                    enl_ced_cue: (formData.get("enl_ced_cue") as string) || null,
+                    enl_mat_cue: (formData.get("enl_mat_cue") as string) || null,
+                    img_user: (formData.get("img_user") as string) || null,
                 };
                 try {
                     // Importar módulos dinámicamente para compatibilidad
@@ -627,8 +623,7 @@ const carreras = carrerasData?.carreras || [];
                         },
                     });
 
-                    const { data, error } =
-                        await actions.crearUsuario(userData);
+                    const { data, error } = await actions.crearUsuario(userData);
 
                     if (data?.success) {
                         await Swal.fire({

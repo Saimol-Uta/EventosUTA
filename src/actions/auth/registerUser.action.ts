@@ -43,7 +43,11 @@ export const SignIn = defineAction({
         nombre: z.string().min(1, { message: "El nombre es obligatorio." }),
         apellido: z.string().min(1, { message: "El apellido es obligatorio." }),
         correo: z.string().email({ message: "Debe ser un correo electrónico válido." }),
-        contrasena: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+        contrasena: z.string()
+            .min(6, { message: "La contraseña debe tener al menos 6 caracteres." })
+            .regex(/(?=.*[a-z])/, { message: "Debe contener al menos una letra minúscula." })
+            .regex(/(?=.*[A-Z])/, { message: "Debe contener al menos una letra mayúscula." })
+            .regex(/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/, { message: "Debe contener al menos un carácter especial." }),
         fechNac: z.string()
             .refine((val) => !isNaN(Date.parse(val)), { message: 'Fecha de nacimiento inválida.' })
             .refine((val) => { // Validar edad también en el backend

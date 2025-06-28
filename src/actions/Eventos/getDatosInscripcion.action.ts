@@ -122,3 +122,71 @@ export const getDatosInscripcion = defineAction({
         };
     },
 });
+
+export const getDetallesEventoCompleto = defineAction({
+    accept: 'json',
+    input: z.object({
+        slug: z.string(),
+        idUsuario: z.string().optional(), // El ID del usuario es opcional
+    }),
+    handler: async ({ slug, idUsuario }) => {
+        try {
+            // Consulta para obtener los detalles del evento por su 'slug' (ID)
+            const eventoPromise = prisma.eventos.findUnique({
+                where: { id_eve: slug },
+                include: {
+                    categorias_eventos: true,
+                    organizadores: true,
+                    asignaciones: {
+                        include: {
+                            detalle_asignaciones: {
+                                include: {
+                                    carreras: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            // Si tenemos un usuario, preparamos también la consulta de su inscripción
+            const inscripcionPromise = idUsuario
+                ? prisma.inscripciones.findUnique({
+                    where: {
+                        id_usu_ins_id_eve_ins: { // Usando el índice único que tienes
+                            id_usu_ins: idUsuario,
+                            id_eve_ins: slug,
+                        },
+                    },
+                })
+                : Promise.resolve(null); // Si no hay usuario, resolvemos a null
+
+            const usuarioPromise = idUsuario
+                ? prisma.usuarios.findUnique({ where: { cor_cue: idUsuario } })
+                : Promise.resolve(null);
+
+            // Ejecutamos las 3 promesas en paralelo
+            const [evento, inscripcion, usuario] = await Promise.all([
+                eventoPromise,
+                inscripcionPromise,
+                usuarioPromise
+            ]);
+
+            if (!evento) {
+                throw new Error("Evento no encontrado");
+            }
+
+            // Devolvemos todo en un solo objeto
+            return {
+                success: true,
+                data: {
+                    evento,
+                    inscripcion,
+                    usuario  // Será null si el usuario no está logueado o no está inscrito
+                },
+            };
+        } catch (error) {
+            return { success: false, error: error instanceof Error ? error.message : "Error desconocido" };
+        }
+    },
+});

@@ -13,7 +13,7 @@ const { data: resultProximos } = await Astro.callAction(
 
 const upcomingEvents = resultProximos?.eventos || [];
 
-function formatearFecha(fecha) {
+function formatearFecha(fecha = ""): string {
   const date = new Date(fecha);
   return date.toLocaleString("es-EC", {
     weekday: "short",
@@ -45,7 +45,7 @@ function formatearFecha(fecha) {
                 const slug = titulo.toLowerCase().replace(/\s+/g, '-');
                 const imagen = e.img_eve;
                 const estado = "Próximo";
-                const horas = formatearFecha(e.fec_ini_eve);
+                const horas = formatearFecha(e.fec_ini_eve.toISOString());
 
                 return (
                   <EventoCard
