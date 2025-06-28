@@ -24,8 +24,12 @@ export const getDashboardData = defineAction({
     }),
     handler: async ({ idUsuario }) => {
         // 1. Preparamos la promesa para los eventos próximos (para todos los visitantes)
+        const fechaActual = new Date();
         const eventosProximosPromise = prisma.eventos.findMany({
-            where: { fec_ini_eve: { gte: new Date() } },
+            where: { 
+                fec_ini_eve: { gte: fechaActual },
+                estado_evento: 'ACTIVO' // Solo eventos activos
+            },
             orderBy: { fec_ini_eve: 'asc' },
             take: 4, // Limitar a 4, como en tu frontend original
         });
@@ -57,19 +61,58 @@ export const getDashboardData = defineAction({
         });
 
         // Promesa para los CERTIFICADOS del usuario
-        // Es una consulta a la misma tabla 'inscripciones', pero filtrando
-        // aquellas que SÍ tienen un enlace de certificado.
+        // Aplicamos la misma lógica que en historial.astro
         const certificadosPromise = prisma.inscripciones.findMany({
             where: {
                 id_usu_ins: idUsuario,
-                enl_cer_par: {
-                    not: null, // La clave: solo inscripciones con un enlace de certificado.
-                },
+                est_par: 'APROBADA', // Solo participantes aprobados
+                enl_cer_par: { not: null }, // Solo con certificado generado
             },
             include: {
-                eventos: true, // Incluimos los datos del evento para mostrar el nombre.
+                eventos: {
+                    include: {
+                        categorias_eventos: true, // Incluir la categoría para verificar si otorga certificados
+                    }
+                },
             },
-            take: 4, // Limitar a 4, como en tu frontend
+            orderBy: { fec_cer_par: 'desc' },
+        }).then(inscripciones => {
+            // Filtrar solo aquellas donde:
+            // 1. El evento ya finalizó
+            // 2. La categoría otorga certificados
+            // 3. Cumple los requisitos de la categoría
+            const fechaActual = new Date();
+            
+            return inscripciones.filter(inscripcion => {
+                const evento = inscripcion.eventos;
+                const categoria = evento.categorias_eventos;
+                
+                // Verificar si el evento ya finalizó
+                const eventoFinalizado = evento.fec_fin_eve ? evento.fec_fin_eve < fechaActual : false;
+                if (!eventoFinalizado) return false;
+                
+                // Verificar si la categoría otorga certificados
+                if (!categoria.brinda_certificado) return false;
+                
+                // Verificar requisitos de la categoría
+                const asistenciaNum = inscripcion.asi_par ?? 0;
+                const calificacionNum = inscripcion.not_par ? Number(inscripcion.not_par) : 0.0;
+                
+                const asistenciaMinimaRequerida = categoria.asi_cat ?? 70;
+                const puntajeMinimoRequerido = categoria.pun_apr_cat ? Number(categoria.pun_apr_cat) : 7.0;
+                
+                // Verificar asistencia si es requerida
+                if (categoria.requiere_asistencia && asistenciaNum < asistenciaMinimaRequerida) {
+                    return false;
+                }
+                
+                // Verificar puntaje si es requerido
+                if (categoria.requiere_puntaje && calificacionNum < puntajeMinimoRequerido) {
+                    return false;
+                }
+                
+                return true;
+            }).slice(0, 4); // Limitar a 4 para el dashboard
         });
 
 

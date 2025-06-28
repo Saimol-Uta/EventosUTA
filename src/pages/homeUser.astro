@@ -59,12 +59,18 @@ const eventosUsuario = eventosUsuarioRaw.map(inscripcion => ({
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card title="Eventos Próximos">
               <div class="flex flex-col gap-3">
-                {upcomingEvents.slice(0, 4).map((evento) => (
-                  <div class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300">
-                    <strong class="block text-gray-800 text-lg font-semibold mb-1">{evento.nom_eve}</strong>
-                    <span class="text-sm text-gray-600 italic">Inicio: {new Date(evento.fec_ini_eve).toLocaleDateString()}</span>
-                  </div>
-                ))}
+                {upcomingEvents.length > 0 ? (
+                  upcomingEvents.slice(0, 4).map((evento) => (
+                    <div class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300">
+                      <strong class="block text-gray-800 text-lg font-semibold mb-1">{evento.nom_eve}</strong>
+                      <span class="text-sm text-gray-600 italic">Inicio: {new Date(evento.fec_ini_eve).toLocaleDateString()}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p class="text-gray-700 bg-gray-50 border border-dashed border-gray-400 rounded-xl p-4 text-center">
+                    No hay eventos próximos disponibles.
+                  </p>
+                )}
                 {upcomingEvents.length > 4 && (
                   <a href="/eventosProximos" class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit">Ver más...</a>
                 )}
@@ -90,9 +96,9 @@ const eventosUsuario = eventosUsuarioRaw.map(inscripcion => ({
                     No tienes certificados para mostrar.
                   </p>
                 )}
-                {certificates.length > 4 && (
-                  <a href="/User/certificadosUsuario" class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit">Ver más...</a>
-                )}
+                <a href="/User/historial" class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit mt-2">
+                  Ver más
+                </a>
               </div>
             </Card>
           </div>
@@ -160,15 +166,15 @@ const eventosUsuario = eventosUsuarioRaw.map(inscripcion => ({
             document.querySelectorAll(".js-view-cert").forEach((link) => {
                 link.addEventListener("click", async (event) => {
                     event.preventDefault();
-                    const targetLink = event.currentTarget as HTMLAnchorElement;
-                    const pdfUrl = targetLink.href;
+                    const targetElement = event.currentTarget as HTMLElement;
+                    const pdfUrl = targetElement.getAttribute('data-url');
 
                     if (!pdfUrl) {
                         alert("Este certificado no tiene un enlace válido.");
                         return;
                     }
 
-                    const originalText = targetLink.textContent;
+                    const originalText = targetElement.textContent;
 
                     try {
                         // Llamamos a la nueva action, pasándole la URL del enlace
@@ -215,7 +221,7 @@ const eventosUsuario = eventosUsuarioRaw.map(inscripcion => ({
                             "error",
                         );
                     } finally {
-                        targetLink.textContent = originalText;
+                        targetElement.textContent = originalText;
                     }
                 });
             });
