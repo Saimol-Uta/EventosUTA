@@ -15,7 +15,7 @@ const { data: certificadosData } = await Astro.callAction(
   { idUsuario: session.user.id }
 );
 
-const certificados = certificadosData?.enlaces ?? [];
+const certificados = certificadosData?.certificados ?? [];
 ---
 
 <html lang="es">
@@ -34,7 +34,7 @@ const certificados = certificadosData?.enlaces ?? [];
         certificados.length > 0 ? (
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {
-              certificados.map((enlace, i) => (
+              certificados.map((certificado, i) => (
                 <div class="bg-white rounded-xl shadow-lg p-4 border border-gray-200">
                   <h2 class="text-xl font-semibold text-gray-800 mb-2">
                     Certificado #{i + 1}
@@ -43,7 +43,7 @@ const certificados = certificadosData?.enlaces ?? [];
                     Curso o evento completado exitosamente.
                   </p>
                   <a
-                    href={enlace}
+                    href={`/certificados/${certificado.id_ins}`}
                     target="_blank"
                     class="text-red-700 hover:underline font-medium"
                   >
