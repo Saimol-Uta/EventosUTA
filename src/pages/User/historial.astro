@@ -17,6 +17,7 @@ type TarjetaEventoProps = {
   eventoId: string;
   inscripcionId: string; // <-- Propiedad añadida
   estadoPago: string; // <-- Propiedad añadida
+  mensajeCertificado?: string; // <-- Nueva propiedad para el mensaje
 };
 
 const session = await getSession(Astro.request);
@@ -32,7 +33,11 @@ if (usuarioId) {
       id_usu_ins: usuarioId, // Buscamos por el ID de usuario (su correo)
     },
     include: {
-      eventos: true, // Incluimos los datos del evento relacionado
+      eventos: {
+        include: {
+          categorias_eventos: true, // Incluimos la categoría del evento
+        }
+      }
     },
     orderBy: {
       eventos: {
@@ -50,12 +55,31 @@ if (usuarioId) {
     const fechaActual = new Date();
     const eventoFinalizado = fechaFinEvento ? fechaFinEvento < fechaActual : false;
 
+    // Obtenemos la información de la categoría del evento
+    const categoria = inscripcion.eventos.categorias_eventos;
+    const requiereAsistencia = categoria.requiere_asistencia ?? false;
+    const requierePuntaje = categoria.requiere_puntaje ?? false;
+    const brindaCertificado = categoria.brinda_certificado ?? false;
+
     // Lógica para determinar si el certificado está disponible
-    const esCertificadoDisponible =
-      eventoFinalizado && // El evento debe haber finalizado
-      asistenciaNum >= 70 &&
-      calificacionNum >= 7.0 &&
-      inscripcion.est_par === "APROBADA";
+    let esCertificadoDisponible = false;
+    let mensajeCertificado = "";
+    
+    // Todos los eventos generan certificado de participación
+    if (inscripcion.est_par !== "APROBADA") {
+      mensajeCertificado = "❌ Sin certificado: Necesitas estar aprobado para obtener el certificado";
+    } else if (!eventoFinalizado) {
+      const fechaFin = fechaFinEvento ? fechaFinEvento.toLocaleDateString("es-EC") : "por definir";
+      mensajeCertificado = `⏳ Sin certificado: El evento aún no ha finalizado (termina el ${fechaFin})`;
+    } else if (requiereAsistencia && asistenciaNum < 70) {
+      mensajeCertificado = `❌ Sin certificado: No cumples la asistencia mínima requerida (tienes ${asistenciaNum}%, necesitas 70%)`;
+    } else if (requierePuntaje && calificacionNum < 7.0) {
+      mensajeCertificado = `❌ Sin certificado: No cumples la calificación mínima requerida (tienes ${calificacionNum.toFixed(1)}, necesitas 7.0)`;
+    } else {
+      // Si llegamos aquí, se cumplen todas las condiciones
+      esCertificadoDisponible = true;
+      mensajeCertificado = "✅ Certificado disponible: Cumples todos los requisitos";
+    }
 
     const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
 
@@ -73,6 +97,7 @@ if (usuarioId) {
       eventoId: inscripcion.id_eve_ins,
       inscripcionId: inscripcion.id_ins,
       estadoPago: inscripcion.est_ins,
+      mensajeCertificado: mensajeCertificado,
     };
   });
 }
