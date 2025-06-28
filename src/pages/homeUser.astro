@@ -160,15 +160,15 @@ const eventosUsuario = eventosUsuarioRaw.map(inscripcion => ({
             document.querySelectorAll(".js-view-cert").forEach((link) => {
                 link.addEventListener("click", async (event) => {
                     event.preventDefault();
-                    const targetLink = event.currentTarget as HTMLAnchorElement;
-                    const pdfUrl = targetLink.href;
+                    const targetElement = event.currentTarget as HTMLElement;
+                    const pdfUrl = targetElement.getAttribute('data-url');
 
                     if (!pdfUrl) {
                         alert("Este certificado no tiene un enlace válido.");
                         return;
                     }
 
-                    const originalText = targetLink.textContent;
+                    const originalText = targetElement.textContent;
 
                     try {
                         // Llamamos a la nueva action, pasándole la URL del enlace
@@ -215,7 +215,7 @@ const eventosUsuario = eventosUsuarioRaw.map(inscripcion => ({
                             "error",
                         );
                     } finally {
-                        targetLink.textContent = originalText;
+                        targetElement.textContent = originalText;
                     }
                 });
             });
