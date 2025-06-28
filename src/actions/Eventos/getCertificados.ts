@@ -25,13 +25,16 @@ export const getCertificadosPorUsuario = defineAction({
             const inscripcionesConCertificado = await prisma.inscripciones.findMany({
                 where: {
                     id_usu_ins: idUsuario,
-                    est_par: 'APROBADA', // Solo participantes aprobados
+                    est_par: 'APROBADA',
                     OR: [
                         { enl_cer_par: { not: null } }, // Certificados ya generados
                         { 
-                            // Cualquier inscripción aprobada puede generar certificado
-                            // Las condiciones específicas se evalúan después
-                            est_par: 'APROBADA'
+                            // Solo eventos que brindan certificado y están aprobados
+                            eventos: {
+                                categorias_eventos: {
+                                    brinda_certificado: true
+                                }
+                            }
                         }
                     ]
                 },
@@ -64,6 +67,11 @@ export const getCertificadosPorUsuario = defineAction({
                 if (!eventoFinalizado) return false;
 
                 const categoria = inscripcion.eventos.categorias_eventos;
+                const brindaCertificado = categoria?.brinda_certificado ?? false;
+                
+                // Si la categoría no brinda certificado, no está disponible
+                if (!brindaCertificado) return false;
+
                 const requiereAsistencia = categoria?.requiere_asistencia ?? false;
                 const requierePuntaje = categoria?.requiere_puntaje ?? false;
                 const asistencia = inscripcion.asi_par ?? 0;
