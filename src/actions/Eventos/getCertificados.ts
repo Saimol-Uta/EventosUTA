@@ -50,6 +50,8 @@ export const getCertificadosPorUsuario = defineAction({
                                     requiere_asistencia: true,
                                     requiere_puntaje: true,
                                     brinda_certificado: true,
+                                    asi_cat: true, // Asistencia mínima de la categoría
+                                    pun_apr_cat: true, // Puntaje mínimo de la categoría
                                 }
                             }
                         }
@@ -76,15 +78,19 @@ export const getCertificadosPorUsuario = defineAction({
                 const requierePuntaje = categoria?.requiere_puntaje ?? false;
                 const asistencia = inscripcion.asi_par ?? 0;
                 const calificacion = inscripcion.not_par ? Number(inscripcion.not_par) : 0;
+                
+                // Obtener los valores específicos de la categoría
+                const asistenciaMinimaRequerida = categoria?.asi_cat ?? 70;
+                const puntajeMinimoRequerido = categoria?.pun_apr_cat ? Number(categoria.pun_apr_cat) : 7.0;
 
                 // Si no requiere asistencia ni puntaje, está disponible (solo necesita haber finalizado)
                 if (!requiereAsistencia && !requierePuntaje) {
                     return true;
                 }
 
-                // Si requiere asistencia y/o puntaje, verificar que cumple
-                const cumpleAsistencia = !requiereAsistencia || asistencia >= 70;
-                const cumplePuntaje = !requierePuntaje || calificacion >= 7.0;
+                // Si requiere asistencia y/o puntaje, verificar que cumple con los valores de la categoría
+                const cumpleAsistencia = !requiereAsistencia || asistencia >= asistenciaMinimaRequerida;
+                const cumplePuntaje = !requierePuntaje || calificacion >= puntajeMinimoRequerido;
                 
                 return cumpleAsistencia && cumplePuntaje;
             });
