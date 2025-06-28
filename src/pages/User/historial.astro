@@ -18,6 +18,10 @@ type TarjetaEventoProps = {
   inscripcionId: string; // <-- Propiedad añadida
   estadoPago: string; // <-- Propiedad añadida
   mensajeCertificado?: string; // <-- Nueva propiedad para el mensaje
+  asistenciaMinimaRequerida?: number; // <-- Nueva propiedad
+  puntajeMinimoRequerido?: number; // <-- Nueva propiedad
+  requiereAsistencia?: boolean; // <-- Nueva propiedad
+  requierePuntaje?: boolean; // <-- Nueva propiedad
 };
 
 const session = await getSession(Astro.request);
@@ -60,28 +64,44 @@ if (usuarioId) {
     const requiereAsistencia = categoria.requiere_asistencia ?? false;
     const requierePuntaje = categoria.requiere_puntaje ?? false;
     const brindaCertificado = categoria.brinda_certificado ?? false;
+    
+    // Obtenemos los valores específicos de la categoría
+    const asistenciaMinimaRequerida = categoria.asi_cat ?? 70; // Valor por defecto 70% si no está definido
+    const puntajeMinimoRequerido = (categoria.pun_apr_cat as Decimal)?.toNumber() ?? 7.0; // Valor por defecto 7.0 si no está definido
 
     // Lógica para determinar si el certificado está disponible
     let esCertificadoDisponible = false;
     let mensajeCertificado = "";
+    let estadoEvento = "incompleto";
     
-    // Todos los eventos generan certificado de participación
+    // Primero verificamos si cumple los requisitos básicos
     if (inscripcion.est_par !== "APROBADA") {
       mensajeCertificado = "❌ Sin certificado: Necesitas estar aprobado para obtener el certificado";
+      estadoEvento = "incompleto";
     } else if (!eventoFinalizado) {
       const fechaFin = fechaFinEvento ? fechaFinEvento.toLocaleDateString("es-EC") : "por definir";
       mensajeCertificado = `⏳ Sin certificado: El evento aún no ha finalizado (termina el ${fechaFin})`;
-    } else if (requiereAsistencia && asistenciaNum < 70) {
-      mensajeCertificado = `❌ Sin certificado: No cumples la asistencia mínima requerida (tienes ${asistenciaNum}%, necesitas 70%)`;
-    } else if (requierePuntaje && calificacionNum < 7.0) {
-      mensajeCertificado = `❌ Sin certificado: No cumples la calificación mínima requerida (tienes ${calificacionNum.toFixed(1)}, necesitas 7.0)`;
+      estadoEvento = "incompleto";
+    } else if (requiereAsistencia && asistenciaNum < asistenciaMinimaRequerida) {
+      mensajeCertificado = `❌ Sin certificado: No cumples la asistencia mínima requerida (tienes ${asistenciaNum}%, necesitas ${asistenciaMinimaRequerida}%)`;
+      estadoEvento = "incompleto";
+    } else if (requierePuntaje && calificacionNum < puntajeMinimoRequerido) {
+      mensajeCertificado = `❌ Sin certificado: No cumples la calificación mínima requerida (tienes ${calificacionNum.toFixed(1)}, necesitas ${puntajeMinimoRequerido.toFixed(1)})`;
+      estadoEvento = "incompleto";
     } else {
-      // Si llegamos aquí, se cumplen todas las condiciones
-      esCertificadoDisponible = true;
-      mensajeCertificado = "✅ Certificado disponible: Cumples todos los requisitos";
+      // Cumple todos los requisitos básicos
+      estadoEvento = "completo";
+      
+      if (!brindaCertificado) {
+        // Si la categoría no brinda certificado, pero cumplió todos los requisitos
+        mensajeCertificado = "ℹ️ Evento completado: Esta categoría no entrega certificado";
+        esCertificadoDisponible = false;
+      } else {
+        // Si la categoría brinda certificado y cumple todos los requisitos
+        mensajeCertificado = "✅ Certificado disponible: Cumples todos los requisitos";
+        esCertificadoDisponible = true;
+      }
     }
-
-    const estadoEvento = esCertificadoDisponible ? "completo" : "incompleto";
 
     return {
       nombre: inscripcion.eventos.nom_eve,
@@ -98,6 +118,10 @@ if (usuarioId) {
       inscripcionId: inscripcion.id_ins,
       estadoPago: inscripcion.est_ins,
       mensajeCertificado: mensajeCertificado,
+      asistenciaMinimaRequerida: asistenciaMinimaRequerida,
+      puntajeMinimoRequerido: puntajeMinimoRequerido,
+      requiereAsistencia: requiereAsistencia,
+      requierePuntaje: requierePuntaje,
     };
   });
 }
