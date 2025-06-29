@@ -27,9 +27,11 @@ export const crearEvento = defineAction({
         es_gratuito: z.coerce.boolean().optional(),
         requiere_carta: z.coerce.boolean().optional(),
         es_destacado: z.coerce.boolean().optional(),
-        carta_motivacion: z.string().optional(), fecha_inicio_inscripciones: z.string().transform(str => new Date(str)),
+        carta_motivacion: z.string().optional(),
+        fecha_inicio_inscripciones: z.string().transform(str => new Date(str)),
         fecha_fin_inscripciones: z.string().transform(str => new Date(str)),
         asignacion_id: z.string().uuid().optional(),
+        cup_max: z.coerce.number().int().min(1),
     }),
     handler: async (form, { request }) => {
         try {
@@ -94,7 +96,8 @@ export const crearEvento = defineAction({
                     des_eve: form.descripcion,
                     id_cat_eve: form.categoria,
                     fec_ini_eve: form.fecha_inicio,
-                    fec_fin_eve: form.fecha_fin, fec_ini_ins_eve: form.fecha_inicio_inscripciones,
+                    fec_fin_eve: form.fecha_fin,
+                    fec_ini_ins_eve: form.fecha_inicio_inscripciones,
                     fec_fin_ins_eve: form.fecha_fin_inscripciones,
                     dur_eve: form.duracion,
                     are_eve: form.area,
@@ -107,6 +110,7 @@ export const crearEvento = defineAction({
                     es_destacado: form.es_destacado ?? false,
                     car_mot_eve: form.carta_motivacion,
                     id_asi_eve: form.asignacion_id,
+                    cup_max: form.cup_max
                 }
             });
 
