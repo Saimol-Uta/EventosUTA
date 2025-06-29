@@ -26,8 +26,10 @@ const { data: responseData } = await Astro.callAction(actions.getEventosFiltrado
 
 // 3. Extraemos los datos de la nueva estructura de respuesta { eventos, totalEventos }.
 //    La información ahora viene dentro de la propiedad 'data' de la respuesta.
-const eventosPagina = (responseData?.data?.eventos || []) as Eventos[];
+const eventosPagina = (responseData?.data?.eventos || []) as unknown as Eventos[];
 const totalEventos = responseData?.data?.totalEventos || 0;
+console.log("Total de eventos:", eventosPagina);
+
 
 
 // 4. Calculamos el total de páginas USANDO EL DATO CORRECTO que viene del backend.
@@ -51,6 +53,8 @@ function construirUrl(pagina: number) {
 <div class="contenedor">
   {eventosPagina.length > 0 ? (
     eventosPagina.map((evento) => (
+
+        
       <EventoCard
         imagen={evento.img_eve}
         titulo={evento.nom_eve}
@@ -60,7 +64,7 @@ function construirUrl(pagina: number) {
         modoAdmin ={modoAdmin}
         idEvento={evento.id_eve}
         esDestacado={evento.es_destacado}
-       
+        precio={evento.precio ?? 0}
       />
       
     ))

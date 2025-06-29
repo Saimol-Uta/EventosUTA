@@ -614,16 +614,25 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         const duracion = modal.querySelector("#evento-duracion");
         if (duracion) {
             if (evento.dur_eve) {
-                // Mostrar duración en minutos y convertir a horas si es necesario
-                if (evento.dur_eve >= 60) {
-                    const horas = Math.floor(evento.dur_eve / 60);
-                    const minutos = evento.dur_eve % 60;
-                    duracion.textContent =
-                        minutos > 0
-                            ? `${horas}h ${minutos}min (${evento.dur_eve} minutos)`
-                            : `${horas}h (${evento.dur_eve} minutos)`;
+                // El campo dur_eve está en horas
+                const horas = evento.dur_eve;
+                if (horas < 24) {
+                    // Menos de 24 horas
+                    const horasRedondeadas = Math.round(horas * 100) / 100;
+                    if (horasRedondeadas === 1) {
+                        duracion.textContent = "1 hora";
+                    } else {
+                        duracion.textContent = `${horasRedondeadas} horas`;
+                    }
                 } else {
-                    duracion.textContent = `${evento.dur_eve} minutos`;
+                    // 24 horas o más, mostrar días y horas
+                    const dias = Math.floor(horas / 24);
+                    const horasRestantes = Math.round(horas % 24);
+                    if (horasRestantes === 0) {
+                        duracion.textContent = `${dias} ${dias === 1 ? "día" : "días"}`;
+                    } else {
+                        duracion.textContent = `${dias} ${dias === 1 ? "día" : "días"} ${horasRestantes}h`;
+                    }
                 }
             } else {
                 duracion.textContent = "No especificada";
