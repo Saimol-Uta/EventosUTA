@@ -45,5 +45,6 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, { id_fac });
         imagenVision={pagina?.data?.img_vis ?? ""}
         modoAdmin={esAdmin}
     />
+    <div class="h-15 bg-white"></div>
     <Footer />
 </Layout>

@@ -38,43 +38,6 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
 }
 ---
 
-<section class="py-12" style="background-color: rgb(245, 245, 245)">
-  <div class="flex justify-between max-w-4xl mx-auto">
-    <div>
-      <h2 class="text-4xl font-bold text-red-900 mb-8">Equipo Académico</h2>
-    </div>
-  </div>
-  <div class="flex flex-wrap justify-center gap-6">
-    <TarjetaPersona
-      titulo="Ing."
-      nombre={decano}
-      master=", Mg."
-      rol="Decano"
-      facultad="FISEI"
-      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/franklin_mayorga.png"
-      modoEdit={modoAdmin}
-    />
-    <TarjetaPersona
-      titulo="Ing."
-      nombre={subdecano}
-      master=", Mg."
-      rol="Subdecano"
-      facultad="FISEI"
-      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/luis_morales.png"
-      modoEdit={modoAdmin}
-    />
-    <TarjetaPersona
-      titulo="Ing."
-      nombre="Daniel"
-      apellido="Jerez"
-      master=", Mg."
-      rol="Responsable"
-      facultad="FISEI"
-      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/daniel_jerez.jpeg"
-      modoEdit={modoAdmin}
-    />
-  </div>
-</section>
 
 <section class="py-12" style="background-color: rgb(245, 245, 245)">
   <div class="flex justify-between max-w-4xl mx-auto">
@@ -202,7 +165,45 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
   </div>
 </section>
 
-<section class="py-12" style="background-color: rgb(245, 245, 245)">
+<section class="py-12" style="background-color: white">
+  <div class="flex justify-between max-w-4xl mx-auto">
+    <div>
+      <h2 class="text-4xl font-bold text-red-900 mb-8">Equipo Académico</h2>
+    </div>
+  </div>
+  <div class="flex flex-wrap justify-center gap-6">
+    <TarjetaPersona
+      titulo="Ing."
+      nombre={decano}
+      master=", Mg."
+      rol="Decano"
+      facultad="FISEI"
+      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/franklin_mayorga.png"
+      modoEdit={modoAdmin}
+    />
+    <TarjetaPersona
+      titulo="Ing."
+      nombre={subdecano}
+      master=", Mg."
+      rol="Subdecano"
+      facultad="FISEI"
+      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/luis_morales.png"
+      modoEdit={modoAdmin}
+    />
+    <TarjetaPersona
+      titulo="Ing."
+      nombre="Daniel"
+      apellido="Jerez"
+      master=", Mg."
+      rol="Responsable"
+      facultad="FISEI"
+      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/daniel_jerez.jpeg"
+      modoEdit={modoAdmin}
+    />
+  </div>
+</section>
+
+<section style="background-color: rgb(245, 245, 245)">
 
   <div>
     <TarjetaConImagen
@@ -213,6 +214,7 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
       modoEdicion={modoAdmin}
     />
   </div>
+  <div class="h-15"></div>
   <div>
     <TarjetaConImagen
       titulo="VISIÓN"
@@ -224,4 +226,5 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
     />
   </div>
 </section>
+
 <script src="/js/eventosFavoritos.js" defer is:inline></script>

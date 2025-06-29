@@ -14,12 +14,12 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
 ---
 
 <section
-  class="relative h-[480px] w-full bg-cover bg-center py-16 px-6 lg:px-24 text-white my-12"
+  class="relative h-[480px] w-full bg-cover bg-center py-16 px-6  text-white"
   style={`background-image: url('${imagenUrl}');`}
   data-animated-section
 >
   <!-- Capa oscura encima de la imagen -->
-  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="absolute top-0 left-0 right-0 bottom-0 bg-black/50"></div>
 
   <div
     class="relative z-10 max-w-6xl mx-auto flex flex-col my-18 items-center gap-12"
@@ -46,7 +46,7 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
               <textarea
                 id={`contenido-${columna}`}
                 name={columna}
-                class="w-full bg-transparent p-2 text-lg focus:outline-none resize-none placeholder:text-gray-300 border-b border-white text-white drop-shadow text-animate animate-20"
+                class="w-full bg-transparent p-2 text-lg focus:outline-none resize-none placeholder:text-gray-300 border-b border-white text-white drop-shadow text-animate animate-60"
                 rows="6"
                 required
                 placeholder="Escribe algo"
@@ -62,7 +62,7 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
               </button>
             </>
           ) : (
-            <p class="text-2xl font-bold leading-relaxed whitespace-pre-line drop-shadow-lg text-animate animate-20 w-full">
+            <p class="text-2xl font-bold leading-relaxed whitespace-pre-line drop-shadow-lg text-animate animate-60 w-full">
               {contenido}
             </p>
           )
