@@ -3,15 +3,11 @@ const { isLoggedIn } = Astro.locals;
 ---
 
 <footer
-    style="background-color:rgb(34, 34, 34); color: white; padding: 40px 60px;"
+    style="background-color:rgb(34, 34, 34); color: white; padding: 40px 80px;"
 >
     <style>
         footer a {
             transition: color 0.3s ease;
-        }
-
-        footer a:hover {
-            color: #c62828;
         }
 
         footer svg {
@@ -22,7 +18,7 @@ const { isLoggedIn } = Astro.locals;
 
         footer a:hover svg {
             transform: scale(1.1);
-            fill: #c62828;
+            fill: rgb(108, 19, 19);
         }
 
         .footer-cursos li {
@@ -40,48 +36,57 @@ const { isLoggedIn } = Astro.locals;
             bottom: -2px;
             width: 0%;
             height: 2px;
-            background-color: #c62828;
+            background-color: rgb(108, 19, 19);
             transition: width 0.3s ease;
         }
 
         .footer-cursos a:hover::after {
             width: 100%;
         }
+
+        .titulo{
+            color: rgb(139, 22, 22); 
+            margin-bottom: 20px; 
+            letter-spacing: 1px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+				.texto {
+					color: white;
+				}
+
+				.btn-cambios {
+					background-color: #cd982e; color: white; font-weight: 500; padding: 14px 28px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease; margin-right: 30px;
+				}
+
+				.btn-cambios:hover {
+					background-color: white;
+					color: rgb(108, 19, 19);
+				}
+
+				.derechos {
+					text-align: center; font-size: 12px; color: rgba(255, 255, 255, 0.5);
+				}
     </style>
 
     <div
-        style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px;"
+        style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px; "
     >
-       
         <div>
-            <h3
-                style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;"
-            >
-                CONTACTO
-            </h3>
-            <p style="margin: 10px 0;">
-                <span style="margin-right: 10px;">📍</span>Av. Los Chasquis y
-                Río Guayllabamba
-            </p>
-            <p style="margin: 10px 0;">
-                <span style="margin-right: 10px;">✉️</span
-                >talleresfisei@uta.edu.ec
-            </p>
-            <p style="margin: 10px 0;">
-                <span style="margin-right: 10px;">✉️</span>ctt.fisei@uta.edu.ec
-            </p>
-            <p style="margin: 10px 0;">
-                <span style="margin-right: 10px;">💻</span><a
-                    href="#"
-                    style="color: #C62828; text-decoration: none;"
-                    >Plataforma Educativa</a
-                >
-            </p>
+            <h3 class="titulo">CONTACTO</h3>
+						<p class="texto" style="margin: 0 0 8px 0;">Av. Los Chásquis y Río Guayllabamba</p>
+            <p class="texto">talleresfisei@uta.edu.ec</p>
+        </div>
 
+        <dir>
+            <h3 class="titulo" style="text-align: center;">
+                REDES
+            </h3>
             <div style="margin-top: 20px; display: flex; gap: 12px;">
             
                 <a
-                    href="https://twitter.com/tu_usuario"
+                    href="https://x.com/UTecnicaAmbato"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -97,7 +102,6 @@ const { isLoggedIn } = Astro.locals;
                     </svg>
                 </a>
 
-             
                 <a
                     href="https://www.facebook.com/UTAFISEI"
                     target="_blank"
@@ -111,24 +115,6 @@ const { isLoggedIn } = Astro.locals;
                     >
                         <path
                             d="M22 12a10 10 0 10-11.63 9.87v-6.99h-2.6v-2.88h2.6V9.41c0-2.58 1.54-4.01 3.9-4.01 1.13 0 2.3.2 2.3.2v2.53h-1.3c-1.28 0-1.68.79-1.68 1.6v1.92h2.85l-.46 2.88h-2.39v6.99A10 10 0 0022 12z"
-                        ></path>
-                    </svg>
-                </a>
-
-            
-                <a
-                    href="https://linkedin.com/in/tu_usuario"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <svg
-                        width="24"
-                        height="24"
-                        fill="white"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            d="M19 0h-14C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM7.1 20H4V9h3.1v11zM5.5 7.7c-.99 0-1.8-.81-1.8-1.8S4.51 4.1 5.5 4.1s1.8.81 1.8 1.8-.81 1.8-1.8 1.8zM20 20h-3v-5.6c0-1.34-.03-3.07-1.87-3.07-1.88 0-2.17 1.46-2.17 2.97V20h-3V9h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.03 0 3.59 1.99 3.59 4.58V20z"
                         ></path>
                     </svg>
                 </a>
@@ -150,20 +136,18 @@ const { isLoggedIn } = Astro.locals;
                     </svg>
                 </a>
             </div>
-        </div>
+        </dir>
 
-       
     
         <div>
-           {
-               !isLoggedIn ? (
+						{
+								!isLoggedIn ? (
                     <p></p>
                 ) : (
-                    <h3 style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;"> INFORMACIÓN
+                    <h3 class="titulo"> SUGERENCIAS
             </h3>
-               <p style="margin-bottom: 20px;">Danos tus recomendaciones</p>
                     <a href="/Formularios/FormularioSolicitudCambioUsuario"
-                        style="background-color: #C62828; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease;">
+                        class="btn-cambios">
                         SOLICITAR CAMBIOS
                     </a>
                 )
@@ -171,20 +155,11 @@ const { isLoggedIn } = Astro.locals;
         </div>
     </div>
 
+    <div class="derechos" style="margin: 12px 0 8px 0;">
+        Grupo 3 MYCS © 2025. Todos los derechos reservados.
+    </div>
 
-    <hr
-        style="
-  margin: 40px auto;
-  border: none;
-  height: 3px;
-  max-width: 400px;
-  background: linear-gradient(to right, transparent, #C62828, transparent);
-  border-radius: 3px;
-"
-        aria-hidden="true"
-    />
-
-    <div style="text-align: center; font-size: 14px;">
-        © Copyright © Universidad Técnica de Ambato
+    <div class="derechos">
+        UNIVERSIDAD TÉCNICA DE AMBATO U.T.A.
     </div>
 </footer>
