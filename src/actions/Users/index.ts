@@ -1,7 +1,5 @@
 export * from './actualizar-usuario.action';
-export * from './crear-cuenta.action';
 export * from './crear-usuario.action';
-export * from './eliminar-cuenta.action';
 export * from './eliminar-usuario.action';
 export * from './get-cambios-by-user.action';
 export * from './get-cuenta-byID-single.action';

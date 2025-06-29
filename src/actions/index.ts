@@ -46,9 +46,7 @@ import { crearUsuario } from './Users/crear-usuario.action';
 import { getDatosInscripcion, getDetallesEventoCompleto } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
 import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser, uploadDocumentPdf, getDashboardData } from './Users';
-import { crearCuenta } from './Users/crear-cuenta.action';
 import { modificarCuenta } from './Users/modificar-cuenta.action';
-import { eliminarCuenta } from './Users/eliminar-cuenta.action';
 import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
 import { GenerarCertificado, generarCertificadoPublico, recuperarCertificadoDesdeUrl } from './Certificados/certificado.action';
 import { GenerarOrdenDePago } from './OrdenPago/generarOrden.action';
@@ -88,9 +86,7 @@ export const server = {
     uploadImageUser, getCuentaById,
     uploadDocumentImage,
     uploadDocumentPdf,
-    crearCuenta,
     modificarCuenta,
-    eliminarCuenta,
     
 
 
