@@ -224,17 +224,30 @@ import "../styles/ModalDetallesInscripcion.css";
 
     function cargarComprobantePago(inscripcionId: string) {
         const inscripcionesData = (window as any).inscripcionesData || [];
-        const inscripcion = inscripcionesData.find((ins: any) => ins.id_ins === inscripcionId);
+        const inscripcion = inscripcionesData.find(
+            (ins: any) => ins.id_ins === inscripcionId,
+        );
         if (!inscripcion) return;
 
-        const enlaceComprobanteBtn = document.getElementById("enlace-comprobante-pago") as HTMLButtonElement;
-        const sinComprobanteSpan = document.getElementById("sin-comprobante") as HTMLSpanElement;
+        const enlaceComprobanteBtn = document.getElementById(
+            "enlace-comprobante-pago",
+        ) as HTMLButtonElement;
+        const sinComprobanteSpan = document.getElementById(
+            "sin-comprobante",
+        ) as HTMLSpanElement;
 
-        if (inscripcion.enl_ord_pag_ins && inscripcion.enl_ord_pag_ins !== "null") {
+        if (
+            inscripcion.enl_ord_pag_ins &&
+            inscripcion.enl_ord_pag_ins !== "null"
+        ) {
             enlaceComprobanteBtn.style.display = "inline-block";
             sinComprobanteSpan.style.display = "none";
             // ✅ Asignamos el onclick para llamar a nuestra nueva función robusta
-            enlaceComprobanteBtn.onclick = () => abrirModalDocumentoPago(inscripcion.enl_ord_pag_ins, "Comprobante de Pago");
+            enlaceComprobanteBtn.onclick = () =>
+                abrirModalDocumentoPago(
+                    inscripcion.enl_ord_pag_ins,
+                    "Comprobante de Pago",
+                );
         } else {
             enlaceComprobanteBtn.style.display = "none";
             sinComprobanteSpan.style.display = "inline";
@@ -353,13 +366,15 @@ import "../styles/ModalDetallesInscripcion.css";
         const modal = document.getElementById("modalVisualizarDocumentoPago");
         if (!modal) return;
         modal.style.display = "none";
-        
-        const previewPdf = modal.querySelector("#preview-pdf-pago") as HTMLIFrameElement;
+
+        const previewPdf = modal.querySelector(
+            "#preview-pdf-pago",
+        ) as HTMLIFrameElement;
         if (previewPdf) {
             if (previewPdf.src.startsWith("blob:")) {
                 URL.revokeObjectURL(previewPdf.src);
             }
-            previewPdf.src = 'about:blank';
+            previewPdf.src = "about:blank";
         }
     }
 
@@ -370,7 +385,9 @@ import "../styles/ModalDetallesInscripcion.css";
         const tituloElemento = document.getElementById("titulo-documento-pago");
         const cargando = document.getElementById("cargando-documento-pago");
         const errorDiv = document.getElementById("error-documento-pago");
-        const previewPdf = document.getElementById("preview-pdf-pago") as HTMLIFrameElement;
+        const previewPdf = document.getElementById(
+            "preview-pdf-pago",
+        ) as HTMLIFrameElement;
 
         // Resetear y mostrar modal en estado de carga
         if (tituloElemento) tituloElemento.textContent = titulo;
@@ -393,18 +410,22 @@ import "../styles/ModalDetallesInscripcion.css";
                 const byteArray = new Uint8Array(byteNumbers);
                 const blob = new Blob([byteArray], { type: "application/pdf" });
                 const blobUrl = URL.createObjectURL(blob);
-                
+
                 previewPdf.src = blobUrl;
                 if (cargando) cargando.style.display = "none";
                 previewPdf.style.display = "block";
             } else {
-                throw new Error(result.error?.message || "No se pudo cargar el comprobante.");
+                throw new Error(
+                    result.error?.message ||
+                        "No se pudo cargar el comprobante.",
+                );
             }
         } catch (error: any) {
             if (cargando) cargando.style.display = "none";
             if (errorDiv) {
                 errorDiv.style.display = "block";
-                (errorDiv.querySelector('p') as HTMLElement).textContent = error.message;
+                (errorDiv.querySelector("p") as HTMLElement).textContent =
+                    error.message;
             }
         }
     }
@@ -470,8 +491,8 @@ import "../styles/ModalDetallesInscripcion.css";
     window.cerrarModalDocumentoPago = cerrarModalDocumentoPago; // Exponer también las funciones auxiliares
     (window as any).cargarInformacionUsuarioPago = cargarInformacionUsuarioPago;
     (window as any).cargarComprobantePago = cargarComprobantePago;
-    (window as any).verificarRequisitosPagoYActualizarBoton =
-        verificarRequisitosPagoYActualizarBoton;
+    // (window as any).verificarRequisitosPagoYActualizarBoton =
+    //   verificarRequisitosPagoYActualizarBoton;
     (window as any).abrirModalTextoPago = abrirModalTextoPago;
     console.log("Funciones de pago expuestas al window:", {
         abrirModalDocumentoPago: typeof window.abrirModalDocumentoPago,

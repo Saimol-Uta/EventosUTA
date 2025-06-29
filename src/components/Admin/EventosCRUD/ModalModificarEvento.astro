@@ -50,6 +50,20 @@ const { categorias = [], organizadores = [] } = Astro.props;
                     </div>
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
+                            <p class="texto-dato">Cupo Máximo</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    class="input-dato"
+                                    name="cup_max"
+                                    required
+                                    placeholder="Ej: 40"
+                                />
+                            </div>
+                        </div>
+                        <div class="contenedor-dato">
                             <p class="texto-dato">Categoría:</p>
                             <div class="contenedor-input">
                                 <select
@@ -289,7 +303,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
                     </div>
 
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Duración (minutos)</p>
+                        <p class="texto-dato">Duración (Horas)</p>
                         <div class="contenedor-input">
                             <input
                                 type="number"
@@ -824,6 +838,9 @@ const { categorias = [], organizadores = [] } = Astro.props;
                 const duracion = form.querySelector(
                     'input[name="duracion"]',
                 ) as HTMLInputElement;
+                const cupMax = form.querySelector(
+                    'input[name="cup_max"]',
+                ) as HTMLInputElement;
                 const ubicacion = form.querySelector(
                     'input[name="ubicacion"]',
                 ) as HTMLInputElement;
@@ -850,6 +867,10 @@ const { categorias = [], organizadores = [] } = Astro.props;
                 if (descripcion) {
                     descripcion.value = evento.des_eve;
                     console.log("✅ Descripción asignada");
+                }
+                if (cupMax && evento.cup_max !== undefined) {
+                    cupMax.value = evento.cup_max.toString();
+                    console.log("✅ Cupo máximo asignado:", evento.cup_max);
                 }
                 if (categoria) {
                     categoria.value = evento.id_cat_eve;

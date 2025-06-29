@@ -10,8 +10,8 @@ export interface Eventos {
     ubi_eve: string;
     ced_org_eve: string;
     img_eve?: string;
-    es_destacado?:boolean;
-
+    es_destacado?: boolean;
+    precio?: number; // Puede ser null si el evento es gratuito
     // Relaciones
     asignaciones?: any[]; // Puedes reemplazar 'any' por la interfaz correspondiente si la tienes
     organizador?: any;    // Relación con organizadores

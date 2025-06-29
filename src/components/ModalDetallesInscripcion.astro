@@ -52,7 +52,7 @@ import "../styles/ModalDetallesInscripcion.css";
                             >No disponible</span
                         >
                     </p>
-                    <p>
+                    <p id="campo-matricula" style="display:none;">
                         <strong>Certificado de Matriculación:</strong>
                         <button
                             id="enlace-matricula"
@@ -66,7 +66,7 @@ import "../styles/ModalDetallesInscripcion.css";
                             >No disponible</span
                         >
                     </p>
-                    <p>
+                    <p id="campo-motivacion" style="display:none;">
                         <strong>Carta de Motivación:</strong>
                         <button
                             id="enlace-motivacion"
@@ -152,15 +152,23 @@ import "../styles/ModalDetallesInscripcion.css";
 <script>
     import { actions } from "astro:actions";
     import Swal from "sweetalert2";
-    
+
     declare global {
         interface Window {
             cerrarModalDetallesInscripcion: () => void;
-            abrirModalDetallesInscripcionComponent: (inscripcionId: string) => void;
+            abrirModalDetallesInscripcionComponent: (
+                inscripcionId: string,
+            ) => void;
             aprobarInscripcionDocumentacion: () => void;
             rechazarInscripcionDocumentacion: () => void;
-            aprobarInscripcion: (inscripcionId: string, tipo: "documentacion" | "pago") => Promise<void>;
-            rechazarInscripcion: (inscripcionId: string, tipo: "documentacion" | "pago") => Promise<void>;
+            aprobarInscripcion: (
+                inscripcionId: string,
+                tipo: "documentacion" | "pago",
+            ) => Promise<void>;
+            rechazarInscripcion: (
+                inscripcionId: string,
+                tipo: "documentacion" | "pago",
+            ) => Promise<void>;
             currentInscripcionId: string;
             abrirModalDocumento: (url: string, titulo: string) => void;
             abrirModalTexto: (texto: string, titulo: string) => void;
@@ -185,76 +193,161 @@ import "../styles/ModalDetallesInscripcion.css";
         cargarDocumentosInscripcion(inscripcionId);
         verificarRequisitosYActualizarBoton();
     }
-    
+
     function verificarRequisitosYActualizarBoton() {
-        const botonAprobar = document.getElementById("boton-aprobar-documentacion") as HTMLButtonElement;
+        const botonAprobar = document.getElementById(
+            "boton-aprobar-documentacion",
+        ) as HTMLButtonElement;
         if (!botonAprobar) return;
 
         const inscripcionesData = (window as any).inscripcionesData || [];
-        const inscripcion = inscripcionesData.find((ins: any) => ins.id_ins === window.currentInscripcionId);
+        const inscripcion = inscripcionesData.find(
+            (ins: any) => ins.id_ins === window.currentInscripcionId,
+        );
         if (!inscripcion) return;
 
         const usuario = inscripcion.usuarios || {};
         const evento = inscripcion.eventos || {};
         const asignacion = evento.asignaciones;
-        const tieneAsignacionValida = asignacion && (asignacion.tip_asi === "FACULTAD" || asignacion.tip_asi === "CARRERA");
+        const tieneAsignacionValida =
+            asignacion &&
+            (asignacion.tip_asi === "FACULTAD" ||
+                asignacion.tip_asi === "CARRERA");
         const esEstudiante = usuario.rol_cue === "ESTUDIANTE";
         const eventoRequiereCarta = evento.requiere_carta || false;
-        
+
         let requisitosCumplidos = false;
         if (!tieneAsignacionValida || !esEstudiante) {
-            requisitosCumplidos = isValidDocumentLink(usuario.enl_ced_cue) && (eventoRequiereCarta ? (inscripcion.car_mot_inscrip && inscripcion.car_mot_inscrip.trim() !== '') : true);
+            requisitosCumplidos =
+                isValidDocumentLink(usuario.enl_ced_cue) &&
+                (eventoRequiereCarta
+                    ? inscripcion.car_mot_inscrip &&
+                      inscripcion.car_mot_inscrip.trim() !== ""
+                    : true);
         } else {
-            requisitosCumplidos = isValidDocumentLink(usuario.enl_ced_cue) && isValidDocumentLink(usuario.enl_mat_cue) && (eventoRequiereCarta ? (inscripcion.car_mot_inscrip && inscripcion.car_mot_inscrip.trim() !== '') : true);
+            requisitosCumplidos =
+                isValidDocumentLink(usuario.enl_ced_cue) &&
+                isValidDocumentLink(usuario.enl_mat_cue) &&
+                (eventoRequiereCarta
+                    ? inscripcion.car_mot_inscrip &&
+                      inscripcion.car_mot_inscrip.trim() !== ""
+                    : true);
         }
         botonAprobar.disabled = !requisitosCumplidos;
     }
 
     function cargarInformacionUsuario(inscripcionId: string) {
         const inscripcionesData = (window as any).inscripcionesData || [];
-        const inscripcion = inscripcionesData.find((ins: any) => ins.id_ins === inscripcionId);
+        const inscripcion = inscripcionesData.find(
+            (ins: any) => ins.id_ins === inscripcionId,
+        );
         if (!inscripcion || !inscripcion.usuarios) return;
-        
+
         const usuario = inscripcion.usuarios;
-        const nombreCompleto = `${usuario.nom_usu1 || ""} ${usuario.nom_usu2 || ""}`.trim();
-        const apellidoCompleto = `${usuario.ape_usu1 || ""} ${usuario.ape_usu2 || ""}`.trim();
-        
-        (document.getElementById("usuario-nombres") as HTMLElement).textContent = nombreCompleto;
-        (document.getElementById("usuario-apellidos") as HTMLElement).textContent = apellidoCompleto;
-        (document.getElementById("usuario-correo") as HTMLElement).textContent = usuario.cor_cue;
-        (document.getElementById("usuario-cedula") as HTMLElement).textContent = usuario.ced_usu;
+        const nombreCompleto =
+            `${usuario.nom_usu1 || ""} ${usuario.nom_usu2 || ""}`.trim();
+        const apellidoCompleto =
+            `${usuario.ape_usu1 || ""} ${usuario.ape_usu2 || ""}`.trim();
+
+        (
+            document.getElementById("usuario-nombres") as HTMLElement
+        ).textContent = nombreCompleto;
+        (
+            document.getElementById("usuario-apellidos") as HTMLElement
+        ).textContent = apellidoCompleto;
+        (document.getElementById("usuario-correo") as HTMLElement).textContent =
+            usuario.cor_cue;
+        (document.getElementById("usuario-cedula") as HTMLElement).textContent =
+            usuario.ced_usu;
     }
 
     function cargarDocumentosInscripcion(inscripcionId: string) {
         const inscripcionesData = (window as any).inscripcionesData || [];
-        const inscripcion = inscripcionesData.find((ins: any) => ins.id_ins === inscripcionId);
+        const inscripcion = inscripcionesData.find(
+            (ins: any) => ins.id_ins === inscripcionId,
+        );
         if (!inscripcion || !inscripcion.usuarios) {
             mostrarDocumentosNoDisponibles();
             return;
         }
 
         const usuario = inscripcion.usuarios;
+        const evento = inscripcion.eventos || {};
 
-        const setupButton = (buttonId: string, spanId: string, url: string, titulo: string, isText: boolean = false) => {
-            const button = document.getElementById(buttonId) as HTMLButtonElement;
+        // Mostrar/ocultar campos según requisitos del evento
+        const campoMatricula = document.getElementById("campo-matricula");
+        const campoMotivacion = document.getElementById("campo-motivacion");
+
+        // Verificar si el evento es dirigido a estudiantes (tiene asignación a carrera o facultad)
+        const asignacion = evento.asignaciones;
+        const esDirigidoAEstudiantes =
+            asignacion &&
+            (asignacion.tip_asi === "FACULTAD" ||
+                asignacion.tip_asi === "CARRERA");
+
+        if (campoMatricula) {
+            campoMatricula.style.display = esDirigidoAEstudiantes
+                ? "block"
+                : "none";
+        }
+        if (campoMotivacion) {
+            campoMotivacion.style.display = evento.requiere_carta
+                ? "block"
+                : "none";
+        }
+
+        const setupButton = (
+            buttonId: string,
+            spanId: string,
+            url: string,
+            titulo: string,
+            isText: boolean = false,
+        ) => {
+            const button = document.getElementById(
+                buttonId,
+            ) as HTMLButtonElement;
             const span = document.getElementById(spanId) as HTMLSpanElement;
-            const hasContent = isText ? (url && url.trim() !== "") : isValidDocumentLink(url);
+            const hasContent = isText
+                ? url && url.trim() !== ""
+                : isValidDocumentLink(url);
 
             if (hasContent) {
                 button.style.display = "inline-block";
                 span.style.display = "none";
-                button.onclick = isText ? () => window.abrirModalTexto(url, titulo) : () => window.abrirModalDocumento(url, titulo);
+                button.onclick = isText
+                    ? () => window.abrirModalTexto(url, titulo)
+                    : () => window.abrirModalDocumento(url, titulo);
             } else {
                 button.style.display = "none";
                 span.style.display = "inline";
             }
         };
-        
-        setupButton("enlace-cedula", "sin-cedula", usuario.enl_ced_cue, "Cédula y Papeleta de Votación");
-        setupButton("enlace-matricula", "sin-matricula", usuario.enl_mat_cue, "Certificado de Matriculación");
-        setupButton("enlace-motivacion", "sin-motivacion", inscripcion.car_mot_inscrip, "Carta de Motivación", true);
+
+        setupButton(
+            "enlace-cedula",
+            "sin-cedula",
+            usuario.enl_ced_cue,
+            "Cédula y Papeleta de Votación",
+        );
+        if (esDirigidoAEstudiantes) {
+            setupButton(
+                "enlace-matricula",
+                "sin-matricula",
+                usuario.enl_mat_cue,
+                "Certificado de Matriculación",
+            );
+        }
+        if (evento.requiere_carta) {
+            setupButton(
+                "enlace-motivacion",
+                "sin-motivacion",
+                inscripcion.car_mot_inscrip,
+                "Carta de Motivación",
+                true,
+            );
+        }
     }
-    
+
     function isValidDocumentLink(link: string | null | undefined): boolean {
         return !!(link && link.trim() !== "" && link !== "null");
     }
@@ -337,14 +430,20 @@ import "../styles/ModalDetallesInscripcion.css";
 
     function aprobarInscripcionDocumentacion() {
         if (window.aprobarInscripcion && window.currentInscripcionId) {
-            window.aprobarInscripcion(window.currentInscripcionId, "documentacion");
+            window.aprobarInscripcion(
+                window.currentInscripcionId,
+                "documentacion",
+            );
             cerrarModalDetallesInscripcion();
         }
     }
 
     function rechazarInscripcionDocumentacion() {
         if (window.rechazarInscripcion && window.currentInscripcionId) {
-            window.rechazarInscripcion(window.currentInscripcionId, "documentacion");
+            window.rechazarInscripcion(
+                window.currentInscripcionId,
+                "documentacion",
+            );
             cerrarModalDetallesInscripcion();
         }
     }
@@ -354,12 +453,14 @@ import "../styles/ModalDetallesInscripcion.css";
         if (!modal) return;
         modal.style.display = "none";
 
-        const previewPdf = document.getElementById("preview-pdf") as HTMLIFrameElement;
+        const previewPdf = document.getElementById(
+            "preview-pdf",
+        ) as HTMLIFrameElement;
         if (previewPdf) {
             if (previewPdf.src.startsWith("blob:")) {
                 URL.revokeObjectURL(previewPdf.src);
             }
-            previewPdf.src = 'about:blank';
+            previewPdf.src = "about:blank";
         }
     }
 
@@ -370,9 +471,13 @@ import "../styles/ModalDetallesInscripcion.css";
         const tituloElemento = document.getElementById("titulo-documento");
         const cargando = document.getElementById("cargando-documento");
         const errorDiv = document.getElementById("error-documento");
-        const previewPdf = document.getElementById("preview-pdf") as HTMLIFrameElement;
+        const previewPdf = document.getElementById(
+            "preview-pdf",
+        ) as HTMLIFrameElement;
 
-        const previewImagen = document.getElementById("preview-imagen") as HTMLImageElement;
+        const previewImagen = document.getElementById(
+            "preview-imagen",
+        ) as HTMLImageElement;
         const previewTexto = document.getElementById("preview-texto");
         if (previewImagen) previewImagen.style.display = "none";
         if (previewTexto) previewTexto.style.display = "none";
@@ -398,18 +503,21 @@ import "../styles/ModalDetallesInscripcion.css";
                 const byteArray = new Uint8Array(byteNumbers);
                 const blob = new Blob([byteArray], { type: "application/pdf" });
                 const blobUrl = URL.createObjectURL(blob);
-                
+
                 previewPdf.src = blobUrl;
                 if (cargando) cargando.style.display = "none";
                 previewPdf.style.display = "block";
             } else {
-                throw new Error(result.error?.message || "No se pudo cargar el PDF.");
+                throw new Error(
+                    result.error?.message || "No se pudo cargar el PDF.",
+                );
             }
         } catch (error: any) {
             if (cargando) cargando.style.display = "none";
             if (errorDiv) {
                 errorDiv.style.display = "block";
-                (errorDiv.querySelector('p') as HTMLElement).textContent = error.message;
+                (errorDiv.querySelector("p") as HTMLElement).textContent =
+                    error.message;
             }
         }
     }
@@ -422,17 +530,27 @@ import "../styles/ModalDetallesInscripcion.css";
         const previewTexto = document.getElementById("preview-texto");
         const contenidoTexto = document.getElementById("contenido-texto");
 
-        const previewImagen = document.getElementById("preview-imagen") as HTMLImageElement;
-        const previewPdf = document.getElementById("preview-pdf") as HTMLIFrameElement;
+        const previewImagen = document.getElementById(
+            "preview-imagen",
+        ) as HTMLImageElement;
+        const previewPdf = document.getElementById(
+            "preview-pdf",
+        ) as HTMLIFrameElement;
         if (previewImagen) previewImagen.style.display = "none";
         if (previewPdf) previewPdf.style.display = "none";
 
-        
         // Ocultar otros visores y mostrar el de texto
-        (document.getElementById("preview-pdf") as HTMLElement).style.display = "none";
-        (document.getElementById("preview-imagen") as HTMLElement).style.display = "none";
-        (document.getElementById("cargando-documento") as HTMLElement).style.display = "none";
-        (document.getElementById("error-documento") as HTMLElement).style.display = "none";
+        (document.getElementById("preview-pdf") as HTMLElement).style.display =
+            "none";
+        (
+            document.getElementById("preview-imagen") as HTMLElement
+        ).style.display = "none";
+        (
+            document.getElementById("cargando-documento") as HTMLElement
+        ).style.display = "none";
+        (
+            document.getElementById("error-documento") as HTMLElement
+        ).style.display = "none";
 
         if (tituloElemento) tituloElemento.textContent = titulo;
         if (contenidoTexto) contenidoTexto.textContent = texto;
@@ -443,7 +561,9 @@ import "../styles/ModalDetallesInscripcion.css";
 
     window.onclick = function (event) {
         const modalReserva = document.getElementById("modalDetallesReserva");
-        const modalDocumento = document.getElementById("modalVisualizarDocumento");
+        const modalDocumento = document.getElementById(
+            "modalVisualizarDocumento",
+        );
 
         if (event.target === modalReserva) cerrarModalDetallesInscripcion();
         if (event.target === modalDocumento) cerrarModalDocumento();
@@ -453,7 +573,8 @@ import "../styles/ModalDetallesInscripcion.css";
     window.cerrarModalDocumento = cerrarModalDocumento;
     window.abrirModalDocumento = abrirModalDocumento;
     window.abrirModalTexto = abrirModalTexto;
-    window.abrirModalDetallesInscripcionComponent = abrirModalDetallesInscripcionComponent;
+    window.abrirModalDetallesInscripcionComponent =
+        abrirModalDetallesInscripcionComponent;
     window.aprobarInscripcionDocumentacion = aprobarInscripcionDocumentacion;
     window.rechazarInscripcionDocumentacion = rechazarInscripcionDocumentacion;
 </script>

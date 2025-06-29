@@ -8,12 +8,12 @@ export const getByIdInscripcion = defineAction({
         id: z.string().min(1)
     }),
     async handler({ id }) {
-        try {
-            const inscripciones = await prisma.inscripciones.findMany({
-                where: { id_eve_ins: id },
-                // ✅ 'include' es más limpio que 'select' si quieres traer todo
-                include: {
-                    usuarios: {
+        try {
+            const inscripciones = await prisma.inscripciones.findMany({
+                where: { id_eve_ins: id },
+                // ✅ 'include' es más limpio que 'select' si quieres traer todo
+                include: {
+                    usuarios: {
                         include: {
                             carreras: {
                                 include: {
@@ -21,16 +21,24 @@ export const getByIdInscripcion = defineAction({
                                 }
                             }
                         }
-                    },
-                    eventos: {
+                    }, eventos: {
                         include: {
                             categorias_eventos: true,
                             organizadores: true,
+                            asignaciones: {
+                                include: {
+                                    detalle_asignaciones: {
+                                        include: {
+                                            carreras: true,
+                                        },
+                                    },
+                                },
+                            },
                         }
                     },
-                },
-                orderBy: { fec_ins: 'desc' }
-            });
+                },
+                orderBy: { fec_ins: 'desc' }
+            });
 
 
             // Serializar fechas y decimales para evitar problemas de serialización
@@ -64,6 +72,6 @@ export const getByIdInscripcion = defineAction({
                 inscripciones: [],
                 total: 0
             };
-        }
-    },
+        }
+    },
 });

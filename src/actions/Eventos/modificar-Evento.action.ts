@@ -33,6 +33,7 @@ export const modificarEvento = defineAction({
         fecha_inicio_inscripcion: z.string().transform(str => new Date(str)),
         fecha_fin_inscripcion: z.string().transform(str => new Date(str)),
         asignacion_id: z.string().uuid().optional(),
+        cup_max: z.coerce.number().int().min(1),
     }),
     handler: async (form, { request }) => {
         try {
@@ -124,6 +125,7 @@ export const modificarEvento = defineAction({
                     es_destacado: form.es_destacado ?? false,
                     car_mot_eve: form.carta_motivacion,
                     id_asi_eve: form.asignacion_id,
+                    cup_max: form.cup_max,
                 }
             });
 

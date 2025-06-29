@@ -52,29 +52,32 @@ const eventosActivos = eventosCompletos.filter((e: any) => {
         <MenuAdmin />        <ModalDetallesEvento />
         <ModalModificarEvento categorias={categorias} organizadores={organizadores} />
         <ModalNuevoEvento categorias={categorias} organizadores={organizadores} /><main class="registros">
-            <!-- Panel de estadísticas -->
-            
+       
 
             <div class="registros-grid">
                 <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Eventos                        <select
-                            id="filtroCategoria"
-                            class="select-estado"
-                            onchange="window.location.href = `?categoria=${this.value}`"
-                        >
-                            <option value="" selected={!categoriaFiltro}>
-                                Todos los eventos
-                            </option>
-                            {categorias.map((categoria: any) => (
-                                <option
-                                    value={categoria.id_cat}
-                                    selected={categoriaFiltro === categoria.id_cat}
-                                >
-                                    {categoria.nom_cat}
+                        Eventos
+                        <form id="formFiltroCategoria" method="get" style="display:inline;">
+                            <select
+                                id="filtroCategoria"
+                                name="categoria"
+                                class="select-estado"
+                                onchange="this.form.submit()"
+                            >
+                                <option value="" selected={!categoriaFiltro}>
+                                    Todos los eventos
                                 </option>
-                            ))}
-                        </select>
+                                {categorias.map((categoria: any) => (
+                                    <option
+                                        value={categoria.id_cat}
+                                        selected={categoriaFiltro === categoria.id_cat}
+                                    >
+                                        {categoria.nom_cat}
+                                    </option>
+                                ))}
+                            </select>
+                        </form>
                     </div>
                     <div class="registros-superior-derecho">
                         <a
@@ -96,12 +99,15 @@ const eventosActivos = eventosCompletos.filter((e: any) => {
                             Categoría
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
+                            Cupo Máximo
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
                             Organizador
                         </div>
-                        <div class="parte-izquierda-registro-encabezado">
+                        <div class="parte-izquierda-registro-encabezado cupo-centro">
                             Fecha Inicio
                         </div>
-                        <div class="parte-izquierda-registro-encabezado">
+                        <div class="parte-izquierda-registro-encabezado cupo-centro">
                             Precio
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
@@ -125,12 +131,15 @@ const eventosActivos = eventosCompletos.filter((e: any) => {
                                 <div class="parte-izquierda-registro-fila">
                                     {evento.categorias_eventos?.nom_cat || "N/A"}
                                 </div>
+                                <div class="parte-izquierda-registro-fila cupo-centro">
+                                    {evento.cup_max ?? "-"}
+                                </div>
                                 <div class="parte-izquierda-registro-fila">
                                     {evento.organizadores ? 
                                         `${evento.organizadores.tit_aca_org} ${evento.organizadores.nom_org1} ${evento.organizadores.ape_org1}` 
                                         : "N/A"}
                                 </div>
-                                <div class="parte-izquierda-registro-fila">
+                                <div class="parte-izquierda-registro-fila cupo-centro">
                                     {new Date(evento.fec_ini_eve)
                                         .toLocaleDateString('es-ES', {
                                             year: 'numeric',
@@ -138,7 +147,7 @@ const eventosActivos = eventosCompletos.filter((e: any) => {
                                             day: '2-digit'
                                         })}
                                 </div>
-                                <div class="parte-izquierda-registro-fila">
+                                <div class="parte-izquierda-registro-fila cupo-centro">
                                     {evento.es_gratuito 
                                         ? "Gratuito" 
                                         : `$${Number(evento.precio || 0).toFixed(2)}`}
@@ -188,6 +197,9 @@ const eventosActivos = eventosCompletos.filter((e: any) => {
         </main>
 
         <style>
+            .cupo-centro {
+                text-align: center;
+            }
             .registro-opciones button {
                 margin: 0 2px;
                 border-radius: 4px;
