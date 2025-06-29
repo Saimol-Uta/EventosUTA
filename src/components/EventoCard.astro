@@ -32,7 +32,34 @@ const {
 } = Astro.props;
 ---
 
-<div class="w-full max-w-sm mx-auto group" data-titulo={titulo.toLowerCase()}>
+<div
+    class="w-full max-w-sm mx-auto group relative"
+    data-titulo={titulo.toLowerCase()}
+>
+    {
+        modoAdmin && (
+            <button
+                class={`absolute top-4 right-4 w-10 h-10 rounded-full border border-white/25 backdrop-blur-md shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white hover:shadow-xl z-30 ${
+                    esDestacado
+                        ? "bg-yellow-400 text-yellow-900"
+                        : "bg-white/20 text-white hover:text-gray-700"
+                }`}
+                data-id={idEvento}
+                onclick="toggleFavorito(this)"
+                title="Marcar como destacado"
+                type="button"
+            >
+                <svg
+                    class="w-5 h-5 mx-auto transition-transform duration-300 hover:scale-110"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+            </button>
+        )
+    }
+
     <a
         href={`/Eventos/${slug}`}
         class="block relative overflow-hidden rounded-3xl bg-gray-900 shadow-2xl transition-all duration-500 hover:scale-105 hover:shadow-3xl transform-gpu"
@@ -139,30 +166,6 @@ const {
             </div>
         </div>
     </a>
-
-    {
-        modoAdmin && (
-            <button
-                class={`absolute top-4 right-4 w-10 h-10 rounded-full border border-white/25 backdrop-blur-md shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white hover:shadow-xl z-20 ${
-                    esDestacado
-                        ? "bg-yellow-400 text-yellow-900"
-                        : "bg-white/20 text-white hover:text-gray-700"
-                }`}
-                data-id={idEvento}
-                onclick="toggleFavorito(this)"
-                title="Marcar como destacado"
-                type="button"
-            >
-                <svg
-                    class="w-5 h-5 mx-auto transition-transform duration-300 hover:scale-110"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-            </button>
-        )
-    }
 </div>
 
 <style>
