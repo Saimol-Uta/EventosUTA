@@ -2,7 +2,7 @@
 import TarjetaConImagen from "../components/ContenedorInfo.astro";
 import "../styles/global.css";
 import Evento from "../components/CardCarousel.astro";
-import TarjetaPersona from '../components/CardPersona.astro';
+import TarjetaPersona from "../components/CardPersona.astro";
 import prisma from "@/db";
 import { actions } from "astro:actions";
 const {
@@ -37,16 +37,21 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
   slides.push(eventosDestacados.slice(i, i + 2));
 }
 ---
-  <section class="py-12 bg-gray-100 text-center">
-  <h2 class="text-2xl font-bold text-red-800 mb-6">Equipo Académico</h2>
+
+<section class="py-12" style="background-color: rgb(245, 245, 245)">
+  <div class="flex justify-between max-w-4xl mx-auto">
+    <div>
+      <h2 class="text-4xl font-bold text-red-900 mb-8">Equipo Académico</h2>
+    </div>
+  </div>
   <div class="flex flex-wrap justify-center gap-6">
     <TarjetaPersona
-    titulo="Ing."
+      titulo="Ing."
       nombre={decano}
       master=", Mg."
       rol="Decano"
       facultad="FISEI"
-      imagen={decanoImagen}
+      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/franklin_mayorga.png"
       modoEdit={modoAdmin}
     />
     <TarjetaPersona
@@ -55,7 +60,7 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
       master=", Mg."
       rol="Subdecano"
       facultad="FISEI"
-      imagen={subdecanoImagen}
+      imagen="https://ctt-talleresfisei.uta.edu.ec/img/autoridades/luis_morales.png"
       modoEdit={modoAdmin}
     />
     <TarjetaPersona
@@ -70,7 +75,6 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
     />
   </div>
 </section>
-     
 
 <section class="py-12" style="background-color: rgb(245, 245, 245)">
   <div class="flex justify-between max-w-4xl mx-auto">
@@ -100,7 +104,7 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
       </a>
     </div>
   </div>
-  <div class="relative max-w-4xl mx-auto relative">
+  <div class="max-w-4xl mx-auto relative">
     <!-- Contenedor del carrusel -->
     <div id="carousel-container" class="overflow-hidden w-full">
       <div
@@ -198,29 +202,26 @@ for (let i = 0; i < eventosDestacados.length; i += 2) {
   </div>
 </section>
 
-<TarjetaConImagen
-  titulo={tituloDescripcion}
-  contenido={contenidoDescripcion}
-  imagenUrl={imagenDescripcion}
-  columna="des_pag"
-  modoEdicion={modoAdmin}
-/>
+<section class="py-12" style="background-color: rgb(245, 245, 245)">
 
-<TarjetaConImagen
-  titulo={tituloMision}
-  contenido={contenidoMision}
-  imagenUrl={imagenMision}
-  invertir={true}
-  columna="mis_pag"
-  modoEdicion={modoAdmin}
-/>
-
-<TarjetaConImagen
-  titulo={tituloVision}
-  contenido={contenidoVision}
-  imagenUrl={imagenVision}
-  columna="vis_pag"
-  modoEdicion={modoAdmin}
-/>
-
+  <div>
+    <TarjetaConImagen
+      titulo="MISIÓN"
+      contenido={contenidoMision}
+      imagenUrl="https://uta.edu.ec/wp-content/uploads/2025/06/DSC04004-scaled.jpg"
+      columna="mis_pag"
+      modoEdicion={modoAdmin}
+    />
+  </div>
+  <div>
+    <TarjetaConImagen
+      titulo="VISIÓN"
+      contenido={contenidoVision}
+      imagenUrl="https://uta.edu.ec/wp-content/uploads/2025/04/DSC07650-scaled.jpg"
+      invertir={true}
+      columna="vis_pag"
+      modoEdicion={modoAdmin}
+    />
+  </div>
+</section>
 <script src="/js/eventosFavoritos.js" defer is:inline></script>
