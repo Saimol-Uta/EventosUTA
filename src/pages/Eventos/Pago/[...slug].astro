@@ -3,7 +3,7 @@ import { getSession } from "auth-astro/server";
 import { actions } from "astro:actions";
 import Layout from "@/layouts/Layout.astro";
 import "@styles/global.css";
-import { PdfUpload } from "@/utils/PdfUpload"; 
+import { PdfUpload } from "@/utils/PdfUpload";
 
 const { slug } = Astro.params;
 if (!slug) {
@@ -35,7 +35,7 @@ if (error || !data?.data || !data.data.evento) {
 const { usuario, evento, inscripcion } = data.data;
 
 // Verificar que la inscripción existe y está aprobada
-if (!inscripcion || inscripcion.est_ins !== "Aprobado") {
+if (!inscripcion || inscripcion.est_ins !== "FPendiente") {
     return new Response(
         `
     <html>
@@ -90,18 +90,20 @@ if (Astro.request.method === "POST") {
             comprobante.size > 0
         ) {
             // Validamos que sea un PDF
-            if (comprobante.type !== 'application/pdf') {
+            if (comprobante.type !== "application/pdf") {
                 throw new Error("El comprobante debe ser un archivo PDF.");
             }
-            
+
             // Creamos un nombre único para el archivo en Cloudinary
             const publicId = `comprobante_pago_${inscripcion.id_ins}`;
-            
+
             // Llamamos directamente a nuestra utilidad de subida
             enlaceComprobante = await PdfUpload.upload(comprobante, publicId);
 
             if (!enlaceComprobante) {
-                throw new Error("Error al subir el comprobante de pago a Cloudinary.");
+                throw new Error(
+                    "Error al subir el comprobante de pago a Cloudinary.",
+                );
             }
         }
 
@@ -377,12 +379,13 @@ if (Astro.request.method === "POST") {
         // Validar tamaño del archivo (5MB máximo)
         const archivo_seleccionado = archivo.files[0];
 
-        if (archivo_seleccionado.type !== 'application/pdf') {
+        if (archivo_seleccionado.type !== "application/pdf") {
             mostrarErrorPago("El archivo debe estar en formato PDF.");
             return false;
         }
-        
-        if (archivo_seleccionado.size > 5 * 1024 * 1024) { // 5MB
+
+        if (archivo_seleccionado.size > 5 * 1024 * 1024) {
+            // 5MB
             mostrarErrorPago("El archivo no debe superar los 5MB.");
             return false;
         }

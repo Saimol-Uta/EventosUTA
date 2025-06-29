@@ -51,13 +51,18 @@ export const updateEstadoInscripcion = defineAction({
             const evento = inscripcionExistente.eventos;
             const esPago = !evento.es_gratuito && evento.precio && Number(evento.precio) > 0;
 
-            if (esPago && tipo === "pago" && estado === "Aprobado") {
-                // Si es un evento de pago y se intenta aprobar el pago, verificar que existe orden de pago
-                if (!inscripcionExistente.enl_ord_pag_ins) {
-                    throw new ActionError({
-                        code: "BAD_REQUEST",
-                        message: `No se puede aprobar el pago para el evento "${evento.nom_eve}". Es obligatorio subir la orden de pago para eventos con costo de $${Number(evento.precio).toFixed(2)}.`,
-                    });
+            if (tipo === "pago" && estado === "Aprobado") {
+                if (!esPago) {
+                    // Si el evento es gratuito, pasa directamente a aprobado sin requerir comprobante
+                    // No se requiere comprobante de pago
+                } else {
+                    // Si es un evento de pago y se intenta aprobar el pago, verificar que existe orden de pago
+                    if (!inscripcionExistente.enl_ord_pag_ins) {
+                        throw new ActionError({
+                            code: "BAD_REQUEST",
+                            message: `No se puede aprobar el pago para el evento "${evento.nom_eve}". Es obligatorio subir la orden de pago para eventos con costo de $${Number(evento.precio).toFixed(2)}.`,
+                        });
+                    }
                 }
             }
 
@@ -92,6 +97,7 @@ export const updateEstadoInscripcion = defineAction({
 
             console.log("Validaciones de requisitos completadas exitosamente");
 
+
             // Mapear estados según los valores permitidos en la BD
             let nuevoEstado: string;
             let mensaje: string;
@@ -109,13 +115,27 @@ export const updateEstadoInscripcion = defineAction({
                     mensaje = "Inscripción rechazada";
                 }
             } else if (tipo === "documentacion" && estado === "Aprobado") {
-                // Si se aprueba la documentación, cambiar a FPendiente
-                nuevoEstado = "FPendiente";
-                mensaje = "Documentación aprobada, pendiente de facturación";
+                // Si se aprueba la documentación
+                if (!esPago) {
+                    // Evento gratuito: pasa directamente a aprobado
+                    nuevoEstado = "Aprobado";
+                    mensaje = "Evento gratuito, inscripción aprobada automáticamente";
+                } else {
+                    // Evento de pago: cambiar a FPendiente
+                    nuevoEstado = "FPendiente";
+                    mensaje = "Documentación aprobada, pendiente de facturación";
+                }
             } else if (tipo === "pago" && estado === "Aprobado") {
-                // Si se aprueba el pago, cambiar a Aprobado completamente
-                nuevoEstado = "Aprobado";
-                mensaje = "Pago aprobado, inscripción completada";
+                // Si se aprueba el pago
+                if (!esPago) {
+                    // Evento gratuito: pasa directamente a aprobado
+                    nuevoEstado = "Aprobado";
+                    mensaje = "Evento gratuito, inscripción completada";
+                } else {
+                    // Evento de pago: requiere comprobante
+                    nuevoEstado = "Aprobado";
+                    mensaje = "Pago aprobado, inscripción completada";
+                }
             } else {
                 // Para otros casos, usar el estado tal como viene
                 nuevoEstado = estado;

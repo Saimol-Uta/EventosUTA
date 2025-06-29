@@ -66,7 +66,7 @@ const formatearFecha = (fecha: string | Date) => {
 // Formatear duración
 const formatearDuracion = (minutos: number) => {
     if (minutos < 60) {
-        return `${minutos} minutos`;
+        return `${minutos} Horas`;
     } else if (minutos < 1440) {
         const horas = Math.floor(minutos / 60);
         const minutosRestantes = minutos % 60;
@@ -94,16 +94,25 @@ function esHoyODespues(fecha: Date) {
 function esAntesDe(fecha: Date) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
+    console.log(hoy);
+    
     const comparar = new Date(fecha);
     comparar.setHours(0, 0, 0, 0);
     return hoy < comparar;
 }
 
+
 const inscripcionDisponible = () => {
     const inicio = new Date(evento.fec_ini_ins_eve);
     const fin = new Date(evento.fec_fin_ins_eve);
-    return esHoyODespues(inicio) && !esAntesDe(fin);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    inicio.setHours(0, 0, 0, 0);
+    fin.setHours(0, 0, 0, 0);
+    return hoy >= inicio && hoy <= fin;
 };
+
+
 
 const inscripcionProximamente = () => {
     const inicio = new Date(evento.fec_ini_ins_eve);
@@ -175,6 +184,14 @@ const inscripcionProximamente = () => {
                             <div style="font-weight: 600; font-size: 0.95rem;">
                                 {evento.dur_eve ? formatearDuracion(evento.dur_eve) : "No especificada"}
                             </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.3rem;">👥 Cupo máximo</div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">{evento.cup_max ?? 'No especificado'}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.3rem;">📝 Inscritos</div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">{evento._count?.inscripciones ?? 'No disponible'}</div>
                         </div>
                     </div>
                 </div>

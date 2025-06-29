@@ -131,7 +131,7 @@ export const getDetallesEventoCompleto = defineAction({
     }),
     handler: async ({ slug, idUsuario }) => {
         try {
-            // Consulta para obtener los detalles del evento por su 'slug' (ID)
+            // Consulta para obtener los detalles del evento por su 'slug' (ID) e incluir el conteo de inscripciones
             const eventoPromise = prisma.eventos.findUnique({
                 where: { id_eve: slug },
                 include: {
@@ -146,6 +146,9 @@ export const getDetallesEventoCompleto = defineAction({
                             },
                         },
                     },
+                    _count: {
+                        select: { inscripciones: true }
+                    }
                 },
             });
 
@@ -182,7 +185,8 @@ export const getDetallesEventoCompleto = defineAction({
                 data: {
                     evento,
                     inscripcion,
-                    usuario  // Será null si el usuario no está logueado o no está inscrito
+                    usuario,  // Será null si el usuario no está logueado o no está inscrito
+                    numeroInscritos: evento?._count?.inscripciones ?? 0
                 },
             };
         } catch (error) {
