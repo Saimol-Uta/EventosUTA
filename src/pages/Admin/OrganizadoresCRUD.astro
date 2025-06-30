@@ -257,10 +257,11 @@ type Organizador = {
                     console.error('Error al parsear el organizador:', e);
                     return;
                 }
-                if (typeof window.abrirModalModificarOrganizador === "function") {
-                    window.abrirModalModificarOrganizador(organizador);
+                if (typeof (window as any).abrirModalModificarOrganizadorModal === "function") {
+                    // Llamar la función del modal pasando el objeto organizador
+                    (window as any).abrirModalModificarOrganizadorModal(organizador);
                 } else {
-                    alert('No se encontró la función global abrirModalModificarOrganizador. Revisa el script de ModalModificarOrganizador.astro');
+                    alert('No se encontró la función global abrirModalModificarOrganizadorModal. Revisa el script de ModalModificarOrganizador.astro');
                 }
             }
 
