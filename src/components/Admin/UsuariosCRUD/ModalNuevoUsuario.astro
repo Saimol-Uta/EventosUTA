@@ -93,10 +93,14 @@ const carreras = carrerasData?.carreras || [];
                                 name="cont_cuenta"
                                 id="password-input"
                                 required
-                                minlength="6"
-                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{6,}$"
-                                title="La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula, un número y un caracter especial."
+                                title="La contraseña debe cumplir con los criterios de abajo."
                             />
+                        </div>
+                        <div id="password-criteria" class="password-criteria-container">
+                            <p id="length-check" class="invalid">❌ Mínimo 6 caracteres</p>
+                            <p id="lower-check" class="invalid">❌ Una letra minúscula (a-z)</p>
+                            <p id="upper-check" class="invalid">❌ Una letra mayúscula (A-Z)</p>
+                            <p id="special-check" class="invalid">❌ Un caracter especial (!@#$%^&*_=+-)</p>
                         </div>
                     </div>
 
@@ -327,6 +331,41 @@ const carreras = carrerasData?.carreras || [];
 </div>
 
 <style>
+
+    .password-criteria-container {
+        opacity: 0;
+        max-height: 0; /* El elemento no tiene altura cuando está oculto */
+        overflow: hidden; /* Muy importante para que el contenido no se salga */
+        
+        /* La transición ahora animará la altura y la opacidad */
+        transition: max-height 0.4s ease-out, opacity 0.3s ease-in;
+
+        margin-top: 8px;
+        padding-left: 5px;
+    }
+
+    /* Estado visible: Se expande a su altura máxima y se vuelve opaco */
+    .password-criteria-container.visible {
+        opacity: 1;
+        max-height: 10rem; /* Una altura suficiente para que quepa todo el texto (1rem ≈ 16px) */
+        transition: max-height 0.4s ease-in, opacity 0.3s ease-out 0.1s; /* Se añade un pequeño retraso a la opacidad */
+    }
+
+    .password-criteria-container p {
+        font-size: 13px;
+        margin: 4px 0;
+        transition: color 0.3s ease;
+    }
+
+    .password-criteria-container p.invalid {
+        color: #9ca3af; /* Un gris para lo que falta */
+    }
+
+    .password-criteria-container p.valid {
+        color: #059669; /* Verde para lo cumplido */
+        font-weight: 500;
+    }
+
     /* Estilos específicos para el modal de nuevo usuario */
     .modal-contenido {
         max-height: 90vh;
@@ -623,6 +662,72 @@ document.addEventListener("DOMContentLoaded", () => {
         const rolSelect = document.getElementById("rol-select") as HTMLSelectElement;
         const carreraContainer = document.getElementById("contenedor-carrera") as HTMLDivElement;
 
+        const passwordInput = document.getElementById("password-input") as HTMLInputElement;
+        const passwordCriteriaContainer = document.getElementById("password-criteria") as HTMLDivElement;
+
+        const lengthCheck = document.getElementById("length-check") as HTMLParagraphElement;
+        const lowerCheck = document.getElementById("lower-check") as HTMLParagraphElement;
+        const upperCheck = document.getElementById("upper-check") as HTMLParagraphElement;
+        const specialCheck = document.getElementById("special-check") as HTMLParagraphElement;
+        
+        if (passwordInput && passwordCriteriaContainer) {
+            // Muestra la lista de criterios cuando el usuario entra al campo
+            passwordInput.addEventListener('focus', () => {
+                // ANTES: passwordCriteriaContainer.style.display = 'block';
+                passwordCriteriaContainer.classList.add('visible'); // AHORA
+            });
+
+            // Oculta la lista cuando el usuario sale del campo
+            passwordInput.addEventListener('blur', () => {
+                if (passwordInput.value === '' || passwordIsValid) {
+                    // ANTES: passwordCriteriaContainer.style.display = 'none';
+                    passwordCriteriaContainer.classList.remove('visible'); // AHORA
+                }
+            });
+        }
+
+        // --- VALIDACIÓN DE CONTRASEÑA EN TIEMPO REAL ---
+        let passwordIsValid = false;
+
+        // FIX: Tipado explícito para los parámetros de la función
+        const updateCheckUI = (element: HTMLParagraphElement | null, isValid: boolean): void => {
+            // Se añade una comprobación de nulidad para mayor robustez
+            if (!element) return;
+
+            if (isValid) {
+                element.classList.remove("invalid");
+                element.classList.add("valid");
+                element.textContent = element.textContent?.replace("❌", "✅") || "";
+            } else {
+                element.classList.remove("valid");
+                element.classList.add("invalid");
+                element.textContent = element.textContent?.replace("✅", "❌") || "";
+            }
+        };
+
+        const validatePassword = (): void => {
+            // FIX: La aserción de tipo en la selección de 'passwordInput' resuelve el error de '.value'
+            const pass = passwordInput.value;
+            
+            const hasLength = pass.length >= 6;
+            updateCheckUI(lengthCheck, hasLength);
+
+            const hasLower = /[a-z]/.test(pass);
+            updateCheckUI(lowerCheck, hasLower);
+
+            const hasUpper = /[A-Z]/.test(pass);
+            updateCheckUI(upperCheck, hasUpper);
+
+            const hasSpecial = /[!@#$%^&*_=+\-.,:;?]/.test(pass);
+            updateCheckUI(specialCheck, hasSpecial);
+
+            passwordIsValid = hasLength && hasLower && hasUpper && hasSpecial;
+        };
+
+        if (passwordInput) {
+            passwordInput.addEventListener('input', validatePassword);
+        }
+
         // --- FUNCIONES DE FILTRADO DE ENTRADA ---
         
         // Función para permitir solo números
@@ -673,6 +778,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
+
+                validatePassword();
+
+                if (!passwordIsValid) {
+                    const { default: Swal } = await import("sweetalert2");
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Contraseña no válida",
+                        text: "Por favor, asegúrate de que la contraseña cumpla todos los criterios.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
 
                 const formData = new FormData(form); // Convertir FormData a objeto para la validación
                 const userData = {
