@@ -177,17 +177,29 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     }
                     
                     // Estado del evento
-                    const estado = ev.estado_evento || "Sin estado";
+                    const estado = ev.estado_evento || "ACTIVO";
                     
                     // Ubicación
-                    const ubicacion = ev.ubi_eve || "Sin ubicación especificada";
+                    const ubicacion = ev.ubi_eve || "Ubicación por definir";
+                    
+                    // Precio
+                    let precioTexto = "";
+                    if (ev.es_gratuito) {
+                        precioTexto = "Gratuito";
+                    } else if (ev.precio && ev.precio > 0) {
+                        precioTexto = `$${ev.precio}`;
+                    } else {
+                        precioTexto = "Precio no definido";
+                    }
                     
                     eventoDiv.innerHTML = `
                         <strong>${nombreEvento}</strong><br>
                         ${fechaTexto ? `<small><strong>Fecha:</strong> ${fechaTexto}</small><br>` : ''}
                         <small><strong>Estado:</strong> ${estado}</small><br>
-                        <small><strong>Ubicación:</strong> ${ubicacion}</small>
+                        <small><strong>Ubicación:</strong> ${ubicacion}</small><br>
+                        <small><strong>Precio:</strong> ${precioTexto}</small>
                         ${ev.es_destacado ? '<br><small style="color: #ffc107;"><strong>⭐ Evento Destacado</strong></small>' : ''}
+                        ${ev.des_eve ? `<br><small style="color: #6c757d;"><em>${ev.des_eve.substring(0, 100)}${ev.des_eve.length > 100 ? '...' : ''}</em></small>` : ''}
                     `;
                     
                     eventosLista.appendChild(eventoDiv);
