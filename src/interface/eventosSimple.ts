@@ -11,6 +11,7 @@ export interface Eventos {
     ced_org_eve: string;
     img_eve?: string;
     es_destacado?: boolean;
+    cup_max?: number;
     precio?: number; // Puede ser null si el evento es gratuito
     // Relaciones
     asignaciones?: any[]; // Puedes reemplazar 'any' por la interfaz correspondiente si la tienes

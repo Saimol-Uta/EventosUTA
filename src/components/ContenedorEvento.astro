@@ -1,5 +1,5 @@
 ---
-import EventoCard from "./EventoCard.astro";
+import EventoCard from "./EventoCard2.astro";
 import RenderPageNum from "./RenderPageNum.astro";
 import type { Eventos } from "../interface/eventosSimple";
 import { actions } from "astro:actions";
@@ -57,13 +57,14 @@ function construirUrl(pagina: number) {
                 <EventoCard
                     imagen={evento.img_eve}
                     titulo={evento.nom_eve}
-                    estado={(evento._count?.inscripciones ?? 0).toString()}
+                    cuposDis={( (evento.cup_max ?? 0) - (evento._count?.inscripciones ?? 0) ).toString()}
                     horas={evento.dur_eve ?? 0}
                     slug={evento.id_eve}
                     modoAdmin={modoAdmin}
                     idEvento={evento.id_eve}
                     esDestacado={evento.es_destacado}
                     precio={evento.precio ?? 0}
+                    categoria={evento.categoria_evento?.nom_cat ?? 'Sin categoría'}
                 />
             ))
         ) : (
