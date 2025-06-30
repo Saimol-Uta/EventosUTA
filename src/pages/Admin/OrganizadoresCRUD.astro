@@ -28,6 +28,13 @@ type Organizador = {
         id_eve: string;
         nom_eve: string;
         fec_ini_eve: Date | string;
+        fec_fin_eve?: Date | string | null;
+        ubi_eve: string;
+        estado_evento?: string | null;
+        es_destacado?: boolean | null;
+        des_eve?: string | null;
+        precio?: number | null;
+        es_gratuito?: boolean | null;
     }>;
 }
     
@@ -80,7 +87,7 @@ type Organizador = {
                     </div>
                 </div>
                 <div class="registros-inferior">
-                    {organizadores.map((organizador: Organizador) => (
+                    {organizadores.map((organizador) => (
                         <>
                             <input
                                 type="hidden"
@@ -156,6 +163,13 @@ type Organizador = {
                     id_eve: string;
                     nom_eve: string;
                     fec_ini_eve: Date | string;
+                    fec_fin_eve?: Date | string | null;
+                    ubi_eve: string;
+                    estado_evento?: string | null;
+                    es_destacado?: boolean | null;
+                    des_eve?: string | null;
+                    precio?: number | null;
+                    es_gratuito?: boolean | null;
                 }>;
             }
 
