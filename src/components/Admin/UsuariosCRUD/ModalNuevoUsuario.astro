@@ -649,6 +649,35 @@ const carreras = carrerasData?.carreras || [];
         }
     }
 
+    function validarCedula(cedula: string): boolean {
+        if (!/^\d{10}$/.test(cedula)) return false;
+        const provincia = parseInt(cedula.substring(0, 2), 10);
+        if (provincia < 1 || provincia > 24) return false;
+
+        const digitos = cedula.split("").map(Number);
+        const digitoVerificador = digitos[9];
+        let suma = 0;
+
+        for (let i = 0; i < 9; i++) {
+            let val = digitos[i];
+            if (i % 2 === 0) {
+                val *= 2;
+                if (val > 9) {
+                    val -= 9;
+                }
+            }
+            suma += val;
+        }
+
+        const decenaSuperior = Math.ceil(suma / 10) * 10;
+        let digitoCalculado = decenaSuperior - suma;
+        if (digitoCalculado === 10) {
+            digitoCalculado = 0;
+        }
+
+        return digitoVerificador === digitoCalculado;
+    }
+
 document.addEventListener("DOMContentLoaded", () => {
         // --- SELECCIÓN DE ELEMENTOS ---
         const form = document.getElementById("formulario-nuevo-usuario") as HTMLFormElement;
@@ -671,17 +700,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const specialCheck = document.getElementById("special-check") as HTMLParagraphElement;
         
         if (passwordInput && passwordCriteriaContainer) {
-            // Muestra la lista de criterios cuando el usuario entra al campo
             passwordInput.addEventListener('focus', () => {
-                // ANTES: passwordCriteriaContainer.style.display = 'block';
-                passwordCriteriaContainer.classList.add('visible'); // AHORA
+                passwordCriteriaContainer.classList.add('visible');
             });
 
             // Oculta la lista cuando el usuario sale del campo
             passwordInput.addEventListener('blur', () => {
                 if (passwordInput.value === '' || passwordIsValid) {
-                    // ANTES: passwordCriteriaContainer.style.display = 'none';
-                    passwordCriteriaContainer.classList.remove('visible'); // AHORA
+                    passwordCriteriaContainer.classList.remove('visible');
                 }
             });
         }
@@ -779,6 +805,21 @@ document.addEventListener("DOMContentLoaded", () => {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
+                const formData = new FormData(form); // Convertir FormData a objeto para la validación
+                const cedula = formData.get("ced_usu") as string;
+                const contrasena = formData.get("cont_cuenta") as string;
+
+                if (!validarCedula(cedula)) {
+                     const { default: Swal } = await import("sweetalert2");
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Cédula Inválida",
+                        text: "Por favor, ingresa un número de cédula ecuatoriana válido.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return; // Detiene el envío
+                }
+
                 validatePassword();
 
                 if (!passwordIsValid) {
@@ -792,7 +833,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                const formData = new FormData(form); // Convertir FormData a objeto para la validación
                 const userData = {
                     cor_cue: formData.get("cor_cue") as string,
                     ced_usu: formData.get("ced_usu") as string,
