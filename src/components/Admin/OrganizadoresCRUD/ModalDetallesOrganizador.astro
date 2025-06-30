@@ -154,7 +154,7 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             if (eventos.length > 0) {
                 eventos.forEach((ev: any) => {
                     const eventoDiv = document.createElement("div");
-                    eventoDiv.style.cssText = "margin-bottom: 10px; padding: 8px; border-left: 3px solid #007bff; background-color: #f8f9fa;";
+                    eventoDiv.style.cssText = "margin-bottom: 10px; padding: 8px; border-left: 3px solid #dc3545; background-color: #f8f9fa;";
                     
                     // Nombre del evento
                     const nombreEvento = ev.nom_eve || "Evento sin nombre";
@@ -199,7 +199,6 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                         <small><strong>Ubicación:</strong> ${ubicacion}</small><br>
                         <small><strong>Precio:</strong> ${precioTexto}</small>
                         ${ev.es_destacado ? '<br><small style="color: #ffc107;"><strong>⭐ Evento Destacado</strong></small>' : ''}
-                        ${ev.des_eve ? `<br><small style="color: #6c757d;"><em>${ev.des_eve.substring(0, 100)}${ev.des_eve.length > 100 ? '...' : ''}</em></small>` : ''}
                     `;
                     
                     eventosLista.appendChild(eventoDiv);
