@@ -90,8 +90,12 @@ if (usuarioId) {
         let mensajeCertificado = "";
         let estadoEvento = "incompleto";
 
-        // Primero verificamos si cumple los requisitos básicos
-        if (inscripcion.est_par !== "APROBADA") {
+        if (inscripcion.est_ins === "DPendiente") {
+            // Los documentos de inscripción están pendientes de revisión
+            mensajeCertificado =
+                "⏳ En revisión: Tus documentos están siendo validados por un administrador";
+            estadoEvento = "En revisión";
+        } else if (inscripcion.est_par !== "APROBADA") {
             mensajeCertificado =
                 "❌ Sin certificado: Necesitas estar aprobado para obtener el certificado";
             estadoEvento = "incompleto";
