@@ -13,7 +13,7 @@ import ContenedorEventos from "../components/ContenedorEvento.astro";
 const url = new URL(Astro.request.url);
 const filtros = {
   categoria: url.searchParams.get("categoria") || "",
-  duracion: url.searchParams.get("duracion") || ""
+  duracion: url.searchParams.get("duracion") || "",
 };
 
 // Extraer número de página, por defecto 1
@@ -26,11 +26,11 @@ const session = await getSession(Astro.request);
 let esAdmin = false;
 
 if (session && session.user) {
-    const user = session.user as CustomUser;
-    const rol = user.rol?.toUpperCase();
-    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
-        esAdmin = true;
-    }
+  const user = session.user as CustomUser;
+  const rol = user.rol?.toUpperCase();
+  if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+    esAdmin = true;
+  }
 }
 
 const { data: pagina } = await Astro.callAction(actions.getInfo, {});
@@ -38,34 +38,45 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 
 <Layout>
   <Header />
-  {esAdmin ? <MenuAdmin/> : <Navbar />}
-  
-  <Filtros />
+  {esAdmin ? <MenuAdmin /> : <Navbar />}
 
+  <section class="contenedor-titulo">
+    <Filtros />
+    <div class="contenedor-interno">
+      <h2 class="titulo-seccion">Eventos</h2>
+      <span class="block h-[3px] w-[66px] bg-red-900"></span>
+    </div>
+  </section>
   <section class="seccion-principal">
-    <h2 class="titulo-seccion">EVENTOS</h2>
+    {
+      (filtros.categoria || filtros.duracion) && (
+        <div class="filtros-activos">
+          <span class="titulo-filtros"> Filtros aplicados:</span>
 
-    {(filtros.categoria || filtros.duracion) && (
-      <div class="filtros-activos">
-        <span class="titulo-filtros"> Filtros aplicados:</span>
+          {filtros.categoria && (
+            <span class="filtro-tag">
+              Categoría: <strong>{filtros.categoria}</strong>
+              <button class="cerrar-filtro" onclick="quitarFiltro('categoria')">
+                ×
+              </button>
+            </span>
+          )}
 
-        {filtros.categoria && (
-          <span class="filtro-tag">
-            Categoría: <strong>{filtros.categoria}</strong>
-            <button class="cerrar-filtro" onclick="quitarFiltro('categoria')">×</button>
-          </span>
-        )}
+          {filtros.duracion && (
+            <span class="filtro-tag">
+              Duración: <strong>{filtros.duracion}</strong>
+              <button class="cerrar-filtro" onclick="quitarFiltro('duracion')">
+                ×
+              </button>
+            </span>
+          )}
 
-        {filtros.duracion && (
-          <span class="filtro-tag">
-            Duración: <strong>{filtros.duracion}</strong>
-            <button class="cerrar-filtro" onclick="quitarFiltro('duracion')">×</button>
-          </span>
-        )}
-
-        <a href="/cursosCompleto" class="btn-limpiar-filtros">Ver todos los cursos</a>
-      </div>
-    )}
+          <a href="/cursosCompleto" class="btn-limpiar-filtros">
+            Ver todos los cursos
+          </a>
+        </div>
+      )
+    }
 
     <!-- Buscador -->
     <div class="buscador">
@@ -74,43 +85,81 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
     </div>
 
     <!-- Eventos filtrados con paginación -->
-    <ContenedorEventos filtros={filtros} page={page} cursosPorPagina={cursosPorPagina} modoAdmin={esAdmin} />
-{esAdmin && (
-  <div style="margin-top: 20px; text-align: right;">
-    <button id="btn-guardar-favoritos" class="btn-buscar" disabled onclick="guardarFavoritos()">Guardar Eventos Favoritos</button>
-  </div>
-)}
+    <ContenedorEventos
+      filtros={filtros}
+      page={page}
+      cursosPorPagina={cursosPorPagina}
+      modoAdmin={esAdmin}
+    />
+    {
+      esAdmin && (
+        <div style="margin-top: 20px; text-align: right;">
+          <button
+            id="btn-guardar-favoritos"
+            class="btn-buscar"
+            disabled
+            onclick="guardarFavoritos()"
+          >
+            Guardar Eventos Favoritos
+          </button>
+        </div>
+      )
+    }
 
-
-   
     <div class="cursos-sin-resultados" style="display: none;">
-      <svg class="icono-vacio" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="30" stroke="#8A1538" stroke-width="3" fill="#fff8f8"/>
-        <circle cx="22" cy="24" r="4" fill="#8A1538"/>
-        <circle cx="42" cy="24" r="4" fill="#8A1538"/>
-        <path d="M22 44c2.5-4 9.5-4 12 0" stroke="#8A1538" stroke-width="2.5" stroke-linecap="round"/>
+      <svg
+        class="icono-vacio"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 64 64"
+        fill="none"
+      >
+        <circle
+          cx="32"
+          cy="32"
+          r="30"
+          stroke="#8A1538"
+          stroke-width="3"
+          fill="#fff8f8"></circle>
+        <circle cx="22" cy="24" r="4" fill="#8A1538"></circle>
+        <circle cx="42" cy="24" r="4" fill="#8A1538"></circle>
+        <path
+          d="M22 44c2.5-4 9.5-4 12 0"
+          stroke="#8A1538"
+          stroke-width="2.5"
+          stroke-linecap="round"></path>
       </svg>
       <p class="titulo-vacio">¡Ups! No se encontraron resultados</p>
-      <p class="texto-vacio">Prueba buscando otro evento </p>
+      <p class="texto-vacio">Prueba buscando otro evento</p>
     </div>
   </section>
 </Layout>
-
 
 <style>
   .seccion-principal {
     padding: 20px 40px;
   }
 
-  .titulo-seccion {
-    font-size: 22px;
-    color: #a10000;
-    margin-bottom: 20px;
+  .contenedor-titulo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(245, 245, 245);
+    height: 200px;
+    position: relative;
   }
-  body {
-  background: linear-gradient(to bottom, #fffaf0, #fffaf0);
-}
 
+  .contenedor-interno {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .titulo-seccion {
+    font-size: 52px;
+    color: rgb(17, 17, 17);
+    font-weight: 500;
+  }
 
   .filtros-activos {
     display: flex;
@@ -176,7 +225,6 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
     display: flex;
     justify-content: flex-end;
     margin-bottom: 20px;
-    
   }
 
   .input-busqueda {
@@ -196,7 +244,6 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
     border-radius: 0px 10px 10px 0px;
     cursor: pointer;
     font-size: 16px;
-    
   }
 
   .btn-buscar:hover {
@@ -204,20 +251,19 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
   }
 
   .sin-resultados {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-  color: #333;
-  max-width: 100%;
-  margin: 0 auto;
-  background-color: #fff6f6; 
-  border: 1px solid #f3caca;
-  border-radius: 12px;
-}
-
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #333;
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: #fff6f6;
+    border: 1px solid #f3caca;
+    border-radius: 12px;
+  }
 
   .sin-resultados svg {
     width: 120px;
@@ -225,31 +271,28 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
     margin-bottom: 20px;
   }
 
- .titulo-vacio {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #8a1538;
-  margin-bottom: 8px;
-}
+  .titulo-vacio {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #8a1538;
+    margin-bottom: 8px;
+  }
 
-.texto-vacio {
-  font-size: 0.95rem;
-  color: #444;
-}
-.btn-favorito {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #ccc;
-}
+  .texto-vacio {
+    font-size: 0.95rem;
+    color: #444;
+  }
+  .btn-favorito {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #ccc;
+  }
 
-.btn-favorito.activo {
-  color: rgb(229, 5, 16);
-}
-
-
+  .btn-favorito.activo {
+    color: rgb(229, 5, 16);
+  }
 </style>
-
 
 <script src="/js/filtros.js" defer is:inline></script>
