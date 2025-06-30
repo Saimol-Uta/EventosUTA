@@ -32,8 +32,6 @@ if (session && session.user) {
     esAdmin = true;
   }
 }
-
-const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 ---
 
 <Layout>
@@ -42,6 +40,38 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
 
   <section class="contenedor-titulo">
     <Filtros />
+    <!-- Buscador -->
+    <div class="flex justify-end my-3 absolute right-16 bottom-1">
+      <div
+        class="flex items-stretch w-full max-w-sm bg-white shadow-md ring-1 ring-[#800000] overflow-hidden"
+      >
+        <input
+          type="text"
+          placeholder="Buscar evento"
+          class="input-busqueda flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400 px-4 py-2 text-sm"
+        />
+        <button
+          class="btn-buscar text-white px-4 flex items-center justify-center transition duration-300"
+          title="Buscar"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21 21l-4.35-4.35m0 0A7 7 0 104.64 4.64a7 7 0 0011.01 11.01z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <div class="contenedor-interno">
       <h2 class="titulo-seccion">Eventos</h2>
       <span class="block h-[3px] w-[66px] bg-red-900"></span>
@@ -77,12 +107,6 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
         </div>
       )
     }
-
-    <!-- Buscador -->
-    <div class="buscador">
-      <input type="text" placeholder="Buscar evento" class="input-busqueda" />
-      <button class="btn-buscar">🔍</button>
-    </div>
 
     <!-- Eventos filtrados con paginación -->
     <ContenedorEventos
@@ -132,167 +156,156 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, {});
       <p class="texto-vacio">Prueba buscando otro evento</p>
     </div>
   </section>
+
+  <style>
+    .seccion-principal {
+      padding: 20px 40px;
+    }
+
+    .contenedor-titulo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgb(245, 245, 245);
+      height: 180px;
+      position: relative;
+      padding-bottom: 30px;
+    }
+
+    .contenedor-interno {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .titulo-seccion {
+      font-size: 52px;
+      color: rgb(17, 17, 17);
+      font-weight: 500;
+    }
+
+    .filtro-tag {
+      background-color: #fff;
+      border: 1px solid #8a1538;
+      border-radius: 20px;
+      padding: 6px 14px;
+      color: #8a1538;
+      font-size: 0.85rem;
+    }
+
+    .titulo-filtros {
+      font-weight: 600;
+      color: #5a1e1e;
+    }
+
+    .btn-limpiar-filtros {
+      margin-left: auto;
+      color: #8a1538;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      border-radius: 5px;
+      background-color: #f0f0f0;
+      transition: background 0.2s ease;
+    }
+
+    .btn-limpiar-filtros:hover {
+      background-color: #e4e4e4;
+    }
+
+    .cerrar-filtro {
+      background: none;
+      border: none;
+      font-size: 14px;
+      color: #8a1538;
+      margin-left: 8px;
+      cursor: pointer;
+      padding: 0;
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    .cerrar-filtro:hover {
+      color: #c30000;
+    }
+
+    .input-busqueda {
+      padding: 8px 12px;
+      width: 220px;
+      font-size: 14px;
+      background-color: transparent;
+    }
+
+    .btn-buscar {
+      padding: 8px 14px;
+      background-color: rgb(108, 19, 19);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .sin-resultados {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+      color: #333;
+      max-width: 100%;
+      margin: 0 auto;
+      background-color: #fff6f6;
+      border: 1px solid #f3caca;
+      border-radius: 12px;
+    }
+
+    .sin-resultados {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+      color: #333;
+      max-width: 100%;
+      margin: 0 auto;
+      background-color: #fff6f6;
+      border: 1px solid #f3caca;
+      border-radius: 12px;
+    }
+
+    .sin-resultados svg {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+    }
+
+    .titulo-vacio {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #8a1538;
+      margin-bottom: 8px;
+    }
+
+    .texto-vacio {
+      font-size: 0.95rem;
+      color: #444;
+    }
+    .btn-favorito {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #ccc;
+    }
+
+    .btn-favorito.activo {
+      color: rgb(229, 5, 16);
+    }
+  </style>
+
+  <script src="/js/filtros.js" defer is:inline></script>
 </Layout>
-
-<style>
-  .seccion-principal {
-    padding: 20px 40px;
-  }
-
-  .contenedor-titulo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgb(245, 245, 245);
-    height: 200px;
-    position: relative;
-  }
-
-  .contenedor-interno {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .titulo-seccion {
-    font-size: 52px;
-    color: rgb(17, 17, 17);
-    font-weight: 500;
-  }
-
-  .filtros-activos {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    background-color: #f9f9f9;
-    padding: 12px 18px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    font-size: 0.95rem;
-    color: #333;
-  }
-
-  .filtro-tag {
-    background-color: #fff;
-    border: 1px solid #8a1538;
-    border-radius: 20px;
-    padding: 6px 14px;
-    color: #8a1538;
-    font-size: 0.85rem;
-  }
-
-  .titulo-filtros {
-    font-weight: 600;
-    color: #5a1e1e;
-  }
-
-  .btn-limpiar-filtros {
-    margin-left: auto;
-    color: #8a1538;
-    font-weight: 500;
-    text-decoration: none;
-    font-size: 0.85rem;
-    padding: 6px 12px;
-    border-radius: 5px;
-    background-color: #f0f0f0;
-    transition: background 0.2s ease;
-  }
-
-  .btn-limpiar-filtros:hover {
-    background-color: #e4e4e4;
-  }
-
-  .cerrar-filtro {
-    background: none;
-    border: none;
-    font-size: 14px;
-    color: #8a1538;
-    margin-left: 8px;
-    cursor: pointer;
-    padding: 0;
-    font-weight: bold;
-    line-height: 1;
-  }
-
-  .cerrar-filtro:hover {
-    color: #c30000;
-  }
-
-  .buscador {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
-  }
-
-  .input-busqueda {
-    padding: 8px 12px;
-    width: 220px;
-    border: 1px solid #ccc;
-    border-radius: 10px 0px 0px 10px;
-    font-size: 14px;
-    background-color: transparent;
-  }
-
-  .btn-buscar {
-    padding: 8px 14px;
-    background-color: #d60404;
-    color: white;
-    border: none;
-    border-radius: 0px 10px 10px 0px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-
-  .btn-buscar:hover {
-    background-color: #8e0404;
-  }
-
-  .sin-resultados {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    text-align: center;
-    color: #333;
-    max-width: 100%;
-    margin: 0 auto;
-    background-color: #fff6f6;
-    border: 1px solid #f3caca;
-    border-radius: 12px;
-  }
-
-  .sin-resultados svg {
-    width: 120px;
-    height: 120px;
-    margin-bottom: 20px;
-  }
-
-  .titulo-vacio {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #8a1538;
-    margin-bottom: 8px;
-  }
-
-  .texto-vacio {
-    font-size: 0.95rem;
-    color: #444;
-  }
-  .btn-favorito {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #ccc;
-  }
-
-  .btn-favorito.activo {
-    color: rgb(229, 5, 16);
-  }
-</style>
-
-<script src="/js/filtros.js" defer is:inline></script>
