@@ -12,8 +12,10 @@ import ContenedorEventos from "../components/ContenedorEvento.astro";
 // Extraer filtros desde la URL
 const url = new URL(Astro.request.url);
 const filtros = {
+
   categoria: url.searchParams.get("categoria") || "",
   duracion: url.searchParams.get("duracion") || "",
+
 };
 
 // Extraer número de página, por defecto 1
@@ -305,7 +307,6 @@ if (session && session.user) {
     .btn-favorito.activo {
       color: rgb(229, 5, 16);
     }
-  </style>
 
   <script src="/js/filtros.js" defer is:inline></script>
 </Layout>

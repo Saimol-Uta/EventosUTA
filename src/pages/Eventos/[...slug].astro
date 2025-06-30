@@ -63,22 +63,25 @@ const formatearFecha = (fecha: string | Date) => {
     });
 };
 
-// Formatear duración
-const formatearDuracion = (minutos: number) => {
-    if (minutos < 60) {
-        return `${minutos} minutos`;
-    } else if (minutos < 1440) {
-        const horas = Math.floor(minutos / 60);
-        const minutosRestantes = minutos % 60;
-        return minutosRestantes > 0
-            ? `${horas}h ${minutosRestantes}m`
-            : `${horas} horas`;
+// Formatear duración (el campo dur_eve está en horas)
+const formatearDuracion = (horas: number) => {
+    if (horas < 24) {
+        // Menos de 24 horas
+        const horasRedondeadas = Math.round(horas * 100) / 100;
+        if (horasRedondeadas === 1) {
+            return '1 hora';
+        } else {
+            return `${horasRedondeadas} horas`;
+        }
     } else {
-        const dias = Math.floor(minutos / 1440);
-        const horasRestantes = Math.floor((minutos % 1440) / 60);
-        return horasRestantes > 0
-            ? `${dias} días ${horasRestantes}h`
-            : `${dias} días`;
+        // 24 horas o más, mostrar días y horas
+        const dias = Math.floor(horas / 24);
+        const horasRestantes = Math.round(horas % 24);
+        if (horasRestantes === 0) {
+            return `${dias} ${dias === 1 ? 'día' : 'días'}`;
+        } else {
+            return `${dias} ${dias === 1 ? 'día' : 'días'} ${horasRestantes}h`;
+        }
     }
 };
 
@@ -94,16 +97,25 @@ function esHoyODespues(fecha: Date) {
 function esAntesDe(fecha: Date) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
+    console.log(hoy);
+    
     const comparar = new Date(fecha);
     comparar.setHours(0, 0, 0, 0);
     return hoy < comparar;
 }
 
+
 const inscripcionDisponible = () => {
     const inicio = new Date(evento.fec_ini_ins_eve);
     const fin = new Date(evento.fec_fin_ins_eve);
-    return esHoyODespues(inicio) && !esAntesDe(fin);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    inicio.setHours(0, 0, 0, 0);
+    fin.setHours(0, 0, 0, 0);
+    return hoy >= inicio && hoy <= fin;
 };
+
+
 
 const inscripcionProximamente = () => {
     const inicio = new Date(evento.fec_ini_ins_eve);
@@ -175,6 +187,14 @@ const inscripcionProximamente = () => {
                             <div style="font-weight: 600; font-size: 0.95rem;">
                                 {evento.dur_eve ? formatearDuracion(evento.dur_eve) : "No especificada"}
                             </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.3rem;">👥 Cupo máximo</div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">{evento.cup_max ?? 'No especificado'}</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.3rem;">📝 Inscritos</div>
+                            <div style="font-weight: 600; font-size: 0.95rem;">{evento._count?.inscripciones ?? 'No disponible'}</div>
                         </div>
                     </div>
                 </div>
@@ -403,7 +423,7 @@ const inscripcionProximamente = () => {
                                 </div>
                                 
                                 <!-- Botón de pago si está aprobado y el evento es pagado -->
-                                {estadoInscripcion === 'Aprobado' && evento.precio && Number(evento.precio) > 0 && (
+                                {estadoInscripcion === 'FPendiente' && evento.precio && Number(evento.precio) > 0 && (
                                     <a
                                         href={`/Eventos/Pago/${evento.id_eve}`}
                                         style="display: block; background: linear-gradient(135deg, #16a34a, #15803d); color: white; padding: 1rem 2rem; border-radius: 12px; font-size: 1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4); transition: all 0.3s ease;"

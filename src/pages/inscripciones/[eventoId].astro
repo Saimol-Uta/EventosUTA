@@ -520,32 +520,39 @@ const links = [
     // Función para verificar requisitos de pago y actualizar el botón
     function verificarRequisitosPagoYActualizarBoton(inscripcion: any) {
         const botonAprobar = document.getElementById("boton-aprobar-pago") as HTMLButtonElement;
-        
+        console.log("[Pago] --- INICIO VERIFICACIÓN ---");
+        console.log("[Pago] Inscripción:", inscripcion);
         if (!botonAprobar) {
-            console.warn("No se encontró el botón de aprobar pago");
+            console.warn("[Pago] No se encontró el botón de aprobar pago");
             return;
         }
 
         // Deshabilitar por defecto
         botonAprobar.disabled = true;
+        console.log("[Pago] Botón deshabilitado por defecto:", botonAprobar.disabled);
 
         const evento = inscripcion.eventos || {};
+        console.log("[Pago] Evento:", evento);
 
         // Verificar si el evento es de pago
         const esPago = !evento.es_gratuito && evento.precio && Number(evento.precio) > 0;
+        console.log("[Pago] ¿Es evento de pago?", esPago);
 
         if (!esPago) {
             // Si el evento es gratuito, habilitar el botón
             botonAprobar.disabled = false;
             botonAprobar.title = "Evento gratuito - No requiere comprobante de pago";
             botonAprobar.style.opacity = "1";
+            console.log("[Pago] Evento gratuito. Botón habilitado:", botonAprobar.disabled);
             return;
         }
 
         // Si es evento de pago, verificar que existe el comprobante
         const tieneComprobante = isValidDocumentLink(inscripcion.enl_ord_pag_ins);
-        
+        console.log("[Pago] ¿Tiene comprobante de pago?", tieneComprobante);
+
         botonAprobar.disabled = !tieneComprobante;
+        console.log("[Pago] Estado final del botón (debe estar", tieneComprobante ? "habilitado" : "deshabilitado", "):", botonAprobar.disabled);
 
         if (!tieneComprobante) {
             botonAprobar.title = `Evento de pago ($${Number(evento.precio).toFixed(2)}) - Falta comprobante de pago`;
@@ -554,6 +561,7 @@ const links = [
             botonAprobar.title = `Evento de pago ($${Number(evento.precio).toFixed(2)}) - Comprobante disponible`;
             botonAprobar.style.opacity = "1";
         }
+        console.log("[Pago] --- FIN VERIFICACIÓN ---");
     }
 
     // Función auxiliar para validar enlaces de documentos

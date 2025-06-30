@@ -2,8 +2,7 @@
 const {
     label = "Subir PDF",
     cuentaId,
-    // La prop sigue llamándose currentImage, pero ahora contendrá la URL de un PDF
-    currentImage = null, 
+    currentImage = null,
     size = "w-24 h-24", // Podrías querer ajustar el tamaño
     fieldName = "documento_pdf",
 } = Astro.props;
@@ -12,6 +11,7 @@ const hasDocument = currentImage && currentImage !== null;
 const initialColor = hasDocument ? "bg-green-600" : "bg-red-800";
 const initialLabel = hasDocument ? "✓ Subido" : label;
 ---
+
 <!-- ✅ Cambio: Usar un único contenedor con todos los datos -->
 <div
     class={`relative ${size}`}
@@ -89,11 +89,19 @@ const initialLabel = hasDocument ? "✓ Subido" : label;
         const allowedType = "application/pdf";
 
         if (file.size > maxSize) {
-            showToast(container, "El PDF es demasiado grande. Máximo 10MB.", "error");
+            showToast(
+                container,
+                "El PDF es demasiado grande. Máximo 10MB.",
+                "error",
+            );
             return;
         }
         if (file.type !== allowedType) {
-            showToast(container, "Tipo de archivo no permitido. Solo se aceptan PDFs.", "error");
+            showToast(
+                container,
+                "Tipo de archivo no permitido. Solo se aceptan PDFs.",
+                "error",
+            );
             return;
         }
 
@@ -127,11 +135,20 @@ const initialLabel = hasDocument ? "✓ Subido" : label;
             console.log("📥 Respuesta recibida:", result);
 
             if (result.data?.success) {
-                updateButtonState(uploadContainer, uploadLabel, true, "✓ Subido");
+                updateButtonState(
+                    uploadContainer,
+                    uploadLabel,
+                    true,
+                    "✓ Subido",
+                );
                 showToast(container, "PDF subido exitosamente", "success");
             } else {
                 updateButtonState(uploadContainer, uploadLabel, false, "Error");
-                showToast(container, result.data?.message || "Error al subir el PDF", "error");
+                showToast(
+                    container,
+                    result.data?.message || "Error al subir el PDF",
+                    "error",
+                );
             }
         } catch (error) {
             console.error("❌ Error al subir PDF:", error);

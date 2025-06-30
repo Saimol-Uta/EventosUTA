@@ -14,6 +14,7 @@ const {
   puntajeMinimoRequerido,
   requiereAsistencia,
   requierePuntaje,
+  tieneComprobanteDePago,
 } = Astro.props;
 ---
 
@@ -67,13 +68,32 @@ const {
     }
 
     {
-      estadoPago === "FPendiente" && (
+      estadoPago === "FPendiente" && !tieneComprobanteDePago && (
+
         <button
           class="btn-pago js-download-order"
           data-inscripcionid={inscripcionId}
         >
           Ver Orden de Pago
         </button>
+        <a href={`/Eventos/Pago/${eventoId}`} class="btn-pago" style="text-decoration:none;display:inline-block;">
+        Seguir con el proceso
+        </a>
+      )
+    }
+    {
+      estadoPago === "FPendiente" && tieneComprobanteDePago && (
+        <p class="texto-inactivo">
+          Se envió a revisión
+        </p>
+      )
+    }
+
+    {
+      estadoPago === "FCompleto" && (
+        <p class="texto-inactivo">
+          Pago completado, espera la generación del certificado.
+        </p>
       )
     }
 

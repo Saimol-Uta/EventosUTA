@@ -1,13 +1,6 @@
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
 import { Readable } from 'stream';
 
-// Configura Cloudinary con tus credenciales
-cloudinary.config({
-    cloud_name: import.meta.env.CLOUDINARY_CLOUD_NAME,
-    api_key: import.meta.env.CLOUDINARY_API_KEY,
-    api_secret: import.meta.env.CLOUDINARY_API_SECRET,
-});
-
 export class PdfUpload {
     /**
      * Sube un archivo PDF a Cloudinary.
@@ -15,6 +8,19 @@ export class PdfUpload {
      * @param publicId - Un nombre único para el archivo en Cloudinary.
      */
     static async upload(file: File, publicId: string): Promise<string> {
+        // Configura Cloudinary DENTRO del método
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+
+        console.log('Cloudinary Config en upload:', {
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+
         // Convertimos el File a un Buffer/Uint8Array
         const pdfBytes = new Uint8Array(await file.arrayBuffer());
 
@@ -22,8 +28,8 @@ export class PdfUpload {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
                     public_id: publicId,
-                    folder: 'documentos_usuarios', // Carpeta específica para PDFs
-                    resource_type: 'raw', // ¡La clave para PDFs!
+                    folder: 'documentos_usuarios',
+                    resource_type: 'raw',
                     overwrite: true,
                 },
                 (error, result) => {
@@ -44,8 +50,14 @@ export class PdfUpload {
         if (!url) return;
 
         try {
+            // Configura Cloudinary DENTRO del método
+            cloudinary.config({
+                cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+                api_key: process.env.CLOUDINARY_API_KEY,
+                api_secret: process.env.CLOUDINARY_API_SECRET,
+            });
+
             // Extraemos el public_id de la URL.
-            // Ejemplo URL: .../upload/v12345/documentos_usuarios/cedula_email.pdf
             const parts = url.split('/');
             const publicIdWithFolder = parts.slice(parts.indexOf('documentos_usuarios')).join('/');
             const publicId = publicIdWithFolder.substring(0, publicIdWithFolder.lastIndexOf('.'));
@@ -57,7 +69,6 @@ export class PdfUpload {
 
         } catch (error) {
             console.error("Error al eliminar el PDF de Cloudinary:", error);
-            // No lanzamos un error para no detener el flujo si solo falla el borrado
         }
     }
 }
