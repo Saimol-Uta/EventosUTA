@@ -103,10 +103,11 @@ if (session && session.user) {
             </span>
           )}
 
-          <a href="/cursosCompleto" class="btn-limpiar-filtros">
+        <a href="/cursosCompleto" class="btn-limpiar-filtros">
             Ver todos los cursos
           </a>
         </div>
+        
       )
     }
 
@@ -189,26 +190,26 @@ if (session && session.user) {
 
     .filtro-tag {
       background-color: #fff;
-      border: 1px solid #8a1538;
-      border-radius: 20px;
+      border: 1px solid rgb(108, 19, 19);
       padding: 6px 14px;
-      color: #8a1538;
+      color: rgb(108, 19, 19);
       font-size: 0.85rem;
+      margin-right: 20px;
     }
 
     .titulo-filtros {
       font-weight: 600;
-      color: #5a1e1e;
+      color: rgb(108, 19, 19);
+      margin-right: 10px;
     }
 
     .btn-limpiar-filtros {
       margin-left: auto;
-      color: #8a1538;
+      color: rgb(108, 19, 19);
       font-weight: 500;
       text-decoration: none;
       font-size: 0.85rem;
       padding: 6px 12px;
-      border-radius: 5px;
       background-color: #f0f0f0;
       transition: background 0.2s ease;
     }
@@ -230,7 +231,14 @@ if (session && session.user) {
     }
 
     .cerrar-filtro:hover {
-      color: #c30000;
+      color: rgb(108, 19, 19);
+    }
+    
+    .filtros-activos {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 18px;
     }
 
     .input-busqueda {
