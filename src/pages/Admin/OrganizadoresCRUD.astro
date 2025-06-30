@@ -9,7 +9,7 @@ import "../../styles/Admin/EventosCRUD.css";
 import { actions } from "astro:actions";
 
 // Obtener organizadores
-const { data: organizadoresData, error } = await Astro.callAction(actions.getOrganizadores, {});
+const { data: organizadoresData, error } = await Astro.callAction(actions.getOrganizadoresCR, {});
 
 if (error) {
     console.error("Error al obtener organizadores:", error);
@@ -20,10 +20,15 @@ const organizadores = organizadoresData?.organizadores || [];
 type Organizador = {
     ced_org: string;
     nom_org1: string;
-    nom_org2?: string;
+    nom_org2?: string | null;
     ape_org1: string;
-    ape_org2?: string;
-    tit_aca_org: string; 
+    ape_org2?: string | null;
+    tit_aca_org: string;
+    eventos?: Array<{
+        id_eve: string;
+        nom_eve: string;
+        fec_ini_eve: Date | string;
+    }>;
 }
     
 ---
@@ -143,10 +148,15 @@ type Organizador = {
             interface Organizador {
                 ced_org: string;
                 nom_org1: string;
-                nom_org2?: string;
+                nom_org2?: string | null;
                 ape_org1: string;
-                ape_org2: string;
+                ape_org2: string | null;
                 tit_aca_org: string;
+                eventos?: Array<{
+                    id_eve: string;
+                    nom_eve: string;
+                    fec_ini_eve: Date | string;
+                }>;
             }
 
             // Función para eliminar organizador
