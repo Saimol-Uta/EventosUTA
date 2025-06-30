@@ -14,14 +14,16 @@ function activarFiltroEnVivo() {
   if (!input || !cards.length) return;
 
   input.addEventListener("input", () => {
-    const texto = input.value.toLowerCase();
+    const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+const texto = normalize(inputBuscar.value.toLowerCase().trim());
     let encontrados = 0;
 
     cards.forEach((card) => {
-      const titulo = card.getAttribute("data-titulo")?.toLowerCase() || "";
-      const coincide = titulo.includes(texto);
-      card.style.display = coincide ? "block" : "none";
-      if (coincide) encontrados++;
+      const titulo = normalize(card.getAttribute("data-titulo")?.toLowerCase() || "");
+  const coincide = titulo.includes(texto);
+  card.style.display = coincide ? "block" : "none";
+  if (coincide) encontrados++;
     });
 
     // ✅ Mostrar u ocultar el mensaje según los resultados
