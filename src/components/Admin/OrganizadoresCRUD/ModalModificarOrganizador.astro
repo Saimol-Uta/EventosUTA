@@ -122,28 +122,14 @@ import "../../../styles/Admin/ModalModificarEvento.css";
 
     declare global {
         interface Window {
-            abrirModalModificarOrganizador: (cedula: string) => void;
+            abrirModalModificarOrganizadorModal: (organizador: Organizador) => void;
             cerrarModalModificarOrganizador: () => void;
             abrirAsignacionesOrganizar: (cedula: string) => void;
         }
     }
 
-    // Recibe la cédula, busca el input oculto en el DOM, parsea y muestra los datos en el modal
-    function abrirModalModificarOrganizador(cedula :string) {
-        // Forzar el tipo a HTMLInputElement para acceder a .value
-        const input = document.querySelector(`input[name="organizador"][data-cedula="${cedula}"]`);
-        if (!input) {
-            console.error('Organizador no encontrado:', cedula);
-            return;
-        }
-        let organizador = null;
-        try {
-            organizador = JSON.parse((input instanceof HTMLInputElement ? input.value : ""));
-        } catch (e) {
-            console.error('Error al parsear el organizador:', e);
-            return;
-        }
-
+    // Recibe el objeto organizador directamente
+    function abrirModalModificarOrganizadorModal(organizador: Organizador) {
         const modal = document.getElementById("modalModificarOrganizador");
         const form = document.getElementById("formulario-modificar-organizador");
         if (!modal || !form) return;
@@ -215,7 +201,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
             });
         }
 
-        window.abrirModalModificarOrganizador = abrirModalModificarOrganizador;
+        window.abrirModalModificarOrganizadorModal = abrirModalModificarOrganizadorModal;
         window.cerrarModalModificarOrganizador = cerrarModalModificarOrganizador;
     });
 </script>
