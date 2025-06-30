@@ -47,6 +47,20 @@ const { categorias = [], organizadores = [] } = Astro.props;
 
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
+                            <p class="texto-dato">Cupo Máximo</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    class="input-dato"
+                                    name="cup_max"
+                                    required
+                                    placeholder="Ej: 40"
+                                />
+                            </div>
+                        </div>
+                        <div class="contenedor-dato">
                             <p class="texto-dato">Categoría:</p>
                             <div class="contenedor-input">
                                 <select

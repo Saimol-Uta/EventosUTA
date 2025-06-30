@@ -10,25 +10,19 @@ export const getEventos = defineAction({
     async handler(input) {
         try {
             const whereClause = input.categoria
-                ? {
-                    categorias_eventos: {
-                        nom_cat: {
-                            contains: input.categoria,
-                            mode: 'insensitive' as const
-                        }
-                    }
+                ? { id_cat_eve: input.categoria }
+                : {};
+            const eventos = await prisma.eventos.findMany({
+                where: whereClause,
+                include: {
+                    categorias_eventos: true,
+                    organizadores: true,
+                    asignaciones: true,
+                },
+                orderBy: {
+                    fec_ini_eve: 'desc'
                 }
-                : {}; const eventos = await prisma.eventos.findMany({
-                    where: whereClause,
-                    include: {
-                        categorias_eventos: true,
-                        organizadores: true,
-                        asignaciones: true,
-                    },
-                    orderBy: {
-                        fec_ini_eve: 'desc'
-                    }
-                });
+            });
 
             // Convertir a objetos planos usando JSON.parse(JSON.stringify())
             const eventosPlanos = JSON.parse(JSON.stringify(eventos));
