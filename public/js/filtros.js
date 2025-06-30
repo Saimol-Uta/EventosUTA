@@ -14,14 +14,16 @@ function activarFiltroEnVivo() {
   if (!input || !cards.length) return;
 
   input.addEventListener("input", () => {
-    const texto = input.value.toLowerCase();
+    const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+const texto = normalize(inputBuscar.value.toLowerCase().trim());
     let encontrados = 0;
 
     cards.forEach((card) => {
-      const titulo = card.getAttribute("data-titulo")?.toLowerCase() || "";
-      const coincide = titulo.includes(texto);
-      card.style.display = coincide ? "block" : "none";
-      if (coincide) encontrados++;
+      const titulo = normalize(card.getAttribute("data-titulo")?.toLowerCase() || "");
+  const coincide = titulo.includes(texto);
+  card.style.display = coincide ? "block" : "none";
+  if (coincide) encontrados++;
     });
 
     // ✅ Mostrar u ocultar el mensaje según los resultados
@@ -71,3 +73,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+//Eventos favoritos 
+let eventosSeleccionados = new Set();
+
+  function toggleFavorito(boton) {
+  const id = boton.dataset.id;
+
+  if (eventosSeleccionados.has(id)) {
+    eventosSeleccionados.delete(id);
+    boton.classList.remove("activo");
+  } else {
+    if (eventosSeleccionados.size >= 6) {
+      alert("Solo puedes seleccionar exactamente 6 eventos destacados.");
+      return;
+    }
+    eventosSeleccionados.add(id);
+    boton.classList.add("activo");
+  }
+
+  actualizarBotonGuardar();
+}
+  function actualizarBotonGuardar() {
+    const btn = document.getElementById("btn-guardar-favoritos");
+    if (btn) {
+      btn.disabled = eventosSeleccionados.size !== 6;
+    }
+  }
+async function guardarFavoritos() {
+  if (eventosSeleccionados.size !== 6) {
+    alert("Debes seleccionar exactamente 6 eventos.");
+    return;
+  }
+
+  const res = await fetch("/api/guardarFavoritos", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ eventos: Array.from(eventosSeleccionados) })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+}
+
