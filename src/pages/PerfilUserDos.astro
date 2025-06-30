@@ -67,10 +67,10 @@ if (Astro.request.method === "POST") {
                 errores.push(`El campo ${nombresCampos[campo] || campo} es obligatorio.`);
             }
         }
-        // const correoRec = formData.get("cor_rec")?.toString() ?? "";
-        // if (correoRec && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoRec)) {
-        //     errores.push("El correo de recuperación no tiene un formato válido.");
-        // }
+        const correoRec = formData.get("cor_rec")?.toString() ?? "";
+        if (correoRec && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoRec)) {
+            errores.push("El correo de recuperación no tiene un formato válido.");
+        }
 
         const cedula = formData.get("ced_usu")?.toString() ?? "";
         if (!/^\d{10}$/.test(cedula)) {
