@@ -2,6 +2,7 @@ import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import prisma from '../../db';
 import bcrypt from 'bcryptjs';
+import { validateEmail } from '../auth/verificacionCorreo';
 
 export const crearUsuario = defineAction({
     accept: 'json',
@@ -23,6 +24,18 @@ export const crearUsuario = defineAction({
     }),
     handler: async (input) => {
         try {
+
+            // Si el correo no es institucional, se verifica su existencia.
+            if (!input.cor_cue.endsWith('@uta.edu.ec')) {
+                const isEmailValid = await validateEmail(input.cor_cue);
+                if (!isEmailValid) {
+                    // Si el correo no es válido, devolvemos un error específico.
+                    return {
+                        success: false,
+                        error: 'El correo electrónico no parece ser válido o el dominio no existe.',
+                    };
+                }
+            }
             // ✅ 2. Hasheamos la contraseña de forma segura.
             const hashedPassword = bcrypt.hashSync(input.cont_cuenta, 10);
 
