@@ -73,6 +73,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="text"
                                 class="input-dato"
                                 name="ced_usu"
+                                id="cedula-input"
                                 required
                                 maxlength="10"
                                 pattern="[0-9]{10}"
@@ -90,9 +91,11 @@ const carreras = carrerasData?.carreras || [];
                                 type="password"
                                 class="input-dato"
                                 name="cont_cuenta"
+                                id="password-input"
                                 required
                                 minlength="6"
-                                title="La contraseña debe tener al menos 6 caracteres"
+                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{6,}$"
+                                title="La contraseña debe tener al menos 6 caracteres, una mayúscula, una minúscula, un número y un caracter especial."
                             />
                         </div>
                     </div>
@@ -107,6 +110,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu1"
+                                    id="nombre1-input"
                                     required
                                     maxlength="20"
                                 />
@@ -120,6 +124,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu2"
+                                    id="nombre2-input"
                                     maxlength="20"
                                 />
                             </div>
@@ -138,6 +143,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu1"
+                                    id="apellido1-input"
                                     required
                                     maxlength="20"
                                 />
@@ -151,6 +157,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu2"
+                                    id="apellido2-input"
                                     maxlength="20"
                                 />
                             </div>
@@ -168,6 +175,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="date"
                                 class="input-dato"
                                 name="fec_nac_usu"
+                                id="fecha-nacimiento-input"
                                 required
                             />
                         </div>
@@ -180,6 +188,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="tel"
                                 class="input-dato"
                                 name="num_tel_usu"
+                                id="telefono-input"
                                 pattern="[0-9]{10}"
                                 maxlength="10"
                                 title="Ingrese un número de teléfono válido de 10 dígitos"
@@ -195,38 +204,55 @@ const carreras = carrerasData?.carreras || [];
                     </p>
 
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Carrera</p>
-                        <div class="contenedor-input">
-                            <select class="input-dato" name="id_car_per">
-                                <option value=""
-                                    >Seleccionar carrera (opcional)</option
-                                >
-                                {
-                                    carreras.map((carrera: any) => (
-                                        <option value={carrera.id_car}>
-                                            {carrera.nom_car}
-                                            {carrera.cod_car
-                                                ? ` (${carrera.cod_car})`
-                                                : ""}
-                                        </option>
-                                    ))
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="contenedor-dato">
                         <p class="texto-dato">
                             Rol <span style="color: red;">*</span>
                         </p>
                         <div class="contenedor-input">
-                            <select class="input-dato" name="rol_cue" required>
+                            <select
+                                class="input-dato"
+                                name="rol_cue"
+                                id="rol-select"
+                                required
+                            >
                                 <option value="">Seleccione un rol</option>
                                 <option value="ESTUDIANTE">Estudiante</option>
                                 <option value="ADMINISTRADOR"
                                     >Administrador</option
                                 >
                                 <option value="USUARIO">Usuario</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div
+                        class="contenedor-dato"
+                        id="contenedor-carrera"
+                        style="display: none;"
+                    >
+                        <p class="texto-dato">Carrera</p>
+                        <div class="contenedor-input">
+                            <select
+                                class="input-dato"
+                                name="id_car_per"
+                                id="carrera-select"
+                            >
+                                <option value=""
+                                    >Seleccionar carrera (opcional)</option
+                                >
+                                {
+                                    carreras.map((carrera: any) => (
+                                        <option value={carrera.id_car}>
+                                                                               
+                                                    {carrera.nom_car}           
+                                                                           {" "}
+                                            {carrera.cod_car
+                                                ? ` (${carrera.cod_car})`
+                                                : ""}
+                                                                               
+                                               {" "}
+                                        </option>
+                                    ))
+                                }
                             </select>
                         </div>
                     </div>
@@ -584,10 +610,66 @@ const carreras = carrerasData?.carreras || [];
         }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById(
-            "formulario-nuevo-usuario",
-        ) as HTMLFormElement; // Manejar envío del formulario
+document.addEventListener("DOMContentLoaded", () => {
+        // --- SELECCIÓN DE ELEMENTOS ---
+        const form = document.getElementById("formulario-nuevo-usuario") as HTMLFormElement;
+        const cedulaInput = document.getElementById("cedula-input") as HTMLInputElement;
+        const telefonoInput = document.getElementById("telefono-input") as HTMLInputElement;
+        const nombre1Input = document.getElementById("nombre1-input") as HTMLInputElement;
+        const nombre2Input = document.getElementById("nombre2-input") as HTMLInputElement;
+        const apellido1Input = document.getElementById("apellido1-input") as HTMLInputElement;
+        const apellido2Input = document.getElementById("apellido2-input") as HTMLInputElement;
+        const fechaNacimientoInput = document.getElementById("fecha-nacimiento-input") as HTMLInputElement;
+        const rolSelect = document.getElementById("rol-select") as HTMLSelectElement;
+        const carreraContainer = document.getElementById("contenedor-carrera") as HTMLDivElement;
+
+        // --- FUNCIONES DE FILTRADO DE ENTRADA ---
+        
+        // Función para permitir solo números
+        const filtrarSoloNumeros = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            input.value = input.value.replace(/\D/g, ''); // Reemplaza cualquier cosa que NO sea un dígito
+        };
+
+        // Función para permitir solo letras y espacios
+        const filtrarSoloLetras = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            // Permite letras (incluyendo acentos comunes en español), y espacios.
+            input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚ\s]/g, '');
+        };
+
+        // --- LÓGICA DE VALIDACIÓN Y UI ---
+
+        // 1. Validar edad mínima (17 años) en fecha de nacimiento
+        const hoy = new Date();
+        const anioMax = hoy.getFullYear() - 17;
+        hoy.setFullYear(anioMax);
+        // Formatea la fecha a YYYY-MM-DD para el atributo 'max'
+        const fechaMaxima = hoy.toISOString().split("T")[0];
+        if(fechaNacimientoInput) fechaNacimientoInput.setAttribute("max", fechaMaxima);
+        
+        // 2. Aplicar filtros de entrada a los campos correspondientes
+        if(cedulaInput) cedulaInput.addEventListener('input', filtrarSoloNumeros);
+        if(telefonoInput) telefonoInput.addEventListener('input', filtrarSoloNumeros);
+        
+        if(nombre1Input) nombre1Input.addEventListener('input', filtrarSoloLetras);
+        if(nombre2Input) nombre2Input.addEventListener('input', filtrarSoloLetras);
+        if(apellido1Input) apellido1Input.addEventListener('input', filtrarSoloLetras);
+        if(apellido2Input) apellido2Input.addEventListener('input', filtrarSoloLetras);
+
+        // 3. Lógica para mostrar/ocultar el campo de carrera según el rol
+        const toggleCarreraField = () => {
+            if (rolSelect.value === 'ESTUDIANTE') {
+                carreraContainer.style.display = 'block';
+            } else {
+                carreraContainer.style.display = 'none';
+            }
+        };
+
+        if(rolSelect) rolSelect.addEventListener('change', toggleCarreraField);
+        // Llamar una vez al cargar para establecer el estado inicial
+        toggleCarreraField();
+        
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
@@ -602,11 +684,17 @@ const carreras = carrerasData?.carreras || [];
                     ape_usu1: formData.get("ape_usu1") as string,
                     ape_usu2: (formData.get("ape_usu2") as string) || null,
                     fec_nac_usu: formData.get("fec_nac_usu") as string,
-                    num_tel_usu: (formData.get("num_tel_usu") as string) || null,
+                    num_tel_usu:
+                        (formData.get("num_tel_usu") as string) || null,
                     id_car_per: (formData.get("id_car_per") as string) || null,
-                    rol_cue: formData.get("rol_cue") as "ESTUDIANTE" | "ADMINISTRADOR" | "USUARIO",
-                    enl_ced_cue: (formData.get("enl_ced_cue") as string) || null,
-                    enl_mat_cue: (formData.get("enl_mat_cue") as string) || null,
+                    rol_cue: formData.get("rol_cue") as
+                        | "ESTUDIANTE"
+                        | "ADMINISTRADOR"
+                        | "USUARIO",
+                    enl_ced_cue:
+                        (formData.get("enl_ced_cue") as string) || null,
+                    enl_mat_cue:
+                        (formData.get("enl_mat_cue") as string) || null,
                     img_user: (formData.get("img_user") as string) || null,
                 };
                 try {
@@ -623,7 +711,8 @@ const carreras = carrerasData?.carreras || [];
                         },
                     });
 
-                    const { data, error } = await actions.crearUsuario(userData);
+                    const { data, error } =
+                        await actions.crearUsuario(userData);
 
                     if (data?.success) {
                         await Swal.fire({
