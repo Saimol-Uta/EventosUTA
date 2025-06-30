@@ -21,7 +21,7 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
     </summary>
 
     <div
-      class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50"
+      class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg z-50"
     >
       <div class="h-2 -mt-2"></div>
       {
@@ -35,7 +35,7 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
         )) || (
           <a
             href="/homeUser"
-            class="block px-4 py-2 text-sm text-red-500 hover:text-red-900 hover:bg-gray-100"
+            class="block px-4 py-2 text-sm text-gray-500 hover:text-red-900 hover:bg-gray-100"
           >
             Ver perfil
           </a>
@@ -45,7 +45,7 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
         (isAdmin && <div />) || (
           <a
             href="/User/historial"
-            class="block px-4 py-2 text-sm text-red-500 hover:text-red-900 hover:bg-gray-100"
+            class="block px-4 py-2 text-sm text-gray-500 hover:text-red-900 hover:bg-gray-100"
           >
             Historial
           </a>
@@ -54,7 +54,7 @@ const { isMaster, isStudent, isUser, isAdmin, isLoggedIn } = Astro.locals;
 
       <a
         href="/"
-        class="block px-4 py-2 text-sm text-red-900 hover:text-red-900 hover:bg-gray-100"
+        class="block px-4 py-2 text-sm text-gray-500 hover:text-red-900 hover:bg-gray-100"
         id="logout-link">Cerrar sesión</a
       >
     </div>
