@@ -9,6 +9,11 @@ const {
   eventoId,
   inscripcionId,
   estadoPago,
+  mensajeCertificado,
+  asistenciaMinimaRequerida,
+  puntajeMinimoRequerido,
+  requiereAsistencia,
+  requierePuntaje,
 } = Astro.props;
 ---
 
@@ -24,8 +29,28 @@ const {
     </div>
     <p class="fecha">{fecha}</p>
     <div class="card-info">
-      <div><strong>Calificación:</strong> {calificacion} / 10.0</div>
-      <div><strong>Asistencia:</strong> {asistencia}%</div>
+      <div class="info-item">
+        <strong>Calificación:</strong> 
+        <span class={`valor ${requierePuntaje && parseFloat(calificacion) < puntajeMinimoRequerido ? "insuficiente" : "suficiente"}`}>
+          {calificacion} / 10.0
+        </span>
+        {requierePuntaje && (
+          <span class="requisito">
+            (mín: {puntajeMinimoRequerido?.toFixed(1)})
+          </span>
+        )}
+      </div>
+      <div class="info-item">
+        <strong>Asistencia:</strong> 
+        <span class={`valor ${requiereAsistencia && asistencia < asistenciaMinimaRequerida ? "insuficiente" : "suficiente"}`}>
+          {asistencia}%
+        </span>
+        {requiereAsistencia && (
+          <span class="requisito">
+            (mín: {asistenciaMinimaRequerida}%)
+          </span>
+        )}
+      </div>
     </div>
   </div>
 
@@ -42,7 +67,7 @@ const {
     }
 
     {
-      estadoPago === "DPendiente" && (
+      estadoPago === "FPendiente" && (
         <button
           class="btn-pago js-download-order"
           data-inscripcionid={inscripcionId}
@@ -53,8 +78,16 @@ const {
     }
 
     {
-      !certificadoDisponible && estadoPago !== "DPendiente" && (
-        <p class="texto-inactivo">🚫 Sin acciones disponibles</p>
+      !certificadoDisponible && estadoPago !== "FPendiente" && (
+        <div class={`mensaje-certificado ${
+          mensajeCertificado?.includes("no ha finalizado") ? "evento-pendiente" :
+          mensajeCertificado?.includes("no otorga certificado") ? "sin-certificado" :
+          "requisitos-faltantes"
+        }`}>
+          <p class="texto-mensaje">
+            {mensajeCertificado || "🚫 Sin acciones disponibles"}
+          </p>
+        </div>
       )
     }
   </div>
@@ -112,10 +145,30 @@ const {
   }
   .card-info {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 8px;
     font-size: 0.95rem;
     margin-bottom: 1rem;
     color: #444;
+  }
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .valor.insuficiente {
+    color: #c62828;
+    font-weight: 600;
+  }
+  .valor.suficiente {
+    color: #2e7d32;
+    font-weight: 600;
+  }
+  .requisito {
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
   }
   .card-footer {
     display: flex;
@@ -167,6 +220,46 @@ const {
     font-size: 0.85rem;
     color: #999;
     font-style: italic;
+  }
+  .mensaje-certificado {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid;
+  }
+  .evento-pendiente {
+    background-color: #e3f2fd;
+    border-color: #90caf9;
+  }
+  .evento-pendiente .texto-mensaje {
+    color: #1565c0;
+  }
+  .sin-certificado {
+    background-color: #fafafa;
+    border-color: #e0e0e0;
+  }
+  .sin-certificado .texto-mensaje {
+    color: #616161;
+  }
+  .requisitos-faltantes {
+    background-color: #ffebee;
+    border-color: #ffcdd2;
+  }
+  .requisitos-faltantes .texto-mensaje {
+    color: #c62828;
+  }
+  .icono-info {
+    font-size: 1.2rem;
+  }
+  .texto-mensaje {
+    margin: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
   }
   .btn-certificado:disabled,
   .btn-pago:disabled {

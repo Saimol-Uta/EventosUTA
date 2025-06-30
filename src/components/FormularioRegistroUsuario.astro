@@ -3,7 +3,7 @@ interface CampoFormulario {
   titulo: string;
   valor: string;
   name: string;
-  tipo?: "select";
+  tipo?: "select" | "email"; 
   opciones?: { valor: string; texto: string }[];
 }
 
@@ -26,99 +26,119 @@ const {
   textoBotonMasTarde,
   textoBotonAsociar,
 } = Astro.props as Props;
+
+const nombre = camposFormulario.find(c => c.name === "nom_usu1")?.valor || "";
+const apellido = camposFormulario.find(c => c.name === "ape_usu1")?.valor || "";
+const nombreCompleto = `${nombre} ${apellido}`.trim();
+
+const fechaMinimaNacimiento = new Date();
+fechaMinimaNacimiento.setFullYear(fechaMinimaNacimiento.getFullYear() - 17);
+const fechaMax = fechaMinimaNacimiento.toISOString().split("T")[0];
 ---
 
-<h1>Edición de tu Información</h1>
-<p class="subtitulo">Completa tus datos:</p>
+<section class="space-y-12">
+  <div class="text-center">
+    <h1 class="text-4xl font-black text-[#581517] mb-2 tracking-tight">🧾 Información de Perfil</h1>
+    <p class="text-gray-600 text-lg">Edita tus datos para mejorar tu experiencia dentro del sistema.</p>
+  </div>
 
-<div class="form-container">
-  <form method="POST">
-    <input type="hidden" name="action" value="guardarInfo" />
+  <div class="bg-white border border-gray-100 rounded-3xl shadow-2xl overflow-hidden">
+    <div class="grid md:grid-cols-3">
+      <!-- Aside Panel -->
+      <div class="bg-[#581517] text-white p-8 space-y-6">
+        <div>
+          <h2 class="text-xl font-bold mb-1">👤 {nombreCompleto || "Usuario"}</h2>
+          <p class="text-sm text-white/80">{cedula}</p>
+        </div>
 
-    {camposFormulario.map((campo) => (
-      <div>
-        <label for={campo.name}>{campo.titulo}</label>
-
-        {campo.tipo === "select" && campo.opciones ? (
-          <select name={campo.name} id={campo.name} required>
-            <option value="" disabled selected={!campo.valor}>Selecciona una opción</option>
-            {campo.opciones.map(op => (
-              <option value={op.valor} selected={op.valor === campo.valor}>{op.texto}</option>
-            ))}
-          </select>
-        ) : (
-          <input
-            id={campo.name}
-            name={campo.name}
-            value={campo.valor}
-            required={["nom_usu1", "ape_usu1", "fec_nac_usu", "num_tel_usu", "id_car_per"].includes(campo.name)}
-            type={campo.name === "fec_nac_usu" ? "date" : "text"}
-          />
-        )}
+        <div class="space-y-3">
+          {camposFormulario.map((campo) => (
+            <div class="text-sm">
+              <p class="font-semibold">{campo.titulo}</p>
+              <p class="text-white/70 truncate">
+                {campo.name === "id_car_per"
+                  ? campo.opciones?.find(op => op.valor === campo.valor)?.texto || "Sin datos"
+                  : campo.valor || "Sin datos"}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
-    ))}
 
-    {mostrarBotones && (
-      <div style="grid-column: 1 / -1;">
-        <button type="submit" class="submit-button">{textoBotonGuardarInfo}</button>
-        <button type="button" class="submit-button" onclick="history.back()">{textoBotonCancelar}</button>
-        
+      <!-- Formulario -->
+      <div class="md:col-span-2 p-10">
+        <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <input type="hidden" name="action" value="guardarInfo" />
+
+          {camposFormulario.map((campo) => (
+            <div class="flex flex-col relative group">
+              <label for={campo.name} class="text-[15px] font-medium text-gray-700 mb-2 group-hover:text-[#581517] transition-colors">{campo.titulo}</label>
+
+              {campo.tipo === "select" && campo.opciones ? (
+                <select name={campo.name} id={campo.name} required
+                  class="bg-white border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#581517] focus:outline-none shadow-sm hover:ring-1 hover:ring-[#581517] transition-all">
+                  <option value="" disabled selected={!campo.valor}>Selecciona una opción</option>
+                  {campo.opciones.map(op => (
+                    <option value={op.valor} selected={op.valor === campo.valor}>{op.texto}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id={campo.name}
+                  name={campo.name}
+                  value={campo.valor}
+                  required={["nom_usu1", "ape_usu1", "fec_nac_usu", "num_tel_usu", "id_car_per"].includes(campo.name)}
+                  type={campo.tipo === "email" ? "email" : campo.name === "fec_nac_usu" ? "date" : campo.name === "num_tel_usu" ? "tel" : "text"}
+                  {...(campo.name === "ced_usu" ? { readonly: true } : {})}
+                  pattern={
+                    ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"].includes(campo.name)
+                      ? "[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]{1,20}"
+                      : campo.name === "num_tel_usu"
+                      ? "\\d{10}"
+                      : undefined
+                  }
+                  maxlength={
+                    ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"].includes(campo.name)
+                      ? 20
+                      : campo.name === "num_tel_usu"
+                      ? 10
+                      : undefined
+                  }
+                  title={
+                    ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"].includes(campo.name)
+                      ? "Solo letras y máximo 20 caracteres"
+                      : campo.name === "num_tel_usu"
+                      ? "Debe tener exactamente 10 dígitos"
+                      : campo.name === "fec_nac_usu"
+                      ? "No puedes seleccionar una fecha mayor a la permitida"
+                      : undefined
+                  }
+                  oninput={
+                    campo.name === "num_tel_usu"
+                      ? "this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                      : ["nom_usu1", "nom_usu2", "ape_usu1", "ape_usu2"].includes(campo.name)
+                      ? "this.value=this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\\s]/g,'').slice(0,20)"
+                      : undefined
+                  }
+                  max={campo.name === "fec_nac_usu" ? fechaMax : undefined}
+                  class="bg-gray-50 border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#581517] focus:outline-none shadow-inner transition-all duration-300 hover:ring-1 hover:ring-[#581517]"
+                />
+              )}
+            </div>
+          ))}
+
+          {mostrarBotones && (
+            <div class="col-span-1 md:col-span-2 flex flex-wrap justify-end gap-4 pt-6">
+              <button type="submit" class="bg-[#581517] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#401012] shadow-xl transition-transform hover:-translate-y-[2px] duration-300">
+                {textoBotonGuardarInfo}
+              </button>
+              <button type="button" onclick="history.back()" class="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200">
+                {textoBotonCancelar}
+              </button>
+            </div>
+          )}
+        </form>
       </div>
-    )}
-  </form>
-</div>
-
-<style>
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 0.25rem;
-  }
-
-  .subtitulo {
-    font-size: 16px;
-    color: #4b5563;
-    margin-bottom: 2rem;
-  }
-
-  .form-container {
-    background-color: #ffffff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem 2rem;
-  }
-
-  label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-  }
-
-  input, select {
-    width: 100%;
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-
-  .submit-button {
-    background-color: #a00000;
-    color: white;
-    padding: 0.75rem 1.25rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-right: 1rem;
-  }
-
-  .submit-button:hover {
-    background-color: #800707;
-  }
-</style>
+    </div>
+  </div>
+</section>

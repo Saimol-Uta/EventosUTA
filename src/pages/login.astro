@@ -16,16 +16,42 @@ if (session && session.user) {
     }
 }
 
-// NUEVO: Obtener mensaje de la URL
+// Obtener mensaje de la URL
 const url = new URL(Astro.request.url);
 const message = url.searchParams.get("message");
 
-let mensajeExito = "";
-if (message === "perfil-actualizado") {
+// Usamos un nombre de variable diferente para evitar confusión con el error de auth-astro
+const errorFromUrl = url.searchParams.get("error");
+
+let mensajeExito: string | null = null;
+let mensajeError: string | null = null;
+
+// Manejar mensajes de éxito
+if (message === "cuenta-verificada-exitosamente") {
+    mensajeExito =
+        "¡Tu cuenta ha sido verificada con éxito! Ya puedes iniciar sesión.";
+} else if (message === "perfil-actualizado") {
     mensajeExito =
         "Perfil actualizado correctamente. Por favor, inicia sesión nuevamente para continuar.";
 }
 
+// Manejar errores de verificación (ignorando el de credenciales)
+if (errorFromUrl && errorFromUrl !== "CredentialsSignin") {
+    switch (errorFromUrl) {
+        case "token-invalido":
+            mensajeError =
+                "El enlace de verificación es inválido o ya fue utilizado.";
+            break;
+        case "token-expirado":
+            mensajeError =
+                "El enlace de verificación ha expirado. Por favor, regístrate de nuevo.";
+            break;
+        case "error-verificacion":
+            mensajeError =
+                "Ocurrió un error al verificar tu cuenta. Por favor, contacta a soporte.";
+            break;
+    }
+}
 // Si no hay sesión o usuario, mostrar login normalmente
 ---
 
@@ -35,119 +61,225 @@ if (message === "perfil-actualizado") {
         <title>Login - Talleres Tecnológicos</title>
         <style>
             body {
-                font-family: Arial, sans-serif;
-                background-color: #fff;
+                margin: 0;
+                padding: 0;
+                font-family: "Segoe UI", sans-serif;
+                background: linear-gradient(
+                    135deg,
+                    #fdf2f2,
+                    #ead8d8
+                ); /* fondo claro suave */
+                height: 100vh;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                height: 100vh;
-                margin: 0;
             }
 
-            .login-container {
-                border: 1px solid #ccc;
-                padding: 30px 40px;
-                text-align: center;
-                max-width: 350px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            .login-wrapper {
+                display: flex;
+                width: 900px;
+                height: 520px;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+                overflow: hidden;
             }
 
-            .login-container img {
-                width: 100%;
-                max-width: 280px;
-                margin-bottom: 20px;
-            }
-
-            .login-container input[type="email"],
-            .login-container input[type="password"] {
-                width: 100%;
-                padding: 10px;
-                margin-bottom: 15px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-            }
-
-            .login-container button {
-                background-color: #a00;
+            .login-left {
+                background: linear-gradient(
+                    135deg,
+                    #6b1111,
+                    #b11d1d
+                ); /* rojo elegante */
                 color: white;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 16px;
+                width: 45%;
+                padding: 40px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                position: relative;
+                text-align: center;
             }
 
-            .login-container button:hover {
-                background-color: #800000;
+            .login-left .logo {
+                max-width: 120px;
+                margin: 0 auto 30px;
             }
 
-            .login-container a {
-                display: block;
-                margin-top: 10px;
+            .login-left h1 {
+                font-size: 32px;
+                margin-bottom: 12px;
+            }
+
+            .login-left p {
+                font-size: 14px;
+                opacity: 0.9;
+            }
+
+            .login-left .volver {
+                position: absolute;
+                bottom: 20px;
+                left: 20px;
+                color: #fdd;
                 font-size: 14px;
                 text-decoration: none;
-                color: #800000;
             }
 
-            .login-container a:hover {
+            .login-left .volver:hover {
                 text-decoration: underline;
             }
 
-            .volver {
-                position: absolute;
-                top: 10px;
-                right: 20px;
-                font-size: 14px;
-                color: #800000;
+            .login-right {
+                width: 55%;
+                padding: 50px 40px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
 
-            .volver:hover {
-                text-decoration: underline;
+            .login-right form {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
             }
 
-            /* NUEVO: Estilos para el mensaje de éxito */
-            .mensaje-exito {
-                background-color: #d1fae5;
-                color: #065f46;
-                border: 1px solid #10b981;
-                padding: 12px 20px;
+            .login-right input[type="email"],
+            .login-right input[type="password"] {
+                padding: 12px;
+                border: 1px solid #ccc;
                 border-radius: 8px;
-                margin-bottom: 20px;
-                text-align: center;
+                font-size: 15px;
+            }
+
+            .login-right button {
+                background: #932020; /* rojo suave institucional */
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 8px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background 0.3s;
+            }
+
+            .login-right button:hover {
+                background: #cd1a1a;
+            }
+
+            .form-extras {
+                display: flex;
+                justify-content: space-between;
+                font-size: 14px;
+                color: #555;
+                align-items: center;
+            }
+
+            .form-extras a,
+            .login-right a {
+                text-decoration: none;
+                color: #a31616;
+            }
+
+            .form-extras a:hover,
+            .login-right a:hover {
+                text-decoration: underline;
+            }
+            .login-wrapper {
+                opacity: 0;
+                transform: translateY(30px);
+                transition:
+                    opacity 0.6s ease,
+                    transform 0.6s ease;
+            }
+
+            .login-wrapper.appear {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .mensaje-exito {
+                background-color: #fcebea;
+                color: #8a1c1c;
+                border: 1px solid #ef9a9a;
+                padding: 10px 20px;
+                border-radius: 8px;
                 font-weight: 600;
                 font-size: 14px;
-                max-width: 400px;
-                margin-left: auto;
-                margin-right: auto;
+                margin-bottom: 20px;
+            }
+            .mensaje-error {
+                background-color: #fee2e2;
+                color: #991b1b;
+                border: 1px solid #ef4444;
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                font-weight: 600;
             }
         </style>
     </head>
     <body>
-        <a class="volver" href="/">Regresar</a>
-
-        <div class="login-container">
-            <!-- NUEVO: Mostrar mensaje de éxito si existe -->
-            {mensajeExito && <div class="mensaje-exito">{mensajeExito}</div>}
-
-            <img src="/img/logoFisei.png" alt="Logo Facultad de Ingeniería" />
-            <form>
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Usuario"
-                    required
+        <div class="login-wrapper">
+            <div class="login-left">
+                <img
+                    src="/FISEX.png"
+                    alt="Logo Facultad de Ingeniería"
+                    class="logo"
                 />
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Contraseña"
-                    required
-                />
-                <button type="submit" id="btn-submit">Acceder</button>
-                <p>¿No tiene una cuenta?</p>
-                <a href="/register">Regístrese aquí</a>
-            </form>
+                <h1>¡Bienvenido!</h1>
+                <p>
+                    Accede a tu cuenta para participar en diferentes talleres y
+                    eventos.
+                </p>
+                <a href="/" class="volver">← Regresar</a>
+            </div>
+
+            <div class="login-right">
+                {
+                    mensajeExito && (
+                        <div class="mensaje-exito">{mensajeExito}</div>
+                    )
+                }
+                {
+                    mensajeError && (
+                        <div class="mensaje-error">{mensajeError}</div>
+                    )
+                }
+
+                <form>
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Usuario"
+                        required
+                    />
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Contraseña"
+                        required
+                    />
+                    <div class="form-extras">
+                        <label><input type="checkbox" /> Recordarme</label>
+                        <a href="#">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <button type="submit" id="btn-submit">Acceder</button>
+                    <p>
+                        ¿No tiene una cuenta? <a href="/register">Regístrate</a>
+                    </p>
+                </form>
+            </div>
         </div>
+        <script>
+            window.addEventListener("DOMContentLoaded", () => {
+                const wrapper = document.querySelector(".login-wrapper");
+                if (wrapper) {
+                    setTimeout(() => {
+                        wrapper.classList.add("appear");
+                    }, 50); // pequeño retardo para permitir animación
+                }
+            });
+        </script>
     </body>
 </html>
 <script>
@@ -156,22 +288,33 @@ if (message === "perfil-actualizado") {
         const error = urlParams.get("error");
         // NUEVO: También verificar si hay mensaje de éxito
         const message = urlParams.get("message");
+        const code = urlParams.get("code");
 
         // Limpiar URL inmediatamente, antes de mostrar algo
         const cleanUrl = window.location.origin + window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
 
-        if (error) {
+        if (error === "CredentialsSignin" && code === "unverified-account") {
             const { default: Swal } = await import("sweetalert2");
             await Swal.fire({
                 icon: "error",
-                title: "Error al ingresar",
-                text: "Usuario / Contraseña no son correctos",
+                title: "Error al Ingresar",
+                text: "Usuario no verificado.",
+                confirmButtonColor: "#a00",
+                heightAuto: false,
+            });
+        } else if (error === "CredentialsSignin" && code === "credentials") {
+            const { default: Swal } = await import("sweetalert2");
+            await Swal.fire({
+                icon: "error",
+                title: "Error al Ingresar",
+                text: "Usuario o Contraseña no son correctos.",
                 confirmButtonColor: "#a00",
                 heightAuto: false,
             });
         }
-        // NUEVO: Opcional - También mostrar SweetAlert para perfil actualizado
+
+        // También mostrar SweetAlert para perfil actualizado
         else if (message === "perfil-actualizado") {
             const { default: Swal } = await import("sweetalert2");
             await Swal.fire({
@@ -191,16 +334,18 @@ if (message === "perfil-actualizado") {
             "#btn-submit",
         ) as HTMLButtonElement;
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            btnSubmit.setAttribute("disabled", "disabled");
+        if (form && btnSubmit) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                btnSubmit.setAttribute("disabled", "disabled");
 
-            const formData = new FormData(form);
+                const formData = new FormData(form);
 
-            await signIn("credentials", {
-                email: formData.get("email"),
-                password: formData.get("password"),
+                await signIn("credentials", {
+                    email: formData.get("email"),
+                    password: formData.get("password"),
+                });
             });
-        });
+        }
     });
 </script>

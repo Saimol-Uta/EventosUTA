@@ -10,7 +10,7 @@ const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp
 export const uploadDocumentImage = defineAction({
     accept: 'form',
     input: z.object({
-        cuentaId: z.string().uuid('ID de cuenta inválido'),
+        cuentaId: z.string().min(1, "ID de usuario es requerido"),
         fieldName: z.string().min(1, 'Nombre del campo es requerido'),
         imagen: z.instanceof(File)
             .refine((file) => file.size <= MAX_FILE_SIZE, 'El tamaño máximo de imagen es 5MB')
@@ -20,26 +20,23 @@ export const uploadDocumentImage = defineAction({
     }),
     handler: async (form) => {
         try {
-            // Verificar que la cuenta existe
-            const cuenta = await prisma.cuentas.findUnique({
-                where: { id_cue: form.cuentaId },
+            // Verificar que el usuario existe
+            const usuario = await prisma.usuarios.findUnique({
+                where: { cor_cue: form.cuentaId },
+
                 select: {
+                    cor_cue: true,
+                    nom_usu1: true,
+                    ape_usu1: true,
                     enl_ced_cue: true,
                     enl_mat_cue: true,
-                    enl_ext_cue: true,
-                    usuarios: {
-                        select: {
-                            nom_usu1: true,
-                            ape_usu1: true
-                        }
-                    }
-                }
+                },
             });
 
-            if (!cuenta) {
+            if (!usuario) {
                 return {
                     success: false,
-                    message: 'Cuenta no encontrada'
+                    message: "Usuario no encontrado",
                 };
             }
 
@@ -59,12 +56,10 @@ export const uploadDocumentImage = defineAction({
             const currentImageField = form.fieldName.toLowerCase();
             let currentImageUrl = '';
 
-            if (currentImageField === 'enl_ced_cue') {
-                currentImageUrl = cuenta.enl_ced_cue || '';
-            } else if (currentImageField === 'enl_mat_cue') {
-                currentImageUrl = cuenta.enl_mat_cue || '';
-            } else if (currentImageField === 'enl_ext_cue') {
-                currentImageUrl = cuenta.enl_ext_cue || '';
+            if (currentImageField === "enl_ced_cue") {
+                currentImageUrl = usuario.enl_ced_cue || "";
+            } else if (currentImageField === "enl_mat_cue") {
+                currentImageUrl = usuario.enl_mat_cue || "";
             }
 
             if (currentImageUrl) {
@@ -92,33 +87,28 @@ export const uploadDocumentImage = defineAction({
             }
 
             // Actualizar el campo correspondiente
-            const cuentaActualizada = await prisma.cuentas.update({
-                where: { id_cue: form.cuentaId },
+            const usuarioActualizado = await prisma.usuarios.update({
+                where: { cor_cue: form.cuentaId },
                 data: updateData,
+                // Seleccionamos los campos actualizados directamente.
                 select: {
-                    id_cue: true,
                     cor_cue: true,
+                    nom_usu1: true,
+                    ape_usu1: true,
                     enl_ced_cue: true,
                     enl_mat_cue: true,
-                    enl_ext_cue: true,
-                    usuarios: {
-                        select: {
-                            nom_usu1: true,
-                            ape_usu1: true
-                        }
-                    }
-                }
+                },
             });
 
             return {
                 success: true,
-                message: 'Imagen de documento actualizada exitosamente',
+                message: "Imagen de documento actualizada exitosamente",
                 data: {
-                    id_cuenta: cuentaActualizada.id_cue,
+                    id_usuario: usuarioActualizado.cor_cue,
                     campo_actualizado: form.fieldName,
                     imagen_url: imagen_url,
-                    nombre_usuario: `${cuentaActualizada.usuarios.nom_usu1} ${cuentaActualizada.usuarios.ape_usu1}`
-                }
+                    nombre_usuario: `${usuarioActualizado.nom_usu1} ${usuarioActualizado.ape_usu1}`,
+                },
             };
 
         } catch (error: any) {

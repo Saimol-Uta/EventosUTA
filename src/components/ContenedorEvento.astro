@@ -60,10 +60,6 @@ function construirUrl(pagina: number) {
                     estado={(evento._count?.inscripciones ?? 0).toString()}
                     horas={evento.dur_eve ?? 0}
                     slug={evento.id_eve}
-                    modoAdmin={modoAdmin}
-                    idEvento={evento.id_eve}
-                    esDestacado={evento.es_destacado}
-                    precio={evento.precio ?? 0}
                 />
             ))
         ) : (

@@ -45,7 +45,6 @@ console.log("Session user ID:", session?.user?.id);
 console.log("Cuenta data:", cuenta);
 console.log("enl_ced_cue:", cuenta?.enl_ced_cue);
 console.log("enl_mat_cue:", cuenta?.enl_mat_cue);
-console.log("enl_ext_cue:", cuenta?.enl_ext_cue);
 
 let nombreAdmin = "";
 
@@ -76,7 +75,7 @@ if (session && session.user) {
     </head>
     <body>
         <Header />
-        <NavBar />
+       
         <MenuAdmin links={links} />
 
         <div class="flex flex-col md:flex-row gap-6 p-6">

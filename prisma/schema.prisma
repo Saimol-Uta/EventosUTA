@@ -60,6 +60,8 @@ model eventos {
   requiere_carta     Boolean?           @default(false)
   es_destacado       Boolean?           @default(false)
   id_asi_eve         String?            @db.Uuid
+  estado_evento      String?            @default("ACTIVO") @db.VarChar(15)
+  cup_max            Int?               @default(0)
   organizadores      organizadores      @relation(fields: [ced_org_eve], references: [ced_org], onDelete: NoAction, onUpdate: NoAction)
   asignaciones       asignaciones?      @relation(fields: [id_asi_eve], references: [id_asi], onDelete: NoAction, onUpdate: NoAction)
   categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
@@ -100,7 +102,7 @@ model organizadores {
 
 model usuarios {
   cor_cue       String          @id @db.VarChar(150)
-  ced_usu       String          @unique @db.VarChar(10)
+  ced_usu       String          @db.VarChar(10)
   nom_usu1      String          @db.VarChar(20)
   nom_usu2      String?         @db.VarChar(20)
   ape_usu1      String          @db.VarChar(20)
@@ -113,6 +115,10 @@ model usuarios {
   enl_ced_cue   String?
   enl_mat_cue   String?
   img_user      String?
+  cor_rec       String?         @db.VarChar(150)
+  cod_ver       String?
+  fec_exp_cod   DateTime?       @db.Timestamptz(6)
+  verificado    Boolean         @default(false)
   cambios       cambios[]
   inscripciones inscripciones[]
   carreras      carreras?       @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)

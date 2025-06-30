@@ -1,34 +1,11 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import prisma from '../../db';
+import type { Prisma } from '@prisma/client';
 
-export type Usuario = {
-  id_usu: string;
-  ced_usu: string | null;
-  nom_usu1: string;
-  nom_usu2: string | null;
-  ape_usu1: string;
-  ape_usu2: string | null;
-  fec_nac_usu: Date; // Fecha no nullable
-  num_tel_usu: string | null;
-  id_car_per: string | null;
-};
-
-export type ResultadoGetUser = {
-  encontrado: boolean;
-  usuario?: Usuario | null;
-};
-
-export const getUserByCedula = defineAction({
-  accept: 'json',
-  input: z.object({
-    ced_usu: z.string().length(10, "La cédula debe tener exactamente 10 dígitos"),
-  }),
-  handler: async ({ ced_usu }): Promise<ResultadoGetUser> => {
-    const usuarioRaw = await prisma.usuarios.findUnique({
-      where: { ced_usu },
-      select: {
-        id_usu: true,
+export type Usuario = Prisma.usuariosGetPayload<{
+    select: {
+        cor_cue: true,
         ced_usu: true,
         nom_usu1: true,
         nom_usu2: true,
@@ -37,23 +14,48 @@ export const getUserByCedula = defineAction({
         fec_nac_usu: true,
         num_tel_usu: true,
         id_car_per: true,
-      }
-    });
+        cor_rec: true,
+    }
+}>;
 
-    if (!usuarioRaw) return { encontrado: false };
+export const getUserByCedula = defineAction({
+  accept: 'json',
+    input: z.object({
+        // Solo necesitamos el ID del usuario (que es su correo)
+        idUsuario: z.string(),
+    }),
+    handler: async ({ idUsuario }) => {
+        try {
+            // Buscamos directamente por la llave primaria. Es la consulta más rápida posible.
+            const usuario = await prisma.usuarios.findUnique({
+                where: {
+                    cor_cue: idUsuario,
+                },
+                // Seleccionamos los mismos campos que antes
+                select: {
+                    cor_cue: true,
+                    ced_usu: true,
+                    nom_usu1: true,
+                    nom_usu2: true,
+                    ape_usu1: true,
+                    ape_usu2: true,
+                    fec_nac_usu: true,
+                    num_tel_usu: true,
+                    id_car_per: true,
+                    cor_rec: true, // Incluimos el correo de recuperación que necesitas
+                    enl_ced_cue: true,
+                },
+            });
 
-    const usuario: Usuario = {
-      id_usu: usuarioRaw.id_usu,
-      ced_usu: usuarioRaw.ced_usu,
-      nom_usu1: usuarioRaw.nom_usu1,
-      nom_usu2: usuarioRaw.nom_usu2 ?? null,
-      ape_usu1: usuarioRaw.ape_usu1,
-      ape_usu2: usuarioRaw.ape_usu2 ?? null,
-      fec_nac_usu: usuarioRaw.fec_nac_usu,
-      num_tel_usu: usuarioRaw.num_tel_usu ?? null,
-      id_car_per: usuarioRaw.id_car_per ?? null,
-    };
+            if (!usuario) {
+                return { success: false, error: 'Perfil de usuario no encontrado.' };
+            }
 
-    return { encontrado: true, usuario };
-  }
+            return { success: true, usuario: usuario };
+
+        } catch (error) {
+            console.error("Error en getUsuarioParaPerfil:", error);
+            return { success: false, error: "Error al obtener el perfil del usuario." };
+        }
+    },
 });

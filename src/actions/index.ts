@@ -1,5 +1,9 @@
-
 import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras } from './Eventos';
+import { finalizarEvento } from './Eventos/finalizar-evento.action';
+import { actualizarPagoInscripcion } from './Eventos/actualizarPagoInscripcion.action';
+
+// Importaciones de Facultades
+import { getAllFacultades, getFacultadById } from './Facultades/get-facultades.action';
 
 // Importaciones de Asignaciones
 import {
@@ -33,19 +37,23 @@ import { modificarUsuario } from './Users/modificar-usuario.action';
 import { setUser } from './Users/setUsers.action';
 import { getAllUsers } from './Admin/get-all-user.action';
 import { getUsersWithAccounts } from './Users/get-users-with-accounts.action';
+import { getInscripcionesByUser } from './Users/get-inscripciones-by-user.action';
+import { getCambiosByUser } from './Users/get-cambios-by-user.action';
+import { getPerfilCompleto } from './Users/get-perfil-completo.action';
+import { actualizarUsuario } from './Users/actualizar-usuario.action';
+import { crearUsuario } from './Users/crear-usuario.action';
 
-import { getDatosInscripcion } from './Eventos';
+import { getDatosInscripcion, getDetallesEventoCompleto } from './Eventos';
 import { setDatosInscripcion } from './Eventos/setDatosInscripcion';
-import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser } from './Users';
-import { crearCuenta } from './Users/crear-cuenta.action';
+import { getCuentaById, getCuentaByIdSingle, uploadDocumentImage, uploadImageUser, uploadDocumentPdf, getDashboardData } from './Users';
 import { modificarCuenta } from './Users/modificar-cuenta.action';
-import { eliminarCuenta } from './Users/eliminar-cuenta.action';
 import { uploadComprobante } from './Eventos/uploadComprobantePago.action';
 import { GenerarCertificado, generarCertificadoPublico, recuperarCertificadoDesdeUrl } from './Certificados/certificado.action';
 import { GenerarOrdenDePago } from './OrdenPago/generarOrden.action';
 
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
+import { getEventosFiltrados } from '../actions/Eventos/getFiltros';
 
 import { getOrganizadoresCR } from './Admin/getOrganizadores.action';
 import { eliminarOrganizador } from './Admin/eliminarOrganizador.action';
@@ -60,24 +68,31 @@ import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Ad
 
 export const server = {
     getEventos,
+
     getEventoBySlug,
     SignIn,
     getEventosPorUsuario,
     createCambio,
-    getUseById,
-    getUserByCedula,
+    getUseById, getUserByCedula,
     setUser, getAllUsers,
     getUsersWithAccounts,
+    getInscripcionesByUser,
+    getCambiosByUser,
+    getPerfilCompleto,
+    actualizarUsuario,
+    crearUsuario,
     eliminarUsuario,
     modificarUsuario,
     uploadImageUser, getCuentaById,
     uploadDocumentImage,
-    crearCuenta,
+    uploadDocumentPdf,
     modificarCuenta,
-    eliminarCuenta,
+    
+
 
     getDatosInscripcion,
     setDatosInscripcion,
+    actualizarPagoInscripcion,
     uploadComprobante,
     GenerarCertificado,
     generarCertificadoPublico,
@@ -96,10 +111,10 @@ export const server = {
     getOrganizadorByEvento,
     getOrganizadores,
     getCategoriaById,
-    getCategorias,
-    crearEvento,
+    getCategorias, crearEvento,
     modificarEvento,
-    eliminarEvento,    // Nuevas acciones para asignaciones
+    eliminarEvento,
+    finalizarEvento,// Nuevas acciones para asignaciones
     getCarreras,
     getAsignacionesByEvento,
     crearAsignacion,
@@ -114,8 +129,7 @@ export const server = {
     vincularAsignacionAEvento,
 
     crearAsignacionesPrueba,    // Nuevas acciones para CRUD de carreras
-    crearCarrera,
-    modificarCarrera,
+    crearCarrera, modificarCarrera,
     eliminarCarrera,
     getAllCarreras,
     getCarreraById,
@@ -135,7 +149,14 @@ export const server = {
     //description
     updatePaginaPrincipal,
     getInfo,
-    getCuentaByIdSingle
+    getCuentaByIdSingle,
+    getDashboardData,
+    getEventosFiltrados,
+    getDetallesEventoCompleto,
+
+    // Nuevas acciones para Facultades
+    getAllFacultades,
+    getFacultadById,
 
 };
 

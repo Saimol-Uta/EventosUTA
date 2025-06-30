@@ -6,42 +6,45 @@ import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
 import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
-import Evento from "../components/EventoCard.astro";
-
-import prisma from "@/db";
+import CarruselUTA from "@/components/Home/CarruselUTA.astro";
 import { actions } from "astro:actions";
 
 const session = await getSession(Astro.request);
 let esAdmin = false;
 
-if (session && session.user) {
+if (session?.user) {
     const user = session.user as CustomUser;
     const rol = user.rol?.toUpperCase();
-    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
-        esAdmin = true;
-    }
+    esAdmin = rol === "ADMINISTRADOR" || rol === "MASTER";
 }
 
 
-const { data: pagina } = await Astro.callAction(actions.getInfo, {});
+const id_fac = "a1b2c3d4-e5f6-4a7b-8c9d-1a1a1a1a1a1a";
+
+const { data: pagina } = await Astro.callAction(actions.getInfo, { id_fac });
 ---
 
 <Layout>
     <Header />
     <Navbar />
-
+    <CarruselUTA modoAdmin={esAdmin}/>
     <InformacionFacultad
-        tituloFacultad="Facultad de Ingenieria en Sistemas Electronica e Industrial"
+        decano={pagina?.data?.dec_fac ?? ""}
+        decanoImagen={pagina?.data?.dec_img ?? ""}
+        subdecano={pagina?.data?.sub_fac ?? ""}
+        subdecanoImagen={pagina?.data?.sub_img ?? ""}
+        tituloFacultad={pagina?.data?.nom_fac ?? ""}
         tituloDescripcion="Descripción"
-        contenidoDescripcion={pagina?.data?.des_pag ?? ""}
-        imagenDescripcion="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
+        contenidoDescripcion={pagina?.data?.des_fac ?? ""}
+        imagenDescripcion={pagina?.data?.img_des ?? ""}
         tituloMision="Misión"
-        contenidoMision={pagina?.data?.mis_pag ?? ""}
-        imagenMision="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80"
+        contenidoMision={pagina?.data?.mis_fac ?? ""}
+        imagenMision={pagina?.data?.img_mis ?? ""}
         tituloVision="Visión"
-        contenidoVision={pagina?.data?.vis_pag ?? ""}
-        imagenVision="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+        contenidoVision={pagina?.data?.vis_fac ?? ""}
+        imagenVision={pagina?.data?.img_vis ?? ""}
         modoAdmin={esAdmin}
     />
+    <div class="h-15 bg-white"></div>
     <Footer />
-</Layout>;
+</Layout>
