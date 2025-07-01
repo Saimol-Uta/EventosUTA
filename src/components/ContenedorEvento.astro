@@ -43,7 +43,7 @@ const paginaActual = Math.min(Math.max(page, 1), totalPaginas || 1);
 // 6. La función para construir la URL sigue siendo la misma y es correcta.
 function construirUrl(pagina: number) {
     const url = new URL("/cursosCompleto", "http://dummybase");
-    if (filtros.categoria) url.searchParams.set("categoria", filtros.categoria);
+    if (filtros.carrera) url.searchParams.set("carrera", filtros.carrera);
     if (filtros.area) url.searchParams.set("area", filtros.area);
     if (filtros.duracion) url.searchParams.set("duracion", filtros.duracion);
     url.searchParams.set("page", pagina.toString());

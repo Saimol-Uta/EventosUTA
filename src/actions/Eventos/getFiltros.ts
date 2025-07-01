@@ -5,13 +5,13 @@ import { z } from 'astro:schema';
 export const getEventosFiltrados = defineAction({
     accept: 'json',
     input: z.object({
-        categoria: z.string().optional(),
+        carrera: z.string().optional(),
         area: z.string().optional(),
         duracion: z.string().optional(),
         page: z.number().default(1),
         cursosPorPagina: z.number().default(8),
     }),
-    handler: async ({ categoria, area, duracion, page = 1, cursosPorPagina = 8 }) => {
+    handler: async ({ carrera, area, duracion, page = 1, cursosPorPagina = 8 }) => {
         const skip = (page - 1) * cursosPorPagina;
         const take = cursosPorPagina;
 
@@ -19,12 +19,18 @@ export const getEventosFiltrados = defineAction({
         const where: any = {};
         const condiciones: any[] = [];
         
-        // Filtro por categoría usando el nombre de la categoría
-        if (categoria) {
+        // Filtro por carrera usando las asignaciones
+        if (carrera) {
             condiciones.push({ 
-                categorias_eventos: { 
-                    nom_cat: categoria 
-                } 
+                asignaciones: {
+                    detalle_asignaciones: {
+                        some: {
+                            carreras: {
+                                nom_car: carrera
+                            }
+                        }
+                    }
+                }
             });
         }
         

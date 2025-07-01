@@ -3,17 +3,17 @@ import { actions } from "astro:actions";
 
 // Obtener filtros dinámicos de la base de datos
 const { data: filtrosData } = await Astro.callAction(actions.getFiltrosDinamicos, {});
-const categorias = filtrosData?.data?.categorias || [];
+const carreras = filtrosData?.data?.carreras || [];
 const areas = filtrosData?.data?.areas || [];
 const rangosDuracion = filtrosData?.data?.rangosDuracion || [];
 ---
 
 <nav class="filtros">
   <ul class="lista-filtros">
-    <!-- CATEGORÍAS DINÁMICAS -->
+    <!-- CARRERAS DINÁMICAS -->
     <li>
-      <button class="btn-filtro" data-target="cat-list">
-        <p>Categorías</p>
+      <button class="btn-filtro" data-target="carrera-list">
+        <p>Carreras</p>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -27,11 +27,11 @@ const rangosDuracion = filtrosData?.data?.rangosDuracion || [];
           ></path>
         </svg>
       </button>
-      <ul id="cat-list" class="submenu">
+      <ul id="carrera-list" class="submenu">
         {
-          categorias.map((categoria) => (
-            <li data-filter-type="categoria" data-filter-value={categoria}>
-              {categoria}
+          carreras.map((carrera) => (
+            <li data-filter-type="carrera" data-filter-value={carrera}>
+              {carrera}
             </li>
           ))
         }

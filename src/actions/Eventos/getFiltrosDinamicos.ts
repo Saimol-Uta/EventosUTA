@@ -7,21 +7,24 @@ export const getFiltrosDinamicos = defineAction({
     input: z.object({}),
     handler: async () => {
         try {
-            // Obtener todas las categorías únicas que tienen eventos con conteo
-            const categorias = await prisma.categorias_eventos.findMany({
+            // Obtener todas las carreras únicas que tienen eventos asignados
+            const carreras = await prisma.carreras.findMany({
                 select: {
-                    nom_cat: true,
-                    _count: {
-                        select: { eventos: true }
-                    }
+                    nom_car: true,
                 },
                 where: {
-                    eventos: {
-                        some: {} // Solo categorías que tienen al menos un evento
+                    detalle_asignaciones: {
+                        some: {
+                            asignaciones: {
+                                eventos: {
+                                    some: {} // Solo carreras que tienen eventos asignados
+                                }
+                            }
+                        }
                     }
                 },
                 orderBy: {
-                    nom_cat: 'asc'
+                    nom_car: 'asc'
                 }
             });
 
@@ -102,11 +105,11 @@ export const getFiltrosDinamicos = defineAction({
                 return {
                     success: true,
                     data: {
-                        categorias: categorias.map(c => c.nom_cat).filter(Boolean),
+                        carreras: carreras.map(c => c.nom_car).filter(Boolean),
                         areas: areasQuery.map(a => a.are_eve).filter(Boolean),
                         rangosDuracion,
                         estadisticas: {
-                            totalCategorias: categorias.length,
+                            totalCarreras: carreras.length,
                             totalAreas: areasQuery.length,
                             duracionMinima: minHoras,
                             duracionMaxima: maxHoras,
@@ -118,11 +121,11 @@ export const getFiltrosDinamicos = defineAction({
                 return {
                     success: true,
                     data: {
-                        categorias: categorias.map(c => c.nom_cat).filter(Boolean),
+                        carreras: carreras.map(c => c.nom_car).filter(Boolean),
                         areas: areasQuery.map(a => a.are_eve).filter(Boolean),
                         rangosDuracion: [],
                         estadisticas: {
-                            totalCategorias: categorias.length,
+                            totalCarreras: carreras.length,
                             totalAreas: areasQuery.length,
                             duracionMinima: 0,
                             duracionMaxima: 0,

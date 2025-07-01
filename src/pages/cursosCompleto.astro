@@ -12,7 +12,7 @@ import ContenedorEventos from "../components/ContenedorEvento.astro";
 // Extraer filtros desde la URL
 const url = new URL(Astro.request.url);
 const filtros = {
-  categoria: url.searchParams.get("categoria") || "",
+  carrera: url.searchParams.get("carrera") || "",
   area: url.searchParams.get("area") || "",
   duracion: url.searchParams.get("duracion") || "",
 };
@@ -80,14 +80,14 @@ if (session && session.user) {
   </section>
   <section class="seccion-principal">
     {
-      (filtros.categoria || filtros.area || filtros.duracion) && (
+      (filtros.carrera || filtros.area || filtros.duracion) && (
         <div class="filtros-activos">
           <span class="titulo-filtros"> Filtros aplicados:</span>
 
-          {filtros.categoria && (
+          {filtros.carrera && (
             <span class="filtro-tag">
-              Categoría: <strong>{filtros.categoria}</strong>
-              <button class="cerrar-filtro" onclick="quitarFiltro('categoria')">
+              Carrera: <strong>{filtros.carrera}</strong>
+              <button class="cerrar-filtro" onclick="quitarFiltro('carrera')">
                 ×
               </button>
             </span>
