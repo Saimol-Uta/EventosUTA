@@ -172,5 +172,7 @@ model facultades {
   twit_fac String?
   face_fac String?
   inst_fac String?
+  res_fac  String?
+  res_img  String?
   carreras carreras[]
 }
