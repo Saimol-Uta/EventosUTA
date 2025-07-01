@@ -1,5 +1,5 @@
 ---
-import EventoCard from "./EventoCard.astro";
+import EventoCard from "./EventoCard2.astro";
 import RenderPageNum from "./RenderPageNum.astro";
 import type { Eventos } from "../interface/eventosSimple";
 import { actions } from "astro:actions";
@@ -57,13 +57,14 @@ function construirUrl(pagina: number) {
                 <EventoCard
                     imagen={evento.img_eve}
                     titulo={evento.nom_eve}
-                    estado={(evento._count?.inscripciones ?? 0).toString()}
+                    cuposDis={( (evento.cup_max ?? 0) - (evento._count?.inscripciones ?? 0) ).toString()}
                     horas={evento.dur_eve ?? 0}
                     slug={evento.id_eve}
                     modoAdmin={modoAdmin}
                     idEvento={evento.id_eve}
                     esDestacado={evento.es_destacado}
                     precio={evento.precio ?? 0}
+                    categoria={evento.categoria_evento?.nom_cat ?? 'Sin categoría'}
                 />
             ))
         ) : (
@@ -135,7 +136,7 @@ function construirUrl(pagina: number) {
         justify-content: center;
         align-items: stretch;
         padding: 16px;
-        gap: 16px;
+        gap: 22px;
     }
 
     .card {
@@ -143,7 +144,6 @@ function construirUrl(pagina: number) {
         max-width: 320px;
         background: linear-gradient(145deg, #1e1e2f, #2a2a3f);
         color: #ffffff;
-        border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         transition:
@@ -204,7 +204,6 @@ function construirUrl(pagina: number) {
         background-color: #5e3eff;
         color: white;
         padding: 8px 14px;
-        border-radius: 8px;
         text-decoration: none;
         font-size: 0.85rem;
         transition: background-color 0.2s ease;
@@ -219,20 +218,20 @@ function construirUrl(pagina: number) {
     .sin-resultados {
         grid-column: 1 / -1;
         text-align: center;
-        color: #444;
+        color: #6C1313;
         margin-top: 40px;
         display: flex;
         flex-direction: column;
         align-items: center;
         padding: 20px;
         background-color: #fff7f7;
-        border: 1px solid #f3dada;
-        border-radius: 12px;
+        border: 1px solid #6C1313;
     }
 
     .paginacion {
         display: flex;
         justify-content: center;
+        align-items: center;
         gap: 10px;
         margin-top: 30px;
     }
@@ -240,24 +239,22 @@ function construirUrl(pagina: number) {
     .paginacion a,
     .paginacion span {
         padding: 8px 14px;
-        border: 1px solid #8a1538;
-        color: #8a1538;
-        border-radius: 6px;
+        border: 1px solid rgb(108, 19, 19);
+        color: rgb(108, 19, 19);
         text-decoration: none;
         cursor: pointer;
     }
 
     .paginacion .activo {
-        background-color: #8a1538;
+        background-color: rgb(108, 19, 19);
         color: white;
         cursor: default;
         padding: 8px 14px;
-        border-radius: 6px;
-        border: 1px solid #8a1538;
+        border: 1px solid rgb(108, 19, 19);
     }
 
     .paginacion a:hover {
-        background-color: #c03434;
+        background-color: rgb(108, 19, 19);
         color: white;
     }
 </style>
