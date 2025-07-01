@@ -9,51 +9,40 @@ const links = [
   { label: "Eventos", href: "/cursosCompleto" },
 ];
 
-// Obtener ruta actual
 const currentUrl = new URL(Astro.request.url);
 const currentPath = currentUrl.pathname;
 
-// Función para verificar ruta activa
-const isActive = (href: string) => {
-  return currentPath === href || currentPath.startsWith(`${href}/`);
-};
+const isActive = (href: string) =>
+  currentPath === href || currentPath.startsWith(`${href}/`);
+
+// 🔥 Control para que solo se muestre si está dentro del Header
+const navbarInHeader = Astro.props.navbarInHeader ?? false;
 ---
+{navbarInHeader && (
+  <nav class="bg-red-900 relative z-10">
+    <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">
+      <input type="checkbox" id="menu-toggle" class="hidden peer" />
+      <label for="menu-toggle" class="md:hidden cursor-pointer">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </label>
 
-<nav class="bg-red-900 relative z-50">
-  <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">
-    <input type="checkbox" id="menu-toggle" class="hidden peer" />
-    <label for="menu-toggle" class="md:hidden cursor-pointer">
-      <svg
-        class="w-6 h-6 text-white"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </label>
-
-    <!-- Menú principal -->
-    <div
-      class="w-full hidden peer-checked:flex flex-col items-center justify-center md:flex md:flex-row md:justify-center gap-4 md:gap-x-12"
-    >
-      {
-        links.map((link) => (
-          <a
-            href={link.href}
-            class={`py-2 relative text-white text-[14px] tracking-wide transition-colors duration-200 drop-shadow-sm
+      <div class="w-full hidden peer-checked:flex flex-col items-center justify-center md:flex md:flex-row md:justify-center gap-4 md:gap-x-12">
+        {
+          links.map((link) => (
+            <a
+              href={link.href}
+              class={`py-2 relative text-white text-[14px] tracking-wide transition-colors duration-200 drop-shadow-sm
                 before:content-[''] before:absolute before:left-0 before:bottom-1 before:h-[2px] before:bg-white
                 before:transition-all before:duration-300
                 ${isActive(link.href) ? "before:w-full" : "before:w-0 hover:before:w-full"}`}
-          >
-            {link.label}
-          </a>
-        ))
-      }
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
+)}
