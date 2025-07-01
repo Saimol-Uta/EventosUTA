@@ -9,7 +9,7 @@ import "../../styles/Admin/EventosCRUD.css";
 import { actions } from "astro:actions";
 
 // Obtener organizadores
-const { data: organizadoresData, error } = await Astro.callAction(actions.getOrganizadores, {});
+const { data: organizadoresData, error } = await Astro.callAction(actions.getOrganizadoresCR, {});
 
 if (error) {
     console.error("Error al obtener organizadores:", error);
@@ -20,10 +20,22 @@ const organizadores = organizadoresData?.organizadores || [];
 type Organizador = {
     ced_org: string;
     nom_org1: string;
-    nom_org2?: string;
+    nom_org2?: string | null;
     ape_org1: string;
-    ape_org2?: string;
-    tit_aca_org: string; 
+    ape_org2?: string | null;
+    tit_aca_org: string;
+    eventos?: Array<{
+        id_eve: string;
+        nom_eve: string;
+        fec_ini_eve: Date | string;
+        fec_fin_eve?: Date | string | null;
+        ubi_eve: string;
+        estado_evento?: string | null;
+        es_destacado?: boolean | null;
+        des_eve?: string | null;
+        precio?: number | null;
+        es_gratuito?: boolean | null;
+    }>;
 }
     
 ---
@@ -75,7 +87,7 @@ type Organizador = {
                     </div>
                 </div>
                 <div class="registros-inferior">
-                    {organizadores.map((organizador: Organizador) => (
+                    {organizadores.map((organizador) => (
                         <>
                             <input
                                 type="hidden"
@@ -143,10 +155,22 @@ type Organizador = {
             interface Organizador {
                 ced_org: string;
                 nom_org1: string;
-                nom_org2?: string;
+                nom_org2?: string | null;
                 ape_org1: string;
-                ape_org2: string;
+                ape_org2: string | null;
                 tit_aca_org: string;
+                eventos?: Array<{
+                    id_eve: string;
+                    nom_eve: string;
+                    fec_ini_eve: Date | string;
+                    fec_fin_eve?: Date | string | null;
+                    ubi_eve: string;
+                    estado_evento?: string | null;
+                    es_destacado?: boolean | null;
+                    des_eve?: string | null;
+                    precio?: number | null;
+                    es_gratuito?: boolean | null;
+                }>;
             }
 
             // Función para eliminar organizador
@@ -233,10 +257,11 @@ type Organizador = {
                     console.error('Error al parsear el organizador:', e);
                     return;
                 }
-                if (typeof window.abrirModalModificarOrganizador === "function") {
-                    window.abrirModalModificarOrganizador(organizador);
+                if (typeof (window as any).abrirModalModificarOrganizadorModal === "function") {
+                    // Llamar la función del modal pasando el objeto organizador
+                    (window as any).abrirModalModificarOrganizadorModal(organizador);
                 } else {
-                    alert('No se encontró la función global abrirModalModificarOrganizador. Revisa el script de ModalModificarOrganizador.astro');
+                    alert('No se encontró la función global abrirModalModificarOrganizadorModal. Revisa el script de ModalModificarOrganizador.astro');
                 }
             }
 
