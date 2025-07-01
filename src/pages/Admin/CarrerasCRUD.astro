@@ -80,7 +80,7 @@ const facultades = facultadesData?.facultades || [];
                                 name="nom_car"
                                 required
                                 maxlength="100"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                                 placeholder="Ingrese el nombre de la carrera"
                             />
                         </div>
@@ -97,7 +97,7 @@ const facultades = facultadesData?.facultades || [];
                                 id="codigoCarrera"
                                 name="cod_car"
                                 maxlength="10"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                                 placeholder="Ej: ING001"
                             />
                         </div>
@@ -115,7 +115,7 @@ const facultades = facultadesData?.facultades || [];
                                 required
                                 maxlength="250"
                                 rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                                 placeholder="Descripción de la carrera"
                             ></textarea>
                         </div>
@@ -130,7 +130,7 @@ const facultades = facultadesData?.facultades || [];
                                 id="facultadCarrera"
                                 name="id_fac_per"
                                 required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                             >
                                 <option value="">Seleccione una facultad</option
                                 >
@@ -160,10 +160,10 @@ const facultades = facultadesData?.facultades || [];
                         </button>
                         <button
                             type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                            style="background: #059669;"
-                            onmouseover="this.style.background='#047857'"
-                            onmouseout="this.style.background='#059669'"
+                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            style="background: rgb(108, 19, 19);"
+                            onmouseover="this.style.background='#9a0202'"
+                            onmouseout="this.style.background='rgb(108, 19, 19)'"
                         >
                             Crear Carrera
                         </button>
@@ -221,7 +221,7 @@ const facultades = facultadesData?.facultades || [];
                                 name="nom_car"
                                 required
                                 maxlength="100"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                             />
                         </div>
 
@@ -237,7 +237,7 @@ const facultades = facultadesData?.facultades || [];
                                 id="editarCodigoCarrera"
                                 name="cod_car"
                                 maxlength="10"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                             />
                         </div>
 
@@ -254,7 +254,7 @@ const facultades = facultadesData?.facultades || [];
                                 required
                                 maxlength="250"
                                 rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                             ></textarea>
                         </div>
                         <div>
@@ -268,7 +268,7 @@ const facultades = facultadesData?.facultades || [];
                                 id="editarFacultadCarrera"
                                 name="id_fac_per"
                                 required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
                             >
                                 <option value="">Seleccione una facultad</option
                                 >
@@ -299,9 +299,9 @@ const facultades = facultadesData?.facultades || [];
                         <button
                             type="submit"
                             class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                            style="background: #059669;"
+                            style="background: rgb(108, 19, 19);"
                             onmouseover="this.style.background='#047857'"
-                            onmouseout="this.style.background='#059669'"
+                            onmouseout="this.style.background='rgb(108, 19, 19)'"
                         >
                             Actualizar Carrera
                         </button>
@@ -367,9 +367,9 @@ const facultades = facultadesData?.facultades || [];
                             <button
                                 onclick="abrirModalNuevaCarrera()"
                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                style="background: #059669;"
+                                style="background: rgb(108, 19, 19);"
                                 onmouseover="this.style.background='#047857'"
-                                onmouseout="this.style.background='#059669'"
+                                onmouseout="this.style.background='#rgb(108, 19, 19)'"
                             >
                                 <svg
                                     class="w-5 h-5 mr-2"
