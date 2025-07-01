@@ -15,7 +15,10 @@ const filtros = {
   carrera: url.searchParams.get("carrera") || "",
   area: url.searchParams.get("area") || "",
   duracion: url.searchParams.get("duracion") || "",
+  busqueda: url.searchParams.get("busqueda") || "",
 };
+
+
 
 // Extraer número de página, por defecto 1
 const page = parseInt(url.searchParams.get("page") || "1", 10);
@@ -46,36 +49,35 @@ if (session && session.user) {
       <div
         class="flex items-stretch w-full max-w-sm bg-white shadow-md ring-1 ring-[#800000] overflow-hidden"
       >
-        <input
-          type="text"
-          placeholder="Buscar evento"
-          class="input-busqueda flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400 px-4 py-2 text-sm"
-        />
-        <button
-          class="btn-buscar text-white px-4 flex items-center justify-center transition duration-300"
-          title="Buscar"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M21 21l-4.35-4.35m0 0A7 7 0 104.64 4.64a7 7 0 0011.01 11.01z"
-            ></path>
-          </svg>
-        </button>
+<!-- En tu archivo principal (cursosCompleto.astro o similar) -->
+<input
+  id="input-busqueda"
+  type="text"
+  placeholder="Buscar evento por nombre, categoría..."
+  class="input-busqueda flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400 px-4 py-2 text-sm"
+/>
+
+<button
+  id="btn-buscar"
+  class="btn-buscar text-white px-4 flex items-center justify-center transition duration-300"
+  title="Buscar"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7 7 0 104.64 4.64a7 7 0 0011.01 11.01z"/>
+  </svg>
+</button>
       </div>
     </div>
 
     <div class="contenedor-interno">
       <h2 class="titulo-seccion">Eventos</h2>
       <span class="block h-[3px] w-[66px] bg-red-900"></span>
+      {filtros.busqueda && (
+  <p class="mt-2 text-sm text-gray-600 italic">
+    Resultados para: <strong>{filtros.busqueda}</strong>
+  </p>
+)}
+
     </div>
   </section>
   <section class="seccion-principal">
@@ -307,6 +309,16 @@ if (session && session.user) {
       color: #8a1538;
       margin-bottom: 8px;
     }
+      /* Añade esto a tus estilos existentes */
+  .card-evento {
+    /* Elimina display:flex si está presente */
+    display: block !important; /* Forzar display block para compatibilidad */
+  }
+  
+  .cursos-sin-resultados {
+    display: none; /* Oculto inicialmente */
+    grid-column: 1 / -1; /* Para que ocupe todo el ancho en el grid */
+  }
 
     .texto-vacio {
       font-size: 0.95rem;
@@ -325,4 +337,70 @@ if (session && session.user) {
     }
 </style>
   <script src="/js/filtros.js" defer is:inline></script>
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('input-busqueda');
+  const btnBuscar = document.getElementById('btn-buscar');
+  let timeoutId;
+
+  // Función mejorada para buscar en las tarjetas
+  const buscarEventos = (termino) => {
+    const cards = document.querySelectorAll('.card-evento');
+    let hayResultados = false;
+    const terminoLower = termino.toLowerCase().trim();
+
+    // Ocultar mensaje de búsqueda URL si existe
+    const mensajeResultadosURL = document.querySelector('.contenedor-interno p');
+    if (mensajeResultadosURL && terminoLower) {
+      mensajeResultadosURL.style.display = 'none';
+    }
+
+    if (!terminoLower) {
+      // Mostrar todas las tarjetas si no hay término
+      cards.forEach(card => card.style.display = '');
+      document.querySelector('.cursos-sin-resultados').style.display = 'none';
+      if (mensajeResultadosURL) mensajeResultadosURL.style.display = '';
+      return;
+    }
+
+    cards.forEach(card => {
+      // Buscar en título (data-titulo) y categoría (texto dentro de .etiqueta.categoria)
+      const titulo = card.getAttribute('data-titulo') || '';
+      const categoriaElement = card.querySelector('.etiqueta.categoria');
+      const categoria = categoriaElement ? categoriaElement.textContent.toLowerCase() : '';
+      
+      const coincide = titulo.includes(terminoLower) || 
+                     categoria.includes(terminoLower);
+      
+      card.style.display = coincide ? '' : 'none';
+      if (coincide) hayResultados = true;
+    });
+
+    // Mostrar mensaje si no hay resultados
+    document.querySelector('.cursos-sin-resultados').style.display = 
+      hayResultados ? 'none' : 'flex';
+  };
+
+  // Eventos de búsqueda con debounce
+  input.addEventListener('input', (e) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => buscarEventos(e.target.value), 300);
+  });
+
+  btnBuscar.addEventListener('click', () => buscarEventos(input.value));
+  
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') buscarEventos(input.value);
+  });
+
+  // Limpiar búsqueda si se borra el texto
+  input.addEventListener('change', (e) => {
+    if (!e.target.value.trim()) {
+      buscarEventos('');
+    }
+  });
+});
+</script>
+
+
 </Layout>
