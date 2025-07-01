@@ -473,7 +473,7 @@ const facultades = facultadesData?.facultades || [];
                                         </button>
                                         <button
                                             onclick={`editarCarrera('${carrera.id_car}')`}
-                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                             title="Editar carrera"
                                         >
                                             <svg
@@ -963,11 +963,11 @@ const facultades = facultadesData?.facultades || [];
                                         </div>
                                         <div>
                                             <dt class="text-sm font-medium text-gray-500">Total de Estudiantes</dt>
-                                            <dd class="text-2xl font-bold text-green-600">${carrera.usuarios?.length || 0}</dd>
+                                            <dd class="text-2xl font-bold text-red-700">${carrera.usuarios?.length || 0}</dd>
                                         </div>
                                         <div>
                                             <dt class="text-sm font-medium text-gray-500">Asignaciones</dt>
-                                            <dd class="text-2xl font-bold text-blue-600">${carrera.asignaciones?.length || 0}</dd>
+                                            <dd class="text-2xl font-bold text-gray-700">${carrera.asignaciones?.length || 0}</dd>
                                         </div>
                                     </div>
                                 </div>
