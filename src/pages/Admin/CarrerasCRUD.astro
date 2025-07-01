@@ -160,7 +160,7 @@ const facultades = facultadesData?.facultades || [];
                         </button>
                         <button
                             type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                             style="background: rgb(108, 19, 19);"
                             onmouseover="this.style.background='#9a0202'"
                             onmouseout="this.style.background='rgb(108, 19, 19)'"
@@ -298,9 +298,9 @@ const facultades = facultadesData?.facultades || [];
                         </button>
                         <button
                             type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
                             style="background: rgb(108, 19, 19);"
-                            onmouseover="this.style.background='#047857'"
+                            onmouseover="this.style.background='#ab0000'"
                             onmouseout="this.style.background='rgb(108, 19, 19)'"
                         >
                             Actualizar Carrera
@@ -366,7 +366,7 @@ const facultades = facultadesData?.facultades || [];
                             </div>
                             <button
                                 onclick="abrirModalNuevaCarrera()"
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                 style="background: rgb(108, 19, 19);"
                                 onmouseover="this.style.background='#047857'"
                                 onmouseout="this.style.background='#rgb(108, 19, 19)'"
@@ -542,10 +542,10 @@ const facultades = facultadesData?.facultades || [];
                             <div class="mt-6">
                                 {" "}
                                 <button
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                    style="background: #059669;"
-                                    onmouseover="this.style.background='#047857'"
-                                    onmouseout="this.style.background='#059669'"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                    style="background: rgb(108, 19, 19);"
+                                    onmouseover="this.style.background='#ab0000'"
+                                    onmouseout="this.style.background='rgb(108, 19, 19)'"
                                     onclick="abrirModalNuevaCarrera()"
                                 >
                                     <svg
@@ -845,7 +845,7 @@ const facultades = facultadesData?.facultades || [];
                         // Mostrar modal con indicador de carga
                         contenido.innerHTML = `
                             <div class="flex justify-center items-center py-12">
-                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
                                 <span class="ml-3 text-gray-600">Cargando información...</span>
                             </div>
                         `;
@@ -916,7 +916,7 @@ const facultades = facultadesData?.facultades || [];
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${usuario.cor_cue}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${usuario.ced_usu || "No registrada"}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${usuario.rol_cue === "ADMIN" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${usuario.rol_cue === "ADMIN" ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800"}">
                                         ${usuario.rol_cue}
                                     </span>
                                 </td>
@@ -928,9 +928,9 @@ const facultades = facultadesData?.facultades || [];
                     contenido.innerHTML = `
                         <div class="space-y-6">
                             <!-- Información General -->
-                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6">
+                            <div class="bg-gradient-to-r from-red-50 to-red-700 rounded-lg p-6">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                                    <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     Información General
@@ -946,7 +946,7 @@ const facultades = facultadesData?.facultades || [];
                                             <dd class="text-sm text-gray-900">
                                                 ${
                                                     carrera.cod_car
-                                                        ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">${carrera.cod_car}</span>`
+                                                        ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">${carrera.cod_car}</span>`
                                                         : '<span class="text-gray-400">No asignado</span>'
                                                 }
                                             </dd>
@@ -991,7 +991,7 @@ const facultades = facultadesData?.facultades || [];
                             <!-- Estudiantes -->
                             <div class="bg-white border border-gray-200 rounded-lg p-6">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                                    <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                                     </svg>
                                     Estudiantes de la Carrera (${carrera.usuarios?.length || 0})
