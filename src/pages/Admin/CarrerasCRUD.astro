@@ -403,7 +403,7 @@ const facultades = facultadesData?.facultades || [];
                                                 {carrera.nom_car}
                                             </h3>
                                             {carrera.cod_car && (
-                                                <p class="text-sm text-blue-600 font-medium">
+                                                <p class="text-sm text-gray-700 font-medium">
                                                     Código: {carrera.cod_car}
                                                 </p>
                                             )}
@@ -425,7 +425,7 @@ const facultades = facultadesData?.facultades || [];
 
                                     <div class="grid grid-cols-2 gap-4 mb-4">
                                         <div class="text-center">
-                                            <div class="text-2xl font-bold text-blue-600">
+                                            <div class="text-2xl font-bold text-red-600">
                                                 {carrera.asignaciones?.length ||
                                                     0}
                                             </div>
@@ -434,7 +434,7 @@ const facultades = facultadesData?.facultades || [];
                                             </div>
                                         </div>
                                         <div class="text-center">
-                                            <div class="text-2xl font-bold text-green-600">
+                                            <div class="text-2xl font-bold text-black">
                                                 {carrera.usuarios?.length || 0}
                                             </div>
                                             <div class="text-xs text-gray-500">
@@ -473,7 +473,7 @@ const facultades = facultadesData?.facultades || [];
                                         </button>
                                         <button
                                             onclick={`editarCarrera('${carrera.id_car}')`}
-                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                             title="Editar carrera"
                                         >
                                             <svg
