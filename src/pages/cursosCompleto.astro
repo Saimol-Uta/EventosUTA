@@ -12,10 +12,9 @@ import ContenedorEventos from "../components/ContenedorEvento.astro";
 // Extraer filtros desde la URL
 const url = new URL(Astro.request.url);
 const filtros = {
-
   categoria: url.searchParams.get("categoria") || "",
+  area: url.searchParams.get("area") || "",
   duracion: url.searchParams.get("duracion") || "",
-
 };
 
 // Extraer número de página, por defecto 1
@@ -81,7 +80,7 @@ if (session && session.user) {
   </section>
   <section class="seccion-principal">
     {
-      (filtros.categoria || filtros.duracion) && (
+      (filtros.categoria || filtros.area || filtros.duracion) && (
         <div class="filtros-activos">
           <span class="titulo-filtros"> Filtros aplicados:</span>
 
@@ -89,6 +88,15 @@ if (session && session.user) {
             <span class="filtro-tag">
               Categoría: <strong>{filtros.categoria}</strong>
               <button class="cerrar-filtro" onclick="quitarFiltro('categoria')">
+                ×
+              </button>
+            </span>
+          )}
+
+          {filtros.area && (
+            <span class="filtro-tag">
+              Área: <strong>{filtros.area}</strong>
+              <button class="cerrar-filtro" onclick="quitarFiltro('area')">
                 ×
               </button>
             </span>

@@ -44,6 +44,7 @@ const paginaActual = Math.min(Math.max(page, 1), totalPaginas || 1);
 function construirUrl(pagina: number) {
     const url = new URL("/cursosCompleto", "http://dummybase");
     if (filtros.categoria) url.searchParams.set("categoria", filtros.categoria);
+    if (filtros.area) url.searchParams.set("area", filtros.area);
     if (filtros.duracion) url.searchParams.set("duracion", filtros.duracion);
     url.searchParams.set("page", pagina.toString());
     return url.pathname + url.search;

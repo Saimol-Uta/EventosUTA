@@ -6,11 +6,12 @@ export const getEventosFiltrados = defineAction({
     accept: 'json',
     input: z.object({
         categoria: z.string().optional(),
+        area: z.string().optional(),
         duracion: z.string().optional(),
         page: z.number().default(1),
         cursosPorPagina: z.number().default(8),
     }),
-    handler: async ({ categoria, duracion, page = 1, cursosPorPagina = 8 }) => {
+    handler: async ({ categoria, area, duracion, page = 1, cursosPorPagina = 8 }) => {
         const skip = (page - 1) * cursosPorPagina;
         const take = cursosPorPagina;
 
@@ -27,9 +28,27 @@ export const getEventosFiltrados = defineAction({
             });
         }
         
-        // Filtro por duración
+        // Filtro por área
+        if (area) {
+            condiciones.push({ are_eve: area });
+        }
+        
+        // Filtro por duración - usando rangos dinámicos
         if (duracion) {
             switch (duracion) {
+                case "Menos de 100 horas":
+                    condiciones.push({ dur_eve: { lt: 100 } });
+                    break;
+                case "100 - 500 horas":
+                    condiciones.push({ dur_eve: { gte: 100, lte: 500 } });
+                    break;
+                case "500 - 1000 horas":
+                    condiciones.push({ dur_eve: { gte: 500, lte: 1000 } });
+                    break;
+                case "Más de 1000 horas":
+                    condiciones.push({ dur_eve: { gt: 1000 } });
+                    break;
+                // Mantener compatibilidad con rangos anteriores por si hay URLs con filtros antiguos
                 case "Menos de 5 horas":
                     condiciones.push({ dur_eve: { lt: 5 } });
                     break;
