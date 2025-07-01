@@ -39,6 +39,9 @@ export const getDatosInscripcion = defineAction({
                         },
                     },
                 },
+                _count: {
+                    select: { inscripciones: true },
+                },
             },
         });
 

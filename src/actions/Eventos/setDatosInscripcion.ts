@@ -44,6 +44,9 @@ export const setDatosInscripcion = defineAction({
                             },
                         },
                     },
+                    _count: {
+                        select: { inscripciones: true },
+                    },
                 },
             });
 
@@ -52,6 +55,17 @@ export const setDatosInscripcion = defineAction({
                     success: false,
                     message: "No se encontró el evento.",
                 };
+            }
+
+            // 2.1. Verificar cupos disponibles
+            if (evento.cup_max && evento.cup_max > 0) {
+                const cuposDisponibles = evento.cup_max - (evento._count?.inscripciones ?? 0);
+                if (cuposDisponibles <= 0) {
+                    return {
+                        success: false,
+                        message: "No hay cupos disponibles para este evento.",
+                    };
+                }
             }
 
             // 3. Verificar requisitos del usuario

@@ -15,15 +15,36 @@ export const getEventosFiltrados = defineAction({
         const take = cursosPorPagina;
 
         // Construcción del objeto 'where' para los filtros
-        // (Tu lógica aquí era correcta, la mantenemos)
         const where: any = {};
         const condiciones: any[] = [];
+        
+        // Filtro por categoría usando el nombre de la categoría
         if (categoria) {
-            condiciones.push({ id_cat_eve: categoria });
+            condiciones.push({ 
+                categorias_eventos: { 
+                    nom_cat: categoria 
+                } 
+            });
         }
+        
+        // Filtro por duración
         if (duracion) {
-            // ... (tu switch de duración va aquí)
+            switch (duracion) {
+                case "Menos de 5 horas":
+                    condiciones.push({ dur_eve: { lt: 5 } });
+                    break;
+                case "De 5 a 30 horas":
+                    condiciones.push({ dur_eve: { gte: 5, lte: 30 } });
+                    break;
+                case "De 30 a 60 horas":
+                    condiciones.push({ dur_eve: { gte: 30, lte: 60 } });
+                    break;
+                case "Más de 60 horas":
+                    condiciones.push({ dur_eve: { gt: 60 } });
+                    break;
+            }
         }
+        
         if (condiciones.length > 0) {
             where.AND = condiciones;
         }

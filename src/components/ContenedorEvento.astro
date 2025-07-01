@@ -57,14 +57,18 @@ function construirUrl(pagina: number) {
                 <EventoCard
                     imagen={evento.img_eve}
                     titulo={evento.nom_eve}
-                    cuposDis={( (evento.cup_max ?? 0) - (evento._count?.inscripciones ?? 0) ).toString()}
+                    cuposDis={
+                        evento.cup_max && evento.cup_max > 0 
+                        ? Math.max(0, evento.cup_max - (evento._count?.inscripciones ?? 0)).toString()
+                        : "Sin límite"
+                    }
                     horas={evento.dur_eve ?? 0}
                     slug={evento.id_eve}
                     modoAdmin={modoAdmin}
                     idEvento={evento.id_eve}
                     esDestacado={evento.es_destacado}
                     precio={evento.precio ?? 0}
-                    categoria={evento.categoria_evento?.nom_cat ?? 'Sin categoría'}
+                    categoria={evento.categorias_eventos?.nom_cat ?? 'Sin categoría'}
                 />
             ))
         ) : (
