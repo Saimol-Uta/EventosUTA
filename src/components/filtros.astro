@@ -1,9 +1,19 @@
+---
+import { actions } from "astro:actions";
+
+// Obtener filtros dinámicos de la base de datos
+const { data: filtrosData } = await Astro.callAction(actions.getFiltrosDinamicos, {});
+const carreras = filtrosData?.data?.carreras || [];
+const areas = filtrosData?.data?.areas || [];
+const rangosDuracion = filtrosData?.data?.rangosDuracion || [];
+---
+
 <nav class="filtros">
   <ul class="lista-filtros">
-    <!-- CATEGORÍAS -->
+    <!-- CARRERAS DINÁMICAS -->
     <li>
-      <button class="btn-filtro" data-target="cat-list">
-        <p>Categorías</p>
+      <button class="btn-filtro" data-target="carrera-list">
+        <p>Carreras</p>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -17,31 +27,18 @@
           ></path>
         </svg>
       </button>
-      <ul id="cat-list" class="submenu">
-        <li data-filter-type="categoria" data-filter-value="TECNICA">
-          Técnica
-        </li>
-        <li data-filter-type="categoria" data-filter-value="INDUSTRIAL">
-          Industrial
-        </li>
-        <li data-filter-type="categoria" data-filter-value="INVESTIGACION">
-          Investigación
-        </li>
-        <li data-filter-type="categoria" data-filter-value="REDES">Redes</li>
-        <li data-filter-type="categoria" data-filter-value="EMPRESARIAL">
-          Empresarial
-        </li>
-        <li data-filter-type="categoria" data-filter-value="ACADEMICA">
-          Académica
-        </li>
-        <li data-filter-type="categoria" data-filter-value="PRACTICA">
-          Práctica
-        </li>
-        <li data-filter-type="categoria" data-filter-value="IA">IA</li>
+      <ul id="carrera-list" class="submenu">
+        {
+          carreras.map((carrera) => (
+            <li data-filter-type="carrera" data-filter-value={carrera}>
+              {carrera}
+            </li>
+          ))
+        }
       </ul>
     </li>
 
-        <!-- Áreas -->
+    <!-- ÁREAS DINÁMICAS -->
     <li>
       <button class="btn-filtro" data-target="area-list">
         <p>Áreas</p>
@@ -59,38 +56,26 @@
         </svg>
       </button>
       <ul id="area-list" class="submenu">
-        <li data-filter-type="area" data-filter-value="TECNICA">
-          Técnica
-        </li>
-        <li data-filter-type="area" data-filter-value="INDUSTRIAL">
-          Industrial
-        </li>
-        <li data-filter-type="area" data-filter-value="INVESTIGACION">
-          Investigación
-        </li>
-        <li data-filter-type="area" data-filter-value="REDES">Redes</li>
-        <li data-filter-type="area" data-filter-value="EMPRESARIAL">
-          Empresarial
-        </li>
-        <li data-filter-type="area" data-filter-value="ACADEMICA">
-          Académica
-        </li>
-        <li data-filter-type="area" data-filter-value="PRACTICA">
-          Práctica
-        </li>
-        <li data-filter-type="area" data-filter-value="IA">IA</li>
+        {
+          areas.map((area) => (
+            <li data-filter-type="area" data-filter-value={area}>
+              {area}
+            </li>
+          ))
+        }
       </ul>
     </li>
 
+    <!-- DURACIÓN DINÁMICA -->
     <li>
-      <button class="btn-filtro" data-target="dur-list">
+      <button class="btn-filtro" data-target="duration-list">
         <p>Duración</p>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           width="24"
           height="24"
-          fill="currentColor"
+          fill="black"
           class="icon"
         >
           <path
@@ -98,19 +83,14 @@
           ></path>
         </svg>
       </button>
-      <ul id="dur-list" class="submenu">
-        <li data-filter-type="duracion" data-filter-value="Menos de 5 horas">
-          Menos de 5 horas
-        </li>
-        <li data-filter-type="duracion" data-filter-value="De 5 a 30 horas">
-          De 5 a 30 horas
-        </li>
-        <li data-filter-type="duracion" data-filter-value="De 30 a 60 horas">
-          De 30 a 60 horas
-        </li>
-        <li data-filter-type="duracion" data-filter-value="Más de 60 horas">
-          Más de 60 horas
-        </li>
+      <ul id="duration-list" class="submenu">
+        {
+          rangosDuracion.map((rango) => (
+            <li data-filter-type="duracion" data-filter-value={rango.value}>
+              {rango.label}
+            </li>
+          ))
+        }
       </ul>
     </li>
   </ul>

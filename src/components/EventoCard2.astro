@@ -33,9 +33,10 @@ const {
 ---
 
 <a
-  class="card-evento relative"
-  href={`/Eventos/${slug}`}
+  class={`card-evento relative ${cuposDis === "0" ? "sin-cupos-evento" : ""}`}
+  href={cuposDis === "0" ? "#" : `/Eventos/${slug}`}
   data-titulo={titulo.toLowerCase()}
+  onclick={cuposDis === "0" ? "event.preventDefault(); return false;" : ""}
 >
   {
     modoAdmin && (
@@ -120,11 +121,13 @@ const {
       <div class="contenedor-etiquetas">
         {
           cuposDis && (
-            <div class="etiqueta cupos">
+            <div class={`etiqueta cupos ${cuposDis === "0" ? "sin-cupos" : ""}`}>
               <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
               </svg>
-              {cuposDis} cupos disponibles
+              {cuposDis === "Sin límite" ? "Sin límite de cupos" : 
+               cuposDis === "0" ? "Sin cupos disponibles" : 
+               `${cuposDis} cupos disponibles`}
             </div>
           )
         }
@@ -180,6 +183,15 @@ const {
   .card-evento:hover {
     transform: translateY(-5px);
     box-shadow: 0 0px 14px rgba(0, 0, 0, 0.25);
+  }
+  .sin-cupos-evento {
+    opacity: 0.7;
+    cursor: not-allowed !important;
+    pointer-events: none;
+  }
+  .sin-cupos-evento:hover {
+    transform: none !important;
+    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.25) !important;
   }
   .card-img {
     width: 100%;
@@ -250,5 +262,9 @@ const {
   .cupos {
     color: #b30000;
     background-color: rgba(179, 0, 0, 0.1);
+  }
+  .sin-cupos {
+    color: #666;
+    background-color: rgba(102, 102, 102, 0.1);
   }
 </style>

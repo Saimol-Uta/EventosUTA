@@ -179,6 +179,17 @@ const evento = data?.data?.evento ?? null;
                 }
                 <p><strong>Área:</strong> {evento?.are_eve ?? "-"}</p>
                 <p><strong>Ubicación:</strong> {evento?.ubi_eve ?? "-"}</p>
+                {
+                    evento?.cup_max && evento.cup_max > 0 ? (
+                        <p>
+                            <strong>Cupos disponibles:</strong> 
+                            {Math.max(0, evento.cup_max - ((evento as any)._count?.inscripciones ?? 0))}
+                            {" de "}{evento.cup_max}
+                        </p>
+                    ) : (
+                        <p><strong>Cupos:</strong> Sin límite</p>
+                    )
+                }
                 <p>
                     <strong>Fecha Inicio:</strong>
                     {

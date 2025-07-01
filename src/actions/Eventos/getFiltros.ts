@@ -5,25 +5,71 @@ import { z } from 'astro:schema';
 export const getEventosFiltrados = defineAction({
     accept: 'json',
     input: z.object({
-        categoria: z.string().optional(),
+        carrera: z.string().optional(),
+        area: z.string().optional(),
         duracion: z.string().optional(),
         page: z.number().default(1),
         cursosPorPagina: z.number().default(8),
     }),
-    handler: async ({ categoria, duracion, page = 1, cursosPorPagina = 8 }) => {
+    handler: async ({ carrera, area, duracion, page = 1, cursosPorPagina = 8 }) => {
         const skip = (page - 1) * cursosPorPagina;
         const take = cursosPorPagina;
 
         // Construcción del objeto 'where' para los filtros
-        // (Tu lógica aquí era correcta, la mantenemos)
         const where: any = {};
         const condiciones: any[] = [];
-        if (categoria) {
-            condiciones.push({ id_cat_eve: categoria });
+        
+        // Filtro por carrera usando las asignaciones
+        if (carrera) {
+            condiciones.push({ 
+                asignaciones: {
+                    detalle_asignaciones: {
+                        some: {
+                            carreras: {
+                                nom_car: carrera
+                            }
+                        }
+                    }
+                }
+            });
         }
+        
+        // Filtro por área
+        if (area) {
+            condiciones.push({ are_eve: area });
+        }
+        
+        // Filtro por duración - usando rangos dinámicos
         if (duracion) {
-            // ... (tu switch de duración va aquí)
+            switch (duracion) {
+                case "Menos de 100 horas":
+                    condiciones.push({ dur_eve: { lt: 100 } });
+                    break;
+                case "100 - 500 horas":
+                    condiciones.push({ dur_eve: { gte: 100, lte: 500 } });
+                    break;
+                case "500 - 1000 horas":
+                    condiciones.push({ dur_eve: { gte: 500, lte: 1000 } });
+                    break;
+                case "Más de 1000 horas":
+                    condiciones.push({ dur_eve: { gt: 1000 } });
+                    break;
+                // Mantener compatibilidad con rangos anteriores por si hay URLs con filtros antiguos
+                case "Menos de 5 horas":
+                    condiciones.push({ dur_eve: { lt: 5 } });
+                    break;
+                case "De 5 a 30 horas":
+                    condiciones.push({ dur_eve: { gte: 5, lte: 30 } });
+                    break;
+                case "De 30 a 60 horas":
+                    condiciones.push({ dur_eve: { gte: 30, lte: 60 } });
+                    break;
+                case "Más de 60 horas":
+                    condiciones.push({ dur_eve: { gt: 60 } });
+                    break;
+            }
         }
+        
         if (condiciones.length > 0) {
             where.AND = condiciones;
         }

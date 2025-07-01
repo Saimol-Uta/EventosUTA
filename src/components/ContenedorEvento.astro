@@ -43,7 +43,8 @@ const paginaActual = Math.min(Math.max(page, 1), totalPaginas || 1);
 // 6. La función para construir la URL sigue siendo la misma y es correcta.
 function construirUrl(pagina: number) {
     const url = new URL("/cursosCompleto", "http://dummybase");
-    if (filtros.categoria) url.searchParams.set("categoria", filtros.categoria);
+    if (filtros.carrera) url.searchParams.set("carrera", filtros.carrera);
+    if (filtros.area) url.searchParams.set("area", filtros.area);
     if (filtros.duracion) url.searchParams.set("duracion", filtros.duracion);
     url.searchParams.set("page", pagina.toString());
     return url.pathname + url.search;
@@ -57,14 +58,18 @@ function construirUrl(pagina: number) {
                 <EventoCard
                     imagen={evento.img_eve}
                     titulo={evento.nom_eve}
-                    cuposDis={( (evento.cup_max ?? 0) - (evento._count?.inscripciones ?? 0) ).toString()}
+                    cuposDis={
+                        evento.cup_max && evento.cup_max > 0 
+                        ? Math.max(0, evento.cup_max - (evento._count?.inscripciones ?? 0)).toString()
+                        : "Sin límite"
+                    }
                     horas={evento.dur_eve ?? 0}
                     slug={evento.id_eve}
                     modoAdmin={modoAdmin}
                     idEvento={evento.id_eve}
                     esDestacado={evento.es_destacado}
                     precio={evento.precio ?? 0}
-                    categoria={evento.categoria_evento?.nom_cat ?? 'Sin categoría'}
+                    categoria={evento.categorias_eventos?.nom_cat ?? 'Sin categoría'}
                 />
             ))
         ) : (

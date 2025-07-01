@@ -54,6 +54,7 @@ import { GenerarOrdenDePago } from './OrdenPago/generarOrden.action';
 import { getEventosProximos } from "../actions/Eventos/getEventosProximos";
 import { getCertificadosPorUsuario } from "../actions/Eventos/getCertificados";
 import { getEventosFiltrados } from '../actions/Eventos/getFiltros';
+import { getFiltrosDinamicos } from '../actions/Eventos/getFiltrosDinamicos';
 
 import { getOrganizadoresCR } from './Admin/getOrganizadores.action';
 import { eliminarOrganizador } from './Admin/eliminarOrganizador.action';
@@ -152,6 +153,7 @@ export const server = {
     getCuentaByIdSingle,
     getDashboardData,
     getEventosFiltrados,
+    getFiltrosDinamicos,
     getDetallesEventoCompleto,
 
     // Nuevas acciones para Facultades
