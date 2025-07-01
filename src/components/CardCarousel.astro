@@ -1,195 +1,236 @@
 ---
 import "../styles/global.css";
 const { imagen, titulo, resumen, minutos, slug, precio, fechaIni } =
-    Astro.props;
+  Astro.props;
 
 // Ahora 'minutos' representa horas en la base de datos
 const formatearDuracion = (horas: number) => {
-    if (horas < 24) {
-        // Menos de 24 horas
-        const horasRedondeadas = Math.round(horas * 100) / 100;
-        if (horasRedondeadas === 1) {
-            return "1 hora";
-        } else {
-            return `${horasRedondeadas} horas`;
-        }
+  if (horas < 24) {
+    // Menos de 24 horas
+    const horasRedondeadas = Math.round(horas * 100) / 100;
+    if (horasRedondeadas === 1) {
+      return "1 hora";
     } else {
-        // 24 horas o más, mostrar días y horas
-        const dias = Math.floor(horas / 24);
-        const horasRestantes = Math.round(horas % 24);
-        if (horasRestantes === 0) {
-            return `${dias} ${dias === 1 ? "día" : "días"}`;
-        } else {
-            return `${dias} ${dias === 1 ? "día" : "días"} ${horasRestantes}h`;
-        }
+      return `${horasRedondeadas} horas`;
     }
+  } else {
+    // 24 horas o más, mostrar días y horas
+    const dias = Math.floor(horas / 24);
+    const horasRestantes = Math.round(horas % 24);
+    if (horasRestantes === 0) {
+      return `${dias} ${dias === 1 ? "día" : "días"}`;
+    } else {
+      return `${dias} ${dias === 1 ? "día" : "días"} ${horasRestantes}h`;
+    }
+  }
 };
 
 const formatearFecha = (fecha?: string | Date | null): string => {
-    if (!fecha) return "Fecha no disponible";
+  if (!fecha) return "Fecha no disponible";
 
-    const date = typeof fecha === "string" ? new Date(fecha) : fecha;
+  const date = typeof fecha === "string" ? new Date(fecha) : fecha;
 
-    if (!(date instanceof Date) || isNaN(date.getTime()))
-        return "Fecha inválida";
+  if (!(date instanceof Date) || isNaN(date.getTime())) return "Fecha inválida";
 
-    return date.toLocaleDateString("es-ES", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 };
 ---
 
 <a class="card-evento" href={`/Eventos/${slug}`}>
-    <img
-        class="card-img"
-        src={imagen || "/img/logo-fisei.png"}
-        alt="Imagen del evento"
-    />
+  <img
+    class="card-img"
+    src={imagen || "/img/logo-fisei.png"}
+    alt="Imagen del evento"
+  />
 
-    <div class="info-overlay">
-        <h3 class="titulo">{titulo}</h3>
-        <p class="resumen">{resumen}</p>
+  <div class="info-overlay">
+    <h3 class="titulo">{titulo}</h3>
+    <p class="resumen">{resumen}</p>
 
-        <div class="etiquetas-footer">
-            <div class="contenedor-etiquetas">
-                <div class="etiqueta horas">{formatearDuracion(minutos)}</div>
+    <div class="etiquetas-footer">
+      <div class="contenedor-etiquetas">
+        <div class="etiqueta horas">
+          <svg
+            class="w-2.5 h-2.5"
+            width="200"
+            height="200"
+            viewBox="0 0 200 200"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="100" cy="100" r="85" fill="currentColor"></circle>
 
-                {
-                    precio == 0 ? (
-                        <div class="etiqueta gratis">Gratis</div>
-                    ) : (
-                        <div class="etiqueta precio">${precio.toFixed(2)}</div>
-                    )
-                }
-            </div>
-            <div class="fecha-ini">
-                Inicia el {formatearFecha(fechaIni)}
-            </div>
+            <line
+              x1="100"
+              y1="100"
+              x2="140"
+              y2="140"
+              stroke="white"
+              stroke-width="16"
+              stroke-linecap="round"></line>
+
+            <!-- Manecilla de los minutos (12) -->
+            <line
+              x1="100"
+              y1="100"
+              x2="100"
+              y2="50"
+              stroke="white"
+              stroke-width="16"
+              stroke-linecap="round"></line>
+
+            <!-- Centro del reloj -->
+            <circle cx="100" cy="100" r="12" fill="white"></circle>
+          </svg>
+          {formatearDuracion(minutos)}
         </div>
+
+        {
+          precio == 0 ? (
+            <div class="etiqueta gratis">
+              <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              Gratis
+            </div>
+          ) : (
+            <div class="etiqueta precio">$ {precio.toFixed(2)}</div>
+          )
+        }
+      </div>
+      <div class="fecha-ini">
+        Inicia el {formatearFecha(fechaIni)}
+      </div>
     </div>
+  </div>
 </a>
 
 <style>
+  .card-evento {
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    box-shadow: 0 0px 10px rgba(0, 0, 0, 0.25);
+    text-decoration: none;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-evento:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0px 15px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Imagen arriba */
+  .card-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  /* Contenido estilo vidrio */
+  .info-overlay {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 160px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .titulo {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: rgb(108, 19, 19);
+    margin: 0;
+  }
+
+  .resumen {
+    font-size: 1rem;
+    color: #444;
+    margin: 0;
+    line-height: 1.5;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    display: -webkit-box;
+  }
+
+  .etiquetas-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .contenedor-etiquetas {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .etiqueta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    gap: 0.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .etiqueta.horas {
+    color: rgb(213, 153, 33);
+    background-color: rgba(205, 152, 46, 0.106);
+  }
+
+  .etiqueta.gratis {
+    color: #1c8f39;
+    background-color: rgba(28, 143, 57, 0.1);
+  }
+
+  .etiqueta.precio {
+    color: #b30000;
+    background-color: rgba(179, 0, 0, 0.1);
+  }
+
+  @media (max-width: 640px) {
     .card-evento {
-        width: 100%;
-        max-width: 460px;
-        overflow: hidden;
-        -webkit-backdrop-filter: blur(14px) saturate(160%);
-        box-shadow: 0 0px 10px rgba(0, 0, 0, 0.25);
-        text-decoration: none;
-        transition:
-            transform 0.3s ease,
-            box-shadow 0.3s ease;
-        display: flex;
-        flex-direction: column;
+      margin: 16px;
     }
 
-    .card-evento:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0px 15px rgba(0, 0, 0, 0.25);
-    }
-
-    /* Imagen arriba */
     .card-img {
-        width: 100%;
-        height: 250px;
-        object-fit: cover;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      height: 160px;
     }
 
-    /* Contenido estilo vidrio */
     .info-overlay {
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        min-height: 160px;
-        background: rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(10px);
-        border-top: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 16px;
     }
 
     .titulo {
-        font-size: 1.3rem;
-        font-weight: 500;
-        color: rgb(108, 19, 19);
-        margin: 0;
+      font-size: 1.1rem;
     }
 
     .resumen {
-        font-size: 1rem;
-        color: #444;
-        margin: 0;
-        line-height: 1.5;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        display: -webkit-box;
+      -webkit-line-clamp: 2;
     }
+  }
 
-    .etiquetas-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .contenedor-etiquetas {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .etiqueta {
-        font-size: 0.8rem;
-        font-weight: 600;
-        padding: 6px 14px;
-        border-radius: 10px;
-        background-color: rgba(255, 255, 255, 0.75);
-        backdrop-filter: blur(6px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        white-space: nowrap;
-    }
-
-    .etiqueta.horas {
-        color: rgb(213, 153, 33);
-        background-color: rgba(205, 152, 46, 0.106);
-    }
-
-    .etiqueta.gratis {
-        color: #1c8f39;
-        background-color: rgba(28, 143, 57, 0.1);
-    }
-
-    .etiqueta.precio {
-        color: #b30000;
-        background-color: rgba(179, 0, 0, 0.1);
-    }
-
-    @media (max-width: 640px) {
-        .card-evento {
-            margin: 16px;
-        }
-
-        .card-img {
-            height: 160px;
-        }
-
-        .info-overlay {
-            padding: 16px;
-        }
-
-        .titulo {
-            font-size: 1.1rem;
-        }
-
-        .resumen {
-            -webkit-line-clamp: 2;
-        }
-    }
-
-    .fecha-ini {
-        font-size: 14px;
-    }
+  .fecha-ini {
+    font-size: 14px;
+  }
 </style>
