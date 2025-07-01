@@ -20,12 +20,11 @@ const filtros = {
 
 
 
-// Extraer número de página, por defecto 1
-const page = parseInt(url.searchParams.get("page") || "1", 10);
+// Extraer número de página (solo si no hay búsqueda)
+const page = filtros.busqueda ? 1 : parseInt(url.searchParams.get("page") || "1", 10);
 
-// Número de cursos por página (configurable)
-const cursosPorPagina = 8;
-
+// Mostrar todos los resultados si hay búsqueda, de lo contrario paginar
+const cursosPorPagina = filtros.busqueda ? 1000 : 10; // 1000 es un número alto para mostrar "todos"
 const session = await getSession(Astro.request);
 let esAdmin = false;
 
