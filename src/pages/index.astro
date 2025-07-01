@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
+import MenuAdmin from "../components/MenuAdministrador.astro";
 import InformacionFacultad from "../components/InformacionFacultad.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
@@ -26,7 +27,7 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, { id_fac });
 
 <Layout>
     <Header />
-    <Navbar />
+  {esAdmin ? <MenuAdmin /> :  <Navbar />} 
     <CarruselUTA modoAdmin={esAdmin}/>
     <InformacionFacultad
         decano={pagina?.data?.dec_fac ?? ""}
