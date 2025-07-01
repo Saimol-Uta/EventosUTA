@@ -1294,7 +1294,83 @@ const links = [
             estadoTexto.className = `badge-estado ${resultado.clase}`;
             estadoMotivo.textContent = resultado.motivo;
             estadoInfo.style.display = "block";
-        } // Función para abrir modal de calificación        //@ts-ignore
+        } // Función para abrir modal de calificación        // Función para resetear el modal antes de abrirlo
+        function resetearModal() {
+            console.log("=== RESETEANDO MODAL ===");
+
+            const modal = document.getElementById(
+                "modalCalificaciones",
+            ) as HTMLElement;
+            const asistenciaSelect = document.getElementById(
+                "asistencia-select",
+            ) as HTMLSelectElement;
+            const asistenciaNumber = document.getElementById(
+                "asistencia-number",
+            ) as HTMLInputElement;
+            const asistenciaNoAplicable = document.getElementById(
+                "asistencia-no-aplicable",
+            ) as HTMLElement;
+            const notaNumber = document.getElementById(
+                "nota-number",
+            ) as HTMLInputElement;
+            const notaNoAplicable = document.getElementById(
+                "nota-no-aplicable",
+            ) as HTMLElement;
+            const notaInfo = document.getElementById(
+                "nota-info",
+            ) as HTMLElement;
+            const estadoInfo = document.getElementById(
+                "estado-info",
+            ) as HTMLElement;
+
+            // Limpiar el data-participante-id del modal para evitar conflictos
+            if (modal) {
+                modal.removeAttribute("data-participante-id");
+                delete modal.dataset.participanteId;
+            }
+
+            // Resetear todos los campos a su estado inicial
+            if (asistenciaSelect) {
+                asistenciaSelect.style.display = "none";
+                asistenciaSelect.removeAttribute("name");
+                asistenciaSelect.disabled = false;
+                asistenciaSelect.value = "100";
+            }
+
+            if (asistenciaNumber) {
+                asistenciaNumber.style.display = "none";
+                asistenciaNumber.removeAttribute("name");
+                asistenciaNumber.disabled = false;
+                asistenciaNumber.value = "";
+            }
+
+            if (asistenciaNoAplicable) {
+                asistenciaNoAplicable.style.display = "none";
+            }
+
+            if (notaNumber) {
+                notaNumber.style.display = "none";
+                notaNumber.removeAttribute("name");
+                notaNumber.disabled = false;
+                notaNumber.value = "";
+            }
+
+            if (notaNoAplicable) {
+                notaNoAplicable.style.display = "none";
+            }
+
+            if (notaInfo) {
+                notaInfo.style.display = "none";
+            }
+
+            if (estadoInfo) {
+                estadoInfo.style.display = "none";
+            }
+
+            console.log("Modal reseteado completamente");
+        }
+
+        //@ts-ignore
         window.abrirModalCalificacion = function (
             participanteId: string,
             nombreCompleto: string,
@@ -1338,6 +1414,9 @@ const links = [
 
             console.log("Validación pasada, abriendo modal...");
 
+            // IMPORTANTE: Resetear el modal antes de configurarlo
+            resetearModal();
+
             const modal = document.getElementById(
                 "modalCalificaciones",
             ) as HTMLElement;
@@ -1370,8 +1449,9 @@ const links = [
                 participanteInput.value = nombreCompleto;
 
                 // Buscar los datos actuales del participante en la tabla
+                // Ser específico para evitar seleccionar el modal que también tiene el mismo data-participante-id
                 const filaParticipante = document.querySelector(
-                    `[data-participante-id="${participanteId}"]`,
+                    `.registros-inferior .registro-fila[data-participante-id="${participanteId}"]`,
                 ) as HTMLElement;
                 let requiereAsistencia = false;
                 let requierePuntaje = false;
@@ -1501,12 +1581,14 @@ const links = [
             if (closeBtn && modal) {
                 closeBtn.addEventListener("click", function () {
                     modal.style.display = "none";
+                    resetearModal(); // Resetear cuando se cierre
                 });
             }
 
             if (cancelBtn && modal) {
                 cancelBtn.addEventListener("click", function () {
                     modal.style.display = "none";
+                    resetearModal(); // Resetear cuando se cancele
                 });
             } // Guardar calificación
             if (form && modal) {
@@ -1534,6 +1616,7 @@ const links = [
                                 confirmButtonText: "OK",
                             });
                             modal.style.display = "none";
+                            resetearModal(); // Resetear después del éxito
                             window.location.reload();
                         } else {
                             await Swal.fire({
@@ -1584,7 +1667,7 @@ const links = [
                         "modalCalificaciones",
                     ) as HTMLElement;
                     const filaParticipante = document.querySelector(
-                        `[data-participante-id="${modal.dataset.participanteId}"]`,
+                        `.registros-inferior .registro-fila[data-participante-id="${modal.dataset.participanteId}"]`,
                     ) as HTMLElement;
 
                     if (filaParticipante) {
@@ -1616,7 +1699,7 @@ const links = [
                         "modalCalificaciones",
                     ) as HTMLElement;
                     const filaParticipante = document.querySelector(
-                        `[data-participante-id="${modal.dataset.participanteId}"]`,
+                        `.registros-inferior .registro-fila[data-participante-id="${modal.dataset.participanteId}"]`,
                     ) as HTMLElement;
 
                     if (filaParticipante) {
@@ -2101,13 +2184,14 @@ const links = [
             );
         };
 
-        // Cerrar modalal hacer clic fuera
+        // Cerrar modal al hacer clic fuera
         window.addEventListener("click", function (event) {
             const modal = document.getElementById(
                 "modalCalificaciones",
             ) as HTMLElement;
             if (event.target === modal && modal) {
                 modal.style.display = "none";
+                resetearModal(); // Resetear cuando se cierre haciendo clic fuera
             }
         });
     </script>
