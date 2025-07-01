@@ -368,8 +368,8 @@ const facultades = facultadesData?.facultades || [];
                                 onclick="abrirModalNuevaCarrera()"
                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                 style="background: rgb(108, 19, 19);"
-                                onmouseover="this.style.background='#047857'"
-                                onmouseout="this.style.background='#rgb(108, 19, 19)'"
+                                onmouseover="this.style.background='#ab0000'"
+                                onmouseout="this.style.background='rgb(108, 19, 19)'"
                             >
                                 <svg
                                     class="w-5 h-5 mr-2"
@@ -447,7 +447,7 @@ const facultades = facultadesData?.facultades || [];
                                         {" "}
                                         <button
                                             onclick={`abrirModalDetallesCarrera('${carrera.id_car}')`}
-                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                                             title="Ver detalles"
                                         >
                                             <svg
@@ -473,7 +473,7 @@ const facultades = facultadesData?.facultades || [];
                                         </button>
                                         <button
                                             onclick={`editarCarrera('${carrera.id_car}')`}
-                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                                             title="Editar carrera"
                                         >
                                             <svg
@@ -896,9 +896,9 @@ const facultades = facultadesData?.facultades || [];
                             ? carrera.asignaciones
                                   .map(
                                       (asignacion: any) =>
-                                          `<div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                                <h4 class="font-medium text-blue-900">${asignacion.nom_asi}</h4>
-                                <p class="text-sm text-blue-700 mt-1">${asignacion.des_asi}</p>
+                                          `<div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <h4 class="font-medium text-gray-900">${asignacion.nom_asi}</h4>
+                                <p class="text-sm text-gray-700 mt-1">${asignacion.des_asi}</p>
                             </div>`,
                                   )
                                   .join("")
@@ -928,7 +928,7 @@ const facultades = facultadesData?.facultades || [];
                     contenido.innerHTML = `
                         <div class="space-y-6">
                             <!-- Información General -->
-                            <div class="bg-gradient-to-r from-red-50 to-red-700 rounded-lg p-6">
+                            <div class="bg-red-50 rounded-lg p-6">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                                     <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -976,7 +976,7 @@ const facultades = facultadesData?.facultades || [];
                             <!-- Asignaciones -->
                             <div class="bg-white border border-gray-200 rounded-lg p-6">
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h5.586a1 1 0 00.707-.293l5.414-5.414a1 1 0 00.293-.707V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                     </svg>
                                     Asignaciones de la Carrera (${carrera.asignaciones?.length || 0})
