@@ -17,7 +17,6 @@ const adminRoutes = [
     '/Eventos/*',
     '/Inscripcion/Inscripcion',
     '/Formularios/FormularioSolicitudCambioUsuario',
-    '/cursosCompleto',
     '/CompletarPerfilUser',
     '/PerfilUserDos',
     '/inscripciones/*',
@@ -25,7 +24,7 @@ const adminRoutes = [
 ];
 
 const studentRoutes = [
-    '/homeUser', 
+    '/homeUser',
     '/User/certificadosUsuario',
     '/User/CompletarPerfilUser',
     '/User/EventosUser',
@@ -33,13 +32,12 @@ const studentRoutes = [
     '/User/buscarCertificado',
     '/User/cursosCompleto',
     '/User/eventosProximos',
-    '/Eventos/*', 
+    '/Eventos/*',
     '/Inscripcion/Inscripcion',
     '/buscarCertificado',
     '/Formularios/FormularioSolicitudCambioUsuario',
-    '/cursosCompleto',
     '/CompletarPerfilUser'
-    ,'/PerfilUserDos'
+    , '/PerfilUserDos'
 ];
 
 const userRoutes = [
@@ -55,9 +53,8 @@ const userRoutes = [
     '/Inscripcion/Inscripcion',
     '/buscarCertificado',
     '/Formularios/FormularioSolicitudCambioUsuario',
-    '/cursosCompleto',
     '/CompletarPerfilUser'
-    ,'/PerfilUserDos'
+    , '/PerfilUserDos'
 ];
 
 const masterRoutes = [
@@ -75,7 +72,6 @@ const masterRoutes = [
     '/Eventos/*',
     '/Inscripcion/Inscripcion',
     '/Formularios/FormularioSolicitudCambioUsuario',
-    '/cursosCompleto',
     '/CompletarPerfilUser',
     '/PerfilUserDos',
     '/inscripciones/*',
@@ -99,7 +95,8 @@ const publicRoutes = [
     '/cursosCompleto',
     '/Eventos/*',
     '/User/verificar-cuenta',
-    '/public/*'
+    '/public/*',
+    '/api/*'
 ];
 
 const eventosExcludedSubroutes = [
@@ -194,7 +191,7 @@ export const onRequest = defineMiddleware(async ({ url, request, locals, redirec
             hasAccess = true;
         } else if (locals.isUser && isRouteAllowed(url.pathname, userRoutes)) {
             hasAccess = true;
-        } else if (locals.isMaster && isRouteAllowed(url.pathname, masterRoutes)  && !isRouteExcluded(url.pathname, eventosExcludedSubroutes)) {
+        } else if (locals.isMaster && isRouteAllowed(url.pathname, masterRoutes) && !isRouteExcluded(url.pathname, eventosExcludedSubroutes)) {
             hasAccess = true;
         }
 
