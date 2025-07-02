@@ -544,8 +544,13 @@ if (session && session.user) {
                         botonGuardar.textContent = textoOriginal;
                     }
 
-                    // Opcional: Recargar la página para reflejar los cambios
-                    // setTimeout(() => window.location.reload(), 1500);
+                    // Recargar la página para reflejar los cambios en la BD
+                    setTimeout(() => {
+                        console.log(
+                            "Recargando página para reflejar cambios...",
+                        );
+                        window.location.reload();
+                    }, 2000);
                 } else {
                     throw new Error(
                         result.message || "Error al guardar eventos favoritos",
