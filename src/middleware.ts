@@ -2,27 +2,107 @@ import { defineMiddleware } from 'astro:middleware';
 import { getSession } from "auth-astro/server";
 
 // Rutas específicas por rol
-const adminRoutes = ['/homeAdmin', '/admin/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD', '/Admin/Asignaciones']; // Añadir más rutas de admin aquí
-const studentRoutes = ['/homeUser', '/student/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de estudiante aquí
-const userRoutes = ['/homeUser', '/user/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de usuario aquí
-const masterRoutes = ['/homeAdmin', '/master/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD', '/Admin/Asignaciones']; // Añadir más rutas de master aquí
+const adminRoutes = [
+    '/homeAdmin',
+    '/Admin/*',
+    '/Admin/AprobacionInscripciones',
+    '/Admin/Asignaciones',
+    '/Admin/AsignacionesNuevo',
+    '/Admin/CarrerasCRUD',
+    '/Admin/CategoriasCRUD',
+    '/Admin/EventosCRUD',
+    '/Admin/gestionEventos',
+    '/Admin/OrganizadoresCRUD',
+    '/Admin/UsuariosCRUD',
+    '/Eventos/*',
+    '/Inscripcion/Inscripcion',
+    '/buscarCertificado',
+    '/Formularios/FormularioSolicitudCambioUsuario',
+    '/cursosCompleto',
+    '/CompletarPerfilUser',
+    '/PerfilUserDos',
+    '/inscripciones/*',
+    '/participantes/*'
+];
+
+const studentRoutes = [
+    '/homeUser', 
+    '/User/certificadosUsuario',
+    '/User/CompletarPerfilUser',
+    '/User/EventosUser',
+    '/User/historial',
+    '/User/buscarCertificado',
+    '/User/cursosCompleto',
+    '/User/eventosProximos',
+    '/Eventos/*', 
+    '/Inscripcion/Inscripcion',
+    '/buscarCertificado',
+    '/Formularios/FormularioSolicitudCambioUsuario',
+    '/cursosCompleto',
+    '/CompletarPerfilUser'
+    ,'/PerfilUserDos'
+];
+
+const userRoutes = [
+    '/homeUser',
+    '/User/certificadosUsuario',
+    '/User/CompletarPerfilUser',
+    '/User/EventosUser',
+    '/User/historial',
+    '/User/buscarCertificado',
+    '/User/cursosCompleto',
+    '/User/eventosProximos',
+    '/Eventos/*',
+    '/Inscripcion/Inscripcion',
+    '/buscarCertificado',
+    '/Formularios/FormularioSolicitudCambioUsuario',
+    '/cursosCompleto',
+    '/CompletarPerfilUser'
+    ,'/PerfilUserDos'
+];
+
+const masterRoutes = [
+    '/homeAdmin',
+    '/Admin/*',
+    '/Admin/AprobacionInscripciones',
+    '/Admin/Asignaciones',
+    '/Admin/AsignacionesNuevo',
+    '/Admin/CarrerasCRUD',
+    '/Admin/CategoriasCRUD',
+    '/Admin/EventosCRUD',
+    '/Admin/gestionEventos',
+    '/Admin/OrganizadoresCRUD',
+    '/Admin/UsuariosCRUD',
+    '/Eventos/*',
+    '/Inscripcion/Inscripcion',
+    '/buscarCertificado',
+    '/Formularios/FormularioSolicitudCambioUsuario',
+    '/cursosCompleto',
+    '/CompletarPerfilUser',
+    '/PerfilUserDos',
+    '/inscripciones/*',
+    '/participantes/*'
+];
 
 
-// Rutas que no requieren autenticación
+// Rutas que no requieren autenticación (login y registro)
 const noAuthRoutes = ['/login', '/register', '/'];
 
 // Rutas públicas accesibles por todos (autenticados y no autenticados)
 const publicRoutes = [
-    '/*',
-    '/Admin/*',
+    '/', // La raíz, manejada explícitamente para redirección de usuarios logueados
+    '/login',
+    '/register',
     '/img/usuario.png',
     '/default-avatar.png',
     '/favicon.ico',
     '/about',
-    '/Eventos/historial',
     '/contact',
-    // Añadir aquí todas las rutas que deben ser accesibles por usuarios autenticados
+    '/cursosCompleto',
+    '/Eventos/*',
+    '/User/verificar-cuenta'
 ];
+
 
 // Función para verificar si una ruta coincide con los patrones permitidos
 function isRouteAllowed(pathname: string, allowedRoutes: string[]): boolean {
