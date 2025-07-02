@@ -48,10 +48,12 @@ if (session && session.user) {
             >
                 <input
                     type="text"
+                    id="input-busqueda"
                     placeholder="Buscar evento"
                     class="input-busqueda flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400 px-4 py-2 text-sm"
                 />
                 <button
+                    id="btn-busqueda"
                     class="btn-buscar text-white px-4 flex items-center justify-center transition duration-300"
                     title="Buscar"
                 >
@@ -341,12 +343,142 @@ if (session && session.user) {
         .btn-favorito.activo {
             color: rgb(229, 5, 16);
         }
+
+        /* Estilos para el buscador */
+        .input-busqueda:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-buscar:hover {
+            background-color: rgb(90, 15, 15);
+        }
+
+        .btn-buscar:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(108, 19, 19, 0.3);
+        }
+
+        /* Animación para resultados de búsqueda */
+        .evento-card, .contenedor-evento, [data-evento] {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .evento-card[style*="display: none"], 
+        .contenedor-evento[style*="display: none"], 
+        [data-evento][style*="display: none"] {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        /* Mejoras visuales para sin resultados */
+        .cursos-sin-resultados {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            color: #666;
+            background-color: #fafafa;
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            margin: 40px auto;
+            max-width: 500px;
+        }
+
+        .icono-vacio {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+
+        .titulo-vacio {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #8a1538;
+            margin-bottom: 10px;
+        }
+
+        .texto-vacio {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Animaciones mejoradas para las tarjetas */
+        .card-evento {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-evento[style*="display: none"] {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            pointer-events: none;
+        }
+
+        /* Indicador visual de búsqueda activa */
+        .input-busqueda:not(:placeholder-shown) {
+            background-color: rgba(108, 19, 19, 0.05);
+            border-color: rgb(108, 19, 19);
+        }
+
+        /* Efecto de focus en el input */
+        .input-busqueda:focus {
+            box-shadow: 0 0 0 3px rgba(108, 19, 19, 0.1);
+        }
+
+        /* Responsive para dispositivos móviles */
+        @media (max-width: 768px) {
+            .flex.justify-end.my-3.absolute.right-16.bottom-1 {
+                position: relative;
+                right: auto;
+                bottom: auto;
+                justify-content: center;
+                margin: 20px 0;
+            }
+            
+            .contenedor-titulo {
+                height: auto;
+                padding: 40px 20px;
+            }
+            
+            .titulo-seccion {
+                font-size: 36px;
+            }
+        }
+
+        /* Mejoras para el estado de búsqueda activa */
+        .input-busqueda:not(:placeholder-shown) {
+            background-color: rgba(138, 21, 56, 0.05);
+            border-left: 3px solid rgb(138, 21, 56);
+        }
+
+        /* Animación de pulsación en el botón de búsqueda */
+        .btn-buscar:active {
+            transform: scale(0.95);
+        }
+
+        /* Estados de las tarjetas durante la búsqueda */
+        .card-evento.searching {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-evento.hidden {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            pointer-events: none;
+        }
+        
+        .card-evento.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
     </style>
     <script src="/js/filtros.js" defer is:inline></script>
 
     <script>
-        import { actions } from "astro:actions";
-        import Swal from "sweetalert2";
         // Funciones para manejar localStorage
         function cargarEventosDestacados() {
             try {
@@ -374,10 +506,9 @@ if (session && session.user) {
                 );
 
                 if (eventosEnStorage) {
-                    // Si hay una selección guardada, usarla SIEMPRE
-                    // Esto mantiene la selección temporal del usuario intacta
+                    // Si hay una selección guardada, usarla
                     console.log(
-                        "Cargando selección existente desde localStorage (mantiene selección temporal)",
+                        "Cargando selección existente desde localStorage",
                     );
                     return new Set(JSON.parse(eventosEnStorage));
                 } else {
@@ -426,83 +557,6 @@ if (session && session.user) {
             }
         }
 
-        // Función para depurar el estado de selección
-        function debugEstadoSeleccion(contexto = "Desconocido") {
-            const eventosDestacados =
-                (window as any).eventosDestacados || new Set();
-            const eventosArray = Array.from(eventosDestacados);
-
-            console.group(`🔍 Debug Estado Selección - ${contexto}`);
-            console.log(
-                "Cantidad de eventos seleccionados:",
-                eventosArray.length,
-            );
-            console.log("IDs de eventos seleccionados:", eventosArray);
-            console.log(
-                "localStorage:",
-                localStorage.getItem("eventosDestacadosTemp"),
-            );
-
-            // Verificar botones visibles
-            const botonesVisibles =
-                document.querySelectorAll(".destacar-boton");
-            console.log("Botones destacar visibles:", botonesVisibles.length);
-
-            botonesVisibles.forEach((boton, index) => {
-                const botonElement = boton as HTMLButtonElement;
-                const idEvento = botonElement.dataset.id;
-                const estaDestacado = boton.classList.contains("destacado");
-                const estaEnSet = eventosDestacados.has(idEvento);
-
-                if (estaDestacado !== estaEnSet) {
-                    console.warn(
-                        `⚠️ Inconsistencia en botón ${index + 1} (ID: ${idEvento}):`,
-                        `Visual: ${estaDestacado}, Set: ${estaEnSet}`,
-                    );
-                }
-            });
-
-            console.groupEnd();
-        }
-
-        // Función para verificar y mantener integridad de la selección
-        function verificarIntegridadSeleccion() {
-            const eventosDestacados =
-                (window as any).eventosDestacados || new Set();
-            const eventosArray = Array.from(eventosDestacados);
-
-            console.log(
-                "Verificando integridad de la selección:",
-                eventosArray,
-            );
-            debugEstadoSeleccion("Verificación de integridad");
-
-            // Actualizar localStorage con el estado actual
-            guardarEventosDestacados(eventosDestacados);
-
-            // Forzar actualización visual en todos los botones visibles
-            document.querySelectorAll(".destacar-boton").forEach((boton) => {
-                const botonElement = boton as HTMLButtonElement;
-                const idEvento = botonElement.dataset.id;
-                const estaSeleccionado = eventosDestacados.has(idEvento);
-
-                if (estaSeleccionado) {
-                    boton.classList.add("destacado");
-                    boton.classList.remove("bg-white/20", "text-white");
-                    boton.classList.add("bg-yellow-400", "text-yellow-900");
-                    botonElement.title = "Quitar de destacados";
-                } else {
-                    boton.classList.remove("destacado");
-                    boton.classList.remove("bg-yellow-400", "text-yellow-900");
-                    boton.classList.add("bg-white/20", "text-white");
-                    botonElement.title = "Marcar como destacado";
-                }
-            });
-
-            // Actualizar el botón de guardar
-            actualizarBotonGuardar();
-        }
-
         function guardarEventosDestacados(eventosSet: Set<any>) {
             try {
                 localStorage.setItem(
@@ -544,12 +598,7 @@ if (session && session.user) {
                         ? "No hay eventos seleccionados. Debes seleccionar exactamente 6 eventos."
                         : `Has seleccionado ${eventosDestacados.size} evento(s). Debes seleccionar exactamente 6 eventos.`;
 
-                Swal.fire({
-                    icon: "warning",
-                    title: "Validación de eventos",
-                    text: mensaje,
-                    confirmButtonText: "Aceptar",
-                });
+                alert(mensaje);
                 return;
             }
 
@@ -596,12 +645,7 @@ if (session && session.user) {
                 }
 
                 if (result.success) {
-                    Swal.fire({
-                        icon: "success",
-                        title: "¡Éxito!",
-                        text: result.message,
-                        confirmButtonText: "Aceptar",
-                    });
+                    alert(result.message);
 
                     // Limpiar la selección de localStorage
                     limpiarEventosDestacados();
@@ -652,11 +696,7 @@ if (session && session.user) {
                     error instanceof Error
                         ? error.message
                         : "Error desconocido";
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Error al guardar eventos favoritos: " + errorMessage,
-                });
+                alert("Error al guardar eventos favoritos: " + errorMessage);
 
                 // Restaurar el botón
                 const botonGuardar = document.getElementById(
@@ -737,42 +777,30 @@ if (session && session.user) {
 
             mensaje += "\n¿Deseas limpiar la selección y empezar de nuevo?";
 
-            Swal.fire({
-                title: "Eventos seleccionados",
-                text: mensaje,
-                icon: "info",
-                showCancelButton: true,
-                confirmButtonText: "Sí, limpiar",
-                cancelButtonText: "Cancelar",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Limpiar la selección
-                    limpiarEventosDestacados();
-                    (window as any).eventosDestacados.clear();
+            if (confirm(mensaje)) {
+                // Limpiar la selección
+                limpiarEventosDestacados();
+                (window as any).eventosDestacados.clear();
 
-                    document
-                        .querySelectorAll(".destacar-boton.destacado")
-                        .forEach((boton) => {
-                            boton.classList.remove(
-                                "destacado",
-                                "bg-yellow-400",
-                                "text-yellow-900",
-                            );
-                            boton.classList.add("bg-white/20", "text-white");
-                            (boton as HTMLButtonElement).title =
-                                "Marcar como destacado";
-                        });
-
-                    actualizarBotonGuardar();
-
-                    Swal.fire({
-                        icon: "success",
-                        title: "Listo",
-                        text: "Selección limpiada. Puedes empezar de nuevo.",
-                        confirmButtonText: "Aceptar",
+                // Actualizar visualmente todos los botones en la página actual
+                document
+                    .querySelectorAll(".destacar-boton.destacado")
+                    .forEach((boton) => {
+                        boton.classList.remove("destacado");
+                        boton.classList.remove(
+                            "bg-yellow-400",
+                            "text-yellow-900",
+                        );
+                        boton.classList.add("bg-white/20", "text-white");
+                        (boton as HTMLButtonElement).title =
+                            "Marcar como destacado";
                     });
-                }
-            });
+
+                actualizarBotonGuardar();
+                alert(
+                    "Selección limpiada. Puedes empezar a seleccionar eventos de nuevo.",
+                );
+            }
         }
 
         // Hacer las funciones disponibles globalmente
@@ -784,9 +812,6 @@ if (session && session.user) {
         (window as any).guardarEventosDestacados = guardarEventosDestacados;
         (window as any).limpiarEventosDestacados = limpiarEventosDestacados;
         (window as any).verEventosSeleccionados = verEventosSeleccionados;
-        (window as any).verificarIntegridadSeleccion =
-            verificarIntegridadSeleccion;
-        (window as any).debugEstadoSeleccion = debugEstadoSeleccion;
 
         // Inicializar cuando se carga la página
         document.addEventListener("DOMContentLoaded", async function () {
@@ -810,31 +835,187 @@ if (session && session.user) {
                 }),
             );
 
-            // Verificar integridad después de la inicialización
+            // Inicializar funcionalidad del buscador
             setTimeout(() => {
-                verificarIntegridadSeleccion();
-            }, 100);
+                inicializarBuscador();
+            }, 100); // Pequeño delay para asegurar que todo esté renderizado
         });
 
-        // Escuchar cambios de página para mantener integridad
-        window.addEventListener("popstate", function () {
-            setTimeout(() => {
-                if ((window as any).verificarIntegridadSeleccion) {
-                    (window as any).verificarIntegridadSeleccion();
-                }
-            }, 100);
-        });
+        // Función para inicializar el buscador
+        function inicializarBuscador() {
+            const inputBusqueda = document.getElementById('input-busqueda') as HTMLInputElement;
+            const btnBusqueda = document.getElementById('btn-busqueda') as HTMLButtonElement;
+            const contenedorEventos = document.querySelector('.contenedor') as HTMLElement;
+            const sinResultados = document.querySelector('.cursos-sin-resultados') as HTMLElement;
 
-        // Verificar integridad cuando se hace visible la página
-        document.addEventListener("visibilitychange", function () {
-            if (
-                !document.hidden &&
-                (window as any).verificarIntegridadSeleccion
-            ) {
-                setTimeout(() => {
-                    (window as any).verificarIntegridadSeleccion();
-                }, 100);
+            console.log('Inicializando buscador...');
+            console.log('Input encontrado:', !!inputBusqueda);
+            console.log('Botón encontrado:', !!btnBusqueda);
+            console.log('Sin resultados encontrado:', !!sinResultados);
+
+            if (!inputBusqueda || !btnBusqueda) {
+                console.error('Elementos del buscador no encontrados');
+                return;
             }
-        });
+
+            // Función para realizar la búsqueda
+            function realizarBusqueda() {
+                const termino = inputBusqueda.value.trim().toLowerCase();
+                
+                // Obtener todas las tarjetas de eventos
+                const tarjetasEventos = document.querySelectorAll('.card-evento');
+                const paginacion = document.querySelector('.paginacion') as HTMLElement;
+                let eventosVisibles = 0;
+
+                console.log(`Realizando búsqueda con término: "${termino}"`);
+                console.log(`Tarjetas encontradas: ${tarjetasEventos.length}`);
+
+                tarjetasEventos.forEach((tarjeta, index) => {
+                    const elemento = tarjeta as HTMLElement;
+                    
+                    // Añadir clase para animaciones
+                    elemento.classList.add('searching');
+                    
+                    // Buscar en diferentes elementos de la tarjeta
+                    const titulo = elemento.querySelector('.titulo')?.textContent?.toLowerCase() || '';
+                    const dataTitulo = elemento.getAttribute('data-titulo')?.toLowerCase() || '';
+                    const categoriaElemento = elemento.querySelector('.etiqueta.categoria')?.textContent?.toLowerCase() || '';
+                    const textoCompleto = elemento.textContent?.toLowerCase() || '';
+                    
+                    // Verificar si el término de búsqueda coincide
+                    const coincide = termino === '' || 
+                                   titulo.includes(termino) || 
+                                   dataTitulo.includes(termino) ||
+                                   categoriaElemento.includes(termino) ||
+                                   textoCompleto.includes(termino);
+
+                    if (coincide) {
+                        elemento.style.display = '';
+                        elemento.classList.remove('hidden');
+                        elemento.classList.add('visible');
+                        eventosVisibles++;
+                        console.log(`Evento ${index + 1} visible: "${titulo}"`);
+                    } else {
+                        elemento.style.display = 'none';
+                        elemento.classList.remove('visible');
+                        elemento.classList.add('hidden');
+                        console.log(`Evento ${index + 1} oculto: "${titulo}"`);
+                    }
+                    
+                    // Remover clase de searching después de un momento
+                    setTimeout(() => {
+                        elemento.classList.remove('searching');
+                    }, 400);
+                });
+
+                console.log(`Eventos visibles después de búsqueda: ${eventosVisibles}`);
+
+                // Mostrar/ocultar paginación según si hay búsqueda activa
+                if (paginacion) {
+                    if (termino !== '') {
+                        paginacion.style.display = 'none';
+                    } else {
+                        paginacion.style.display = '';
+                    }
+                }
+
+                // Mostrar/ocultar mensaje de "sin resultados"
+                if (sinResultados) {
+                    if (eventosVisibles === 0 && termino !== '') {
+                        sinResultados.style.display = 'flex';
+                    } else {
+                        sinResultados.style.display = 'none';
+                    }
+                }
+
+                // Actualizar URL con el término de búsqueda
+                if (termino) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('buscar', termino);
+                    window.history.replaceState({}, '', url.toString());
+                } else {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('buscar');
+                    window.history.replaceState({}, '', url.toString());
+                }
+            }
+
+            // Función para limpiar la búsqueda
+            function limpiarBusqueda() {
+                inputBusqueda.value = '';
+                realizarBusqueda();
+                inputBusqueda.focus();
+            }
+
+            // Event listeners
+            btnBusqueda.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Botón de búsqueda clickeado');
+                realizarBusqueda();
+            });
+            
+            inputBusqueda.addEventListener('keyup', (e) => {
+                console.log(`Tecla presionada: ${e.key}`);
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    console.log('Enter presionado, realizando búsqueda');
+                    realizarBusqueda();
+                } else if (e.key === 'Escape') {
+                    console.log('Escape presionado, limpiando búsqueda');
+                    limpiarBusqueda();
+                } else {
+                    // Búsqueda en tiempo real con debounce
+                    clearTimeout((window as any).busquedaTimeout);
+                    (window as any).busquedaTimeout = setTimeout(() => {
+                        console.log('Búsqueda automática tras escribir');
+                        realizarBusqueda();
+                    }, 300);
+                }
+            });
+
+            inputBusqueda.addEventListener('input', () => {
+                console.log(`Input cambiado: "${inputBusqueda.value}"`);
+                // Si el input está vacío, limpiar inmediatamente
+                if (inputBusqueda.value.trim() === '') {
+                    console.log('Input vacío, limpiando búsqueda');
+                    limpiarBusqueda();
+                }
+            });
+
+            // Cargar término de búsqueda desde URL si existe
+            const urlParams = new URLSearchParams(window.location.search);
+            const terminoBusqueda = urlParams.get('buscar');
+            if (terminoBusqueda) {
+                console.log(`Cargando término desde URL: "${terminoBusqueda}"`);
+                inputBusqueda.value = terminoBusqueda;
+                setTimeout(realizarBusqueda, 100); // Pequeño delay para asegurar que el DOM esté listo
+            }
+
+            // Hacer funciones disponibles globalmente
+            (window as any).realizarBusqueda = realizarBusqueda;
+            (window as any).limpiarBusqueda = limpiarBusqueda;
+            
+            // Función de prueba para depuración
+            (window as any).probarBuscador = () => {
+                console.log('=== PRUEBA DEL BUSCADOR ===');
+                console.log('Input existe:', !!inputBusqueda);
+                console.log('Botón existe:', !!btnBusqueda);
+                console.log('Valor actual del input:', inputBusqueda.value);
+                
+                const tarjetas = document.querySelectorAll('.card-evento');
+                console.log('Tarjetas encontradas:', tarjetas.length);
+                
+                tarjetas.forEach((tarjeta, i) => {
+                    const titulo = tarjeta.querySelector('.titulo')?.textContent;
+                    console.log(`Tarjeta ${i + 1}: "${titulo}"`);
+                });
+                
+                console.log('Para probar, escribe: probarBuscador() en la consola');
+                return 'Prueba completada. Revisa la consola para detalles.';
+            };
+            
+            console.log('Buscador inicializado correctamente');
+            console.log('Para probar el buscador, escribe "probarBuscador()" en la consola');
+        }
     </script>
 </Layout>
