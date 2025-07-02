@@ -28,6 +28,9 @@ const {
 const eventosDestacados = await prisma.eventos.findMany({
     where: {
         es_destacado: true,
+        estado_evento: {
+            not: "FINALIZADO"
+        }
     },
     take: 6,
     orderBy: {

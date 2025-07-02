@@ -8,7 +8,6 @@ import { actions } from "astro:actions";
 import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
 import ContenedorEventos from "../components/ContenedorEvento.astro";
-import Footer from "../components/Footer.astro";
 
 // Extraer filtros desde la URL
 const url = new URL(Astro.request.url);
@@ -34,13 +33,6 @@ if (session && session.user) {
         esAdmin = true;
     }
 }
-
-const id_fac = "a1b2c3d4-e5f6-4a7b-8c9d-1a1a1a1a1a1a";
-
-const { data: pagina } = await Astro.callAction(
-    actions.getPaginaSeleccionada,
-    {},
-);
 ---
 
 <Layout>
@@ -193,16 +185,6 @@ const { data: pagina } = await Astro.callAction(
             <p class="texto-vacio">Prueba buscando otro evento</p>
         </div>
     </section>
-
-        <div class="h-15 bg-white"></div>
-    <Footer
-        Twitter={pagina?.facultad?.twit_fac}
-        Facebook={pagina?.facultad?.face_fac}
-        Instagram={pagina?.facultad?.inst_fac}
-        Direccion={pagina?.facultad?.dir_fac}
-        Correo={pagina?.facultad?.cor_fac}
-        Solicitud={pagina?.facultad?.enl_sol}
-    />
 
     <style>
         .seccion-principal {
@@ -363,6 +345,8 @@ const { data: pagina } = await Astro.callAction(
     <script src="/js/filtros.js" defer is:inline></script>
 
     <script>
+        import { actions } from "astro:actions";
+        import Swal from "sweetalert2";
         // Funciones para manejar localStorage
         function cargarEventosDestacados() {
             try {
@@ -390,9 +374,10 @@ const { data: pagina } = await Astro.callAction(
                 );
 
                 if (eventosEnStorage) {
-                    // Si hay una selección guardada, usarla
+                    // Si hay una selección guardada, usarla SIEMPRE
+                    // Esto mantiene la selección temporal del usuario intacta
                     console.log(
-                        "Cargando selección existente desde localStorage",
+                        "Cargando selección existente desde localStorage (mantiene selección temporal)",
                     );
                     return new Set(JSON.parse(eventosEnStorage));
                 } else {
@@ -441,6 +426,83 @@ const { data: pagina } = await Astro.callAction(
             }
         }
 
+        // Función para depurar el estado de selección
+        function debugEstadoSeleccion(contexto = "Desconocido") {
+            const eventosDestacados =
+                (window as any).eventosDestacados || new Set();
+            const eventosArray = Array.from(eventosDestacados);
+
+            console.group(`🔍 Debug Estado Selección - ${contexto}`);
+            console.log(
+                "Cantidad de eventos seleccionados:",
+                eventosArray.length,
+            );
+            console.log("IDs de eventos seleccionados:", eventosArray);
+            console.log(
+                "localStorage:",
+                localStorage.getItem("eventosDestacadosTemp"),
+            );
+
+            // Verificar botones visibles
+            const botonesVisibles =
+                document.querySelectorAll(".destacar-boton");
+            console.log("Botones destacar visibles:", botonesVisibles.length);
+
+            botonesVisibles.forEach((boton, index) => {
+                const botonElement = boton as HTMLButtonElement;
+                const idEvento = botonElement.dataset.id;
+                const estaDestacado = boton.classList.contains("destacado");
+                const estaEnSet = eventosDestacados.has(idEvento);
+
+                if (estaDestacado !== estaEnSet) {
+                    console.warn(
+                        `⚠️ Inconsistencia en botón ${index + 1} (ID: ${idEvento}):`,
+                        `Visual: ${estaDestacado}, Set: ${estaEnSet}`,
+                    );
+                }
+            });
+
+            console.groupEnd();
+        }
+
+        // Función para verificar y mantener integridad de la selección
+        function verificarIntegridadSeleccion() {
+            const eventosDestacados =
+                (window as any).eventosDestacados || new Set();
+            const eventosArray = Array.from(eventosDestacados);
+
+            console.log(
+                "Verificando integridad de la selección:",
+                eventosArray,
+            );
+            debugEstadoSeleccion("Verificación de integridad");
+
+            // Actualizar localStorage con el estado actual
+            guardarEventosDestacados(eventosDestacados);
+
+            // Forzar actualización visual en todos los botones visibles
+            document.querySelectorAll(".destacar-boton").forEach((boton) => {
+                const botonElement = boton as HTMLButtonElement;
+                const idEvento = botonElement.dataset.id;
+                const estaSeleccionado = eventosDestacados.has(idEvento);
+
+                if (estaSeleccionado) {
+                    boton.classList.add("destacado");
+                    boton.classList.remove("bg-white/20", "text-white");
+                    boton.classList.add("bg-yellow-400", "text-yellow-900");
+                    botonElement.title = "Quitar de destacados";
+                } else {
+                    boton.classList.remove("destacado");
+                    boton.classList.remove("bg-yellow-400", "text-yellow-900");
+                    boton.classList.add("bg-white/20", "text-white");
+                    botonElement.title = "Marcar como destacado";
+                }
+            });
+
+            // Actualizar el botón de guardar
+            actualizarBotonGuardar();
+        }
+
         function guardarEventosDestacados(eventosSet: Set<any>) {
             try {
                 localStorage.setItem(
@@ -482,7 +544,12 @@ const { data: pagina } = await Astro.callAction(
                         ? "No hay eventos seleccionados. Debes seleccionar exactamente 6 eventos."
                         : `Has seleccionado ${eventosDestacados.size} evento(s). Debes seleccionar exactamente 6 eventos.`;
 
-                alert(mensaje);
+                Swal.fire({
+                    icon: "warning",
+                    title: "Validación de eventos",
+                    text: mensaje,
+                    confirmButtonText: "Aceptar",
+                });
                 return;
             }
 
@@ -529,7 +596,12 @@ const { data: pagina } = await Astro.callAction(
                 }
 
                 if (result.success) {
-                    alert(result.message);
+                    Swal.fire({
+                        icon: "success",
+                        title: "¡Éxito!",
+                        text: result.message,
+                        confirmButtonText: "Aceptar",
+                    });
 
                     // Limpiar la selección de localStorage
                     limpiarEventosDestacados();
@@ -580,7 +652,11 @@ const { data: pagina } = await Astro.callAction(
                     error instanceof Error
                         ? error.message
                         : "Error desconocido";
-                alert("Error al guardar eventos favoritos: " + errorMessage);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Error al guardar eventos favoritos: " + errorMessage,
+                });
 
                 // Restaurar el botón
                 const botonGuardar = document.getElementById(
@@ -661,30 +737,42 @@ const { data: pagina } = await Astro.callAction(
 
             mensaje += "\n¿Deseas limpiar la selección y empezar de nuevo?";
 
-            if (confirm(mensaje)) {
-                // Limpiar la selección
-                limpiarEventosDestacados();
-                (window as any).eventosDestacados.clear();
+            Swal.fire({
+                title: "Eventos seleccionados",
+                text: mensaje,
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Sí, limpiar",
+                cancelButtonText: "Cancelar",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Limpiar la selección
+                    limpiarEventosDestacados();
+                    (window as any).eventosDestacados.clear();
 
-                // Actualizar visualmente todos los botones en la página actual
-                document
-                    .querySelectorAll(".destacar-boton.destacado")
-                    .forEach((boton) => {
-                        boton.classList.remove("destacado");
-                        boton.classList.remove(
-                            "bg-yellow-400",
-                            "text-yellow-900",
-                        );
-                        boton.classList.add("bg-white/20", "text-white");
-                        (boton as HTMLButtonElement).title =
-                            "Marcar como destacado";
+                    document
+                        .querySelectorAll(".destacar-boton.destacado")
+                        .forEach((boton) => {
+                            boton.classList.remove(
+                                "destacado",
+                                "bg-yellow-400",
+                                "text-yellow-900",
+                            );
+                            boton.classList.add("bg-white/20", "text-white");
+                            (boton as HTMLButtonElement).title =
+                                "Marcar como destacado";
+                        });
+
+                    actualizarBotonGuardar();
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Listo",
+                        text: "Selección limpiada. Puedes empezar de nuevo.",
+                        confirmButtonText: "Aceptar",
                     });
-
-                actualizarBotonGuardar();
-                alert(
-                    "Selección limpiada. Puedes empezar a seleccionar eventos de nuevo.",
-                );
-            }
+                }
+            });
         }
 
         // Hacer las funciones disponibles globalmente
@@ -696,6 +784,9 @@ const { data: pagina } = await Astro.callAction(
         (window as any).guardarEventosDestacados = guardarEventosDestacados;
         (window as any).limpiarEventosDestacados = limpiarEventosDestacados;
         (window as any).verEventosSeleccionados = verEventosSeleccionados;
+        (window as any).verificarIntegridadSeleccion =
+            verificarIntegridadSeleccion;
+        (window as any).debugEstadoSeleccion = debugEstadoSeleccion;
 
         // Inicializar cuando se carga la página
         document.addEventListener("DOMContentLoaded", async function () {
@@ -718,6 +809,32 @@ const { data: pagina } = await Astro.callAction(
                     detail: { eventosDestacados: eventosDestacadosGuardados },
                 }),
             );
+
+            // Verificar integridad después de la inicialización
+            setTimeout(() => {
+                verificarIntegridadSeleccion();
+            }, 100);
+        });
+
+        // Escuchar cambios de página para mantener integridad
+        window.addEventListener("popstate", function () {
+            setTimeout(() => {
+                if ((window as any).verificarIntegridadSeleccion) {
+                    (window as any).verificarIntegridadSeleccion();
+                }
+            }, 100);
+        });
+
+        // Verificar integridad cuando se hace visible la página
+        document.addEventListener("visibilitychange", function () {
+            if (
+                !document.hidden &&
+                (window as any).verificarIntegridadSeleccion
+            ) {
+                setTimeout(() => {
+                    (window as any).verificarIntegridadSeleccion();
+                }, 100);
+            }
         });
     </script>
 </Layout>

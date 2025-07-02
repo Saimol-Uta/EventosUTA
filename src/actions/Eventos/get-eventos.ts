@@ -10,8 +10,13 @@ export const getEventos = defineAction({
     async handler(input) {
         try {
             const whereClause = input.categoria
-                ? { id_cat_eve: input.categoria }
-                : {};
+                ? { 
+                    id_cat_eve: input.categoria,
+                    estado_evento: { not: "FINALIZADO" }
+                  }
+                : { 
+                    estado_evento: { not: "FINALIZADO" }
+                  };
             const eventos = await prisma.eventos.findMany({
                 where: whereClause,
                 include: {

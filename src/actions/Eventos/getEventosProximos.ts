@@ -9,6 +9,9 @@ export const getEventosProximos = defineAction({
           fec_ini_eve: {
             gt: new Date(), 
           },
+          estado_evento: {
+            not: "FINALIZADO"
+          }
         },
         orderBy: {
           fec_ini_eve: 'asc',
