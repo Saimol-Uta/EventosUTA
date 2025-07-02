@@ -31,17 +31,22 @@ export const crearCategoria = defineAction({
     }),
     handler: async (input) => {
         try {
+
+            const dataToCreate = {
+                nom_cat: input.nom_cat,
+                des_cat: input.des_cat,
+                requiere_puntaje: input.requiere_puntaje,
+                requiere_asistencia: input.requiere_asistencia,
+                brinda_certificado: input.brinda_certificado,
+                // Si requiere puntaje, usa el del input; si no, usa el mínimo permitido por la BD (7)
+                pun_apr_cat: input.requiere_puntaje ? input.pun_apr_cat : 7,
+                // Si requiere asistencia, usa la del input; si no, usa el mínimo permitido por la BD (70)
+                asi_cat: input.requiere_asistencia ? input.asi_cat : 70,
+            };
+
             // Crear la nueva categoría
             const nuevaCategoria = await prisma.categorias_eventos.create({
-                data: {
-                    nom_cat: input.nom_cat,
-                    des_cat: input.des_cat,
-                    pun_apr_cat: input.pun_apr_cat,
-                    asi_cat: input.asi_cat,
-                    requiere_puntaje: input.requiere_puntaje,
-                    requiere_asistencia: input.requiere_asistencia,
-                    brinda_certificado: input.brinda_certificado
-                }
+                data: dataToCreate
             });
 
             const CategoriaNuevoPlano = JSON.parse(JSON.stringify(nuevaCategoria));
