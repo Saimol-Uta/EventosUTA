@@ -60,6 +60,7 @@
 }
 
 .boton-nuevo-registro {
+    cursor: pointer;
     font-weight: 500;
 }
 
