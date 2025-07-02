@@ -363,6 +363,66 @@ if (session && session.user) {
             return new Set();
         }
 
+        // Nueva función para cargar y sincronizar eventos con la BD
+        async function cargarYSincronizarEventosDestacados() {
+            try {
+                // Primero intentar cargar desde localStorage
+                const eventosEnStorage = localStorage.getItem(
+                    "eventosDestacadosTemp",
+                );
+
+                if (eventosEnStorage) {
+                    // Si hay una selección guardada, usarla
+                    console.log(
+                        "Cargando selección existente desde localStorage",
+                    );
+                    return new Set(JSON.parse(eventosEnStorage));
+                } else {
+                    // Si no hay selección guardada, obtener eventos ya destacados desde la BD
+                    console.log(
+                        "No hay selección guardada. Sincronizando con BD...",
+                    );
+
+                    const response = await fetch("/api/obtenerDestacados");
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.eventosDestacados) {
+                            const eventosDestacadosBD = new Set(
+                                data.eventosDestacados,
+                            );
+
+                            // Guardar en localStorage para mantener sincronización
+                            localStorage.setItem(
+                                "eventosDestacadosTemp",
+                                JSON.stringify(Array.from(eventosDestacadosBD)),
+                            );
+
+                            console.log(
+                                "Eventos sincronizados desde BD:",
+                                Array.from(eventosDestacadosBD),
+                            );
+                            return eventosDestacadosBD;
+                        }
+                    } else {
+                        console.error(
+                            "Error al obtener eventos destacados de la BD:",
+                            response.status,
+                        );
+                    }
+
+                    // Fallback: retornar set vacío
+                    return new Set();
+                }
+            } catch (error) {
+                console.error(
+                    "Error al cargar y sincronizar eventos destacados:",
+                    error,
+                );
+                // Fallback: intentar cargar solo desde localStorage
+                return cargarEventosDestacados();
+            }
+        }
+
         function guardarEventosDestacados(eventosSet: Set<any>) {
             try {
                 localStorage.setItem(
@@ -391,6 +451,12 @@ if (session && session.user) {
         async function guardarFavoritos() {
             const eventosDestacados =
                 (window as any).eventosDestacados || new Set();
+
+            console.log(
+                "Intentando guardar eventos. Cantidad:",
+                eventosDestacados.size,
+            );
+            console.log("Eventos a guardar:", Array.from(eventosDestacados));
 
             if (eventosDestacados.size !== 6) {
                 const mensaje =
@@ -430,7 +496,14 @@ if (session && session.user) {
 
                 const result = await response.json();
 
+                console.log("Respuesta del servidor:", {
+                    status: response.status,
+                    success: result.success,
+                    message: result.message,
+                });
+
                 if (!response.ok) {
+                    // El servidor devolvió un error, usar el mensaje específico
                     throw new Error(
                         result.message ||
                             `Error en la respuesta: ${response.status}`,
@@ -532,11 +605,11 @@ if (session && session.user) {
                     } else if (cantidadSeleccionada < 6) {
                         mensajeValidacion.style.display = "block";
                         mensajeValidacion.style.color = "#ff6b35";
-                        mensajeValidacion.textContent = `Selecciona ${6 - cantidadSeleccionada} evento(s) más para continuar.`;
+                        mensajeValidacion.innerHTML = `Selecciona ${6 - cantidadSeleccionada} evento(s) más para continuar. <button onclick="verEventosSeleccionados()" style="background:none;border:none;color:#ff6b35;text-decoration:underline;cursor:pointer;font-size:inherit;">Ver eventos seleccionados</button>`;
                     } else if (cantidadSeleccionada > 6) {
                         mensajeValidacion.style.display = "block";
                         mensajeValidacion.style.color = "#ff6b35";
-                        mensajeValidacion.textContent = `Has seleccionado ${cantidadSeleccionada - 6} evento(s) de más. Debes tener exactamente 6.`;
+                        mensajeValidacion.innerHTML = `Has seleccionado ${cantidadSeleccionada - 6} evento(s) de más. Debes tener exactamente 6. <button onclick="verEventosSeleccionados()" style="background:none;border:none;color:#ff6b35;text-decoration:underline;cursor:pointer;font-size:inherit;">Ver eventos seleccionados</button>`;
                     } else {
                         mensajeValidacion.style.display = "block";
                         mensajeValidacion.style.color = "#28a745";
@@ -547,20 +620,81 @@ if (session && session.user) {
             }
         }
 
+        // Función para mostrar los eventos seleccionados
+        function verEventosSeleccionados() {
+            const eventosDestacados =
+                (window as any).eventosDestacados || new Set();
+            const eventosArray = Array.from(eventosDestacados);
+
+            if (eventosArray.length === 0) {
+                alert("No hay eventos seleccionados.");
+                return;
+            }
+
+            let mensaje = `Eventos seleccionados (${eventosArray.length}/6):\n\n`;
+            eventosArray.forEach((idEvento, index) => {
+                mensaje += `${index + 1}. ID: ${idEvento}\n`;
+            });
+
+            mensaje += "\n¿Deseas limpiar la selección y empezar de nuevo?";
+
+            if (confirm(mensaje)) {
+                // Limpiar la selección
+                limpiarEventosDestacados();
+                (window as any).eventosDestacados.clear();
+
+                // Actualizar visualmente todos los botones en la página actual
+                document
+                    .querySelectorAll(".destacar-boton.destacado")
+                    .forEach((boton) => {
+                        boton.classList.remove("destacado");
+                        boton.classList.remove(
+                            "bg-yellow-400",
+                            "text-yellow-900",
+                        );
+                        boton.classList.add("bg-white/20", "text-white");
+                        (boton as HTMLButtonElement).title =
+                            "Marcar como destacado";
+                    });
+
+                actualizarBotonGuardar();
+                alert(
+                    "Selección limpiada. Puedes empezar a seleccionar eventos de nuevo.",
+                );
+            }
+        }
+
         // Hacer las funciones disponibles globalmente
         (window as any).guardarFavoritos = guardarFavoritos;
         (window as any).actualizarBotonGuardar = actualizarBotonGuardar;
         (window as any).cargarEventosDestacados = cargarEventosDestacados;
+        (window as any).cargarYSincronizarEventosDestacados =
+            cargarYSincronizarEventosDestacados;
         (window as any).guardarEventosDestacados = guardarEventosDestacados;
         (window as any).limpiarEventosDestacados = limpiarEventosDestacados;
+        (window as any).verEventosSeleccionados = verEventosSeleccionados;
 
         // Inicializar cuando se carga la página
-        document.addEventListener("DOMContentLoaded", function () {
-            // Cargar eventos destacados desde localStorage
-            const eventosDestacadosGuardados = cargarEventosDestacados();
+        document.addEventListener("DOMContentLoaded", async function () {
+            // Cargar y sincronizar eventos destacados desde localStorage y BD
+            const eventosDestacadosGuardados =
+                await cargarYSincronizarEventosDestacados();
             (window as any).eventosDestacados = eventosDestacadosGuardados;
 
+            // Debug: mostrar lo que se cargó
+            console.log(
+                "Estado inicial cargado y sincronizado:",
+                Array.from(eventosDestacadosGuardados),
+            );
+
             actualizarBotonGuardar();
+
+            // Enviar evento personalizado para notificar que la inicialización está completa
+            window.dispatchEvent(
+                new CustomEvent("eventosDestacadosInicialized", {
+                    detail: { eventosDestacados: eventosDestacadosGuardados },
+                }),
+            );
         });
     </script>
 </Layout>

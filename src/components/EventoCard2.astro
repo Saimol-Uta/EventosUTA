@@ -264,19 +264,26 @@ const {
         );
     }
 
-    // Inicializar cuando se carga el DOM
-    document.addEventListener("DOMContentLoaded", function () {
-        // Cargar eventos destacados desde localStorage usando función global o local como fallback
-        const funcionCargar =
-            (window as any).cargarEventosDestacados ||
-            cargarEventosDestacadosLocal;
-        const eventosDestacadosGuardados = funcionCargar();
-        (window as any).eventosDestacados = eventosDestacadosGuardados;
-
+    // Función separada para actualizar la visualización de los botones
+    function actualizarBotonesVisualmente() {
         // Agregar event listeners a todos los botones de destacar
         const botonesDestacar = document.querySelectorAll(".destacar-boton");
+        console.log(
+            "EventoCard2: Inicializando",
+            botonesDestacar.length,
+            "botones destacar",
+        );
+        console.log(
+            "EventoCard2: Estado actual eventosDestacados:",
+            Array.from((window as any).eventosDestacados || new Set()),
+        );
+
         botonesDestacar.forEach((boton) => {
-            boton.addEventListener("click", manejarClicDestacar);
+            // Evitar agregar el listener múltiples veces
+            if (!boton.hasAttribute("data-listener-added")) {
+                boton.addEventListener("click", manejarClicDestacar);
+                boton.setAttribute("data-listener-added", "true");
+            }
 
             // Verificar el estado del botón
             const botonElement = boton as HTMLButtonElement;
@@ -287,8 +294,12 @@ const {
                 window as any
             ).eventosDestacados.has(idEvento);
 
-            // Verificar si ya está destacado en la base de datos
+            // Verificar si ya está destacado en la base de datos (por el estilo CSS inicial)
             const yaDestacadoEnBD = boton.classList.contains("bg-yellow-400");
+
+            console.log(
+                `EventoCard2: Evento ${idEvento} - enSeleccion: ${estaEnSeleccionTemporal}, enBD: ${yaDestacadoEnBD}`,
+            );
 
             // Si está en la selección temporal, marcarlo visualmente como seleccionado
             if (estaEnSeleccionTemporal) {
@@ -297,12 +308,24 @@ const {
                 boton.classList.add("bg-yellow-400", "text-yellow-900");
                 (boton as HTMLButtonElement).title = "Quitar de destacados";
             }
-            // Si ya está destacado en la BD pero no en la selección temporal, mantener el estado de BD
-            else if (yaDestacadoEnBD) {
-                // Este evento ya está destacado en la BD, no lo agregamos a la selección temporal
-                // pero mantenemos su apariencia visual
-                (boton as HTMLButtonElement).title =
-                    "Ya destacado en la base de datos";
+            // Si ya está destacado en la BD pero NO está en la selección temporal,
+            // significa que se acaba de sincronizar y debe agregarse a la selección
+            else if (yaDestacadoEnBD && !estaEnSeleccionTemporal) {
+                // Agregar a la selección temporal para mantener sincronización
+                (window as any).eventosDestacados.add(idEvento);
+
+                // Guardar en localStorage
+                const funcionGuardar =
+                    (window as any).guardarEventosDestacados ||
+                    guardarEventosDestacadosLocal;
+                funcionGuardar((window as any).eventosDestacados);
+
+                boton.classList.add("destacado");
+                (boton as HTMLButtonElement).title = "Quitar de destacados";
+
+                console.log(
+                    `EventoCard2: Evento ${idEvento} sincronizado desde BD a selección temporal`,
+                );
             }
         });
 
@@ -310,6 +333,56 @@ const {
         if ((window as any).actualizarBotonGuardar) {
             (window as any).actualizarBotonGuardar();
         }
+    }
+
+    // Función para inicializar botones destacar
+    function inicializarBotonesDestacar() {
+        // Si no existe eventosDestacados, inicializarlo desde localStorage
+        if (!(window as any).eventosDestacados) {
+            const funcionCargar =
+                (window as any).cargarYSincronizarEventosDestacados ||
+                (window as any).cargarEventosDestacados ||
+                cargarEventosDestacadosLocal;
+
+            // Si tenemos la función de sincronización, usarla (es async)
+            if ((window as any).cargarYSincronizarEventosDestacados) {
+                (window as any)
+                    .cargarYSincronizarEventosDestacados()
+                    .then((eventosSet: Set<string>) => {
+                        (window as any).eventosDestacados = eventosSet;
+                        actualizarBotonesVisualmente();
+                    });
+                return; // Salir temprano, la actualización se hará en el callback
+            } else {
+                // Fallback a función síncrona
+                (window as any).eventosDestacados = funcionCargar();
+            }
+        }
+
+        actualizarBotonesVisualmente();
+    }
+
+    // Inicializar cuando se carga el DOM
+    document.addEventListener("DOMContentLoaded", function () {
+        // Escuchar el evento de inicialización desde cursosCompleto.astro
+        window.addEventListener("eventosDestacadosInicialized", function () {
+            console.log("EventoCard2: Recibido evento de inicialización");
+            inicializarBotonesDestacar();
+        });
+
+        // Fallback con timeout en caso de que el evento no llegue
+        setTimeout(() => {
+            if (
+                document.querySelectorAll(
+                    ".destacar-boton[data-listener-added]",
+                ).length === 0
+            ) {
+                console.log(
+                    "EventoCard2: Fallback timeout - inicializando botones",
+                );
+                inicializarBotonesDestacar();
+            }
+        }, 200);
     });
 </script>
 
