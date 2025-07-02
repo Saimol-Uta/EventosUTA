@@ -66,6 +66,9 @@ model eventos {
   asignaciones       asignaciones?      @relation(fields: [id_asi_eve], references: [id_asi], onDelete: NoAction, onUpdate: NoAction)
   categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
   inscripciones      inscripciones[]
+
+  @@index([dur_eve], map: "idx_eventos_on_dur_eve")
+  @@index([nom_eve], map: "idx_eventos_on_nom_eve")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -122,6 +125,8 @@ model usuarios {
   cambios       cambios[]
   inscripciones inscripciones[]
   carreras      carreras?       @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([id_car_per], map: "idx_usuarios_on_id_car_per")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -170,9 +175,10 @@ model facultades {
   inst_fac  String?
   res_fac   String?
   res_img   String?
-  tit_caru1 String?    @db.VarChar(250)
-  tit_caru2 String?    @db.VarChar(250)
-  tit_caru3 String?    @db.VarChar(250)
+  est_fac   Boolean    @default(false)
+  tit_caru1 String?    @db.VarChar(30)
+  tit_caru2 String?    @db.VarChar(30)
+  tit_caru3 String?    @db.VarChar(30)
   des_caru1 String?
   des_caru2 String?
   des_caru3 String?
@@ -181,6 +187,5 @@ model facultades {
   img_caru3 String?
   img_log   String?
   enl_sol   String?
-  est_fac   Boolean    @default(false)
   carreras  carreras[]
 }
