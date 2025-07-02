@@ -94,11 +94,41 @@ if (session && session.user) {
                 <div class="bg-gray-50 border border-gray-200 rounded-2xl shadow-lg p-4 text-gray-700 hover:shadow-xl transition-shadow duration-300">
                   <p class="mb-1">
                     <strong class="text-gray-900">Estudiante:</strong>{" "}
-                    {c.usuarios.nom_usu1}
+                    {[
+                      c.usuarios.nom_usu1,
+                      c.usuarios.nom_usu2,
+                      c.usuarios.ape_usu1,
+                      c.usuarios.ape_usu2
+                    ].filter(Boolean).join(" ")}
                   </p>
                   <p>
                     <strong class="text-gray-900">Evento:</strong>{" "}
                     {c.eventos.nom_eve}
+                  </p>
+                  <p>
+                    <strong class="text-gray-900">Estado:</strong>{" "}
+                    <span
+                      class="font-medium"
+                      style={
+                        c.est_ins === "Rechazado"
+                          ? "color: rgb(108, 19, 19);"
+                          : c.est_ins === "Aprobado"
+                          ? "color: #09632a;"
+                          : (c.est_ins === "DPendiente" || c.est_ins === "FPendiente")
+                          ? "color: #916500;"
+                          : "color: #64748b;"
+                      }
+                    >
+                      {c.est_ins === "DPendiente"
+                        ? "Documentación pendiente"
+                        : c.est_ins === "FPendiente"
+                        ? "Facturación pendiente"
+                        : c.est_ins === "Aprobado"
+                        ? "Aprobado"
+                        : c.est_ins === "Rechazado"
+                        ? "Rechazado"
+                        : "Inscrito"}
+                    </span>
                   </p>
                 </div>
               ))
@@ -127,7 +157,13 @@ if (session && session.user) {
                   </p>
                   <p>
                     <strong class="text-gray-900">Fecha de inicio:</strong>{" "}
-                    {e.fec_ini_eve}
+                    {e?.fec_ini_eve
+                    ? new Date(e?.fec_ini_eve).toLocaleDateString("es-EC", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric"
+                    })
+                    : "Sin fecha"}
                   </p>
                 </div>
               ))
