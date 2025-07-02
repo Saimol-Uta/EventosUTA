@@ -7,13 +7,17 @@ export const updateParticipante = defineAction({
     input: z.object({
         inscripcionId: z.string().min(1, "ID de inscripción requerido"),
         // Los campos ahora son opcionales y pueden estar vacíos
-        asistencia: z.string().optional().transform(val => {
-            if (!val || val === "") return null;
+        asistencia: z.string().optional().nullable().transform(val => {
+            if (val === undefined || val === null || val === "") {
+                return null;
+            }
             const num = parseInt(val);
             return isNaN(num) ? null : Math.max(0, Math.min(100, num));
         }),
-        nota: z.string().optional().transform(val => {
-            if (!val || val === "") return null;
+        nota: z.string().optional().nullable().transform(val => {
+            if (val === undefined || val === null || val === "") {
+                return null;
+            }
             const num = parseFloat(val);
             return isNaN(num) ? null : Math.max(0, Math.min(10, num));
         }),
@@ -100,6 +104,7 @@ export const updateParticipante = defineAction({
                         console.log(`✅ Cumple asistencia: ${asiPar}% >= ${porcentajeAsistenciaMinimo}%`);
                     }
                 } else {
+                    cumpleAsistencia = true; // No se requiere, se considera cumplido
                     console.log("ℹ️ No requiere asistencia");
                 }
 
@@ -115,6 +120,7 @@ export const updateParticipante = defineAction({
                         console.log(`✅ Cumple puntaje: ${notPar} >= ${puntajeAprobacion}`);
                     }
                 } else {
+                    cumplePuntaje = true; // No se requiere, se considera cumplido
                     console.log("ℹ️ No requiere puntaje");
                 }
 
@@ -126,12 +132,26 @@ export const updateParticipante = defineAction({
                 if (cumpleAsistencia && cumplePuntaje) {
                     console.log("✅ RESULTADO: APROBADA (cumple ambos requisitos)");
                     return "APROBADA";
-                } else {
-                    const motivos = [];
-                    if (!cumpleAsistencia) motivos.push("asistencia insuficiente");
-                    if (!cumplePuntaje) motivos.push("puntaje insuficiente");
-                    console.log(`❌ RESULTADO: REPROBADA (${motivos.join(", ")})`);
+                } else if (requiereAsistencia && !cumpleAsistencia) {
+                     // If attendance is required but not met, it's REPROBADA
+                     console.log("❌ RESULTADO: REPROBADA (asistencia insuficiente)");
+                     return "REPROBADA";
+                } else if (requierePuntaje && !cumplePuntaje) {
+                    // If score is required but not met, it's REPROBADA
+                    console.log("❌ RESULTADO: REPROBADA (puntaje insuficiente)");
                     return "REPROBADA";
+                } else if (cumpleAsistencia && requiereAsistencia && !requierePuntaje) {
+                    // If only attendance is required and met, and no score is required
+                    console.log("✅ RESULTADO: ASISTIO (solo requiere asistencia y cumple)");
+                    return "ASISTIO";
+                } else if (cumplePuntaje && requierePuntaje && !requiereAsistencia) {
+                    // If only score is required and met, and no attendance is required
+                    console.log("✅ RESULTADO: APROBADA (solo requiere puntaje y cumple)");
+                    return "APROBADA";
+                } else {
+                    // Default to PENDIENTE if none of the above conditions are met
+                    console.log("❓ RESULTADO: PENDIENTE (criterios no cubiertos o falta de datos)");
+                    return "PENDIENTE";
                 }
             }
 
