@@ -1,20 +1,13 @@
 ---
 import { actions } from "astro:actions";
 
-const {
-  titulo,
-  contenido,
-  imagenUrl,
-  invertir = false,
-  modoEdicion = false,
-  columna,
-} = Astro.props;
+const { titulo, contenido, imagenUrl, invertir = false, columna } = Astro.props;
 
 const result = Astro.getActionResult(actions.updatePaginaPrincipal);
 ---
 
 <section
-  class="relative h-[480px] w-full bg-cover bg-center py-16 px-6  text-white"
+  class="relative h-[480px] w-full bg-cover bg-center py-16 px-6 text-white"
   style={`background-image: url('${imagenUrl}');`}
   data-animated-section
 >
@@ -40,33 +33,12 @@ const result = Astro.getActionResult(actions.updatePaginaPrincipal);
         >
           {titulo}
         </h2>
-        {
-          modoEdicion ? (
-            <>
-              <textarea
-                id={`contenido-${columna}`}
-                name={columna}
-                class="w-full bg-transparent p-2 text-lg focus:outline-none resize-none placeholder:text-gray-300 border-b border-white text-white drop-shadow text-animate animate-60"
-                rows="6"
-                required
-                placeholder="Escribe algo"
-              >
-                {contenido}
-              </textarea>
 
-              <button
-                type="submit"
-                class="bg-gradient-to-r from-red-700 via-red-800 to-red-900 text-white text-sm px-5 py-2.5 rounded-full shadow-md hover:shadow-lg hover:from-red-600 hover:to-red-800 transition-all duration-300 font-semibold tracking-wide text-animate animate-60"
-              >
-                Guardar Contenido
-              </button>
-            </>
-          ) : (
-            <p class="text-2xl font-bold leading-relaxed whitespace-pre-line drop-shadow-lg text-animate animate-60 w-full">
-              {contenido}
-            </p>
-          )
-        }
+        <p
+          class="text-2xl font-normal text-justify leading-relaxed whitespace-pre-line drop-shadow-lg text-animate animate-60 w-full"
+        >
+          {contenido}
+        </p>
 
         {
           result?.data?.success === false && (
