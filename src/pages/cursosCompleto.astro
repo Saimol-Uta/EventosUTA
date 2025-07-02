@@ -10,20 +10,24 @@ import { getSession } from "auth-astro/server";
 import ContenedorEventos from "../components/ContenedorEvento.astro";
 
 // Extraer filtros desde la URL
+// Extraer filtros desde la URL
 const url = new URL(Astro.request.url);
 const filtros = {
   carrera: url.searchParams.get("carrera") || "",
   area: url.searchParams.get("area") || "",
   duracion: url.searchParams.get("duracion") || "",
-  busqueda: url.searchParams.get("busqueda") || "",
+  busqueda: url.searchParams.get("busqueda") || ""
 };
 
-
-
-// Solo usamos paginación cuando NO hay búsqueda
 // Configuración de paginación
-const page = filtros.busqueda ? 1 : parseInt(url.searchParams.get("page") || "1", 10);
-const cursosPorPagina = filtros.busqueda ? 1000 : 10; // Mostrar todos los resultados en búsquedas
+let cursosPorPagina = 10; // Usamos let en lugar de const para poder modificarlo
+const textoBusqueda = filtros.busqueda;
+const busquedaActiva = textoBusqueda.trim() !== "";
+
+const page = busquedaActiva ? 1 : parseInt(url.searchParams.get("page") || "1", 10);
+if (busquedaActiva) {
+  cursosPorPagina = 1000; // Mostrar todos los resultados en búsquedas
+}
 
 const session = await getSession(Astro.request);
 let esAdmin = false;
@@ -121,13 +125,12 @@ if (session && session.user) {
       )
     }
 
-    <!-- Eventos filtrados con paginación -->
-    <ContenedorEventos
-      filtros={filtros}
-      page={page}
-      cursosPorPagina={cursosPorPagina}
-      modoAdmin={esAdmin}
-    />
+<ContenedorEventos
+  filtros={filtros}
+  page={page}
+  cursosPorPagina={cursosPorPagina}
+  modoAdmin={esAdmin}
+/>
     {
       esAdmin && (
         <div style="margin-top: 20px; text-align: right;">
@@ -184,7 +187,43 @@ if (session && session.user) {
       position: relative;
       padding-bottom: 30px;
     }
+.paginacion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 40px;
+    padding: 20px 0;
+    flex-wrap: wrap;
+}
 
+.paginacion a, .paginacion span {
+    padding: 8px 16px;
+    border: 1px solid #6C1313;
+    color: #6C1313;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    min-width: 40px;
+    text-align: center;
+}
+
+.paginacion a:hover {
+    background-color: #6C1313;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.paginacion .activo {
+    background-color: #6C1313;
+    color: white;
+    font-weight: bold;
+    cursor: default;
+}
+
+.paginacion .pagina-anterior, .paginacion .pagina-siguiente {
+    padding: 8px 20px;
+}
     .contenedor-interno {
       display: flex;
       flex-direction: column;
@@ -345,14 +384,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const realizarBusqueda = (termino) => {
     const url = new URL(window.location.href);
     
-    // Limpiar parámetros existentes
-    ['page', 'busqueda'].forEach(param => url.searchParams.delete(param));
+    // Conservar otros filtros
+    const params = new URLSearchParams();
     
+    // Mantener filtros existentes (excepto paginación)
+    if (url.searchParams.get("carrera")) params.set("carrera", url.searchParams.get("carrera"));
+    if (url.searchParams.get("area")) params.set("area", url.searchParams.get("area"));
+    if (url.searchParams.get("duracion")) params.set("duracion", url.searchParams.get("duracion"));
+    
+    // Agregar búsqueda si existe
     if (termino.trim()) {
-      url.searchParams.set('busqueda', termino);
+      params.set("busqueda", termino);
     }
     
-    window.location.href = url.toString();
+    window.location.href = `/cursosCompleto?${params.toString()}`;
   };
 
   btnBuscar.addEventListener('click', () => realizarBusqueda(input.value));
@@ -361,6 +406,4 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-
-
 </Layout>

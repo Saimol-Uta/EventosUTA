@@ -23,7 +23,7 @@ const { data: responseData } = await Astro.callAction(
         ...filtros,
         page: paginaActual,
         cursosPorPagina: resultadosPorPagina,
-        busqueda: filtros.busqueda || undefined // Envía undefined si no hay búsqueda
+        busqueda: filtros.busqueda || undefined
     }
 );
 
@@ -86,7 +86,7 @@ function construirUrl(pagina: number) {
         ))
     ) : (
         <div class="sin-resultados">
-            <p>No se encontraron resultados para "{filtros.busqueda}"</p>
+            <p>No se encontraron resultados {filtros.busqueda ? `para "${filtros.busqueda}"` : ""}</p>
         </div>
     )}
 </div>
@@ -94,12 +94,32 @@ function construirUrl(pagina: number) {
 <!-- Paginación solo sin búsqueda -->
 {!esBusqueda && totalPaginas > 1 && (
     <nav class="paginacion" role="navigation" aria-label="Paginación">
-        {/* Controles de paginación existentes */}
+        {/* Botón Anterior */}
+        {paginaActual > 1 && (
+            <a href={construirUrl(paginaActual - 1)} class="pagina-anterior">
+                &larr; Anterior
+            </a>
+        )}
+        
+        {/* Números de página */}
+        {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((num) => (
+            <a 
+                href={construirUrl(num)} 
+                class={num === paginaActual ? 'activo' : ''}
+                aria-current={num === paginaActual ? 'page' : undefined}
+            >
+                {num}
+            </a>
+        ))}
+        
+        {/* Botón Siguiente */}
+        {paginaActual < totalPaginas && (
+            <a href={construirUrl(paginaActual + 1)} class="pagina-siguiente">
+                Siguiente &rarr;
+            </a>
+        )}
     </nav>
 )}
-<!-- Estilos se mantienen igual -->
-
-
 <style>
     .contenedor {
         display: grid;
