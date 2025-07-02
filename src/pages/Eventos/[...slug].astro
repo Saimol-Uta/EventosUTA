@@ -6,7 +6,7 @@ import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
 import { Image } from "astro:assets";
 import CursoDetalleCard from "../../components/CursoDetalleCard.astro";
-
+import type { CustomUser } from "../../../auth.config";
 import "../../styles/global.css";
 
 const { slug } = Astro.params;
@@ -121,6 +121,14 @@ const inscripcionProximamente = () => {
     const inicio = new Date(evento.fec_ini_ins_eve);
     return esAntesDe(inicio);
 };
+
+let esAdmin = false;
+
+if (session?.user) {
+    const user = session.user as CustomUser;
+    const rol = user.rol?.toUpperCase();
+    esAdmin = rol === "ADMINISTRADOR" || rol === "MASTER";
+}
 ---
 
 <Layout>
@@ -405,7 +413,9 @@ const inscripcionProximamente = () => {
                         </div>
                     </div>
                       <!-- Botón de acción principal -->
-                    <div style="margin-bottom: 2rem;">                        {yaInscrito ? (
+                    <div style="margin-bottom: 2rem;">                        
+                        {!esAdmin && (
+                            yaInscrito ? (
                             <!-- Usuario ya inscrito -->
                             <div>
                                 <div
@@ -514,7 +524,7 @@ const inscripcionProximamente = () => {
                                 <p style="color: #dc2626; margin: 0; font-weight: bold; font-size: 1.1rem;">Inscripciones cerradas</p>
                                 <p style="color: #b91c1c; margin: 0.5rem 0 0 0; font-size: 0.9rem;">El periodo ha finalizado</p>
                             </div>
-                        )}
+                        ))}
                     </div>
 
                     <!-- Información adicional -->

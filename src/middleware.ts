@@ -16,7 +16,6 @@ const adminRoutes = [
     '/Admin/UsuariosCRUD',
     '/Eventos/*',
     '/Inscripcion/Inscripcion',
-    '/buscarCertificado',
     '/Formularios/FormularioSolicitudCambioUsuario',
     '/cursosCompleto',
     '/CompletarPerfilUser',
@@ -75,7 +74,6 @@ const masterRoutes = [
     '/Admin/UsuariosCRUD',
     '/Eventos/*',
     '/Inscripcion/Inscripcion',
-    '/buscarCertificado',
     '/Formularios/FormularioSolicitudCambioUsuario',
     '/cursosCompleto',
     '/CompletarPerfilUser',
@@ -103,12 +101,28 @@ const publicRoutes = [
     '/User/verificar-cuenta'
 ];
 
+const eventosExcludedSubroutes = [
+    '/Eventos/Pago',
+    '/Eventos/Pago/*',
+    '/Eventos/Evento-Inscripcion',
+    '/Eventos/Evento-Inscripcion/*',
+];
 
 // Función para verificar si una ruta coincide con los patrones permitidos
 function isRouteAllowed(pathname: string, allowedRoutes: string[]): boolean {
     return allowedRoutes.some(route => {
         if (route.endsWith('/*')) {
             // Patrón wildcard: /admin/* permite /admin/cualquier-cosa
+            const baseRoute = route.slice(0, -2);
+            return pathname.startsWith(baseRoute);
+        }
+        return pathname === route;
+    });
+}
+
+function isRouteExcluded(pathname: string, excludedRoutes: string[]): boolean {
+    return excludedRoutes.some(route => {
+        if (route.endsWith('/*')) {
             const baseRoute = route.slice(0, -2);
             return pathname.startsWith(baseRoute);
         }
@@ -148,7 +162,7 @@ export const onRequest = defineMiddleware(async ({ url, request, locals, redirec
     locals.isMaster = user?.rol === 'MASTER' || user?.rol === 'master';
 
     // Si la ruta es pública, permitir acceso
-    if (isRouteAllowed(url.pathname, publicRoutes)) {
+    if (isRouteAllowed(url.pathname, publicRoutes) && !isRouteExcluded(url.pathname, eventosExcludedSubroutes)) {
         return next();
     }
 
@@ -173,13 +187,13 @@ export const onRequest = defineMiddleware(async ({ url, request, locals, redirec
     if (isLoggedIn) {
         let hasAccess = false;
 
-        if (locals.isAdmin && isRouteAllowed(url.pathname, adminRoutes)) {
+        if (locals.isAdmin && isRouteAllowed(url.pathname, adminRoutes) && !isRouteExcluded(url.pathname, eventosExcludedSubroutes)) {
             hasAccess = true;
         } else if (locals.isStudent && isRouteAllowed(url.pathname, studentRoutes)) {
             hasAccess = true;
         } else if (locals.isUser && isRouteAllowed(url.pathname, userRoutes)) {
             hasAccess = true;
-        } else if (locals.isMaster && isRouteAllowed(url.pathname, masterRoutes)) {
+        } else if (locals.isMaster && isRouteAllowed(url.pathname, masterRoutes)  && !isRouteExcluded(url.pathname, eventosExcludedSubroutes)) {
             hasAccess = true;
         }
 
