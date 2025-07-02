@@ -4,7 +4,7 @@ import { actions } from "astro:actions";
 
 // Obtener facultades para el selector
 const { data: facultadesData } = await Astro.callAction(
-    actions.getAllFacultades,
+    actions.GetPaginaFacultad,
     {},
 );
 
@@ -38,6 +38,21 @@ const facultades = facultadesData?.facultades || [];
         background-color: #218838;
     }
 
+    .boton-modificar {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .boton-modificar:hover {
+        background-color: #0056b3;
+    }
+
     .boton-eliminar {
         background-color: #dc3545;
         color: white;
@@ -61,6 +76,29 @@ const facultades = facultadesData?.facultades || [];
 
     .contenedor-selector-facultad {
         margin-bottom: 30px;
+    }
+
+    .boton-volver {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        margin-right: 15px;
+    }
+
+    .boton-volver:hover {
+        background-color: #545b62;
+    }
+
+    .contenedor-boton {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
     }
 </style>
 
@@ -95,6 +133,15 @@ const facultades = facultadesData?.facultades || [];
                     onclick="crearNuevaFacultad()"
                 >
                     Crear Nueva Facultad
+                </button>
+                <button
+                    type="button"
+                    class="boton-modificar"
+                    onclick="modificarFacultad()"
+                    id="btn-modificar"
+                    style="display: none;"
+                >
+                    Modificar Facultad
                 </button>
                 <button
                     type="button"
@@ -557,11 +604,7 @@ const facultades = facultadesData?.facultades || [];
             <div class="contenedor-dato">
                 <p class="texto-dato">Facebook</p>
                 <div class="contenedor-input">
-                    <input
-                        type="text"
-                        name="redes_sociales"
-                        class="input-dato"
-                    />
+                    <input type="text" name="facebook" class="input-dato" />
                     <svg
                         width="24"
                         height="24"
@@ -577,11 +620,7 @@ const facultades = facultadesData?.facultades || [];
             <div class="contenedor-dato">
                 <p class="texto-dato">Twitter</p>
                 <div class="contenedor-input">
-                    <input
-                        type="text"
-                        name="redes_sociales"
-                        class="input-dato"
-                    />
+                    <input type="text" name="twitter" class="input-dato" />
                     <svg
                         width="24"
                         height="24"
@@ -597,11 +636,7 @@ const facultades = facultadesData?.facultades || [];
             <div class="contenedor-dato">
                 <p class="texto-dato">Instagram</p>
                 <div class="contenedor-input">
-                    <input
-                        type="text"
-                        name="redes_sociales"
-                        class="input-dato"
-                    />
+                    <input type="text" name="instagram" class="input-dato" />
                     <svg
                         width="24"
                         height="24"
@@ -623,6 +658,11 @@ const facultades = facultadesData?.facultades || [];
         </div>
 
         <div class="contenedor-boton">
+            <button
+                type="button"
+                class="boton-volver"
+                onclick="volverAGestion()">← Volver a Gestión</button
+            >
             <button type="submit" class="boton-confirmar"
                 >Guardar Cambios</button
             >
@@ -630,91 +670,243 @@ const facultades = facultadesData?.facultades || [];
     </form>
 </div>
 
-<script is:inline>
+<script>
+    import Swal from "sweetalert2";
+    import { actions } from "astro:actions";
+
     document.addEventListener("DOMContentLoaded", function () {
-        // Cargar facultades al inicializar la página
-        cargarFacultades();
+        // Las facultades ya están cargadas desde el servidor en el frontmatter
+        // No necesitamos cargarlas nuevamente
 
-        // Función para cargar la lista de facultades
-        async function cargarFacultades() {
+        // Función para recargar la lista de facultades (solo cuando sea necesario)
+        async function recargarFacultades() {
             try {
-                const response = await fetch("/api/facultades/listar");
-                const facultades = await response.json();
-
-                const selector = document.getElementById("selector-facultad");
-                selector.innerHTML =
-                    '<option value="">-- Seleccionar Facultad --</option>';
-
-                facultades.forEach((facultad) => {
-                    const option = document.createElement("option");
-                    option.value = facultad.id_fac;
-                    option.textContent = facultad.nom_fac;
-                    selector.appendChild(option);
+                const formData = new FormData();
+                const response = await fetch("/_actions/GetPaginaFacultad", {
+                    method: "POST",
+                    body: formData,
                 });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    console.error("Error al obtener facultades:", result.error);
+                    mostrarNotificacionError("Error al cargar facultades");
+                    return;
+                }
+
+                const facultades = result.facultades || [];
+                const selector = document.getElementById("selector-facultad");
+                if (selector) {
+                    selector.innerHTML =
+                        '<option value="">-- Seleccionar Facultad --</option>';
+
+                    facultades.forEach((facultad: any) => {
+                        const option = document.createElement("option");
+                        option.value = facultad.id_fac;
+                        option.textContent = facultad.nom_fac;
+                        selector.appendChild(option);
+                    });
+                }
             } catch (error) {
                 console.error("Error al cargar facultades:", error);
+                mostrarNotificacionError("Error al cargar facultades");
             }
         }
 
-        // Función para cargar datos de una facultad específica
-        async function cargarDatosFacultad(idFacultad) {
-            if (!idFacultad) {
-                document.getElementById("nombreFacultad").value = "";
-                document.getElementById("siglasFacultad").value = "";
-                document.getElementById("descripcionFacultad").value = "";
-                document.getElementById("sitioWebFacultad").value = "";
-                document.getElementById("emailFacultad").value = "";
-                document.getElementById("telefonoFacultad").value = "";
-                document.getElementById("direccionFacultad").value = "";
-                document.getElementById("enlaceSoporte").value = "";
+        // Función para mostrar notificaciones de éxito
+        function mostrarNotificacionExito(mensaje: string) {
+            Swal.fire({
+                icon: "success",
+                title: "¡Éxito!",
+                text: mensaje,
+                confirmButtonColor: "#059669",
+                timer: 2000,
+                timerProgressBar: true,
+            });
+        }
 
-                // Limpiar campos de carrusel
-                for (let i = 1; i <= 3; i++) {
-                    document.getElementById(`tituloCarrusel${i}`).value = "";
-                    document.getElementById(`descripcionCarrusel${i}`).value =
-                        "";
+        // Función para mostrar notificaciones de error
+        function mostrarNotificacionError(mensaje: string) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: mensaje,
+                confirmButtonColor: "#dc2626",
+            });
+        }
+
+        // Función para cargar datos de una facultad específica (solo habilita botones)
+        async function cargarDatosFacultad(idFacultad: string) {
+            const btnEliminar = document.getElementById(
+                "btn-eliminar",
+            ) as HTMLButtonElement;
+            const btnModificar = document.getElementById(
+                "btn-modificar",
+            ) as HTMLButtonElement;
+
+            if (!idFacultad) {
+                // Deshabilitar botones cuando no hay selección
+                if (btnEliminar) {
+                    btnEliminar.disabled = true;
+                }
+                if (btnModificar) {
+                    btnModificar.style.display = "none";
                 }
                 return;
             }
 
-            try {
-                const { data, error } = await actions.getFacultadById({
-                    idFacultad,
-                });
+            // Habilitar botones cuando hay una facultad seleccionada
+            if (btnEliminar) {
+                btnEliminar.disabled = false;
+            }
+            if (btnModificar) {
+                btnModificar.style.display = "inline-block";
+            }
+        }
 
-                if (error) {
+        // Función para modificar una facultad (cargar datos y mostrar formulario)
+        async function modificarFacultad() {
+            const selector = document.getElementById(
+                "selector-facultad",
+            ) as HTMLSelectElement;
+            const idFacultad = selector?.value;
+
+            if (!idFacultad) {
+                mostrarNotificacionError(
+                    "Selecciona una facultad para modificar",
+                );
+                return;
+            }
+
+            const panelGestion = document.querySelector(
+                ".contenedor-selector-facultad",
+            ) as HTMLElement;
+            const formulario = document.getElementById(
+                "formulario-facultad",
+            ) as HTMLFormElement;
+
+            try {
+                const { data, error } =
+                    await actions.getFacultadByIdPersonalizacion({
+                        id_facultad: idFacultad,
+                    });
+
+                if (error || !data?.success) {
+                    console.error(
+                        "Error al obtener facultad:",
+                        error || data?.error,
+                    );
                     mostrarNotificacionError(
-                        "Error al cargar los datos de la facultad",
+                        data?.error ||
+                            "Error al cargar los datos de la facultad",
                     );
                     return;
                 }
 
-                if (data) {
-                    document.getElementById("nombreFacultad").value =
-                        data.NOM_FAC || "";
-                    document.getElementById("siglasFacultad").value =
-                        data.SIG_FAC || "";
-                    document.getElementById("descripcionFacultad").value =
-                        data.DES_FAC || "";
-                    document.getElementById("sitioWebFacultad").value =
-                        data.SIT_WEB || "";
-                    document.getElementById("emailFacultad").value =
-                        data.EMA_FAC || "";
-                    document.getElementById("telefonoFacultad").value =
-                        data.TEL_FAC || "";
-                    document.getElementById("direccionFacultad").value =
-                        data.DIR_FAC || "";
-                    document.getElementById("enlaceSoporte").value =
-                        data.ENL_SOL || "";
+                if (data && data.success) {
+                    const facultad = data.data;
 
-                    // Cargar datos del carrusel
-                    for (let i = 1; i <= 3; i++) {
-                        document.getElementById(`tituloCarrusel${i}`).value =
-                            data[`TIT_CARU${i}`] || "";
-                        document.getElementById(
-                            `descripcionCarrusel${i}`,
-                        ).value = data[`DES_CARU${i}`] || "";
+                    // Ocultar panel de gestión y mostrar formulario
+                    if (panelGestion) {
+                        panelGestion.style.display = "none";
                     }
+                    if (formulario) {
+                        formulario.style.display = "block";
+                    }
+
+                    // Llenar campos del formulario con los datos de la facultad
+                    const idInput = document.getElementById(
+                        "id_facultad",
+                    ) as HTMLInputElement;
+                    if (idInput) idInput.value = facultad.id_fac || "";
+
+                    // Campos básicos
+                    const nombreInput = document.querySelector(
+                        'input[name="nombre_facultad"]',
+                    ) as HTMLInputElement;
+                    if (nombreInput) nombreInput.value = facultad.nom_fac || "";
+
+                    // Cargar datos del carrusel si existen
+                    for (let i = 1; i <= 3; i++) {
+                        const tituloInput = document.querySelector(
+                            `input[name="titulo_carrusel_${i}"]`,
+                        ) as HTMLInputElement;
+                        const descripcionInput = document.querySelector(
+                            `textarea[name="descripcion_carrusel_${i}"]`,
+                        ) as HTMLTextAreaElement;
+
+                        if (tituloInput)
+                            tituloInput.value = facultad[`tit_caru${i}`] || "";
+                        if (descripcionInput)
+                            descripcionInput.value =
+                                facultad[`des_caru${i}`] || "";
+                    }
+
+                    // Cargar datos del equipo académico
+                    const decanoInput = document.querySelector(
+                        'input[name="nombre_decano"]',
+                    ) as HTMLInputElement;
+                    const subdecanoInput = document.querySelector(
+                        'input[name="nombre_subdecano"]',
+                    ) as HTMLInputElement;
+                    const responsableInput = document.querySelector(
+                        'input[name="nombre_responsable"]',
+                    ) as HTMLInputElement;
+
+                    if (decanoInput) decanoInput.value = facultad.dec_fac || "";
+                    if (subdecanoInput)
+                        subdecanoInput.value = facultad.sub_fac || "";
+                    if (responsableInput)
+                        responsableInput.value = facultad.res_fac || "";
+
+                    // Cargar misión y visión
+                    const misionTextarea = document.querySelector(
+                        'textarea[name="mision"]',
+                    ) as HTMLTextAreaElement;
+                    const visionTextarea = document.querySelector(
+                        'textarea[name="vision"]',
+                    ) as HTMLTextAreaElement;
+
+                    if (misionTextarea)
+                        misionTextarea.value = facultad.mis_fac || "";
+                    if (visionTextarea)
+                        visionTextarea.value = facultad.vis_fac || "";
+
+                    // Cargar información de contacto
+                    const direccionInput = document.querySelector(
+                        'input[name="direccion_contacto"]',
+                    ) as HTMLInputElement;
+                    const correoInput = document.querySelector(
+                        'input[name="correo_contacto"]',
+                    ) as HTMLInputElement;
+                    const jiraInput = document.querySelector(
+                        'input[name="link_jira"]',
+                    ) as HTMLInputElement;
+
+                    // Redes sociales
+                    const facebookInput = document.querySelector(
+                        'input[name="facebook"]',
+                    ) as HTMLInputElement;
+                    const twitterInput = document.querySelector(
+                        'input[name="twitter"]',
+                    ) as HTMLInputElement;
+                    const instagramInput = document.querySelector(
+                        'input[name="instagram"]',
+                    ) as HTMLInputElement;
+
+                    if (direccionInput)
+                        direccionInput.value = facultad.dir_fac || "";
+                    if (correoInput) correoInput.value = facultad.cor_fac || "";
+                    if (jiraInput) jiraInput.value = facultad.enl_sol || "";
+
+                    // Cargar redes sociales
+                    if (facebookInput)
+                        facebookInput.value = facultad.face_fac || "";
+                    if (twitterInput)
+                        twitterInput.value = facultad.twit_fac || "";
+                    if (instagramInput)
+                        instagramInput.value = facultad.inst_fac || "";
                 }
             } catch (error) {
                 console.error("Error al cargar facultad:", error);
@@ -725,15 +917,77 @@ const facultades = facultadesData?.facultades || [];
         }
 
         function crearNuevaFacultad() {
-            // Limpiar el formulario
-            cargarDatosFacultad("");
-            // Cambiar título
-            document.querySelector("h1").textContent = "Crear Nueva Facultad";
+            // Ocultar panel de gestión
+            const panelGestion = document.querySelector(
+                ".contenedor-selector-facultad",
+            ) as HTMLElement;
+            if (panelGestion) {
+                panelGestion.style.display = "none";
+            }
+
+            // Mostrar formulario para nueva facultad
+            const formulario = document.getElementById(
+                "formulario-facultad",
+            ) as HTMLFormElement;
+            if (formulario) {
+                formulario.style.display = "block";
+                formulario.reset();
+
+                // Limpiar el campo hidden del ID para indicar que es una nueva facultad
+                const idInput = document.getElementById(
+                    "id_facultad",
+                ) as HTMLInputElement;
+                if (idInput) idInput.value = "";
+            }
+        }
+
+        function volverAGestion() {
+            // Mostrar panel de gestión
+            const panelGestion = document.querySelector(
+                ".contenedor-selector-facultad",
+            ) as HTMLElement;
+            if (panelGestion) {
+                panelGestion.style.display = "block";
+            }
+
+            // Ocultar formulario
+            const formulario = document.getElementById(
+                "formulario-facultad",
+            ) as HTMLFormElement;
+            if (formulario) {
+                formulario.style.display = "none";
+                formulario.reset();
+            }
+
+            // Resetear selector
+            const selector = document.getElementById(
+                "selector-facultad",
+            ) as HTMLSelectElement;
+            if (selector) {
+                selector.value = "";
+            }
+
+            // Deshabilitar y ocultar botones
+            const btnEliminar = document.getElementById(
+                "btn-eliminar",
+            ) as HTMLButtonElement;
+            const btnModificar = document.getElementById(
+                "btn-modificar",
+            ) as HTMLButtonElement;
+
+            if (btnEliminar) {
+                btnEliminar.disabled = true;
+            }
+            if (btnModificar) {
+                btnModificar.style.display = "none";
+            }
         }
 
         async function eliminarFacultad() {
-            const selector = document.getElementById("selectorFacultad");
-            const idFacultad = selector.value;
+            const selector = document.getElementById(
+                "selector-facultad",
+            ) as HTMLSelectElement;
+            const idFacultad = selector?.value;
 
             if (!idFacultad) {
                 mostrarNotificacionError(
@@ -757,19 +1011,26 @@ const facultades = facultadesData?.facultades || [];
             if (!result.isConfirmed) return;
 
             try {
-                const { data, error } = await actions.eliminarFacultad({
-                    idFacultad,
+                const { data, error } = await actions.DeletePaginaFacultad({
+                    id_facultad: idFacultad,
                 });
 
-                if (error) {
-                    mostrarNotificacionError(error);
+                if (error || !data?.success) {
+                    console.error(
+                        "Error al eliminar facultad:",
+                        error || data?.error,
+                    );
+                    mostrarNotificacionError(
+                        data?.error || "Error al eliminar la facultad",
+                    );
                     return;
                 }
 
                 mostrarNotificacionExito("Facultad eliminada exitosamente");
-                // Recargar la página después de eliminar
+                // Recargar facultades y volver al panel de gestión
                 setTimeout(() => {
-                    window.location.reload();
+                    recargarFacultades();
+                    volverAGestion();
                 }, 1500);
             } catch (error) {
                 console.error("Error al eliminar facultad:", error);
@@ -777,8 +1038,65 @@ const facultades = facultadesData?.facultades || [];
             }
         }
 
-        function showPreview(input, previewId, displayId) {
-            const file = input.files[0];
+        // Función para manejar el envío del formulario
+        async function manejarEnvioFormulario(event: Event) {
+            event.preventDefault();
+
+            const formulario = event.target as HTMLFormElement;
+            const formData = new FormData(formulario);
+
+            try {
+                const result =
+                    await actions.CreateUpdatePaginaFacultad(formData);
+
+                // Verificar si hay error en la respuesta de Astro
+                if (result.error) {
+                    console.error("Error de Astro:", result.error);
+                    mostrarNotificacionError("Error al procesar la solicitud");
+                    return;
+                }
+
+                // Obtener el resultado de la acción
+                const actionResult = result.data as any;
+
+                // Verificar el resultado de la acción
+                if (!actionResult.success) {
+                    console.error(
+                        "Error al guardar facultad:",
+                        actionResult.error || actionResult.message,
+                    );
+                    mostrarNotificacionError(
+                        actionResult.message || "Error al guardar los cambios",
+                    );
+                    return;
+                }
+
+                mostrarNotificacionExito(
+                    actionResult.message || "Facultad guardada exitosamente",
+                );
+                // Recargar facultades y volver al panel de gestión
+                setTimeout(() => {
+                    recargarFacultades();
+                    volverAGestion();
+                }, 1500);
+            } catch (error) {
+                console.error("Error al guardar facultad:", error);
+                mostrarNotificacionError("Error al guardar los cambios");
+            }
+        }
+
+        // Agregar event listener al formulario
+        const formulario = document.getElementById("formulario-facultad");
+        if (formulario) {
+            formulario.addEventListener("submit", manejarEnvioFormulario);
+        }
+
+        function showPreview(
+            input: HTMLInputElement,
+            previewId: string,
+            displayId: string,
+        ) {
+            const file = input.files?.[0];
             if (!file) return;
 
             const previewContainer = document.getElementById(previewId);
@@ -786,27 +1104,34 @@ const facultades = facultadesData?.facultades || [];
 
             // Elimina vista previa anterior
             const existingPreview =
-                previewContainer.querySelector(".preview-image");
+                previewContainer?.querySelector(".preview-image");
             if (existingPreview) existingPreview.remove();
 
-            fileNameDisplay.textContent = file.name;
-            fileNameDisplay.style.display = "block";
+            if (fileNameDisplay) {
+                fileNameDisplay.textContent = file.name;
+                fileNameDisplay.style.display = "block";
+            }
 
-            if (file.type.startsWith("image/")) {
+            if (file.type.startsWith("image/") && previewContainer) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    const previewImg = document.createElement("img");
-                    previewImg.className = "preview-image";
-                    previewImg.src = e.target.result;
-                    previewImg.alt = "Vista previa";
-                    previewContainer.prepend(previewImg);
+                    if (
+                        e.target?.result &&
+                        typeof e.target.result === "string"
+                    ) {
+                        const previewImg = document.createElement("img");
+                        previewImg.className = "preview-image";
+                        previewImg.src = e.target.result;
+                        previewImg.alt = "Vista previa";
+                        previewContainer.prepend(previewImg);
+                    }
                 };
                 reader.readAsDataURL(file);
             }
         }
 
         document.querySelectorAll(".input-file").forEach((input) => {
-            input.addEventListener("change", function () {
+            input.addEventListener("change", function (this: HTMLInputElement) {
                 const previewId = this.getAttribute("data-preview");
                 const displayId = this.getAttribute("data-name-display");
                 if (previewId && displayId) {
@@ -816,33 +1141,12 @@ const facultades = facultadesData?.facultades || [];
         });
 
         // Hacer funciones disponibles globalmente
-        window.cargarDatosFacultad = cargarDatosFacultad;
-        window.crearNuevaFacultad = crearNuevaFacultad;
-        window.eliminarFacultad = eliminarFacultad;
-
-        // Función para mostrar notificaciones de éxito
-        function mostrarNotificacionExito(mensaje) {
-            Swal.fire({
-                icon: "success",
-                title: "¡Éxito!",
-                text: mensaje,
-                confirmButtonColor: "#059669",
-                timer: 2000,
-                timerProgressBar: true,
-            });
-        }
-
-        // Función para mostrar notificaciones de error
-        function mostrarNotificacionError(mensaje) {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: mensaje,
-                confirmButtonColor: "#dc2626",
-            });
-        }
-
-        window.mostrarNotificacionExito = mostrarNotificacionExito;
-        window.mostrarNotificacionError = mostrarNotificacionError;
+        (window as any).cargarDatosFacultad = cargarDatosFacultad;
+        (window as any).modificarFacultad = modificarFacultad;
+        (window as any).crearNuevaFacultad = crearNuevaFacultad;
+        (window as any).eliminarFacultad = eliminarFacultad;
+        (window as any).volverAGestion = volverAGestion;
+        (window as any).mostrarNotificacionExito = mostrarNotificacionExito;
+        (window as any).mostrarNotificacionError = mostrarNotificacionError;
     });
 </script>
