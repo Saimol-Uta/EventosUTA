@@ -181,5 +181,6 @@ model facultades {
   img_caru3 String?
   img_log   String?
   enl_sol   String?
+  est_fac   Boolean    @default(false)
   carreras  carreras[]
 }

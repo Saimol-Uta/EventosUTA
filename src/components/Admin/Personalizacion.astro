@@ -53,6 +53,21 @@ const facultades = facultadesData?.facultades || [];
         background-color: #0056b3;
     }
 
+    .boton-principal {
+        background-color: #ffc107;
+        color: #212529;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .boton-principal:hover {
+        background-color: #e0a800;
+    }
+
     .boton-eliminar {
         background-color: #dc3545;
         color: white;
@@ -120,6 +135,9 @@ const facultades = facultadesData?.facultades || [];
                             facultades.map((facultad: any) => (
                                 <option value={facultad.id_fac}>
                                     {facultad.nom_fac}
+                                    {facultad.est_fac
+                                        ? " (Facultad Principal ⭐)"
+                                        : ""}
                                 </option>
                             ))
                         }
@@ -151,6 +169,15 @@ const facultades = facultadesData?.facultades || [];
                     disabled
                 >
                     Eliminar Facultad
+                </button>
+                <button
+                    type="button"
+                    class="boton-principal"
+                    onclick="seleccionarFacultadPrincipal()"
+                    id="btn-principal"
+                    style="display: none;"
+                >
+                    Seleccionar como facultad principal
                 </button>
             </div>
         </div>
@@ -752,6 +779,9 @@ const facultades = facultadesData?.facultades || [];
             const btnModificar = document.getElementById(
                 "btn-modificar",
             ) as HTMLButtonElement;
+            const btnPrincipal = document.getElementById(
+                "btn-principal",
+            ) as HTMLButtonElement;
 
             if (!idFacultad) {
                 // Deshabilitar botones cuando no hay selección
@@ -760,6 +790,9 @@ const facultades = facultadesData?.facultades || [];
                 }
                 if (btnModificar) {
                     btnModificar.style.display = "none";
+                }
+                if (btnPrincipal) {
+                    btnPrincipal.style.display = "none";
                 }
                 return;
             }
@@ -770,6 +803,9 @@ const facultades = facultadesData?.facultades || [];
             }
             if (btnModificar) {
                 btnModificar.style.display = "inline-block";
+            }
+            if (btnPrincipal) {
+                btnPrincipal.style.display = "inline-block";
             }
         }
 
@@ -1207,6 +1243,66 @@ const facultades = facultadesData?.facultades || [];
             }
         }
 
+        // Función para seleccionar una facultad como principal
+        async function seleccionarFacultadPrincipal() {
+            const selector = document.getElementById(
+                "selector-facultad",
+            ) as HTMLSelectElement;
+            const idFacultad = selector?.value;
+
+            if (!idFacultad) {
+                mostrarNotificacionError(
+                    "Selecciona una facultad para marcar como principal",
+                );
+                return;
+            }
+
+            // Confirmar acción
+            const result = await Swal.fire({
+                title: "¿Confirmar selección?",
+                text: "Esta facultad será marcada como la facultad principal y se desactivarán todas las demás",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#ffc107",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Sí, seleccionar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const { data, error } = await actions.activarFacultad({
+                    id_facultad: idFacultad,
+                });
+
+                if (error || !data?.success) {
+                    console.error(
+                        "Error al activar facultad:",
+                        error || data?.error,
+                    );
+                    mostrarNotificacionError(
+                        data?.error ||
+                            "Error al seleccionar la facultad como principal",
+                    );
+                    return;
+                }
+
+                mostrarNotificacionExito(
+                    "Facultad seleccionada como principal exitosamente",
+                );
+                // Recargar la página para reflejar los cambios
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } catch (error) {
+                console.error("Error al activar facultad:", error);
+                mostrarNotificacionError(
+                    "Error al seleccionar la facultad como principal",
+                );
+            }
+        }
+
         // Función para manejar el envío del formulario
         async function manejarEnvioFormulario(event: Event) {
             event.preventDefault();
@@ -1313,6 +1409,8 @@ const facultades = facultadesData?.facultades || [];
         (window as any).modificarFacultad = modificarFacultad;
         (window as any).crearNuevaFacultad = crearNuevaFacultad;
         (window as any).eliminarFacultad = eliminarFacultad;
+        (window as any).seleccionarFacultadPrincipal =
+            seleccionarFacultadPrincipal;
         (window as any).volverAGestion = volverAGestion;
         (window as any).mostrarNotificacionExito = mostrarNotificacionExito;
         (window as any).mostrarNotificacionError = mostrarNotificacionError;

@@ -19,7 +19,6 @@ if (session?.user) {
     esAdmin = rol === "ADMINISTRADOR" || rol === "MASTER";
 }
 
-
 const id_fac = "a1b2c3d4-e5f6-4a7b-8c9d-1a1a1a1a1a1a";
 
 const { data: pagina } = await Astro.callAction(actions.getInfo, { id_fac });
@@ -27,8 +26,8 @@ const { data: pagina } = await Astro.callAction(actions.getInfo, { id_fac });
 
 <Layout>
     <Header />
-  {esAdmin ? <MenuAdmin /> :  <Navbar />} 
-    <CarruselUTA modoAdmin={esAdmin}/>
+    {esAdmin ? <MenuAdmin /> : <Navbar />}
+    <CarruselUTA modoAdmin={esAdmin} />
     <InformacionFacultad
         decano={pagina?.data?.dec_fac ?? ""}
         decanoImagen={pagina?.data?.dec_img ?? ""}
