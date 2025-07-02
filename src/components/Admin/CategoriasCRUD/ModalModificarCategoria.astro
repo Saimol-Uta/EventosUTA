@@ -124,7 +124,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                     type="number"
                                     class="input-dato"
                                     name="pun_apr_cat"
-                                    min="0"
+                                    min="7"
                                     max="10"
                                     step="0.1"
                                 />
@@ -143,7 +143,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                     type="number"
                                     class="input-dato"
                                     name="asi_cat"
-                                    min="0"
+                                    min="70"
                                     max="100"
                                 />
                                 <p>%</p>
@@ -249,16 +249,9 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         const contenedorAsistenciaMod = document.getElementById(
             "contenedor-asistencia-mod",
         ) as HTMLElement;
-
-        if (contenedorPuntajeMod) {
-            contenedorPuntajeMod.style.display = categoria.requiere_puntaje
-                ? "block"
-                : "none";
-        }
-        if (contenedorAsistenciaMod) {
-            contenedorAsistenciaMod.style.display =
-                categoria.requiere_asistencia ? "block" : "none";
-        }
+        
+        document.getElementById("requiere_puntaje_mod")?.dispatchEvent(new Event('change'));
+        document.getElementById("requiere_asistencia_mod")?.dispatchEvent(new Event('change'));
 
         modal.style.display = "block";
     }
@@ -290,55 +283,31 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         ) as HTMLFormElement;
 
         // Referencias a los checkboxes y contenedores para modificar
-        const requierePuntajeCheckboxMod = document.getElementById(
-            "requiere_puntaje_mod",
-        ) as HTMLInputElement;
-        const requiereAsistenciaCheckboxMod = document.getElementById(
-            "requiere_asistencia_mod",
-        ) as HTMLInputElement;
-        const contenedorPuntajeMod = document.getElementById(
-            "contenedor-puntaje-mod",
-        ) as HTMLElement;
-        const contenedorAsistenciaMod = document.getElementById(
-            "contenedor-asistencia-mod",
-        ) as HTMLElement;
-        const inputPuntajeMod = form?.querySelector(
-            'input[name="pun_apr_cat"]',
-        ) as HTMLInputElement;
-        const inputAsistenciaMod = form?.querySelector(
-            'input[name="asi_cat"]',
-        ) as HTMLInputElement;
+        const requierePuntajeCheckbox = document.getElementById("requiere_puntaje_mod") as HTMLInputElement;
+        const requiereAsistenciaCheckbox = document.getElementById("requiere_asistencia_mod") as HTMLInputElement;
+        const contenedorPuntaje = document.getElementById("contenedor-puntaje-mod") as HTMLElement;
+        const contenedorAsistencia = document.getElementById("contenedor-asistencia-mod") as HTMLElement;
+        const inputPuntaje = form.querySelector('input[name="pun_apr_cat"]') as HTMLInputElement;
+        const inputAsistencia = form.querySelector('input[name="asi_cat"]') as HTMLInputElement;
 
         // Función para toggle de campos en modificar
-        function toggleCampoPuntajeMod() {
-            if (requierePuntajeCheckboxMod?.checked) {
-                contenedorPuntajeMod.style.display = "block";
-                inputPuntajeMod.required = true;
-            } else {
-                contenedorPuntajeMod.style.display = "none";
-                inputPuntajeMod.required = false;
-            }
+        function actualizarEstadoPuntaje() {
+            const isChecked = requierePuntajeCheckbox.checked;
+            contenedorPuntaje.style.display = isChecked ? "block" : "none";
+            inputPuntaje.required = isChecked;
+            inputPuntaje.disabled = !isChecked; // La clave: deshabilita si no está marcado
         }
 
-        function toggleCampoAsistenciaMod() {
-            if (requiereAsistenciaCheckboxMod?.checked) {
-                contenedorAsistenciaMod.style.display = "block";
-                inputAsistenciaMod.required = true;
-            } else {
-                contenedorAsistenciaMod.style.display = "none";
-                inputAsistenciaMod.required = false;
-            }
+        function actualizarEstadoAsistencia() {
+            const isChecked = requiereAsistenciaCheckbox.checked;
+            contenedorAsistencia.style.display = isChecked ? "block" : "none";
+            inputAsistencia.required = isChecked;
+            inputAsistencia.disabled = !isChecked; // La clave: deshabilita si no está marcado
         }
 
         // Event listeners para los checkboxes
-        requierePuntajeCheckboxMod?.addEventListener(
-            "change",
-            toggleCampoPuntajeMod,
-        );
-        requiereAsistenciaCheckboxMod?.addEventListener(
-            "change",
-            toggleCampoAsistenciaMod,
-        );
+        requierePuntajeCheckbox.addEventListener("change", actualizarEstadoPuntaje);
+        requiereAsistenciaCheckbox.addEventListener("change", actualizarEstadoAsistencia);
 
         // Manejar envío del formulario
         if (form) {
