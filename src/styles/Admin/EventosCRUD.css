@@ -52,6 +52,7 @@
     height: 36px;
     transition: color 0.15;
     transition: background-color 0.15s;
+    cursor: pointer;
 }
 
 .contenedor-boton-nuevo-registro:hover {
@@ -119,6 +120,7 @@
     width: 100%;
     height: auto;
     transition: opacity 0.15;
+    cursor: pointer;
 }
 
 .imagen-boton-registro {
