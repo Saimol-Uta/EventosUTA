@@ -1,4 +1,4 @@
-import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras } from './Eventos';
+import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras, guardarEventosDestacados } from './Eventos';
 import { finalizarEvento } from './Eventos/finalizar-evento.action';
 import { actualizarPagoInscripcion } from './Eventos/actualizarPagoInscripcion.action';
 
@@ -66,6 +66,7 @@ import { crearCategoria, modificarCategoria, eliminarCategoria, getAllCategorias
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
 import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Admin';
+import { CreateUpdatePaginaFacultad, DeletePaginaFacultad, GetPaginaFacultad, activarFacultad, getFacultadById as getFacultadByIdPersonalizacion, getPaginaSeleccionada } from './PerzonalizarPagina';
 
 export const server = {
     getEventos,
@@ -88,7 +89,7 @@ export const server = {
     uploadDocumentImage,
     uploadDocumentPdf,
     modificarCuenta,
-    
+
 
 
     getDatosInscripcion,
@@ -114,6 +115,7 @@ export const server = {
     getCategoriaById,
     getCategorias, crearEvento,
     modificarEvento,
+    guardarEventosDestacados,
     eliminarEvento,
     finalizarEvento,// Nuevas acciones para asignaciones
     getCarreras,
@@ -156,9 +158,17 @@ export const server = {
     getFiltrosDinamicos,
     getDetallesEventoCompleto,
 
-    // Nuevas acciones para Facultades
+
+    // Nuevas acciones para Pagina Facultad
     getAllFacultades,
     getFacultadById,
+    getFacultadByIdPersonalizacion,
 
+    CreateUpdatePaginaFacultad,
+    DeletePaginaFacultad,
+    GetPaginaFacultad,
+
+    getPaginaSeleccionada,
+    activarFacultad
 };
 

@@ -1,5 +1,7 @@
 ---
 const { isLoggedIn } = Astro.locals;
+
+const {Twitter, Facebook, Instagram} = Astro.props;
 ---
 
 <footer
@@ -18,7 +20,7 @@ const { isLoggedIn } = Astro.locals;
 
         footer a:hover svg {
             transform: scale(1.1);
-            fill: rgb(108, 19, 19);
+            fill: rgb(178, 0, 0);
         }
 
         .footer-cursos li {
@@ -36,7 +38,7 @@ const { isLoggedIn } = Astro.locals;
             bottom: -2px;
             width: 0%;
             height: 2px;
-            background-color: rgb(108, 19, 19);
+            background-color: rgb(162, 0, 0);
             transition: width 0.3s ease;
         }
 
@@ -45,7 +47,7 @@ const { isLoggedIn } = Astro.locals;
         }
 
         .titulo{
-            color: rgb(139, 22, 22); 
+            color: rgb(169, 0, 0); 
             margin-bottom: 20px; 
             letter-spacing: 1px;
             font-size: 14px;
@@ -57,12 +59,12 @@ const { isLoggedIn } = Astro.locals;
 				}
 
 				.btn-cambios {
-					background-color: #cd982e; color: white; font-weight: 500; padding: 14px 28px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease; margin-right: 30px;
+					background-color: #a80006; color: white; font-weight: 500; padding: 14px 28px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease; margin-right: 30px;
 				}
 
 				.btn-cambios:hover {
 					background-color: white;
-					color: rgb(108, 19, 19);
+					color: rgb(122, 12, 12);
 				}
 
 				.derechos {
@@ -86,7 +88,7 @@ const { isLoggedIn } = Astro.locals;
             <div style="margin-top: 20px; display: flex; gap: 12px;">
             
                 <a
-                    href="https://x.com/UTecnicaAmbato"
+                    href={Twitter || "https://twitter.com/uta_fisei"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -103,7 +105,7 @@ const { isLoggedIn } = Astro.locals;
                 </a>
 
                 <a
-                    href="https://www.facebook.com/UTAFISEI"
+                    href={Facebook || "https://www.facebook.com/UTAFISEI"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -120,7 +122,7 @@ const { isLoggedIn } = Astro.locals;
                 </a>
 
                 <a
-                    href="https://www.instagram.com/fisei_uta/"
+                    href={Instagram || "https://www.instagram.com/fisei_uta/"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >

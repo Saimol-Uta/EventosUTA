@@ -75,10 +75,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-//Eventos favoritos 
-let eventosSeleccionados = new Set();
+// Eventos favoritos
+const eventosSeleccionados = new Set();
 
-  function toggleFavorito(boton) {
+function toggleFavorito(boton) {
   const id = boton.dataset.id;
 
   if (eventosSeleccionados.has(id)) {
@@ -95,27 +95,53 @@ let eventosSeleccionados = new Set();
 
   actualizarBotonGuardar();
 }
-  function actualizarBotonGuardar() {
-    const btn = document.getElementById("btn-guardar-favoritos");
-    if (btn) {
-      btn.disabled = eventosSeleccionados.size !== 6;
-    }
+
+function actualizarBotonGuardar() {
+  const btn = document.getElementById("btn-guardar-favoritos");
+  if (btn) {
+    btn.disabled = eventosSeleccionados.size !== 6;
   }
+}
+
 async function guardarFavoritos() {
   if (eventosSeleccionados.size !== 6) {
     alert("Debes seleccionar exactamente 6 eventos.");
     return;
   }
 
-  const res = await fetch("/api/guardarFavoritos", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ eventos: Array.from(eventosSeleccionados) })
+  try {
+    const res = await fetch("/api/guardarFavoritos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ eventos: Array.from(eventosSeleccionados) })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+  } catch (error) {
+    console.error("Error al guardar favoritos:", error);
+    alert("Ocurrió un error al guardar los eventos.");
+  }
+}
+
+// Esperar a que el DOM esté listo para agregar los listeners
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".destacar-boton").forEach((btn) => {
+    btn.addEventListener("click", () => toggleFavorito(btn));
   });
 
-  const data = await res.json();
-  alert(data.message);
-}
+  const guardarBtn = document.getElementById("btn-guardar-favoritos");
+  if (guardarBtn) {
+    guardarBtn.addEventListener("click", guardarFavoritos);
+  }
+
+  // Si ya hay 6 marcados como activos en la carga, los agregamos al set
+  document.querySelectorAll(".destacar-boton.activo").forEach((btn) => {
+    eventosSeleccionados.add(btn.dataset.id);
+  });
+
+  actualizarBotonGuardar();
+});
 
