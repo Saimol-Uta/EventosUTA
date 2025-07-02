@@ -31,7 +31,7 @@ const facultades = facultadesData?.facultades || [];
 
         <!-- Modal para Nueva Asignación -->
         <div id="modalNuevaAsignacion" class="modal" style="display: none;">
-            <div class="modal-contenido" style="max-width: 800px;">
+            <div class="modal-contenido">
                 <span class="cerrar" onclick="cerrarModalNuevaAsignacion()">&times;</span>
                 
                 <div class="modal-header">
@@ -103,7 +103,7 @@ const facultades = facultadesData?.facultades || [];
 
         <!-- Modal para Editar Asignación -->
         <div id="modalEditarAsignacion" class="modal" style="display: none;">
-            <div class="modal-contenido" style="max-width: 800px;">
+            <div class="modal-contenido">
                 <span class="cerrar" onclick="cerrarModalEditarAsignacion()">&times;</span>
                 
                 <div class="modal-header">
@@ -131,8 +131,6 @@ const facultades = facultadesData?.facultades || [];
                             <select id="editarTipoAsignacion" name="tipoAsignacion" required onchange="manejarCambioTipo('editar')">
                                 <option value="GENERAL">General</option>
                                 <option value="CARRERA">Por Carrera</option>
-                                <option value="FACULTAD">Por Facultad</option>
-                                <option value="EXTERNO">Externo</option>
                             </select>
                         </div>
                     </div>
@@ -271,7 +269,9 @@ const facultades = facultadesData?.facultades || [];
         <style>
             /* Estilos específicos para la página de asignaciones */
             .modal {
-                display: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 position: fixed;
                 z-index: 1000;
                 left: 0;
@@ -283,12 +283,14 @@ const facultades = facultadesData?.facultades || [];
 
             .modal-contenido {
                 background-color: #fefefe;
-                margin: 2% auto;
+                /*margin: 2% auto;*/
                 padding: 20px;
                 border: 1px solid #888;
                 border-radius: 10px;
                 max-height: 90vh;
                 overflow-y: auto;
+                width: 90%; /* Ocupa el 90% del ancho disponible */
+                max-width: 800px; /* Pero no más de 800px */
             }
 
             .modal-header {
@@ -408,7 +410,7 @@ const facultades = facultadesData?.facultades || [];
             }
 
             .btn-principal {
-                background: #059669;
+                background: #b01025;
                 color: white;
             }
 
@@ -418,7 +420,7 @@ const facultades = facultadesData?.facultades || [];
             }
 
             .btn-principal:hover {
-                background: #047857;
+                background: #880f1f;
             }
 
             .btn-secundario:hover {
@@ -439,12 +441,12 @@ const facultades = facultadesData?.facultades || [];
             }
 
             .badge-info {
-                background: #3b82f6;
+                background-color: #ad272e;
                 color: white;
             }
 
             .badge-success {
-                background: #10b981;
+                background-color: #28a745;
                 color: white;
             }
 
@@ -488,7 +490,7 @@ const facultades = facultadesData?.facultades || [];
                 // Función para abrir modal de nueva asignación
                 function abrirModalNuevaAsignacion() {
                     const modal = document.getElementById("modalNuevaAsignacion");
-                    if (modal) modal.style.display = "block";
+                    if (modal) modal.style.display = "flex";
                 }
     
                 // Función para cerrar modal de nueva asignación
@@ -503,7 +505,7 @@ const facultades = facultadesData?.facultades || [];
                 // Función para abrir modal de editar asignación
                 function abrirModalEditarAsignacion() {
                     const modal = document.getElementById("modalEditarAsignacion");
-                    if (modal) modal.style.display = "block";
+                    if (modal) modal.style.display = "flex";
                 }
     
                 // Función para cerrar modal de editar asignación
@@ -732,7 +734,7 @@ const facultades = facultadesData?.facultades || [];
                                         icon: "success",
                                         title: "¡Éxito!",
                                         text: "Asignación creada correctamente",
-                                        confirmButtonColor: "#059669",
+                                        confirmButtonColor: "#ad272e",
                                     }).then(() => {
                                         window.location.reload();
                                     });
@@ -790,7 +792,7 @@ const facultades = facultadesData?.facultades || [];
                                         icon: "success",
                                         title: "¡Éxito!",
                                         text: "Asignación actualizada correctamente",
-                                        confirmButtonColor: "#059669",
+                                        confirmButtonColor: "#ad272e",
                                     }).then(() => {
                                         window.location.reload();
                                     });
@@ -809,7 +811,7 @@ const facultades = facultadesData?.facultades || [];
                     }
     
                     // Cerrar modales al hacer clic fuera
-                    window.addEventListener('click', (event) => {
+                    /*window.addEventListener('click', (event) => {
                         const modalNueva = document.getElementById('modalNuevaAsignacion');
                         const modalEditar = document.getElementById('modalEditarAsignacion');
                         
@@ -818,7 +820,7 @@ const facultades = facultadesData?.facultades || [];
                         }
                         if (event.target === modalEditar) {
                             cerrarModalEditarAsignacion();                        }
-                    });
+                    });*/
                 });
 
             // Hacer funciones disponibles globalmente

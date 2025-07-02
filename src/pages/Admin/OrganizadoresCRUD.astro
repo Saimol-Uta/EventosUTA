@@ -270,6 +270,7 @@ type Organizador = {
                 interface Window {
                     eliminarOrganizador: (cedula: string) => Promise<void>;
                     mostrarDetallesOrganizador: (cedula: string) => void;
+                    abrirModalModificarOrganizador: (cedula: string) => void;
                 }
             }
 
