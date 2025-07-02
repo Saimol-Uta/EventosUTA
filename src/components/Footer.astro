@@ -1,7 +1,11 @@
 ---
 const { isLoggedIn } = Astro.locals;
 
-const {Twitter, Facebook, Instagram} = Astro.props;
+const {Twitter, Facebook, Instagram, 
+        Direccion = "Av. Los Chásquis y Río Guayllabamba", 
+        Correo = "talleresfisei@uta.edu.ec", 
+        Solicitud
+} = Astro.props;
 ---
 
 <footer
@@ -94,13 +98,13 @@ const {Twitter, Facebook, Instagram} = Astro.props;
               <svg class="contacto-icon" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
                 <path d="M20 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
               </svg>
-              <p class="texto">talleresfisei@uta.edu.ec</p>
+              <p class="texto">{Correo}</p>
             </div>
 						<div class="contacto-contenido">
               <svg class="contacto-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
               </svg>
-              <p class="texto">Av. Los Chásquis y Río Guayllabamba</p>
+              <p class="texto">{Direccion}</p>
             </div>
         </div>
 
@@ -172,7 +176,7 @@ const {Twitter, Facebook, Instagram} = Astro.props;
                 ) : (
                     <h3 class="titulo"> SUGERENCIAS
             </h3>
-                    <a href="/Formularios/FormularioSolicitudCambioUsuario"
+                    <a href={Solicitud}
                         class="btn-cambios">
                         SOLICITAR CAMBIOS
                     </a>
