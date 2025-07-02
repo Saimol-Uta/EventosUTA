@@ -52,11 +52,11 @@ const totalPaginas = esBusqueda
 function construirUrl(pagina: number) {
     const url = new URL("/cursosCompleto", "http://dummybase");
     
-    // Añadir filtros de manera segura
-    if (filtros.carrera) url.searchParams.set("carrera", String(filtros.carrera));
-    if (filtros.area) url.searchParams.set("area", String(filtros.area));
-    if (filtros.duracion) url.searchParams.set("duracion", String(filtros.duracion));
-    if (filtros.busqueda) url.searchParams.set("busqueda", String(filtros.busqueda));
+    Object.entries(filtros).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+            url.searchParams.set(key, String(value));
+        }
+    });
     
     url.searchParams.set("page", String(pagina));
     return url.pathname + url.search;
