@@ -178,16 +178,29 @@ const eventosUsuario = eventosUsuarioRaw.map((inscripcion) => ({
                                     </div>
                                     <div class="text-sm text-gray-600 mt-1 italic">
                                         Fecha:{" "}
-                                        {evento?.fecha ||
-                                            evento?.fecha ||
-                                            "Sin fecha"}
+                                        {evento?.fecha
+                                            ? new Date(evento.fecha).toLocaleDateString(
+                                                  "es-EC",
+                                                  {
+                                                      year: "numeric",
+                                                      month: "long",
+                                                      day: "numeric",
+                                                  },
+                                              )
+                                            : "Sin fecha"}
                                     </div>
                                     <div class="text-sm text-gray-700">
                                         Estado:{" "}
                                         <span class="font-medium">
-                                            {evento?.estado ||
-                                                evento?.estado ||
-                                                "Inscrito"}
+                                            {evento?.estado === "DPendiente"
+                                                ? "Documentación pendiente"
+                                                : evento?.estado === "FPendiente"
+                                                ? "Facturación pendiente"
+                                                : evento?.estado === "Aprobado"
+                                                ? "Aprobado"
+                                                : evento?.estado === "Rechazado"
+                                                ? "Rechazado"
+                                                : "Inscrito"}
                                         </span>
                                     </div>
                                 </div>
