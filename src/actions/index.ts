@@ -66,6 +66,7 @@ import { crearCategoria, modificarCategoria, eliminarCategoria, getAllCategorias
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
 import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Admin';
+import { CreateUpdatePaginaFacultad, DeletePaginaFacultad, GetPaginaFacultad } from './PerzonalizarPagina';
 
 export const server = {
     getEventos,
@@ -88,7 +89,7 @@ export const server = {
     uploadDocumentImage,
     uploadDocumentPdf,
     modificarCuenta,
-    
+
 
 
     getDatosInscripcion,
@@ -160,5 +161,9 @@ export const server = {
     getAllFacultades,
     getFacultadById,
 
+    // Nuevas acciones para Pagina Facultad
+    CreateUpdatePaginaFacultad,
+    DeletePaginaFacultad,
+    GetPaginaFacultad
 };
 
