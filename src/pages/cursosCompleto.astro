@@ -345,6 +345,8 @@ if (session && session.user) {
     <script src="/js/filtros.js" defer is:inline></script>
 
     <script>
+        import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
         // Funciones para manejar localStorage
         function cargarEventosDestacados() {
             try {
@@ -459,14 +461,20 @@ if (session && session.user) {
             console.log("Eventos a guardar:", Array.from(eventosDestacados));
 
             if (eventosDestacados.size !== 6) {
-                const mensaje =
-                    eventosDestacados.size === 0
-                        ? "No hay eventos seleccionados. Debes seleccionar exactamente 6 eventos."
-                        : `Has seleccionado ${eventosDestacados.size} evento(s). Debes seleccionar exactamente 6 eventos.`;
+    const mensaje =
+        eventosDestacados.size === 0
+            ? "No hay eventos seleccionados. Debes seleccionar exactamente 6 eventos."
+            : `Has seleccionado ${eventosDestacados.size} evento(s). Debes seleccionar exactamente 6 eventos.`;
 
-                alert(mensaje);
-                return;
-            }
+    Swal.fire({
+        icon: 'warning',
+        title: 'Validación de eventos',
+        text: mensaje,
+        confirmButtonText: 'Aceptar',
+    });
+    return;
+}
+
 
             const eventosArray = Array.from(eventosDestacados);
             console.log("Guardando eventos destacados:", eventosArray);
@@ -511,7 +519,13 @@ if (session && session.user) {
                 }
 
                 if (result.success) {
-                    alert(result.message);
+                   Swal.fire({
+    icon: 'success',
+    title: '¡Éxito!',
+    text: result.message,
+    confirmButtonText: 'Aceptar',
+});
+
 
                     // Limpiar la selección de localStorage
                     limpiarEventosDestacados();
@@ -562,7 +576,11 @@ if (session && session.user) {
                     error instanceof Error
                         ? error.message
                         : "Error desconocido";
-                alert("Error al guardar eventos favoritos: " + errorMessage);
+               Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: 'Error al guardar eventos favoritos: ' + errorMessage,
+});
 
                 // Restaurar el botón
                 const botonGuardar = document.getElementById(
@@ -643,30 +661,36 @@ if (session && session.user) {
 
             mensaje += "\n¿Deseas limpiar la selección y empezar de nuevo?";
 
-            if (confirm(mensaje)) {
-                // Limpiar la selección
-                limpiarEventosDestacados();
-                (window as any).eventosDestacados.clear();
+           Swal.fire({
+    title: 'Eventos seleccionados',
+    text: mensaje,
+    icon: 'info',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, limpiar',
+    cancelButtonText: 'Cancelar',
+}).then((result) => {
+    if (result.isConfirmed) {
+        // Limpiar la selección
+        limpiarEventosDestacados();
+        (window as any).eventosDestacados.clear();
 
-                // Actualizar visualmente todos los botones en la página actual
-                document
-                    .querySelectorAll(".destacar-boton.destacado")
-                    .forEach((boton) => {
-                        boton.classList.remove("destacado");
-                        boton.classList.remove(
-                            "bg-yellow-400",
-                            "text-yellow-900",
-                        );
-                        boton.classList.add("bg-white/20", "text-white");
-                        (boton as HTMLButtonElement).title =
-                            "Marcar como destacado";
-                    });
+        document.querySelectorAll(".destacar-boton.destacado").forEach((boton) => {
+            boton.classList.remove("destacado", "bg-yellow-400", "text-yellow-900");
+            boton.classList.add("bg-white/20", "text-white");
+            (boton as HTMLButtonElement).title = "Marcar como destacado";
+        });
 
-                actualizarBotonGuardar();
-                alert(
-                    "Selección limpiada. Puedes empezar a seleccionar eventos de nuevo.",
-                );
-            }
+        actualizarBotonGuardar();
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Listo',
+            text: 'Selección limpiada. Puedes empezar de nuevo.',
+            confirmButtonText: 'Aceptar',
+        });
+    }
+});
+
         }
 
         // Hacer las funciones disponibles globalmente
