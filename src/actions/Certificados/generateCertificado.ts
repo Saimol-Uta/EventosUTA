@@ -10,6 +10,8 @@ export async function generarCertificadoPDF({
   fechaFin,
   duracionHoras,
   fechaGeneracion,
+  nota, // Nuevo campo
+  asistencia, // Nuevo campo
 }: {
   nombreUsuario: string;
   nombreCurso: string;
@@ -17,6 +19,8 @@ export async function generarCertificadoPDF({
   fechaFin: string;
   duracionHoras: string;
   fechaGeneracion: string;
+  nota: number; // Nuevo campo
+  asistencia: number; // Nuevo campo
 }) {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([1920, 1080]);
@@ -44,7 +48,7 @@ export async function generarCertificadoPDF({
     height: height,
   });
 
-  let currentY = 550;
+  let currentY = 650;
 
 
   const nombreUsuarioText = nombreUsuario.toUpperCase();
@@ -56,7 +60,7 @@ export async function generarCertificadoPDF({
     size: 52, 
     color: colors.text,
   });
-  currentY -= 90;
+  currentY -= 70;
 
   const textoParticipado = 'Por haber participado y aprobado el curso de:';
   const textoParticipadoWidth = bodyFont.widthOfTextAtSize(textoParticipado, 30);
@@ -67,7 +71,7 @@ export async function generarCertificadoPDF({
     size: 30,
     color: colors.text,
   });
-  currentY -= 75;
+  currentY -= 70;
 
   const nombreCursoText = nombreCurso.toUpperCase();
   const nombreCursoWidth = titleFont.widthOfTextAtSize(nombreCursoText, 40);
@@ -78,7 +82,7 @@ export async function generarCertificadoPDF({
     size: 40,
     color: colors.primary,
   });
-  currentY -= 75;
+  currentY -= 70;
 
   const combinedText = `del ${fechaInicio} al ${fechaFin}, con una duración de ${duracionHoras} horas académicas.`;
   const combinedTextWidth = bodyFont.widthOfTextAtSize(combinedText, 30);
@@ -89,15 +93,25 @@ export async function generarCertificadoPDF({
     size: 30, 
     color: colors.text,
   });
-  currentY -= 140; 
+  currentY -= 70; 
 
+    const notaAsistenciaText = `Con una calificación de ${nota} y una asistencia del ${asistencia}%.`;
+  const notaAsistenciaTextWidth = bodyFont.widthOfTextAtSize(notaAsistenciaText, 30);
+  page.drawText(notaAsistenciaText, {
+      x: (width - notaAsistenciaTextWidth) / 2,
+      y: currentY,
+      font: bodyFont,
+      size: 30,
+      color: colors.text,
+  });
+  currentY -= 100; 
   const rightMarginForDate = 280;
   const generationDateText = `Ambato, ${fechaGeneracion}`;
-  const dateTextWidth = bodyFont.widthOfTextAtSize(generationDateText, 28);
+  const dateTextWidth = nameFont.widthOfTextAtSize(generationDateText, 28);
   page.drawText(generationDateText, {
     x: width - rightMarginForDate - dateTextWidth,
     y: currentY,
-    font: bodyFont,
+    font: nameFont,
     size: 28, 
     color: colors.text,
   });
