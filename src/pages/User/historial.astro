@@ -90,8 +90,10 @@ if (usuarioId) {
         let mensajeCertificado = "";
         let estadoEvento = "incompleto";
 
+        const estadoEventoBD = inscripcion.eventos.estado_evento ?? "";
+        const eventoRealmenteFinalizado = eventoFinalizado && estadoEventoBD === "FINALIZADO";
+
         if (inscripcion.est_ins === "DPendiente") {
-            // Los documentos de inscripción están pendientes de revisión
             mensajeCertificado =
                 "⏳ En revisión: Tus documentos están siendo validados por un administrador";
             estadoEvento = "En revisión";
@@ -99,11 +101,17 @@ if (usuarioId) {
             mensajeCertificado =
                 "❌ Sin certificado: Necesitas estar aprobado para obtener el certificado";
             estadoEvento = "incompleto";
-        } else if (!eventoFinalizado) {
-            const fechaFin = fechaFinEvento
-                ? fechaFinEvento.toLocaleDateString("es-EC")
-                : "por definir";
-            mensajeCertificado = `⏳ Sin certificado: El evento aún no ha finalizado (termina el ${fechaFin})`;
+        } else if (!eventoRealmenteFinalizado) {
+            let mensaje = "";
+            if (estadoEventoBD !== "FINALIZADO") {
+                mensaje = "⏳ Sin certificado: El evento aún no ha sido marcado como FINALIZADO por la administración.";
+            } else {
+                const fechaFin = fechaFinEvento
+                    ? fechaFinEvento.toLocaleDateString("es-EC")
+                    : "por definir";
+                mensaje = `⏳ Sin certificado: El evento aún no ha finalizado (termina el ${fechaFin})`;
+            }
+            mensajeCertificado = mensaje;
             estadoEvento = "incompleto";
         } else if (
             requiereAsistencia &&
@@ -122,21 +130,17 @@ if (usuarioId) {
             inscripcion.est_ins === "FPendiente" &&
             tieneComprobanteDePago
         ) {
-            // Cumple todo, es evento de pago, el pago está pendiente de revisión y ya subió comprobante
             mensajeCertificado =
                 "⏳ En proceso de revisión: Tu comprobante de pago está siendo revisado";
             estadoEvento = "En proceso de revisión";
         } else {
-            // Cumple todos los requisitos básicos y el pago ya fue aprobado (o es evento gratuito)
             estadoEvento = "completo";
 
             if (!brindaCertificado) {
-                // Si la categoría no brinda certificado, pero cumplió todos los requisitos
                 mensajeCertificado =
                     "ℹ️ Evento completado: Esta categoría no entrega certificado";
                 esCertificadoDisponible = false;
             } else {
-                // Si la categoría brinda certificado y cumple todos los requisitos
                 mensajeCertificado =
                     "✅ Certificado disponible: Cumples todos los requisitos";
                 esCertificadoDisponible = true;
