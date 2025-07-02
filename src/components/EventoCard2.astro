@@ -2,6 +2,7 @@
 import "../styles/global.css";
 
 // Función para formatear duración
+/*
 const formatearDuracion = (horas: number) => {
     if (!horas) return "Sin especificar";
     if (horas < 24) {
@@ -17,7 +18,7 @@ const formatearDuracion = (horas: number) => {
         }
     }
 };
-
+*/
 const {
     imagen,
     titulo,
@@ -106,7 +107,7 @@ const {
                         <circle cx="100" cy="100" r="12" fill="white"></circle>
                     </svg>
 
-                    {formatearDuracion(horas)}
+                    {horas} horas
                 </div>
 
                 {
@@ -226,6 +227,13 @@ const {
         const boton = event.currentTarget as HTMLButtonElement;
         const idEvento = boton.dataset.id;
 
+        // Debug antes del cambio
+        if ((window as any).debugEstadoSeleccion) {
+            (window as any).debugEstadoSeleccion(
+                `Antes de click en evento ${idEvento}`,
+            );
+        }
+
         // Verificar si está en la selección temporal del usuario
         const estaEnSeleccionTemporal = (window as any).eventosDestacados.has(
             idEvento,
@@ -262,6 +270,20 @@ const {
             "Eventos destacados:",
             Array.from((window as any).eventosDestacados),
         );
+
+        // Debug después del cambio
+        if ((window as any).debugEstadoSeleccion) {
+            (window as any).debugEstadoSeleccion(
+                `Después de click en evento ${idEvento}`,
+            );
+        }
+
+        // Verificar integridad después del cambio
+        setTimeout(() => {
+            if ((window as any).verificarIntegridadSeleccion) {
+                (window as any).verificarIntegridadSeleccion();
+            }
+        }, 50);
     }
 
     // Función separada para actualizar la visualización de los botones
@@ -294,38 +316,23 @@ const {
                 window as any
             ).eventosDestacados.has(idEvento);
 
-            // Verificar si ya está destacado en la base de datos (por el estilo CSS inicial)
-            const yaDestacadoEnBD = boton.classList.contains("bg-yellow-400");
-
             console.log(
-                `EventoCard2: Evento ${idEvento} - enSeleccion: ${estaEnSeleccionTemporal}, enBD: ${yaDestacadoEnBD}`,
+                `EventoCard2: Evento ${idEvento} - enSeleccion: ${estaEnSeleccionTemporal}`,
             );
 
-            // Si está en la selección temporal, marcarlo visualmente como seleccionado
+            // Actualizar visualmente basado SOLO en la selección temporal
+            // No considerar el estado de la BD para evitar conflictos
             if (estaEnSeleccionTemporal) {
                 boton.classList.add("destacado");
                 boton.classList.remove("bg-white/20", "text-white");
                 boton.classList.add("bg-yellow-400", "text-yellow-900");
                 (boton as HTMLButtonElement).title = "Quitar de destacados";
-            }
-            // Si ya está destacado en la BD pero NO está en la selección temporal,
-            // significa que se acaba de sincronizar y debe agregarse a la selección
-            else if (yaDestacadoEnBD && !estaEnSeleccionTemporal) {
-                // Agregar a la selección temporal para mantener sincronización
-                (window as any).eventosDestacados.add(idEvento);
-
-                // Guardar en localStorage
-                const funcionGuardar =
-                    (window as any).guardarEventosDestacados ||
-                    guardarEventosDestacadosLocal;
-                funcionGuardar((window as any).eventosDestacados);
-
-                boton.classList.add("destacado");
-                (boton as HTMLButtonElement).title = "Quitar de destacados";
-
-                console.log(
-                    `EventoCard2: Evento ${idEvento} sincronizado desde BD a selección temporal`,
-                );
+            } else {
+                // No está en selección temporal, mostrar como no seleccionado
+                boton.classList.remove("destacado");
+                boton.classList.remove("bg-yellow-400", "text-yellow-900");
+                boton.classList.add("bg-white/20", "text-white");
+                (boton as HTMLButtonElement).title = "Marcar como destacado";
             }
         });
 
@@ -383,6 +390,13 @@ const {
                 inicializarBotonesDestacar();
             }
         }, 200);
+
+        // Escuchar cambios de página para re-inicializar
+        window.addEventListener("pageshow", function () {
+            setTimeout(() => {
+                inicializarBotonesDestacar();
+            }, 100);
+        });
     });
 </script>
 

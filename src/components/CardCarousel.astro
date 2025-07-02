@@ -4,6 +4,7 @@ const { imagen, titulo, resumen, minutos, slug, precio, fechaIni } =
   Astro.props;
 
 // Ahora 'minutos' representa horas en la base de datos
+/*
 const formatearDuracion = (horas: number) => {
   if (horas < 24) {
     // Menos de 24 horas
@@ -24,6 +25,7 @@ const formatearDuracion = (horas: number) => {
     }
   }
 };
+*/
 
 const formatearFecha = (fecha?: string | Date | null): string => {
   if (!fecha) return "Fecha no disponible";
@@ -85,7 +87,7 @@ const formatearFecha = (fecha?: string | Date | null): string => {
             <!-- Centro del reloj -->
             <circle cx="100" cy="100" r="12" fill="white"></circle>
           </svg>
-          {formatearDuracion(minutos)}
+          {minutos} horas
         </div>
 
         {

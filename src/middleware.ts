@@ -2,26 +2,108 @@ import { defineMiddleware } from 'astro:middleware';
 import { getSession } from "auth-astro/server";
 
 // Rutas específicas por rol
-const adminRoutes = ['/homeAdmin', '/admin/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD', '/Admin/Asignaciones']; // Añadir más rutas de admin aquí
-const studentRoutes = ['/homeUser', '/student/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de estudiante aquí
-const userRoutes = ['/homeUser', '/user/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser']; // Añadir más rutas de usuario aquí
-const masterRoutes = ['/homeAdmin', '/master/*', '/Eventos/*', '/Inscripcion/Inscripcion', '/buscarCertificado', '/Formularios/FormularioSolicitudCambioUsuario', '/cursosCompleto', '/CompletarPerfilUser', '/Admin/EventosCRUD', '/Admin/Asignaciones']; // Añadir más rutas de master aquí
+const adminRoutes = [
+    '/homeAdmin',
+    '/Admin/*',
+    '/Admin/AprobacionInscripciones',
+    '/Admin/Asignaciones',
+    '/Admin/AsignacionesNuevo',
+    '/Admin/CarrerasCRUD',
+    '/Admin/CategoriasCRUD',
+    '/Admin/EventosCRUD',
+    '/Admin/gestionEventos',
+    '/Admin/OrganizadoresCRUD',
+    '/Admin/UsuariosCRUD',
+    '/Eventos/*',
+    '/Inscripcion/Inscripcion',
+    '/Formularios/FormularioSolicitudCambioUsuario',
+    '/CompletarPerfilUser',
+    '/PerfilUserDos',
+    '/inscripciones/*',
+    '/participantes/*'
+];
+
+const studentRoutes = [
+    '/homeUser',
+    '/User/certificadosUsuario',
+    '/User/CompletarPerfilUser',
+    '/User/EventosUser',
+    '/User/historial',
+    '/User/buscarCertificado',
+    '/User/cursosCompleto',
+    '/User/eventosProximos',
+    '/Eventos/*',
+    '/Inscripcion/Inscripcion',
+    '/buscarCertificado',
+    '/Formularios/FormularioSolicitudCambioUsuario',
+    '/CompletarPerfilUser'
+    , '/PerfilUserDos'
+];
+
+const userRoutes = [
+    '/homeUser',
+    '/User/certificadosUsuario',
+    '/User/CompletarPerfilUser',
+    '/User/EventosUser',
+    '/User/historial',
+    '/User/buscarCertificado',
+    '/User/cursosCompleto',
+    '/User/eventosProximos',
+    '/Eventos/*',
+    '/Inscripcion/Inscripcion',
+    '/buscarCertificado',
+    '/Formularios/FormularioSolicitudCambioUsuario',
+    '/CompletarPerfilUser'
+    , '/PerfilUserDos'
+];
+
+const masterRoutes = [
+    '/homeAdmin',
+    '/Admin/*',
+    '/Admin/AprobacionInscripciones',
+    '/Admin/Asignaciones',
+    '/Admin/AsignacionesNuevo',
+    '/Admin/CarrerasCRUD',
+    '/Admin/CategoriasCRUD',
+    '/Admin/EventosCRUD',
+    '/Admin/gestionEventos',
+    '/Admin/OrganizadoresCRUD',
+    '/Admin/UsuariosCRUD',
+    '/Eventos/*',
+    '/Inscripcion/Inscripcion',
+    '/Formularios/FormularioSolicitudCambioUsuario',
+    '/CompletarPerfilUser',
+    '/PerfilUserDos',
+    '/inscripciones/*',
+    '/participantes/*'
+];
 
 
-// Rutas que no requieren autenticación
+// Rutas que no requieren autenticación (login y registro)
 const noAuthRoutes = ['/login', '/register', '/'];
 
 // Rutas públicas accesibles por todos (autenticados y no autenticados)
 const publicRoutes = [
-    '/*',
-    '/Admin/*',
+    '/', // La raíz, manejada explícitamente para redirección de usuarios logueados
+    '/login',
+    '/register',
     '/img/usuario.png',
     '/default-avatar.png',
     '/favicon.ico',
     '/about',
-    '/Eventos/historial',
     '/contact',
-    // Añadir aquí todas las rutas que deben ser accesibles por usuarios autenticados
+    '/cursosCompleto',
+    '/Eventos/*',
+    '/User/verificar-cuenta',
+    '/public/*',
+    '/api/*'
+];
+
+const eventosExcludedSubroutes = [
+    '/Eventos/Pago',
+    '/Eventos/Pago/*',
+    '/Eventos/Evento-Inscripcion',
+    '/Eventos/Evento-Inscripcion/*',
 ];
 
 // Función para verificar si una ruta coincide con los patrones permitidos
@@ -29,6 +111,16 @@ function isRouteAllowed(pathname: string, allowedRoutes: string[]): boolean {
     return allowedRoutes.some(route => {
         if (route.endsWith('/*')) {
             // Patrón wildcard: /admin/* permite /admin/cualquier-cosa
+            const baseRoute = route.slice(0, -2);
+            return pathname.startsWith(baseRoute);
+        }
+        return pathname === route;
+    });
+}
+
+function isRouteExcluded(pathname: string, excludedRoutes: string[]): boolean {
+    return excludedRoutes.some(route => {
+        if (route.endsWith('/*')) {
             const baseRoute = route.slice(0, -2);
             return pathname.startsWith(baseRoute);
         }
@@ -68,7 +160,7 @@ export const onRequest = defineMiddleware(async ({ url, request, locals, redirec
     locals.isMaster = user?.rol === 'MASTER' || user?.rol === 'master';
 
     // Si la ruta es pública, permitir acceso
-    if (isRouteAllowed(url.pathname, publicRoutes)) {
+    if (isRouteAllowed(url.pathname, publicRoutes) && !isRouteExcluded(url.pathname, eventosExcludedSubroutes)) {
         return next();
     }
 
@@ -93,13 +185,13 @@ export const onRequest = defineMiddleware(async ({ url, request, locals, redirec
     if (isLoggedIn) {
         let hasAccess = false;
 
-        if (locals.isAdmin && isRouteAllowed(url.pathname, adminRoutes)) {
+        if (locals.isAdmin && isRouteAllowed(url.pathname, adminRoutes) && !isRouteExcluded(url.pathname, eventosExcludedSubroutes)) {
             hasAccess = true;
         } else if (locals.isStudent && isRouteAllowed(url.pathname, studentRoutes)) {
             hasAccess = true;
         } else if (locals.isUser && isRouteAllowed(url.pathname, userRoutes)) {
             hasAccess = true;
-        } else if (locals.isMaster && isRouteAllowed(url.pathname, masterRoutes)) {
+        } else if (locals.isMaster && isRouteAllowed(url.pathname, masterRoutes) && !isRouteExcluded(url.pathname, eventosExcludedSubroutes)) {
             hasAccess = true;
         }
 

@@ -1538,12 +1538,15 @@ const links = [
                         "Configurando modal para evento CON puntaje, valor:",
                         notaActual,
                     );
-                    notaNumber.style.display = "block";
-                    notaNoAplicable.style.display = "none";
-                    notaInfo.style.display = "block";
-                    notaNumber.setAttribute("name", "nota");
-                    notaNumber.value =
-                        notaActual === "Sin calificar" ? "" : notaActual;
+                    if (notaNumber) {
+                        notaNumber.style.display = "block";
+                        notaNoAplicable.style.display = "none";
+                        notaInfo.style.display = "block";
+                        notaNumber.setAttribute("name", "nota"); // <--- ASEGÚRATE QUE SIEMPRE TENGA 'name' SI SE VA A ENVIAR
+                        // ¡Aquí está la clave! Si notaActual es "0" o "Sin calificar", se convierte a cadena vacía.
+                        notaNumber.value =
+                            notaActual === "Sin calificar" ? "" : notaActual;
+                    }
                     puntajeMin.textContent = puntajeAprobacion.toString();
                 }
                 console.log("=== FIN CONFIGURACIÓN ===");
@@ -1578,6 +1581,8 @@ const links = [
                 "filtroEstado",
             ) as HTMLSelectElement;
 
+            console.log("Formulario encontrado al cargar el DOM:", form);
+
             if (closeBtn && modal) {
                 closeBtn.addEventListener("click", function () {
                     modal.style.display = "none";
@@ -1595,14 +1600,44 @@ const links = [
                 form.addEventListener("submit", async function (e) {
                     e.preventDefault();
 
+                    // Validación manual para evitar valores inválidos en inputs tipo number
+                    const asistenciaInput = document.getElementById("asistencia-number") as HTMLInputElement;
+                    const notaInput = document.getElementById("nota-number") as HTMLInputElement;
+                    const formData = new FormData(this);
+                    if (asistenciaInput && asistenciaInput.hasAttribute("name")) {
+                        if (asistenciaInput.value !== "" && isNaN(Number(asistenciaInput.value))) {
+                            Swal.fire({
+                                title: "Error",
+                                text: "El valor de asistencia no es válido.",
+                                icon: "error",
+                                confirmButtonText: "OK",
+                            });
+                            return;
+                        }
+                    }
+                    if (asistenciaInput && asistenciaInput.hasAttribute("name") && asistenciaInput.value !== "") {
+                        formData.append("nota", asistenciaInput.value);
+                    }
+                    
+                    if (notaInput && notaInput.hasAttribute("name") && notaInput.value !== "") {
+                        formData.append("nota", notaInput.value);
+                    }
+
                     const participanteId = modal.dataset.participanteId;
                     if (!participanteId) {
                         alert("Error: No se pudo identificar al participante");
                         return;
                     }
 
-                    const formData = new FormData(this);
                     formData.append("inscripcionId", participanteId);
+
+                    // ============ AÑADE ESTOS CONSOLE.LOGS ============
+                    console.log("=== Debugging FormData antes de enviar ===");
+                    for (let pair of formData.entries()) {
+                        console.log(pair[0] + ": " + pair[1]);
+                    }
+                    console.log("=========================================");
+                    // ===================================================
 
                     try {
                         const { data, error } =
@@ -1948,19 +1983,23 @@ const links = [
                         const formData = new FormData();
                         formData.append("inscripcionId", participanteId || "");
                         if (
-                            asistencia &&
+                            asistencia !== undefined &&
+                            asistencia !== null &&
+                            asistencia !== "" &&
                             asistencia !== "null" &&
                             asistencia !== "undefined"
                         ) {
-                            formData.append("asistencia", asistencia);
+                            formData.append("asistencia", String(asistencia));
                         }
                         if (
-                            nota &&
+                            nota !== undefined &&
+                            nota !== null &&
+                            nota !== "" &&
                             nota !== "null" &&
                             nota !== "undefined" &&
                             nota !== "Sin calificar"
                         ) {
-                            formData.append("nota", nota);
+                            formData.append("nota", String(nota));
                         }
 
                         const { data, error } =
@@ -2053,19 +2092,22 @@ const links = [
                         const formData = new FormData();
                         formData.append("inscripcionId", participanteId || "");
                         if (
-                            asistencia &&
+                            typeof asistencia === "string" &&
+                            asistencia !== "" &&
                             asistencia !== "null" &&
                             asistencia !== "undefined"
                         ) {
                             formData.append("asistencia", asistencia);
                         }
                         if (
-                            nota &&
+                            nota !== undefined &&
+                            nota !== null &&
+                            nota !== "" &&
                             nota !== "null" &&
                             nota !== "undefined" &&
                             nota !== "Sin calificar"
                         ) {
-                            formData.append("nota", nota);
+                            formData.append("nota", String(nota));
                         }
 
                         const { data, error } =

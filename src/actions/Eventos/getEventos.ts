@@ -9,13 +9,18 @@ export const getEventos = defineAction({
     handler: async () => {
         try {
             const eventos = await prisma.eventos.findMany({
+                where: {
+                    estado_evento: {
+                        not: "FINALIZADO"
+                    }
+                },
                 orderBy: {
                     nom_eve: 'asc'
                 }
             });
             return {
                 success: true,
-                eventos: eventos as Eventos[]
+                eventos: eventos as unknown as Eventos[]
             };
         } catch (error) {
             return {
