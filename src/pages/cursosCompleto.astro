@@ -48,10 +48,12 @@ if (session && session.user) {
             >
                 <input
                     type="text"
+                    id="input-busqueda"
                     placeholder="Buscar evento"
                     class="input-busqueda flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400 px-4 py-2 text-sm"
                 />
                 <button
+                    id="btn-busqueda"
                     class="btn-buscar text-white px-4 flex items-center justify-center transition duration-300"
                     title="Buscar"
                 >
@@ -340,6 +342,157 @@ if (session && session.user) {
 
         .btn-favorito.activo {
             color: rgb(229, 5, 16);
+        }
+
+        /* Estilos para el buscador */
+        .input-busqueda:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-buscar:hover {
+            background-color: rgb(90, 15, 15);
+        }
+
+        .btn-buscar:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(108, 19, 19, 0.3);
+        }
+
+        /* Animación para resultados de búsqueda */
+        .evento-card, .contenedor-evento, [data-evento] {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .evento-card[style*="display: none"], 
+        .contenedor-evento[style*="display: none"], 
+        [data-evento][style*="display: none"] {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        /* Mejoras visuales para sin resultados */
+        .cursos-sin-resultados {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            color: #666;
+            background-color: #fafafa;
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            margin: 40px auto;
+            max-width: 500px;
+        }
+
+        .icono-vacio {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+
+        .titulo-vacio {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #8a1538;
+            margin-bottom: 10px;
+        }
+
+        .texto-vacio {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Estilos para el contador de resultados */
+        .contador-resultados {
+            margin: 20px 18px;
+            padding: 0;
+        }
+
+        .resultado-busqueda {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .resultado-busqueda strong {
+            color: rgb(108, 19, 19);
+            font-weight: 600;
+        }
+
+        .btn-limpiar-busqueda {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: rgb(108, 19, 19);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-limpiar-busqueda:hover {
+            background-color: rgba(108, 19, 19, 0.1);
+        }
+
+        .btn-limpiar-busqueda svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Animaciones mejoradas para las tarjetas */
+        .card-evento {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-evento[style*="display: none"] {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            pointer-events: none;
+        }
+
+        /* Indicador visual de búsqueda activa */
+        .input-busqueda:not(:placeholder-shown) {
+            background-color: rgba(108, 19, 19, 0.05);
+            border-color: rgb(108, 19, 19);
+        }
+
+        /* Efecto de focus en el input */
+        .input-busqueda:focus {
+            box-shadow: 0 0 0 3px rgba(108, 19, 19, 0.1);
+        }
+
+        /* Responsive para dispositivos móviles */
+        @media (max-width: 768px) {
+            .flex.justify-end.my-3.absolute.right-16.bottom-1 {
+                position: relative;
+                right: auto;
+                bottom: auto;
+                justify-content: center;
+                margin: 20px 0;
+            }
+
+            .resultado-busqueda {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .btn-limpiar-busqueda {
+                align-self: flex-end;
+            }
         }
     </style>
     <script src="/js/filtros.js" defer is:inline></script>
@@ -700,6 +853,156 @@ if (session && session.user) {
                     detail: { eventosDestacados: eventosDestacadosGuardados },
                 }),
             );
+
+            // Inicializar funcionalidad del buscador
+            inicializarBuscador();
         });
+
+        // Función para inicializar el buscador
+        function inicializarBuscador() {
+            const inputBusqueda = document.getElementById('input-busqueda') as HTMLInputElement;
+            const btnBusqueda = document.getElementById('btn-busqueda') as HTMLButtonElement;
+            const contenedorEventos = document.querySelector('.contenedor') as HTMLElement;
+            const sinResultados = document.querySelector('.cursos-sin-resultados') as HTMLElement;
+
+            if (!inputBusqueda || !btnBusqueda) return;
+
+            // Función para realizar la búsqueda
+            function realizarBusqueda() {
+                const termino = inputBusqueda.value.trim().toLowerCase();
+                
+                // Obtener todas las tarjetas de eventos
+                const tarjetasEventos = document.querySelectorAll('.card-evento');
+                let eventosVisibles = 0;
+
+                tarjetasEventos.forEach((tarjeta) => {
+                    const elemento = tarjeta as HTMLElement;
+                    
+                    // Buscar en diferentes elementos de la tarjeta
+                    const titulo = elemento.querySelector('.titulo')?.textContent?.toLowerCase() || '';
+                    const dataTitulo = elemento.getAttribute('data-titulo') || '';
+                    const categoria = elemento.querySelector('.etiqueta')?.textContent?.toLowerCase() || '';
+                    const textoCompleto = elemento.textContent?.toLowerCase() || '';
+                    
+                    // Verificar si el término de búsqueda coincide
+                    const coincide = termino === '' || 
+                                   titulo.includes(termino) || 
+                                   dataTitulo.includes(termino) ||
+                                   categoria.includes(termino) ||
+                                   textoCompleto.includes(termino);
+
+                    if (coincide) {
+                        elemento.style.display = '';
+                        elemento.style.opacity = '1';
+                        elemento.style.transform = 'scale(1)';
+                        eventosVisibles++;
+                    } else {
+                        elemento.style.display = 'none';
+                        elemento.style.opacity = '0';
+                        elemento.style.transform = 'scale(0.95)';
+                    }
+                });
+
+                // Mostrar/ocultar mensaje de "sin resultados"
+                if (sinResultados) {
+                    if (eventosVisibles === 0 && termino !== '') {
+                        sinResultados.style.display = 'flex';
+                    } else {
+                        sinResultados.style.display = 'none';
+                    }
+                }
+
+                // Actualizar contador de resultados
+                actualizarContadorResultados(eventosVisibles, termino);
+
+                // Actualizar URL con el término de búsqueda
+                if (termino) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('buscar', termino);
+                    window.history.replaceState({}, '', url.toString());
+                } else {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('buscar');
+                    window.history.replaceState({}, '', url.toString());
+                }
+            }
+
+            // Función para mostrar contador de resultados
+            function actualizarContadorResultados(cantidad: number, termino: string) {
+                let contadorExistente = document.querySelector('.contador-resultados');
+                
+                if (termino && cantidad > 0) {
+                    if (!contadorExistente) {
+                        contadorExistente = document.createElement('div');
+                        contadorExistente.className = 'contador-resultados';
+                        
+                        // Insertar después del título
+                        const seccionPrincipal = document.querySelector('.seccion-principal');
+                        const filtrosActivos = document.querySelector('.filtros-activos');
+                        
+                        if (filtrosActivos) {
+                            filtrosActivos.insertAdjacentElement('afterend', contadorExistente);
+                        } else if (seccionPrincipal) {
+                            seccionPrincipal.insertAdjacentElement('afterbegin', contadorExistente);
+                        }
+                    }
+                    
+                    contadorExistente.innerHTML = `
+                        <div class="resultado-busqueda">
+                            <span>Mostrando ${cantidad} resultado${cantidad !== 1 ? 's' : ''} para "<strong>${termino}</strong>"</span>
+                            <button onclick="limpiarBusqueda()" class="btn-limpiar-busqueda">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>
+                                Limpiar búsqueda
+                            </button>
+                        </div>
+                    `;
+                } else if (contadorExistente) {
+                    contadorExistente.remove();
+                }
+            }
+
+            // Función para limpiar la búsqueda
+            function limpiarBusqueda() {
+                inputBusqueda.value = '';
+                realizarBusqueda();
+                inputBusqueda.focus();
+            }
+
+            // Event listeners
+            btnBusqueda.addEventListener('click', realizarBusqueda);
+            
+            inputBusqueda.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    realizarBusqueda();
+                } else if (e.key === 'Escape') {
+                    limpiarBusqueda();
+                } else {
+                    // Búsqueda en tiempo real con debounce
+                    clearTimeout((window as any).busquedaTimeout);
+                    (window as any).busquedaTimeout = setTimeout(realizarBusqueda, 300);
+                }
+            });
+
+            inputBusqueda.addEventListener('input', () => {
+                // Si el input está vacío, limpiar inmediatamente
+                if (inputBusqueda.value.trim() === '') {
+                    limpiarBusqueda();
+                }
+            });
+
+            // Cargar término de búsqueda desde URL si existe
+            const urlParams = new URLSearchParams(window.location.search);
+            const terminoBusqueda = urlParams.get('buscar');
+            if (terminoBusqueda) {
+                inputBusqueda.value = terminoBusqueda;
+                setTimeout(realizarBusqueda, 100); // Pequeño delay para asegurar que el DOM esté listo
+            }
+
+            // Hacer funciones disponibles globalmente
+            (window as any).realizarBusqueda = realizarBusqueda;
+            (window as any).limpiarBusqueda = limpiarBusqueda;
+        }
     </script>
 </Layout>
