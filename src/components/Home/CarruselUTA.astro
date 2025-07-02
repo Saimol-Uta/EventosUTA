@@ -1,5 +1,6 @@
 ---
 import "../../styles/CarruselUTA.css";
+const {img1, img2, img3, tit_caru1, tit_caru2, tit_caru3,des_caru1, des_caru2, des_caru3} = Astro.props;
 const { modoAdmin = false } = Astro.props;
 ---
 
@@ -7,28 +8,28 @@ const { modoAdmin = false } = Astro.props;
   <div class="list">
     {[
       {
-        img: "/img/Home/carrusel_1_1.jpg",
+        img: img1,
         alt: "Imagen 1",
-        title: "Eventos",
-        desc: "Participa en eventos de todas las áreas de la ingeniería y la tecnología.",
+        title: tit_caru1,
+        desc: des_caru1,
         href: "/cursosCompleto",
         btn: "Ver Eventos",
         name: "img1"
       },
       {
-        img: "/img/Home/carrusel_2.jpeg",
+        img: img2,
         alt: "Imagen 2",
-        title: "Cursos",
-        desc: "Expande tus conocimientos con el apoyo de los mejores profesionales",
+        title: tit_caru2,
+        desc: des_caru2,
         href: "/cursosCompleto",
         btn: "Ver Cursos",
         name: "img2"
       },
       {
-        img: "/img/Home/carrusel_4.jpeg",
+        img: img3,
         alt: "Imagen 3",
-        title: "Certificados",
-        desc: "Impulsa tu currículum con certificados avalados y reconocidos.",
+        title: tit_caru3,
+        desc: des_caru3,
         href: "/buscarCertificado",
         btn: "Verificar certificado",
         name: "img3"
@@ -44,18 +45,7 @@ const { modoAdmin = false } = Astro.props;
           />
           <div class="image-overlay"></div>
 
-          {modoAdmin && (
-            <>
-              <input type="file" class="hidden" accept="image/*" id={`file-${item.name}`} on:change={`previewImage(event, '${item.name}')`} />
-          <button
-  type="button"
-  onclick={`document.getElementById('file-${item.name}').click()`}
-  class="absolute top-2 right-6 bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white px-3 py-1.5 text-xs font-semibold rounded-full shadow-md hover:from-red-500 hover:to-red-700 transition duration-300 z-20"
->
-  ✎ Cambiar imagen
-</button>
-            </>
-          )}
+         
         </div>
         <div class="content">
           <div class="title">{item.title}</div>

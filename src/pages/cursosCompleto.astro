@@ -12,9 +12,9 @@ import ContenedorEventos from "../components/ContenedorEvento.astro";
 // Extraer filtros desde la URL
 const url = new URL(Astro.request.url);
 const filtros = {
-  carrera: url.searchParams.get("carrera") || "",
-  area: url.searchParams.get("area") || "",
-  duracion: url.searchParams.get("duracion") || "",
+    carrera: url.searchParams.get("carrera") || "",
+    area: url.searchParams.get("area") || "",
+    duracion: url.searchParams.get("duracion") || "",
 };
 
 // Extraer número de página, por defecto 1
@@ -27,302 +27,679 @@ const session = await getSession(Astro.request);
 let esAdmin = false;
 
 if (session && session.user) {
-  const user = session.user as CustomUser;
-  const rol = user.rol?.toUpperCase();
-  if (rol === "ADMINISTRADOR" || rol === "MASTER") {
-    esAdmin = true;
-  }
+    const user = session.user as CustomUser;
+    const rol = user.rol?.toUpperCase();
+    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
+        esAdmin = true;
+    }
 }
 ---
 
 <Layout>
-  <Header />
-  {esAdmin ? <MenuAdmin /> : <Navbar />}
+    <Header />
+    {esAdmin ? <MenuAdmin /> : <Navbar />}
 
-  <section class="contenedor-titulo">
-    <Filtros />
-    <!-- Buscador -->
-    <div class="flex justify-end my-3 absolute right-16 bottom-1">
-      <div
-        class="flex items-stretch w-full max-w-sm bg-white shadow-md ring-1 ring-[#800000] overflow-hidden"
-      >
-        <input
-          type="text"
-          placeholder="Buscar evento"
-          class="input-busqueda flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400 px-4 py-2 text-sm"
+    <section class="contenedor-titulo">
+        <Filtros />
+        <!-- Buscador -->
+        <div class="flex justify-end my-3 absolute right-16 bottom-1">
+            <div
+                class="flex items-stretch w-full max-w-sm bg-white shadow-md ring-1 ring-[#800000] overflow-hidden"
+            >
+                <input
+                    type="text"
+                    placeholder="Buscar evento"
+                    class="input-busqueda flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400 px-4 py-2 text-sm"
+                />
+                <button
+                    class="btn-buscar text-white px-4 flex items-center justify-center transition duration-300"
+                    title="Buscar"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M21 21l-4.35-4.35m0 0A7 7 0 104.64 4.64a7 7 0 0011.01 11.01z"
+                        ></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="contenedor-interno">
+            <h2 class="titulo-seccion">Eventos</h2>
+            <span class="block h-[3px] w-[66px] bg-red-900"></span>
+        </div>
+    </section>
+    <section class="seccion-principal">
+        {
+            (filtros.carrera || filtros.area || filtros.duracion) && (
+                <div class="filtros-activos">
+                    <span class="titulo-filtros"> Filtros aplicados:</span>
+
+                    {filtros.carrera && (
+                        <span class="filtro-tag">
+                            Carrera: <strong>{filtros.carrera}</strong>
+                            <button
+                                class="cerrar-filtro"
+                                onclick="quitarFiltro('carrera')"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    )}
+
+                    {filtros.area && (
+                        <span class="filtro-tag">
+                            Área: <strong>{filtros.area}</strong>
+                            <button
+                                class="cerrar-filtro"
+                                onclick="quitarFiltro('area')"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    )}
+
+                    {filtros.duracion && (
+                        <span class="filtro-tag">
+                            Duración: <strong>{filtros.duracion}</strong>
+                            <button
+                                class="cerrar-filtro"
+                                onclick="quitarFiltro('duracion')"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    )}
+
+                    <a href="/cursosCompleto" class="btn-limpiar-filtros">
+                        Ver todos los cursos
+                    </a>
+                </div>
+            )
+        }
+
+        <!-- Eventos filtrados con paginación -->
+        <ContenedorEventos
+            filtros={filtros}
+            page={page}
+            cursosPorPagina={cursosPorPagina}
+            modoAdmin={esAdmin}
         />
-        <button
-          class="btn-buscar text-white px-4 flex items-center justify-center transition duration-300"
-          title="Buscar"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M21 21l-4.35-4.35m0 0A7 7 0 104.64 4.64a7 7 0 0011.01 11.01z"
-            ></path>
-          </svg>
-        </button>
-      </div>
-    </div>
+        {
+            esAdmin && (
+                <div style="margin-top: 20px; text-align: right;">
+                    <div
+                        id="mensaje-validacion"
+                        style="margin-bottom: 10px; font-size: 14px; color: #8a1538; display: none;"
+                    />
+                    <button
+                        id="btn-guardar-favoritos"
+                        class="btn-buscar"
+                        disabled
+                        onclick="guardarFavoritos()"
+                    >
+                        Guardar Eventos Favoritos
+                    </button>
+                    <div style="margin-top: 5px; font-size: 12px; color: #666;">
+                        <em>
+                            Selecciona exactamente 6 eventos para guardar como
+                            destacados
+                        </em>
+                    </div>
+                </div>
+            )
+        }
 
-    <div class="contenedor-interno">
-      <h2 class="titulo-seccion">Eventos</h2>
-      <span class="block h-[3px] w-[66px] bg-red-900"></span>
-    </div>
-  </section>
-  <section class="seccion-principal">
-    {
-      (filtros.carrera || filtros.area || filtros.duracion) && (
-        <div class="filtros-activos">
-          <span class="titulo-filtros"> Filtros aplicados:</span>
-
-          {filtros.carrera && (
-            <span class="filtro-tag">
-              Carrera: <strong>{filtros.carrera}</strong>
-              <button class="cerrar-filtro" onclick="quitarFiltro('carrera')">
-                ×
-              </button>
-            </span>
-          )}
-
-          {filtros.area && (
-            <span class="filtro-tag">
-              Área: <strong>{filtros.area}</strong>
-              <button class="cerrar-filtro" onclick="quitarFiltro('area')">
-                ×
-              </button>
-            </span>
-          )}
-
-          {filtros.duracion && (
-            <span class="filtro-tag">
-              Duración: <strong>{filtros.duracion}</strong>
-              <button class="cerrar-filtro" onclick="quitarFiltro('duracion')">
-                ×
-              </button>
-            </span>
-          )}
-
-        <a href="/cursosCompleto" class="btn-limpiar-filtros">
-            Ver todos los cursos
-          </a>
+        <div class="cursos-sin-resultados" style="display: none;">
+            <svg
+                class="icono-vacio"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 64 64"
+                fill="none"
+            >
+                <circle
+                    cx="32"
+                    cy="32"
+                    r="30"
+                    stroke="#8A1538"
+                    stroke-width="3"
+                    fill="#fff8f8"></circle>
+                <circle cx="22" cy="24" r="4" fill="#8A1538"></circle>
+                <circle cx="42" cy="24" r="4" fill="#8A1538"></circle>
+                <path
+                    d="M22 44c2.5-4 9.5-4 12 0"
+                    stroke="#8A1538"
+                    stroke-width="2.5"
+                    stroke-linecap="round"></path>
+            </svg>
+            <p class="titulo-vacio">¡Ups! No se encontraron resultados</p>
+            <p class="texto-vacio">Prueba buscando otro evento</p>
         </div>
-        
-      )
-    }
+    </section>
 
-    <!-- Eventos filtrados con paginación -->
-    <ContenedorEventos
-      filtros={filtros}
-      page={page}
-      cursosPorPagina={cursosPorPagina}
-      modoAdmin={esAdmin}
-    />
-    {
-      esAdmin && (
-        <div style="margin-top: 20px; text-align: right;">
-          <button
-            id="btn-guardar-favoritos"
-            class="btn-buscar"
-            disabled
-            onclick="guardarFavoritos()"
-          >
-            Guardar Eventos Favoritos
-          </button>
-        </div>
-      )
-    }
+    <style>
+        .seccion-principal {
+            padding: 20px 40px;
+        }
 
-    <div class="cursos-sin-resultados" style="display: none;">
-      <svg
-        class="icono-vacio"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 64 64"
-        fill="none"
-      >
-        <circle
-          cx="32"
-          cy="32"
-          r="30"
-          stroke="#8A1538"
-          stroke-width="3"
-          fill="#fff8f8"></circle>
-        <circle cx="22" cy="24" r="4" fill="#8A1538"></circle>
-        <circle cx="42" cy="24" r="4" fill="#8A1538"></circle>
-        <path
-          d="M22 44c2.5-4 9.5-4 12 0"
-          stroke="#8A1538"
-          stroke-width="2.5"
-          stroke-linecap="round"></path>
-      </svg>
-      <p class="titulo-vacio">¡Ups! No se encontraron resultados</p>
-      <p class="texto-vacio">Prueba buscando otro evento</p>
-    </div>
-  </section>
+        .contenedor-titulo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgb(245, 245, 245);
+            height: 180px;
+            position: relative;
+            padding-bottom: 30px;
+        }
 
-  <style>
-    .seccion-principal {
-      padding: 20px 40px;
-    }
+        .contenedor-interno {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
 
-    .contenedor-titulo {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: rgb(245, 245, 245);
-      height: 180px;
-      position: relative;
-      padding-bottom: 30px;
-    }
+        .titulo-seccion {
+            font-size: 52px;
+            color: rgb(17, 17, 17);
+            font-weight: 500;
+        }
 
-    .contenedor-interno {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
+        .filtro-tag {
+            background-color: #fff;
+            border: 1px solid rgb(108, 19, 19);
+            padding: 6px 14px;
+            color: rgb(108, 19, 19);
+            font-size: 0.85rem;
+            margin-right: 20px;
+        }
 
-    .titulo-seccion {
-      font-size: 52px;
-      color: rgb(17, 17, 17);
-      font-weight: 500;
-    }
+        .titulo-filtros {
+            font-weight: 600;
+            color: rgb(108, 19, 19);
+            margin-right: 10px;
+        }
 
-    .filtro-tag {
-      background-color: #fff;
-      border: 1px solid rgb(108, 19, 19);
-      padding: 6px 14px;
-      color: rgb(108, 19, 19);
-      font-size: 0.85rem;
-      margin-right: 20px;
-    }
+        .btn-limpiar-filtros {
+            margin-left: auto;
+            color: rgb(108, 19, 19);
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            background-color: #f0f0f0;
+            transition: background 0.2s ease;
+        }
 
-    .titulo-filtros {
-      font-weight: 600;
-      color: rgb(108, 19, 19);
-      margin-right: 10px;
-    }
+        .btn-limpiar-filtros:hover {
+            background-color: #e4e4e4;
+        }
 
-    .btn-limpiar-filtros {
-      margin-left: auto;
-      color: rgb(108, 19, 19);
-      font-weight: 500;
-      text-decoration: none;
-      font-size: 0.85rem;
-      padding: 6px 12px;
-      background-color: #f0f0f0;
-      transition: background 0.2s ease;
-    }
+        .cerrar-filtro {
+            background: none;
+            border: none;
+            font-size: 14px;
+            color: #8a1538;
+            margin-left: 8px;
+            cursor: pointer;
+            padding: 0;
+            font-weight: bold;
+            line-height: 1;
+        }
 
-    .btn-limpiar-filtros:hover {
-      background-color: #e4e4e4;
-    }
+        .cerrar-filtro:hover {
+            color: rgb(108, 19, 19);
+        }
 
-    .cerrar-filtro {
-      background: none;
-      border: none;
-      font-size: 14px;
-      color: #8a1538;
-      margin-left: 8px;
-      cursor: pointer;
-      padding: 0;
-      font-weight: bold;
-      line-height: 1;
-    }
+        .filtros-activos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 18px;
+        }
 
-    .cerrar-filtro:hover {
-      color: rgb(108, 19, 19);
-    }
-    
-    .filtros-activos {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 0 18px;
-    }
+        .input-busqueda {
+            padding: 8px 12px;
+            width: 220px;
+            font-size: 14px;
+            background-color: transparent;
+        }
 
-    .input-busqueda {
-      padding: 8px 12px;
-      width: 220px;
-      font-size: 14px;
-      background-color: transparent;
-    }
+        .btn-buscar {
+            padding: 8px 14px;
+            background-color: rgb(108, 19, 19);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
 
-    .btn-buscar {
-      padding: 8px 14px;
-      background-color: rgb(108, 19, 19);
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-    }
+        .sin-resultados {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            color: #333;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: #fff6f6;
+            border: 1px solid #f3caca;
+            border-radius: 12px;
+        }
 
-    .sin-resultados {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      text-align: center;
-      color: #333;
-      max-width: 100%;
-      margin: 0 auto;
-      background-color: #fff6f6;
-      border: 1px solid #f3caca;
-      border-radius: 12px;
-    }
+        .sin-resultados {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            color: #333;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: #fff6f6;
+            border: 1px solid #f3caca;
+            border-radius: 12px;
+        }
 
-    .sin-resultados {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      text-align: center;
-      color: #333;
-      max-width: 100%;
-      margin: 0 auto;
-      background-color: #fff6f6;
-      border: 1px solid #f3caca;
-      border-radius: 12px;
-    }
+        .sin-resultados svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+        }
 
-    .sin-resultados svg {
-      width: 120px;
-      height: 120px;
-      margin-bottom: 20px;
-    }
+        .titulo-vacio {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #8a1538;
+            margin-bottom: 8px;
+        }
 
-    .titulo-vacio {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #8a1538;
-      margin-bottom: 8px;
-    }
+        .texto-vacio {
+            font-size: 0.95rem;
+            color: #444;
+        }
+        .btn-favorito {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #ccc;
+        }
 
-    .texto-vacio {
-      font-size: 0.95rem;
-      color: #444;
-    }
-    .btn-favorito {
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: #ccc;
-    }
+        .btn-favorito.activo {
+            color: rgb(229, 5, 16);
+        }
+    </style>
+    <script src="/js/filtros.js" defer is:inline></script>
 
-    .btn-favorito.activo {
-      color: rgb(229, 5, 16);
-    }
-</style>
-  <script src="/js/filtros.js" defer is:inline></script>
+    <script>
+        // Funciones para manejar localStorage
+        function cargarEventosDestacados() {
+            try {
+                const eventosGuardados = localStorage.getItem(
+                    "eventosDestacadosTemp",
+                );
+                if (eventosGuardados) {
+                    return new Set(JSON.parse(eventosGuardados));
+                }
+            } catch (error) {
+                console.error(
+                    "Error al cargar eventos destacados desde localStorage:",
+                    error,
+                );
+            }
+            return new Set();
+        }
+
+        // Nueva función para cargar y sincronizar eventos con la BD
+        async function cargarYSincronizarEventosDestacados() {
+            try {
+                // Primero intentar cargar desde localStorage
+                const eventosEnStorage = localStorage.getItem(
+                    "eventosDestacadosTemp",
+                );
+
+                if (eventosEnStorage) {
+                    // Si hay una selección guardada, usarla
+                    console.log(
+                        "Cargando selección existente desde localStorage",
+                    );
+                    return new Set(JSON.parse(eventosEnStorage));
+                } else {
+                    // Si no hay selección guardada, obtener eventos ya destacados desde la BD
+                    console.log(
+                        "No hay selección guardada. Sincronizando con BD...",
+                    );
+
+                    const response = await fetch("/api/obtenerDestacados");
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.eventosDestacados) {
+                            const eventosDestacadosBD = new Set(
+                                data.eventosDestacados,
+                            );
+
+                            // Guardar en localStorage para mantener sincronización
+                            localStorage.setItem(
+                                "eventosDestacadosTemp",
+                                JSON.stringify(Array.from(eventosDestacadosBD)),
+                            );
+
+                            console.log(
+                                "Eventos sincronizados desde BD:",
+                                Array.from(eventosDestacadosBD),
+                            );
+                            return eventosDestacadosBD;
+                        }
+                    } else {
+                        console.error(
+                            "Error al obtener eventos destacados de la BD:",
+                            response.status,
+                        );
+                    }
+
+                    // Fallback: retornar set vacío
+                    return new Set();
+                }
+            } catch (error) {
+                console.error(
+                    "Error al cargar y sincronizar eventos destacados:",
+                    error,
+                );
+                // Fallback: intentar cargar solo desde localStorage
+                return cargarEventosDestacados();
+            }
+        }
+
+        function guardarEventosDestacados(eventosSet: Set<any>) {
+            try {
+                localStorage.setItem(
+                    "eventosDestacadosTemp",
+                    JSON.stringify(Array.from(eventosSet)),
+                );
+            } catch (error) {
+                console.error(
+                    "Error al guardar eventos destacados en localStorage:",
+                    error,
+                );
+            }
+        }
+
+        function limpiarEventosDestacados() {
+            try {
+                localStorage.removeItem("eventosDestacadosTemp");
+            } catch (error) {
+                console.error(
+                    "Error al limpiar eventos destacados de localStorage:",
+                    error,
+                );
+            }
+        }
+
+        async function guardarFavoritos() {
+            const eventosDestacados =
+                (window as any).eventosDestacados || new Set();
+
+            console.log(
+                "Intentando guardar eventos. Cantidad:",
+                eventosDestacados.size,
+            );
+            console.log("Eventos a guardar:", Array.from(eventosDestacados));
+
+            if (eventosDestacados.size !== 6) {
+                const mensaje =
+                    eventosDestacados.size === 0
+                        ? "No hay eventos seleccionados. Debes seleccionar exactamente 6 eventos."
+                        : `Has seleccionado ${eventosDestacados.size} evento(s). Debes seleccionar exactamente 6 eventos.`;
+
+                alert(mensaje);
+                return;
+            }
+
+            const eventosArray = Array.from(eventosDestacados);
+            console.log("Guardando eventos destacados:", eventosArray);
+
+            try {
+                // Mostrar loading
+                const botonGuardar = document.getElementById(
+                    "btn-guardar-favoritos",
+                ) as HTMLButtonElement;
+                if (!botonGuardar) return;
+
+                const textoOriginal =
+                    botonGuardar.textContent || "Guardar Eventos Favoritos";
+                botonGuardar.disabled = true;
+                botonGuardar.textContent = "Guardando...";
+
+                // Llamar al endpoint API existente
+                const response = await fetch("/api/guardarFavoritos", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        eventos: eventosArray,
+                    }),
+                });
+
+                const result = await response.json();
+
+                console.log("Respuesta del servidor:", {
+                    status: response.status,
+                    success: result.success,
+                    message: result.message,
+                });
+
+                if (!response.ok) {
+                    // El servidor devolvió un error, usar el mensaje específico
+                    throw new Error(
+                        result.message ||
+                            `Error en la respuesta: ${response.status}`,
+                    );
+                }
+
+                if (result.success) {
+                    alert(result.message);
+
+                    // Limpiar la selección de localStorage
+                    limpiarEventosDestacados();
+
+                    // Limpiar la selección en memoria
+                    if ((window as any).eventosDestacados) {
+                        (window as any).eventosDestacados.clear();
+                    }
+                    actualizarBotonGuardar();
+
+                    // Actualizar visualmente las tarjetas
+                    eventosArray.forEach((idEvento) => {
+                        const boton = document.querySelector(
+                            `[data-id="${idEvento}"]`,
+                        );
+                        if (boton && boton instanceof HTMLElement) {
+                            boton.classList.remove("destacado");
+                            boton.classList.remove(
+                                "bg-yellow-400",
+                                "text-yellow-900",
+                            );
+                            boton.classList.add("bg-white/20", "text-white");
+                            boton.title = "Marcar como destacado";
+                        }
+                    });
+
+                    // Restaurar el botón
+                    if (botonGuardar) {
+                        botonGuardar.disabled = false;
+                        botonGuardar.textContent = textoOriginal;
+                    }
+
+                    // Recargar la página para reflejar los cambios en la BD
+                    setTimeout(() => {
+                        console.log(
+                            "Recargando página para reflejar cambios...",
+                        );
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error(
+                        result.message || "Error al guardar eventos favoritos",
+                    );
+                }
+            } catch (error) {
+                console.error("Error al guardar eventos favoritos:", error);
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : "Error desconocido";
+                alert("Error al guardar eventos favoritos: " + errorMessage);
+
+                // Restaurar el botón
+                const botonGuardar = document.getElementById(
+                    "btn-guardar-favoritos",
+                ) as HTMLButtonElement;
+                if (botonGuardar) {
+                    botonGuardar.disabled = false;
+                    botonGuardar.textContent = "Guardar Eventos Favoritos";
+                }
+            }
+        }
+
+        // Función para actualizar el botón de guardar
+        function actualizarBotonGuardar() {
+            const botonGuardar = document.getElementById(
+                "btn-guardar-favoritos",
+            ) as HTMLButtonElement;
+            const mensajeValidacion = document.getElementById(
+                "mensaje-validacion",
+            ) as HTMLElement;
+
+            if (botonGuardar) {
+                const eventosDestacados =
+                    (window as any).eventosDestacados || new Set();
+                const cantidadSeleccionada = eventosDestacados.size;
+                const esValido = cantidadSeleccionada === 6;
+
+                // Actualizar el botón
+                botonGuardar.disabled = !esValido;
+
+                if (cantidadSeleccionada === 0) {
+                    botonGuardar.textContent = "Guardar Eventos Favoritos";
+                } else if (esValido) {
+                    botonGuardar.textContent = `Guardar ${cantidadSeleccionada} Eventos Destacados`;
+                    botonGuardar.style.backgroundColor = "rgb(108, 19, 19)";
+                } else {
+                    botonGuardar.textContent = `${cantidadSeleccionada}/6 Eventos Seleccionados`;
+                    botonGuardar.style.backgroundColor = "#ccc";
+                }
+
+                // Actualizar mensaje de validación
+                if (mensajeValidacion) {
+                    if (cantidadSeleccionada === 0) {
+                        mensajeValidacion.style.display = "none";
+                    } else if (cantidadSeleccionada < 6) {
+                        mensajeValidacion.style.display = "block";
+                        mensajeValidacion.style.color = "#ff6b35";
+                        mensajeValidacion.innerHTML = `Selecciona ${6 - cantidadSeleccionada} evento(s) más para continuar. <button onclick="verEventosSeleccionados()" style="background:none;border:none;color:#ff6b35;text-decoration:underline;cursor:pointer;font-size:inherit;">Ver eventos seleccionados</button>`;
+                    } else if (cantidadSeleccionada > 6) {
+                        mensajeValidacion.style.display = "block";
+                        mensajeValidacion.style.color = "#ff6b35";
+                        mensajeValidacion.innerHTML = `Has seleccionado ${cantidadSeleccionada - 6} evento(s) de más. Debes tener exactamente 6. <button onclick="verEventosSeleccionados()" style="background:none;border:none;color:#ff6b35;text-decoration:underline;cursor:pointer;font-size:inherit;">Ver eventos seleccionados</button>`;
+                    } else {
+                        mensajeValidacion.style.display = "block";
+                        mensajeValidacion.style.color = "#28a745";
+                        mensajeValidacion.textContent =
+                            "✓ Perfecto! Tienes 6 eventos seleccionados.";
+                    }
+                }
+            }
+        }
+
+        // Función para mostrar los eventos seleccionados
+        function verEventosSeleccionados() {
+            const eventosDestacados =
+                (window as any).eventosDestacados || new Set();
+            const eventosArray = Array.from(eventosDestacados);
+
+            if (eventosArray.length === 0) {
+                alert("No hay eventos seleccionados.");
+                return;
+            }
+
+            let mensaje = `Eventos seleccionados (${eventosArray.length}/6):\n\n`;
+            eventosArray.forEach((idEvento, index) => {
+                mensaje += `${index + 1}. ID: ${idEvento}\n`;
+            });
+
+            mensaje += "\n¿Deseas limpiar la selección y empezar de nuevo?";
+
+            if (confirm(mensaje)) {
+                // Limpiar la selección
+                limpiarEventosDestacados();
+                (window as any).eventosDestacados.clear();
+
+                // Actualizar visualmente todos los botones en la página actual
+                document
+                    .querySelectorAll(".destacar-boton.destacado")
+                    .forEach((boton) => {
+                        boton.classList.remove("destacado");
+                        boton.classList.remove(
+                            "bg-yellow-400",
+                            "text-yellow-900",
+                        );
+                        boton.classList.add("bg-white/20", "text-white");
+                        (boton as HTMLButtonElement).title =
+                            "Marcar como destacado";
+                    });
+
+                actualizarBotonGuardar();
+                alert(
+                    "Selección limpiada. Puedes empezar a seleccionar eventos de nuevo.",
+                );
+            }
+        }
+
+        // Hacer las funciones disponibles globalmente
+        (window as any).guardarFavoritos = guardarFavoritos;
+        (window as any).actualizarBotonGuardar = actualizarBotonGuardar;
+        (window as any).cargarEventosDestacados = cargarEventosDestacados;
+        (window as any).cargarYSincronizarEventosDestacados =
+            cargarYSincronizarEventosDestacados;
+        (window as any).guardarEventosDestacados = guardarEventosDestacados;
+        (window as any).limpiarEventosDestacados = limpiarEventosDestacados;
+        (window as any).verEventosSeleccionados = verEventosSeleccionados;
+
+        // Inicializar cuando se carga la página
+        document.addEventListener("DOMContentLoaded", async function () {
+            // Cargar y sincronizar eventos destacados desde localStorage y BD
+            const eventosDestacadosGuardados =
+                await cargarYSincronizarEventosDestacados();
+            (window as any).eventosDestacados = eventosDestacadosGuardados;
+
+            // Debug: mostrar lo que se cargó
+            console.log(
+                "Estado inicial cargado y sincronizado:",
+                Array.from(eventosDestacadosGuardados),
+            );
+
+            actualizarBotonGuardar();
+
+            // Enviar evento personalizado para notificar que la inicialización está completa
+            window.dispatchEvent(
+                new CustomEvent("eventosDestacadosInicialized", {
+                    detail: { eventosDestacados: eventosDestacadosGuardados },
+                }),
+            );
+        });
+    </script>
 </Layout>

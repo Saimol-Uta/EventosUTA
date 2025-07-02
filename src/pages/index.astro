@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
+import MenuAdmin from "../components/MenuAdministrador.astro";
 import InformacionFacultad from "../components/InformacionFacultad.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
@@ -19,37 +20,52 @@ if (session?.user) {
     esAdmin = rol === "ADMINISTRADOR" || rol === "MASTER";
 }
 
-
 const id_fac = "a1b2c3d4-e5f6-4a7b-8c9d-1a1a1a1a1a1a";
 
-const { data: pagina } = await Astro.callAction(actions.getInfo, { id_fac });
+const { data: pagina } = await Astro.callAction(
+    actions.getPaginaSeleccionada,
+    {},
+);
 ---
 
 <Layout>
     <Header />
-    {esAdmin ? (
-        <MenuAdmin /> 
-    ) : (
-        <Navbar />
-    )}
-    <CarruselUTA modoAdmin={esAdmin}/>
+    {esAdmin ? <MenuAdmin /> : <Navbar />}
+    <CarruselUTA
+        img1={pagina?.facultad?.img_caru1 ?? ""}
+        img2={pagina?.facultad?.img_caru2 ?? ""}
+        img3={pagina?.facultad?.img_caru3 ?? ""}
+        tit_caru1={pagina?.facultad?.tit_caru1 ?? ""}
+        tit_caru2={pagina?.facultad?.tit_caru2 ?? ""}
+        tit_caru3={pagina?.facultad?.tit_caru3 ?? ""}
+        des_caru1={pagina?.facultad?.des_caru1 ?? ""}
+        des_caru2={pagina?.facultad?.des_caru2 ?? ""}
+        des_caru3={pagina?.facultad?.des_caru3 ?? ""}
+        modoAdmin={esAdmin}
+    />
     <InformacionFacultad
-        decano={pagina?.data?.dec_fac ?? ""}
-        decanoImagen={pagina?.data?.dec_img ?? ""}
-        subdecano={pagina?.data?.sub_fac ?? ""}
-        subdecanoImagen={pagina?.data?.sub_img ?? ""}
-        tituloFacultad={pagina?.data?.nom_fac ?? ""}
+        tituloFacultad={pagina?.facultad?.nom_fac ?? ""}
+        decano={pagina?.facultad?.dec_fac ?? ""}
+        decanoImagen={pagina?.facultad?.dec_img ?? ""}
+        subdecano={pagina?.facultad?.sub_fac ?? ""}
+        subdecanoImagen={pagina?.facultad?.sub_img ?? ""}
         tituloDescripcion="Descripción"
-        contenidoDescripcion={pagina?.data?.des_fac ?? ""}
-        imagenDescripcion={pagina?.data?.img_des ?? ""}
+        contenidoDescripcion={pagina?.facultad?.des_fac ?? ""}
+        imagenDescripcion={pagina?.facultad?.img_des ?? ""}
         tituloMision="Misión"
-        contenidoMision={pagina?.data?.mis_fac ?? ""}
-        imagenMision={pagina?.data?.img_mis ?? ""}
+        contenidoMision={pagina?.facultad?.mis_fac ?? ""}
+        imagenMision={pagina?.facultad?.img_mis ?? ""}
         tituloVision="Visión"
-        contenidoVision={pagina?.data?.vis_fac ?? ""}
-        imagenVision={pagina?.data?.img_vis ?? ""}
+        contenidoVision={pagina?.facultad?.vis_fac ?? ""}
+        imagenVision={pagina?.facultad?.img_vis ?? ""}
+        responsable={pagina?.facultad?.res_fac ?? ""}
+        responsableImagen={pagina?.facultad?.res_img ?? ""}
         modoAdmin={esAdmin}
     />
     <div class="h-15 bg-white"></div>
-    <Footer />
+    <Footer
+        Twitter={pagina?.facultad?.twit_fac}
+        Facebook={pagina?.facultad?.face_fac}
+        Instagram={pagina?.facultad?.inst_fac}
+    />
 </Layout>

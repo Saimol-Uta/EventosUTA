@@ -3,54 +3,66 @@ import Menu from "../components/ComponenteMenuConfiguraciones.astro";
 import "../styles/global.css";
 
 export interface Props {
-  nombreUsuario: string;
-  userImage: string;
-  logoImage: string;
-  titulo1: string;
-  titulo2: string;
+    nombreUsuario: string;
+    userImage: string;
+    logoImage: string;
+    titulo1: string;
+    titulo2?: string;
 }
 
 const { nombreUsuario, userImage, titulo1, titulo2, logoImage } = Astro.props;
 ---
 
-<header class="flex flex-wrap items-center justify-between px-8 py-2 border-b border-gray-300 bg-white">
-  <!-- Sección Izquierda: Logo y texto -->
-  <div class="flex items-center gap-3 min-w-[250px]">
-    <a href="/" class="flex items-center gap-2">
-      <img
-        src={logoImage}
-        alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
-        class="w-16 h-auto"
-      />
-      <div class="flex flex-col leading-tight">
-        <span class="text-sm font-semibold text-red-800">{titulo1}</span>
-        <span class="text-xs font-semibold text-red-800">{titulo2}</span>
-      </div>
-    </a>
-  </div>
+<header
+    class="flex flex-wrap items-center justify-between px-8 py-2 border-b border-gray-300 bg-white"
+>
+    <!-- Sección Izquierda: Logo y texto -->
+    <div class="flex items-center gap-3 min-w-[250px]">
+        <a href="/" class="flex items-center gap-2">
+            <img
+                src={logoImage}
+                alt="Facultad de Ingeniería en Sistemas, Electrónica e Industrial"
+                class="w-16 h-auto"
+            />
+            <div class="flex flex-col leading-tight">
+                <span class="text-sm font-semibold text-red-800">{titulo1}</span
+                >
+                <span class="text-xs font-semibold text-red-800">{titulo2}</span
+                >
+            </div>
+        </a>
+    </div>
 
-  <!-- Sección Derecha: Verificar certificado + Menú -->
-  <div class="flex flex-wrap items-center justify-end gap-8 min-w-[250px] pr-2">
-    <a
-      href="/buscarCertificado"
-      class="flex items-center gap-2 text-[#660000] hover:text-[#a00000] transition-colors"
-      draggable="false"
+    <!-- Sección Derecha: Verificar certificado + Menú -->
+    <div
+        class="flex flex-wrap items-center justify-end gap-8 min-w-[250px] pr-2"
     >
-      <svg
-        class="w-8 h-auto fill-[#ad272e] -scale-y-100"
-        viewBox="0 0 1710 1770"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <g fill="#ad272e" stroke="none">
-          <path d="M818 1624 c-4 -4 -36 -13 -70 -20 -35 -7 -92 -20 -128 -29 -36 -9 -90 -22 -120 -29 -30 -7 -62 -15 -70 -19 -8 -3 -37 -11 -65 -16 -107 -21 -144 -33 -149 -48 -10 -25 2 -49 29 -61 24 -11 25 -16 25 -96 0 -49 -4 -88 -11 -91 -22 -14 -30 -57 -14 -81 20 -30 19 -45 -6 -144 -23 -94 -21 -100 46 -100 66 0 88 9 80 34 -13 42 -37 151 -37 166 0 8 6 30 13 48 12 29 12 37 -4 63 -24 42 -24 164 -1 173 18 7 83 -2 99 -14 6 -4 29 -11 53 -15 41 -7 52 -21 33 -40 -19 -19 -32 -143 -22 -204 18 -112 95 -215 198 -268 52 -26 65 -28 162 -28 100 1 109 3 163 33 120 66 186 168 195 301 4 60 1 88 -15 134 -20 55 -20 57 -2 67 10 6 29 10 42 10 13 0 28 4 34 9 5 5 34 13 64 19 115 22 149 33 155 51 9 31 -5 50 -43 57 -21 4 -41 9 -47 13 -10 6 -63 18 -175 41 -30 6 -62 14 -70 17 -8 4 -40 12 -70 19 -30 7 -86 20 -125 29 -95 22 -139 28 -147 19z"/>
-          <path d="M500 673 c-75 -12 -183 -91 -233 -169 -55 -88 -75 -240 -38 -300 40 -65 31 -64 633 -64 l543 0 37 25 c23 15 41 38 48 61 18 55 7 172 -23 236 -49 108 -168 200 -277 214 l-50 7 -139 -137 c-76 -75 -142 -136 -147 -136 -5 0 -70 61 -144 135 -139 140 -139 140 -210 128z"/>
-        </g>
-      </svg>
-      <span class="font-medium relative after:block after:w-0 after:h-[2px] after:bg-current after:transition-all after:duration-400 after:absolute after:bottom-[-3px] after:left-0 hover:after:w-full text-sm">
-        Verifica tu certificado
-      </span>
-    </a>
+        <a
+            href="/buscarCertificado"
+            class="flex items-center gap-2 text-[#660000] hover:text-[#a00000] transition-colors"
+            draggable="false"
+        >
+            <svg
+                class="w-8 h-auto fill-[#ad272e] -scale-y-100"
+                viewBox="0 0 1710 1770"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <g fill="#ad272e" stroke="none">
+                    <path
+                        d="M818 1624 c-4 -4 -36 -13 -70 -20 -35 -7 -92 -20 -128 -29 -36 -9 -90 -22 -120 -29 -30 -7 -62 -15 -70 -19 -8 -3 -37 -11 -65 -16 -107 -21 -144 -33 -149 -48 -10 -25 2 -49 29 -61 24 -11 25 -16 25 -96 0 -49 -4 -88 -11 -91 -22 -14 -30 -57 -14 -81 20 -30 19 -45 -6 -144 -23 -94 -21 -100 46 -100 66 0 88 9 80 34 -13 42 -37 151 -37 166 0 8 6 30 13 48 12 29 12 37 -4 63 -24 42 -24 164 -1 173 18 7 83 -2 99 -14 6 -4 29 -11 53 -15 41 -7 52 -21 33 -40 -19 -19 -32 -143 -22 -204 18 -112 95 -215 198 -268 52 -26 65 -28 162 -28 100 1 109 3 163 33 120 66 186 168 195 301 4 60 1 88 -15 134 -20 55 -20 57 -2 67 10 6 29 10 42 10 13 0 28 4 34 9 5 5 34 13 64 19 115 22 149 33 155 51 9 31 -5 50 -43 57 -21 4 -41 9 -47 13 -10 6 -63 18 -175 41 -30 6 -62 14 -70 17 -8 4 -40 12 -70 19 -30 7 -86 20 -125 29 -95 22 -139 28 -147 19z"
+                    ></path>
+                    <path
+                        d="M500 673 c-75 -12 -183 -91 -233 -169 -55 -88 -75 -240 -38 -300 40 -65 31 -64 633 -64 l543 0 37 25 c23 15 41 38 48 61 18 55 7 172 -23 236 -49 108 -168 200 -277 214 l-50 7 -139 -137 c-76 -75 -142 -136 -147 -136 -5 0 -70 61 -144 135 -139 140 -139 140 -210 128z"
+                    ></path>
+                </g>
+            </svg>
+            <span
+                class="font-medium relative after:block after:w-0 after:h-[2px] after:bg-current after:transition-all after:duration-400 after:absolute after:bottom-[-3px] after:left-0 hover:after:w-full text-sm"
+            >
+                Verifica tu certificado
+            </span>
+        </a>
 
-    <Menu userName={nombreUsuario} userImage={userImage} />
-  </div>
+        <Menu userName={nombreUsuario} userImage={userImage} />
+    </div>
 </header>

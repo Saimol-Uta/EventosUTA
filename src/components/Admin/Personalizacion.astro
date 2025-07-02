@@ -1,0 +1,1406 @@
+---
+import "../../styles/Admin/Personalizacion.css";
+import { actions } from "astro:actions";
+
+// Obtener facultades para el selector
+const { data: facultadesData } = await Astro.callAction(
+    actions.GetPaginaFacultad,
+    {},
+);
+
+if (!facultadesData) {
+    console.error("Error al obtener facultades");
+}
+
+const facultades = facultadesData?.facultades || [];
+---
+
+<style>
+    .contenedor-botones-accion {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .boton-crear {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .boton-crear:hover {
+        background-color: #218838;
+    }
+
+    .boton-modificar {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .boton-modificar:hover {
+        background-color: #0056b3;
+    }
+
+    .boton-principal {
+        background-color: #ffc107;
+        color: #212529;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .boton-principal:hover {
+        background-color: #e0a800;
+    }
+
+    .boton-eliminar {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .boton-eliminar:hover:not(:disabled) {
+        background-color: #c82333;
+    }
+
+    .boton-eliminar:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .contenedor-selector-facultad {
+        margin-bottom: 30px;
+    }
+
+    .boton-volver {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        margin-right: 15px;
+    }
+
+    .boton-volver:hover {
+        background-color: #545b62;
+    }
+
+    .contenedor-boton {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+    }
+</style>
+
+<div class="contenedor-formulario">
+    <!-- Selector de Facultad -->
+    <div class="contenedor-selector-facultad">
+        <div class="contenedor-superior">
+            <p class="texto-centrado texto-rojo">Gestión de Facultades</p>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Seleccionar Facultad</p>
+                <div class="contenedor-input">
+                    <select
+                        id="selector-facultad"
+                        class="input-dato"
+                        onchange="cargarDatosFacultad(this.value)"
+                    >
+                        <option value="">-- Seleccionar Facultad --</option>
+                        {
+                            facultades.map((facultad: any) => (
+                                <option value={facultad.id_fac}>
+                                    {facultad.nom_fac}
+                                    {facultad.est_fac
+                                        ? " (Facultad Principal ⭐)"
+                                        : ""}
+                                </option>
+                            ))
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="contenedor-botones-accion">
+                <button
+                    type="button"
+                    class="boton-crear"
+                    onclick="crearNuevaFacultad()"
+                >
+                    Crear Nueva Facultad
+                </button>
+                <button
+                    type="button"
+                    class="boton-modificar"
+                    onclick="modificarFacultad()"
+                    id="btn-modificar"
+                    style="display: none;"
+                >
+                    Modificar Facultad
+                </button>
+                <button
+                    type="button"
+                    class="boton-eliminar"
+                    onclick="eliminarFacultad()"
+                    id="btn-eliminar"
+                    disabled
+                >
+                    Eliminar Facultad
+                </button>
+                <button
+                    type="button"
+                    class="boton-principal"
+                    onclick="seleccionarFacultadPrincipal()"
+                    id="btn-principal"
+                    style="display: none;"
+                >
+                    Seleccionar como facultad principal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <form
+        class="formulario-modificar-registro"
+        method="POST"
+        enctype="multipart/form-data"
+        id="formulario-facultad"
+        style="display: none;"
+    >
+        <input type="hidden" name="id_facultad" id="id_facultad" />
+
+        <!-- Header -->
+        <div class="contenedor-superior">
+            <p class="texto-centrado texto-rojo">Header - Facultad</p>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Nombre de la Facultad</p>
+                <div class="contenedor-input">
+                    <input
+                        type="text"
+                        name="nombre_facultad"
+                        class="input-dato"
+                        required
+                    />
+                </div>
+            </div>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Logo de la Facultad</p>
+                <div class="contenedor-file">
+                    <div id="file-name-display-logo" class="file-name-display">
+                    </div>
+                    <div id="logo-preview" class="preview-container">
+                        <label class="custom-file-upload">
+                            <img
+                                src="/img/CRUD/upload.png"
+                                class="upload-icon"
+                                alt="Subir imagen"
+                            />
+                            <input
+                                type="file"
+                                name="logo_facultad"
+                                class="input-file"
+                                accept="image/*"
+                                data-preview="logo-preview"
+                                data-name-display="file-name-display-logo"
+                            />
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carrusel -->
+        <div class="contenedor-superior">
+            <p class="texto-centrado texto-rojo">Carrusel</p>
+            <!-- Imagen 1 -->
+            <div class="contenedor-nombre">
+                <div class="contenedor-dato">
+                    <p class="texto-importante">Imagen 1</p>
+                    <p class="texto-dato">Título</p>
+                    <div class="contenedor-input">
+                        <input
+                            type="text"
+                            name="titulo_carrusel_1"
+                            class="input-dato"
+                            required
+                        />
+                    </div>
+                    <p class="texto-dato">Descripción</p>
+                    <div class="contenedor-input">
+                        <textarea
+                            name="descripcion_carrusel_1"
+                            class="input-dato"
+                            rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="contenedor-dato relativo">
+                    <div class="contenedor-file">
+                        <div
+                            id="file-name-display-carrusel-1"
+                            class="file-name-display"
+                        >
+                        </div>
+                        <div id="carrusel-preview-1" class="contenedor-extra">
+                            <label class="custom-file-upload">
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    class="upload-icon"
+                                    alt="Subir imagen"
+                                />
+                                <input
+                                    type="file"
+                                    name="imagen_carrusel_1"
+                                    class="input-file"
+                                    accept="image/*"
+                                    data-preview="carrusel-preview-1"
+                                    data-name-display="file-name-display-carrusel-1"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Imagen 2 -->
+            <div class="contenedor-nombre">
+                <div class="contenedor-dato">
+                    <p class="texto-importante">Imagen 2</p>
+                    <p class="texto-dato">Título</p>
+                    <div class="contenedor-input">
+                        <input
+                            type="text"
+                            name="titulo_carrusel_2"
+                            class="input-dato"
+                            required
+                        />
+                    </div>
+                    <p class="texto-dato">Descripción</p>
+                    <div class="contenedor-input">
+                        <textarea
+                            name="descripcion_carrusel_2"
+                            class="input-dato"
+                            rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="contenedor-dato relativo">
+                    <div class="contenedor-file">
+                        <div
+                            id="file-name-display-carrusel-2"
+                            class="file-name-display"
+                        >
+                        </div>
+                        <div id="carrusel-preview-2" class="contenedor-extra">
+                            <label class="custom-file-upload">
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    class="upload-icon"
+                                    alt="Subir imagen"
+                                />
+                                <input
+                                    type="file"
+                                    name="imagen_carrusel_2"
+                                    class="input-file"
+                                    accept="image/*"
+                                    data-preview="carrusel-preview-2"
+                                    data-name-display="file-name-display-carrusel-2"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Imagen 3 -->
+            <div class="contenedor-nombre">
+                <div class="contenedor-dato">
+                    <p class="texto-importante">Imagen 3</p>
+                    <p class="texto-dato">Título</p>
+                    <div class="contenedor-input">
+                        <input
+                            type="text"
+                            name="titulo_carrusel_3"
+                            class="input-dato"
+                            required
+                        />
+                    </div>
+                    <p class="texto-dato">Descripción</p>
+                    <div class="contenedor-input">
+                        <textarea
+                            name="descripcion_carrusel_3"
+                            class="input-dato"
+                            rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="contenedor-dato relativo">
+                    <div class="contenedor-file">
+                        <div
+                            id="file-name-display-carrusel-3"
+                            class="file-name-display"
+                        >
+                        </div>
+                        <div id="carrusel-preview-3" class="contenedor-extra">
+                            <label class="custom-file-upload">
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    class="upload-icon"
+                                    alt="Subir imagen"
+                                />
+                                <input
+                                    type="file"
+                                    name="imagen_carrusel_3"
+                                    class="input-file"
+                                    accept="image/*"
+                                    data-preview="carrusel-preview-3"
+                                    data-name-display="file-name-display-carrusel-3"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipo Académico -->
+        <div class="contenedor-superior">
+            <p class="texto-centrado texto-rojo">Equipo Académico</p>
+
+            <!-- Decano -->
+            <div class="contenedor-nombre">
+                <div class="contenedor-dato">
+                    <p class="texto-dato">Nombre del Decano</p>
+                    <div class="contenedor-input">
+                        <input
+                            type="text"
+                            name="nombre_decano"
+                            class="input-dato"
+                        />
+                    </div>
+                </div>
+                <div class="contenedor-dato">
+                    <div class="contenedor-file">
+                        <div
+                            id="file-name-display-decano-preview"
+                            class="file-name-display"
+                            style="display: none;"
+                        >
+                        </div>
+                        <div id="decano-preview" class="preview-container">
+                            <label class="custom-file-upload">
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    class="upload-icon"
+                                    alt="Subir imagen"
+                                />
+                                <input
+                                    type="file"
+                                    name="imagen_decano"
+                                    class="input-file"
+                                    accept="image/*"
+                                    data-preview="decano-preview"
+                                    data-name-display="file-name-display-decano-preview"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subdecano -->
+            <div class="contenedor-nombre">
+                <div class="contenedor-dato">
+                    <p class="texto-dato">Nombre del Subdecano</p>
+                    <div class="contenedor-input">
+                        <input
+                            type="text"
+                            name="nombre_subdecano"
+                            class="input-dato"
+                        />
+                    </div>
+                </div>
+                <div class="contenedor-dato">
+                    <div class="contenedor-file">
+                        <div
+                            id="file-name-display-subdecano-preview"
+                            class="file-name-display"
+                            style="display: none;"
+                        >
+                        </div>
+                        <div id="subdecano-preview" class="preview-container">
+                            <label class="custom-file-upload">
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    class="upload-icon"
+                                    alt="Subir imagen"
+                                />
+                                <input
+                                    type="file"
+                                    name="imagen_subdecano"
+                                    class="input-file"
+                                    accept="image/*"
+                                    data-preview="subdecano-preview"
+                                    data-name-display="file-name-display-subdecano-preview"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Responsable -->
+            <div class="contenedor-nombre">
+                <div class="contenedor-dato">
+                    <p class="texto-dato">Nombre del Responsable</p>
+                    <div class="contenedor-input">
+                        <input
+                            type="text"
+                            name="nombre_responsable"
+                            class="input-dato"
+                        />
+                    </div>
+                </div>
+                <div class="contenedor-dato">
+                    <div class="contenedor-file">
+                        <div
+                            id="file-name-display-responsable-preview"
+                            class="file-name-display"
+                            style="display: none;"
+                        >
+                        </div>
+                        <div id="responsable-preview" class="preview-container">
+                            <label class="custom-file-upload">
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    class="upload-icon"
+                                    alt="Subir imagen"
+                                />
+                                <input
+                                    type="file"
+                                    name="imagen_responsable"
+                                    class="input-file"
+                                    accept="image/*"
+                                    data-preview="responsable-preview"
+                                    data-name-display="file-name-display-responsable-preview"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Misión y Visión -->
+        <div class="contenedor-superior">
+            <p class="texto-centrado texto-rojo">Misión y Visión</p>
+            <div class="contenedor-nombre">
+                <div class="contenedor-dato">
+                    <p class="texto-dato">Misión</p>
+                    <div class="contenedor-input">
+                        <textarea name="mision" class="input-dato" rows="3"
+                        ></textarea>
+                    </div>
+                </div>
+                <div class="contenedor-dato">
+                    <div class="contenedor-file">
+                        <div
+                            id="file-name-display-mision-preview"
+                            class="file-name-display"
+                            style="display: none;"
+                        >
+                        </div>
+                        <div id="mision-preview" class="preview-container">
+                            <label class="custom-file-upload">
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    class="upload-icon"
+                                    alt="Subir imagen"
+                                />
+                                <input
+                                    type="file"
+                                    name="imagen_mision"
+                                    class="input-file"
+                                    accept="image/*"
+                                    data-preview="mision-preview"
+                                    data-name-display="file-name-display-mision-preview"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="contenedor-nombre">
+                <div class="contenedor-dato">
+                    <p class="texto-dato">Visión</p>
+                    <div class="contenedor-input">
+                        <textarea name="vision" class="input-dato" rows="3"
+                        ></textarea>
+                    </div>
+                </div>
+                <div class="contenedor-dato">
+                    <div class="contenedor-file">
+                        <div
+                            id="file-name-display-vision-preview"
+                            class="file-name-display"
+                            style="display: none;"
+                        >
+                        </div>
+                        <div id="vision-preview" class="preview-container">
+                            <label class="custom-file-upload">
+                                <img
+                                    src="/img/CRUD/upload.png"
+                                    class="upload-icon"
+                                    alt="Subir imagen"
+                                />
+                                <input
+                                    type="file"
+                                    name="imagen_vision"
+                                    class="input-file"
+                                    accept="image/*"
+                                    data-preview="vision-preview"
+                                    data-name-display="file-name-display-vision-preview"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="contenedor-superior">
+            <p class="texto-centrado texto-rojo">
+                Footer - Información de Contacto
+            </p>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Dirección</p>
+                <div class="contenedor-input">
+                    <input
+                        type="text"
+                        name="direccion_contacto"
+                        class="input-dato"
+                    />
+                </div>
+            </div>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Correo Electrónico</p>
+                <div class="contenedor-input">
+                    <input
+                        type="email"
+                        name="correo_contacto"
+                        class="input-dato"
+                    />
+                </div>
+            </div>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Facebook</p>
+                <div class="contenedor-input">
+                    <input type="text" name="facebook" class="input-dato" />
+                    <svg
+                        width="24"
+                        height="24"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M22 12a10 10 0 10-11.63 9.87v-6.99h-2.6v-2.88h2.6V9.41c0-2.58 1.54-4.01 3.9-4.01 1.13 0 2.3.2 2.3.2v2.53h-1.3c-1.28 0-1.68.79-1.68 1.6v1.92h2.85l-.46 2.88h-2.39v6.99A10 10 0 0022 12z"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Twitter</p>
+                <div class="contenedor-input">
+                    <input type="text" name="twitter" class="input-dato" />
+                    <svg
+                        width="24"
+                        height="24"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M22.46 6c-.77.35-1.6.58-2.46.69a4.27 4.27 0 001.88-2.36 8.48 8.48 0 01-2.7 1.03 4.22 4.22 0 00-7.2 3.85A12 12 0 013 4.79a4.23 4.23 0 001.3 5.63 4.2 4.2 0 01-1.91-.53v.05a4.23 4.23 0 003.39 4.13 4.3 4.3 0 01-1.9.07 4.24 4.24 0 003.95 2.93A8.48 8.48 0 012 19.54a12 12 0 006.29 1.84c7.55 0 11.68-6.26 11.68-11.68 0-.18 0-.36-.01-.54A8.35 8.35 0 0022.46 6z"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Instagram</p>
+                <div class="contenedor-input">
+                    <input type="text" name="instagram" class="input-dato" />
+                    <svg
+                        width="24"
+                        height="24"
+                        fill="white"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.97.24 2.43.41.6.23 1.03.5 1.48.95.45.45.72.88.95 1.48.17.46.36 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.97-.41 2.43a3.66 3.66 0 01-.95 1.48 3.66 3.66 0 01-1.48.95c-.46.17-1.26.36-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.97-.24-2.43-.41a3.66 3.66 0 01-1.48-.95 3.66 3.66 0 01-.95-1.48c-.17-.46-.36-1.26-.41-2.43C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.97.41-2.43.23-.6.5-1.03.95-1.48.45-.45.88-.72 1.48-.95.46-.17 1.26-.36 2.43-.41C8.42 2.21 8.8 2.2 12 2.2zm0 1.8c-3.13 0-3.48.01-4.71.07-.97.05-1.5.22-1.85.37-.47.18-.81.39-1.16.74-.35.35-.56.69-.74 1.16-.15.35-.32.88-.37 1.85-.06 1.23-.07 1.58-.07 4.71s.01 3.48.07 4.71c.05.97.22 1.5.37 1.85.18.47.39.81.74 1.16.35.35.69.56 1.16.74.35.15.88.32 1.85.37 1.23.06 1.58.07 4.71.07s3.48-.01 4.71-.07c.97-.05 1.5-.22 1.85-.37.47-.18.81-.39 1.16-.74.35-.35.56-.69.74-1.16.15-.35.32-.88.37-1.85.06-1.23.07-1.58.07-4.71s-.01-3.48-.07-4.71c-.05-.97-.22-1.5-.37-1.85a2.87 2.87 0 00-.74-1.16 2.87 2.87 0 00-1.16-.74c-.35-.15-.88-.32-1.85-.37-1.23-.06-1.58-.07-4.71-.07zM12 5.84a6.16 6.16 0 100 12.32 6.16 6.16 0 000-12.32zm0 10.16a4 4 0 110-8 4 4 0 010 8zm5.2-10.84a1.44 1.44 0 110 2.88 1.44 1.44 0 010-2.88z"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="contenedor-dato">
+                <p class="texto-dato">Solicitud de cambios</p>
+                <div class="contenedor-input">
+                    <input type="url" name="link_jira" class="input-dato" />
+                </div>
+            </div>
+        </div>
+
+        <div class="contenedor-boton">
+            <button
+                type="button"
+                class="boton-volver"
+                onclick="volverAGestion()">← Volver a Gestión</button
+            >
+            <button type="submit" class="boton-confirmar"
+                >Guardar Cambios</button
+            >
+        </div>
+    </form>
+</div>
+
+<script>
+    import Swal from "sweetalert2";
+    import { actions } from "astro:actions";
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Las facultades ya están cargadas desde el servidor en el frontmatter
+        // No necesitamos cargarlas nuevamente
+
+        // Función para recargar la lista de facultades (solo cuando sea necesario)
+        async function recargarFacultades() {
+            try {
+                const result = await actions.GetPaginaFacultad({});
+
+                // Verificar si hay error en la respuesta de Astro
+                if (result.error) {
+                    console.error(
+                        "Error de Astro al obtener facultades:",
+                        result.error,
+                    );
+                    mostrarNotificacionError("Error al cargar facultades");
+                    return;
+                }
+
+                // Verificar el resultado de la acción
+                if (!result.data?.success) {
+                    console.error(
+                        "Error al obtener facultades:",
+                        result.data?.error,
+                    );
+                    mostrarNotificacionError("Error al cargar facultades");
+                    return;
+                }
+
+                const facultades = result.data.facultades || [];
+                const selector = document.getElementById("selector-facultad");
+                if (selector) {
+                    selector.innerHTML =
+                        '<option value="">-- Seleccionar Facultad --</option>';
+
+                    facultades.forEach((facultad: any) => {
+                        const option = document.createElement("option");
+                        option.value = facultad.id_fac;
+                        option.textContent = facultad.nom_fac;
+                        selector.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error("Error al cargar facultades:", error);
+                mostrarNotificacionError("Error al cargar facultades");
+            }
+        }
+
+        // Función para mostrar notificaciones de éxito
+        function mostrarNotificacionExito(mensaje: string) {
+            Swal.fire({
+                icon: "success",
+                title: "¡Éxito!",
+                text: mensaje,
+                confirmButtonColor: "#059669",
+                timer: 2000,
+                timerProgressBar: true,
+            });
+        }
+
+        // Función para mostrar notificaciones de error
+        function mostrarNotificacionError(mensaje: string) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: mensaje,
+                confirmButtonColor: "#dc2626",
+            });
+        }
+
+        // Función para cargar datos de una facultad específica (solo habilita botones)
+        async function cargarDatosFacultad(idFacultad: string) {
+            const btnEliminar = document.getElementById(
+                "btn-eliminar",
+            ) as HTMLButtonElement;
+            const btnModificar = document.getElementById(
+                "btn-modificar",
+            ) as HTMLButtonElement;
+            const btnPrincipal = document.getElementById(
+                "btn-principal",
+            ) as HTMLButtonElement;
+
+            if (!idFacultad) {
+                // Deshabilitar botones cuando no hay selección
+                if (btnEliminar) {
+                    btnEliminar.disabled = true;
+                }
+                if (btnModificar) {
+                    btnModificar.style.display = "none";
+                }
+                if (btnPrincipal) {
+                    btnPrincipal.style.display = "none";
+                }
+                return;
+            }
+
+            // Habilitar botones cuando hay una facultad seleccionada
+            if (btnEliminar) {
+                btnEliminar.disabled = false;
+            }
+            if (btnModificar) {
+                btnModificar.style.display = "inline-block";
+            }
+            if (btnPrincipal) {
+                btnPrincipal.style.display = "inline-block";
+            }
+        }
+
+        // Función para modificar una facultad (cargar datos y mostrar formulario)
+        async function modificarFacultad() {
+            const selector = document.getElementById(
+                "selector-facultad",
+            ) as HTMLSelectElement;
+            const idFacultad = selector?.value;
+
+            if (!idFacultad) {
+                mostrarNotificacionError(
+                    "Selecciona una facultad para modificar",
+                );
+                return;
+            }
+
+            const panelGestion = document.querySelector(
+                ".contenedor-selector-facultad",
+            ) as HTMLElement;
+            const formulario = document.getElementById(
+                "formulario-facultad",
+            ) as HTMLFormElement;
+
+            try {
+                const { data, error } =
+                    await actions.getFacultadByIdPersonalizacion({
+                        id_facultad: idFacultad,
+                    });
+
+                if (error || !data?.success) {
+                    console.error(
+                        "Error al obtener facultad:",
+                        error || data?.error,
+                    );
+                    mostrarNotificacionError(
+                        data?.error ||
+                            "Error al cargar los datos de la facultad",
+                    );
+                    return;
+                }
+
+                if (data && data.success) {
+                    const facultad = data.data;
+
+                    // Ocultar panel de gestión y mostrar formulario
+                    if (panelGestion) {
+                        panelGestion.style.display = "none";
+                    }
+                    if (formulario) {
+                        formulario.style.display = "block";
+                    }
+
+                    // Llenar campos del formulario con los datos de la facultad
+                    const idInput = document.getElementById(
+                        "id_facultad",
+                    ) as HTMLInputElement;
+                    if (idInput) idInput.value = facultad.id_fac || "";
+
+                    // Campos básicos
+                    const nombreInput = document.querySelector(
+                        'input[name="nombre_facultad"]',
+                    ) as HTMLInputElement;
+                    if (nombreInput) nombreInput.value = facultad.nom_fac || "";
+
+                    // Cargar datos del carrusel si existen
+                    for (let i = 1; i <= 3; i++) {
+                        const tituloInput = document.querySelector(
+                            `input[name="titulo_carrusel_${i}"]`,
+                        ) as HTMLInputElement;
+                        const descripcionInput = document.querySelector(
+                            `textarea[name="descripcion_carrusel_${i}"]`,
+                        ) as HTMLTextAreaElement;
+
+                        if (tituloInput)
+                            tituloInput.value = facultad[`tit_caru${i}`] || "";
+                        if (descripcionInput)
+                            descripcionInput.value =
+                                facultad[`des_caru${i}`] || "";
+                    }
+
+                    // Cargar datos del equipo académico
+                    const decanoInput = document.querySelector(
+                        'input[name="nombre_decano"]',
+                    ) as HTMLInputElement;
+                    const subdecanoInput = document.querySelector(
+                        'input[name="nombre_subdecano"]',
+                    ) as HTMLInputElement;
+                    const responsableInput = document.querySelector(
+                        'input[name="nombre_responsable"]',
+                    ) as HTMLInputElement;
+
+                    if (decanoInput) decanoInput.value = facultad.dec_fac || "";
+                    if (subdecanoInput)
+                        subdecanoInput.value = facultad.sub_fac || "";
+                    if (responsableInput)
+                        responsableInput.value = facultad.res_fac || "";
+
+                    // Cargar misión y visión
+                    const misionTextarea = document.querySelector(
+                        'textarea[name="mision"]',
+                    ) as HTMLTextAreaElement;
+                    const visionTextarea = document.querySelector(
+                        'textarea[name="vision"]',
+                    ) as HTMLTextAreaElement;
+
+                    if (misionTextarea)
+                        misionTextarea.value = facultad.mis_fac || "";
+                    if (visionTextarea)
+                        visionTextarea.value = facultad.vis_fac || "";
+
+                    // Cargar información de contacto
+                    const direccionInput = document.querySelector(
+                        'input[name="direccion_contacto"]',
+                    ) as HTMLInputElement;
+                    const correoInput = document.querySelector(
+                        'input[name="correo_contacto"]',
+                    ) as HTMLInputElement;
+                    const jiraInput = document.querySelector(
+                        'input[name="link_jira"]',
+                    ) as HTMLInputElement;
+
+                    // Redes sociales
+                    const facebookInput = document.querySelector(
+                        'input[name="facebook"]',
+                    ) as HTMLInputElement;
+                    const twitterInput = document.querySelector(
+                        'input[name="twitter"]',
+                    ) as HTMLInputElement;
+                    const instagramInput = document.querySelector(
+                        'input[name="instagram"]',
+                    ) as HTMLInputElement;
+
+                    if (direccionInput)
+                        direccionInput.value = facultad.dir_fac || "";
+                    if (correoInput) correoInput.value = facultad.cor_fac || "";
+                    if (jiraInput) jiraInput.value = facultad.enl_sol || "";
+
+                    // Cargar redes sociales
+                    if (facebookInput)
+                        facebookInput.value = facultad.face_fac || "";
+                    if (twitterInput)
+                        twitterInput.value = facultad.twit_fac || "";
+                    if (instagramInput)
+                        instagramInput.value = facultad.inst_fac || "";
+
+                    // Cargar imágenes existentes en las vistas previas
+                    cargarImagenesExistentes(facultad);
+                }
+            } catch (error) {
+                console.error("Error al cargar facultad:", error);
+                mostrarNotificacionError(
+                    "Error al cargar los datos de la facultad",
+                );
+            }
+        }
+
+        // Función para cargar imágenes existentes en las vistas previas
+        function cargarImagenesExistentes(facultad: any) {
+            // Mapeo de campos de imagen y sus contenedores de vista previa
+            const imagenesMap = [
+                {
+                    campo: "img_log",
+                    preview: "logo-preview",
+                    display: "file-name-display-logo",
+                },
+                {
+                    campo: "img_caru1",
+                    preview: "carrusel-preview-1",
+                    display: "file-name-display-carrusel-1",
+                },
+                {
+                    campo: "img_caru2",
+                    preview: "carrusel-preview-2",
+                    display: "file-name-display-carrusel-2",
+                },
+                {
+                    campo: "img_caru3",
+                    preview: "carrusel-preview-3",
+                    display: "file-name-display-carrusel-3",
+                },
+                {
+                    campo: "dec_img",
+                    preview: "decano-preview",
+                    display: "file-name-display-decano-preview",
+                },
+                {
+                    campo: "sub_img",
+                    preview: "subdecano-preview",
+                    display: "file-name-display-subdecano-preview",
+                },
+                {
+                    campo: "res_img",
+                    preview: "responsable-preview",
+                    display: "file-name-display-responsable-preview",
+                },
+                {
+                    campo: "img_mis",
+                    preview: "mision-preview",
+                    display: "file-name-display-mision-preview",
+                },
+                {
+                    campo: "img_vis",
+                    preview: "vision-preview",
+                    display: "file-name-display-vision-preview",
+                },
+            ];
+
+            imagenesMap.forEach((imagen) => {
+                const url = facultad[imagen.campo];
+                if (url && url.trim() !== "") {
+                    mostrarImagenExistente(url, imagen.preview, imagen.display);
+                }
+            });
+        }
+
+        // Función helper para mostrar una imagen existente en la vista previa
+        function mostrarImagenExistente(
+            imageUrl: string,
+            previewId: string,
+            displayId: string,
+        ) {
+            const previewContainer = document.getElementById(previewId);
+            const fileNameDisplay = document.getElementById(displayId);
+
+            if (!previewContainer) return;
+
+            // Limpiar vista previa anterior
+            const existingPreview =
+                previewContainer.querySelector(".preview-image");
+            if (existingPreview) existingPreview.remove();
+
+            // Mostrar nombre del archivo
+            if (fileNameDisplay) {
+                const fileName =
+                    imageUrl.split("/").pop() || "Imagen existente";
+                fileNameDisplay.textContent = fileName;
+                fileNameDisplay.style.display = "block";
+            }
+
+            // Crear y mostrar la imagen
+            const previewImg = document.createElement("img");
+            previewImg.className = "preview-image";
+            previewImg.src = imageUrl;
+            previewImg.alt = "Imagen existente";
+            previewImg.style.maxWidth = "100%";
+            previewImg.style.maxHeight = "200px";
+            previewImg.style.objectFit = "cover";
+            previewImg.style.borderRadius = "8px";
+            previewImg.style.marginBottom = "10px";
+
+            // Manejar error de carga de imagen
+            previewImg.onerror = function () {
+                console.warn("Error al cargar imagen:", imageUrl);
+                if (fileNameDisplay) {
+                    fileNameDisplay.textContent = "Error al cargar imagen";
+                    fileNameDisplay.style.color = "#dc2626";
+                }
+            };
+
+            previewContainer.prepend(previewImg);
+        }
+
+        function crearNuevaFacultad() {
+            // Ocultar panel de gestión
+            const panelGestion = document.querySelector(
+                ".contenedor-selector-facultad",
+            ) as HTMLElement;
+            if (panelGestion) {
+                panelGestion.style.display = "none";
+            }
+
+            // Mostrar formulario para nueva facultad
+            const formulario = document.getElementById(
+                "formulario-facultad",
+            ) as HTMLFormElement;
+            if (formulario) {
+                formulario.style.display = "block";
+                formulario.reset();
+
+                // Limpiar el campo hidden del ID para indicar que es una nueva facultad
+                const idInput = document.getElementById(
+                    "id_facultad",
+                ) as HTMLInputElement;
+                if (idInput) idInput.value = "";
+
+                // Limpiar todas las vistas previas de imágenes
+                limpiarTodasLasVistasPrevias();
+            }
+        }
+
+        // Función para limpiar todas las vistas previas
+        function limpiarTodasLasVistasPrevias() {
+            const previewIds = [
+                "logo-preview",
+                "carrusel-preview-1",
+                "carrusel-preview-2",
+                "carrusel-preview-3",
+                "decano-preview",
+                "subdecano-preview",
+                "responsable-preview",
+                "mision-preview",
+                "vision-preview",
+            ];
+
+            const displayIds = [
+                "file-name-display-logo",
+                "file-name-display-carrusel-1",
+                "file-name-display-carrusel-2",
+                "file-name-display-carrusel-3",
+                "file-name-display-decano-preview",
+                "file-name-display-subdecano-preview",
+                "file-name-display-responsable-preview",
+                "file-name-display-mision-preview",
+                "file-name-display-vision-preview",
+            ];
+
+            // Limpiar vistas previas
+            previewIds.forEach((previewId) => {
+                const previewContainer = document.getElementById(previewId);
+                if (previewContainer) {
+                    const existingPreview =
+                        previewContainer.querySelector(".preview-image");
+                    if (existingPreview) existingPreview.remove();
+                }
+            });
+
+            // Limpiar displays de nombres de archivos
+            displayIds.forEach((displayId) => {
+                const display = document.getElementById(displayId);
+                if (display) {
+                    display.textContent = "";
+                    display.style.display = "none";
+                    display.style.color = ""; // Resetear color en caso de error previo
+                }
+            });
+        }
+
+        function volverAGestion() {
+            // Mostrar panel de gestión
+            const panelGestion = document.querySelector(
+                ".contenedor-selector-facultad",
+            ) as HTMLElement;
+            if (panelGestion) {
+                panelGestion.style.display = "block";
+            }
+
+            // Ocultar formulario
+            const formulario = document.getElementById(
+                "formulario-facultad",
+            ) as HTMLFormElement;
+            if (formulario) {
+                formulario.style.display = "none";
+                formulario.reset();
+
+                // Limpiar todas las vistas previas
+                limpiarTodasLasVistasPrevias();
+            }
+
+            // Resetear selector
+            const selector = document.getElementById(
+                "selector-facultad",
+            ) as HTMLSelectElement;
+            if (selector) {
+                selector.value = "";
+            }
+
+            // Deshabilitar y ocultar botones
+            const btnEliminar = document.getElementById(
+                "btn-eliminar",
+            ) as HTMLButtonElement;
+            const btnModificar = document.getElementById(
+                "btn-modificar",
+            ) as HTMLButtonElement;
+
+            if (btnEliminar) {
+                btnEliminar.disabled = true;
+            }
+            if (btnModificar) {
+                btnModificar.style.display = "none";
+            }
+        }
+
+        async function eliminarFacultad() {
+            const selector = document.getElementById(
+                "selector-facultad",
+            ) as HTMLSelectElement;
+            const idFacultad = selector?.value;
+
+            if (!idFacultad) {
+                mostrarNotificacionError(
+                    "Selecciona una facultad para eliminar",
+                );
+                return;
+            }
+
+            // Confirmar eliminación
+            const result = await Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Esta acción no se puede deshacer",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc2626",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const { data, error } = await actions.DeletePaginaFacultad({
+                    id_facultad: idFacultad,
+                });
+
+                if (error || !data?.success) {
+                    console.error(
+                        "Error al eliminar facultad:",
+                        error || data?.error,
+                    );
+                    mostrarNotificacionError(
+                        data?.error || "Error al eliminar la facultad",
+                    );
+                    return;
+                }
+
+                mostrarNotificacionExito("Facultad eliminada exitosamente");
+                // Recargar la página después de eliminar
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } catch (error) {
+                console.error("Error al eliminar facultad:", error);
+                mostrarNotificacionError("Error al eliminar la facultad");
+            }
+        }
+
+        // Función para seleccionar una facultad como principal
+        async function seleccionarFacultadPrincipal() {
+            const selector = document.getElementById(
+                "selector-facultad",
+            ) as HTMLSelectElement;
+            const idFacultad = selector?.value;
+
+            if (!idFacultad) {
+                mostrarNotificacionError(
+                    "Selecciona una facultad para marcar como principal",
+                );
+                return;
+            }
+
+            // Confirmar acción
+            const result = await Swal.fire({
+                title: "¿Confirmar selección?",
+                text: "Esta facultad será marcada como la facultad principal y se desactivarán todas las demás",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#ffc107",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Sí, seleccionar",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const { data, error } = await actions.activarFacultad({
+                    id_facultad: idFacultad,
+                });
+
+                if (error || !data?.success) {
+                    console.error(
+                        "Error al activar facultad:",
+                        error || data?.error,
+                    );
+                    mostrarNotificacionError(
+                        data?.error ||
+                            "Error al seleccionar la facultad como principal",
+                    );
+                    return;
+                }
+
+                mostrarNotificacionExito(
+                    "Facultad seleccionada como principal exitosamente",
+                );
+                // Recargar la página para reflejar los cambios
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } catch (error) {
+                console.error("Error al activar facultad:", error);
+                mostrarNotificacionError(
+                    "Error al seleccionar la facultad como principal",
+                );
+            }
+        }
+
+        // Función para manejar el envío del formulario
+        async function manejarEnvioFormulario(event: Event) {
+            event.preventDefault();
+
+            const formulario = event.target as HTMLFormElement;
+            const formData = new FormData(formulario);
+
+            try {
+                const result =
+                    await actions.CreateUpdatePaginaFacultad(formData);
+
+                // Verificar si hay error en la respuesta de Astro
+                if (result.error) {
+                    console.error("Error de Astro:", result.error);
+                    mostrarNotificacionError("Error al procesar la solicitud");
+                    return;
+                }
+
+                // Obtener el resultado de la acción
+                const actionResult = result.data as any;
+
+                // Verificar el resultado de la acción
+                if (!actionResult.success) {
+                    console.error(
+                        "Error al guardar facultad:",
+                        actionResult.error || actionResult.message,
+                    );
+                    mostrarNotificacionError(
+                        actionResult.message || "Error al guardar los cambios",
+                    );
+                    return;
+                }
+
+                mostrarNotificacionExito(
+                    actionResult.message || "Facultad guardada exitosamente",
+                );
+                // Recargar la página después de guardar
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } catch (error) {
+                console.error("Error al guardar facultad:", error);
+                mostrarNotificacionError("Error al guardar los cambios");
+            }
+        }
+
+        // Agregar event listener al formulario
+        const formulario = document.getElementById("formulario-facultad");
+        if (formulario) {
+            formulario.addEventListener("submit", manejarEnvioFormulario);
+        }
+
+        function showPreview(
+            input: HTMLInputElement,
+            previewId: string,
+            displayId: string,
+        ) {
+            const file = input.files?.[0];
+            if (!file) return;
+
+            const previewContainer = document.getElementById(previewId);
+            const fileNameDisplay = document.getElementById(displayId);
+
+            // Elimina vista previa anterior
+            const existingPreview =
+                previewContainer?.querySelector(".preview-image");
+            if (existingPreview) existingPreview.remove();
+
+            if (fileNameDisplay) {
+                fileNameDisplay.textContent = file.name;
+                fileNameDisplay.style.display = "block";
+            }
+
+            if (file.type.startsWith("image/") && previewContainer) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    if (
+                        e.target?.result &&
+                        typeof e.target.result === "string"
+                    ) {
+                        const previewImg = document.createElement("img");
+                        previewImg.className = "preview-image";
+                        previewImg.src = e.target.result;
+                        previewImg.alt = "Vista previa";
+                        previewContainer.prepend(previewImg);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        document.querySelectorAll(".input-file").forEach((input) => {
+            input.addEventListener("change", function (this: HTMLInputElement) {
+                const previewId = this.getAttribute("data-preview");
+                const displayId = this.getAttribute("data-name-display");
+                if (previewId && displayId) {
+                    showPreview(this, previewId, displayId);
+                }
+            });
+        });
+
+        // Hacer funciones disponibles globalmente
+        (window as any).cargarDatosFacultad = cargarDatosFacultad;
+        (window as any).modificarFacultad = modificarFacultad;
+        (window as any).crearNuevaFacultad = crearNuevaFacultad;
+        (window as any).eliminarFacultad = eliminarFacultad;
+        (window as any).seleccionarFacultadPrincipal =
+            seleccionarFacultadPrincipal;
+        (window as any).volverAGestion = volverAGestion;
+        (window as any).mostrarNotificacionExito = mostrarNotificacionExito;
+        (window as any).mostrarNotificacionError = mostrarNotificacionError;
+        (window as any).cargarImagenesExistentes = cargarImagenesExistentes;
+        (window as any).limpiarTodasLasVistasPrevias =
+            limpiarTodasLasVistasPrevias;
+    });
+</script>
