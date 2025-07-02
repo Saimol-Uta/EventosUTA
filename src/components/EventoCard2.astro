@@ -185,6 +185,39 @@ const {
 </a>
 
 <script>
+    // Función local para cargar eventos destacados (fallback si no está la global)
+    function cargarEventosDestacadosLocal() {
+        try {
+            const eventosGuardados = localStorage.getItem(
+                "eventosDestacadosTemp",
+            );
+            if (eventosGuardados) {
+                return new Set(JSON.parse(eventosGuardados));
+            }
+        } catch (error) {
+            console.error(
+                "Error al cargar eventos destacados desde localStorage:",
+                error,
+            );
+        }
+        return new Set();
+    }
+
+    // Función local para guardar eventos destacados (fallback si no está la global)
+    function guardarEventosDestacadosLocal(eventosSet: Set<string>) {
+        try {
+            localStorage.setItem(
+                "eventosDestacadosTemp",
+                JSON.stringify(Array.from(eventosSet)),
+            );
+        } catch (error) {
+            console.error(
+                "Error al guardar eventos destacados en localStorage:",
+                error,
+            );
+        }
+    }
+
     // Función para manejar el clic en el botón de destacar
     function manejarClicDestacar(event: Event) {
         event.preventDefault();
@@ -193,33 +226,32 @@ const {
         const boton = event.currentTarget as HTMLButtonElement;
         const idEvento = boton.dataset.id;
 
-        // Alternar el estado destacado
-        const estaDestacado = boton.classList.contains("destacado");
+        // Verificar si está en la selección temporal del usuario
+        const estaEnSeleccionTemporal = (window as any).eventosDestacados.has(
+            idEvento,
+        );
 
-        if (estaDestacado) {
-            // Quitar de destacados
+        if (estaEnSeleccionTemporal) {
+            // Quitar de la selección temporal
             boton.classList.remove("destacado");
             boton.classList.remove("bg-yellow-400", "text-yellow-900");
             boton.classList.add("bg-white/20", "text-white");
             boton.title = "Marcar como destacado";
+            (window as any).eventosDestacados.delete(idEvento);
         } else {
-            // Marcar como destacado
+            // Agregar a la selección temporal
             boton.classList.add("destacado");
             boton.classList.remove("bg-white/20", "text-white");
             boton.classList.add("bg-yellow-400", "text-yellow-900");
             boton.title = "Quitar de destacados";
-        }
-
-        // Agregar o quitar el ID del evento a la lista global de favoritos
-        if (!(window as any).eventosDestacados) {
-            (window as any).eventosDestacados = new Set();
-        }
-
-        if (estaDestacado) {
-            (window as any).eventosDestacados.delete(idEvento);
-        } else {
             (window as any).eventosDestacados.add(idEvento);
         }
+
+        // Guardar en localStorage usando función global o local como fallback
+        const funcionGuardar =
+            (window as any).guardarEventosDestacados ||
+            guardarEventosDestacadosLocal;
+        funcionGuardar((window as any).eventosDestacados);
 
         // Actualizar el estado del botón de guardar
         if ((window as any).actualizarBotonGuardar) {
@@ -234,25 +266,43 @@ const {
 
     // Inicializar cuando se carga el DOM
     document.addEventListener("DOMContentLoaded", function () {
-        // Inicializar el conjunto global si no existe
-        if (!(window as any).eventosDestacados) {
-            (window as any).eventosDestacados = new Set();
-        }
+        // Cargar eventos destacados desde localStorage usando función global o local como fallback
+        const funcionCargar =
+            (window as any).cargarEventosDestacados ||
+            cargarEventosDestacadosLocal;
+        const eventosDestacadosGuardados = funcionCargar();
+        (window as any).eventosDestacados = eventosDestacadosGuardados;
 
         // Agregar event listeners a todos los botones de destacar
         const botonesDestacar = document.querySelectorAll(".destacar-boton");
         botonesDestacar.forEach((boton) => {
             boton.addEventListener("click", manejarClicDestacar);
 
-            // Si el evento ya está marcado como destacado, agregarlo al conjunto
+            // Verificar el estado del botón
             const botonElement = boton as HTMLButtonElement;
             const idEvento = botonElement.dataset.id;
-            const yaDestacado = boton.classList.contains("bg-yellow-400");
 
-            if (yaDestacado) {
+            // Verificar si está en la selección temporal del usuario
+            const estaEnSeleccionTemporal = (
+                window as any
+            ).eventosDestacados.has(idEvento);
+
+            // Verificar si ya está destacado en la base de datos
+            const yaDestacadoEnBD = boton.classList.contains("bg-yellow-400");
+
+            // Si está en la selección temporal, marcarlo visualmente como seleccionado
+            if (estaEnSeleccionTemporal) {
                 boton.classList.add("destacado");
-                (window as any).eventosDestacados.add(idEvento);
+                boton.classList.remove("bg-white/20", "text-white");
+                boton.classList.add("bg-yellow-400", "text-yellow-900");
                 (boton as HTMLButtonElement).title = "Quitar de destacados";
+            }
+            // Si ya está destacado en la BD pero no en la selección temporal, mantener el estado de BD
+            else if (yaDestacadoEnBD) {
+                // Este evento ya está destacado en la BD, no lo agregamos a la selección temporal
+                // pero mantenemos su apariencia visual
+                (boton as HTMLButtonElement).title =
+                    "Ya destacado en la base de datos";
             }
         });
 

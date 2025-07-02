@@ -345,6 +345,49 @@ if (session && session.user) {
     <script src="/js/filtros.js" defer is:inline></script>
 
     <script>
+        // Funciones para manejar localStorage
+        function cargarEventosDestacados() {
+            try {
+                const eventosGuardados = localStorage.getItem(
+                    "eventosDestacadosTemp",
+                );
+                if (eventosGuardados) {
+                    return new Set(JSON.parse(eventosGuardados));
+                }
+            } catch (error) {
+                console.error(
+                    "Error al cargar eventos destacados desde localStorage:",
+                    error,
+                );
+            }
+            return new Set();
+        }
+
+        function guardarEventosDestacados(eventosSet: Set<any>) {
+            try {
+                localStorage.setItem(
+                    "eventosDestacadosTemp",
+                    JSON.stringify(Array.from(eventosSet)),
+                );
+            } catch (error) {
+                console.error(
+                    "Error al guardar eventos destacados en localStorage:",
+                    error,
+                );
+            }
+        }
+
+        function limpiarEventosDestacados() {
+            try {
+                localStorage.removeItem("eventosDestacadosTemp");
+            } catch (error) {
+                console.error(
+                    "Error al limpiar eventos destacados de localStorage:",
+                    error,
+                );
+            }
+        }
+
         async function guardarFavoritos() {
             const eventosDestacados =
                 (window as any).eventosDestacados || new Set();
@@ -397,7 +440,10 @@ if (session && session.user) {
                 if (result.success) {
                     alert(result.message);
 
-                    // Limpiar la selección
+                    // Limpiar la selección de localStorage
+                    limpiarEventosDestacados();
+
+                    // Limpiar la selección en memoria
                     if ((window as any).eventosDestacados) {
                         (window as any).eventosDestacados.clear();
                     }
@@ -504,12 +550,16 @@ if (session && session.user) {
         // Hacer las funciones disponibles globalmente
         (window as any).guardarFavoritos = guardarFavoritos;
         (window as any).actualizarBotonGuardar = actualizarBotonGuardar;
+        (window as any).cargarEventosDestacados = cargarEventosDestacados;
+        (window as any).guardarEventosDestacados = guardarEventosDestacados;
+        (window as any).limpiarEventosDestacados = limpiarEventosDestacados;
 
         // Inicializar cuando se carga la página
         document.addEventListener("DOMContentLoaded", function () {
-            if (!(window as any).eventosDestacados) {
-                (window as any).eventosDestacados = new Set();
-            }
+            // Cargar eventos destacados desde localStorage
+            const eventosDestacadosGuardados = cargarEventosDestacados();
+            (window as any).eventosDestacados = eventosDestacadosGuardados;
+
             actualizarBotonGuardar();
         });
     </script>
