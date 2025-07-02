@@ -1,4 +1,4 @@
-import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras } from './Eventos';
+import { crearEvento, eliminarEvento, getCategoriaById, getCategorias, getEventoBySlug, getEventos, getOrganizadorByEvento, getOrganizadores, modificarEvento, getCarreras, guardarEventosDestacados } from './Eventos';
 import { finalizarEvento } from './Eventos/finalizar-evento.action';
 import { actualizarPagoInscripcion } from './Eventos/actualizarPagoInscripcion.action';
 
@@ -115,6 +115,7 @@ export const server = {
     getCategoriaById,
     getCategorias, crearEvento,
     modificarEvento,
+    guardarEventosDestacados,
     eliminarEvento,
     finalizarEvento,// Nuevas acciones para asignaciones
     getCarreras,
