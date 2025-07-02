@@ -84,6 +84,8 @@ export const GenerarCertificado = defineAction({
         fechaFin: (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
         duracionHoras: inscripcion.eventos.dur_eve?.toString() ?? '40',
         fechaGeneracion: fechaParaElCertificado.toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+        nota: inscripcion.not_par?.toNumber() ?? 0,
+        asistencia: inscripcion.asi_par ?? 0
       });
 
       const uploadResult = await uploadToCloudinary(pdfBytes, inscripcion.id_ins);
@@ -169,6 +171,8 @@ export const generarCertificadoPublico = defineAction({
         fechaFin: (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
         duracionHoras: inscripcion.eventos.dur_eve?.toString() ?? '40',
         fechaGeneracion: fechaParaElCertificado.toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+        nota: inscripcion.not_par?.toNumber() ?? 0,
+        asistencia: inscripcion.asi_par ?? 0
       });
       
       const uploadResult = await uploadToCloudinary(pdfBytes, inscripcion.id_ins);

@@ -50,6 +50,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="text"
                                 class="input-dato"
                                 name="ced_usu"
+                                id="modificar-cedula-input"
                                 required
                                 pattern="[0-9]{10}"
                                 title="Cédula de 10 dígitos"
@@ -68,6 +69,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu1"
+                                    id="modificar-nombre1-input"
                                     required
                                     maxlength="20"
                                 />
@@ -80,6 +82,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu2"
+                                    id="modificar-nombre2-input"
                                     maxlength="20"
                                 />
                             </div>
@@ -98,6 +101,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu1"
+                                    id="modificar-apellido1-input"
                                     required
                                     maxlength="20"
                                 />
@@ -110,6 +114,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu2"
+                                    id="modificar-apellido2-input"
                                     maxlength="20"
                                 />
                             </div>
@@ -127,6 +132,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="date"
                                 class="input-dato"
                                 name="fec_nac_usu"
+                                id="modificar-fecha-nacimiento-input"
                                 required
                             />
                         </div>
@@ -139,6 +145,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="tel"
                                 class="input-dato"
                                 name="num_tel_usu"
+                                id="modificar-telefono-input"
                                 pattern="[0-9]{10}"
                                 title="Número de teléfono de 10 dígitos"
                                 maxlength="10"
@@ -154,6 +161,20 @@ const carreras = carrerasData?.carreras || [];
                     </p>
 
                     <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Rol del Usuario <span style="color: red;">*</span>
+                        </p>
+                        <div class="contenedor-input">
+                            <select name="rol_cue" id="modificar-rol-select" class="input-dato" required>
+                                <option value="">Seleccione un rol</option>
+                                <option value="ADMINISTRADOR">Administrador</option>
+                                <option value="ESTUDIANTE">Estudiante</option>
+                                <option value="USUARIO">Usuario</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato" id="modificar-contenedor-carrera" style="display: none;">
                         <p class="texto-dato">Carrera</p>
                         <div class="contenedor-input">
                             <select name="id_car_per" class="input-dato">
@@ -168,24 +189,6 @@ const carreras = carrerasData?.carreras || [];
                                         </option>
                                     ))
                                 }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="contenedor-dato">
-                        <p class="texto-dato">
-                            Rol del Usuario <span style="color: red;">*</span>
-                        </p>
-                        <div class="contenedor-input">
-                            <select name="rol_cue" class="input-dato" required>
-                                <option value="">Seleccione un rol</option>
-                                <option value="ADMINISTRADOR"
-                                    >Administrador</option
-                                >
-
-                                <option value="ESTUDIANTE">Estudiante</option>
-
-                                <option value="USUARIO">Usuario</option>
                             </select>
                         </div>
                     </div>
@@ -247,6 +250,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="password"
                                 class="input-dato"
                                 name="cont_cuenta"
+                                id="modificar-password-input"
                                 placeholder="Dejar vacío para mantener la actual"
                                 minlength="6"
                             />
@@ -254,6 +258,14 @@ const carreras = carrerasData?.carreras || [];
                         <small style="color: #6b7280; font-size: 12px;">
                             Dejar vacío para mantener la contraseña actual
                         </small>
+                        <!-- Lista de criterios para la nueva contraseña -->
+                        <div id="modificar-password-criteria" class="password-criteria-container">
+                            <p id="modificar-length-check" class="invalid">❌ Mínimo 6 caracteres</p>
+                            <p id="modificar-lower-check" class="invalid">❌ Una letra minúscula (a-z)</p>
+                            <p id="modificar-upper-check" class="invalid">❌ Una letra mayúscula (A-Z)</p>
+                            <p id="modificar-number-check" class="invalid">❌ Un número (0-9)</p>
+                            <p id="modificar-special-check" class="invalid">❌ Un caracter especial (ej: !@#$.,-_?)</p>
+                        </div>
                     </div>
 
                     <div class="contenedor-boton-modificar">
@@ -273,259 +285,289 @@ const carreras = carrerasData?.carreras || [];
             </form>
         </div>
         <script>
-            declare global {
-                interface Window {
-                    abrirModalModificarUsuario: (usuarioId: string) => void;
-                    cerrarModalModificarUsuario: () => void;
+        declare global {
+            interface Window {
+                abrirModalModificarUsuario: (usuarioId: string) => void;
+                cerrarModalModificarUsuario: () => void;
+            }
+        }
+
+        // Interfaz para el objeto de usuario
+        interface Usuario {
+            cor_cue: string;
+            ced_usu?: string | null;
+            nom_usu1?: string | null;
+            nom_usu2?: string | null;
+            ape_usu1?: string | null;
+            ape_usu2?: string | null;
+            fec_nac_usu?: string | null;
+            num_tel_usu?: string | null;
+            id_car_per?: string | null;
+            rol_cue?: string | null;
+        }
+        
+        // Función de validación de cédula
+        function validarCedula(cedula: string): boolean {
+            if (!/^\d{10}$/.test(cedula)) return false;
+            const provincia = parseInt(cedula.substring(0, 2), 10);
+            if (provincia < 1 || provincia > 24) return false;
+            const digitos = cedula.split("").map(Number);
+            const digitoVerificador = digitos[9];
+            let suma = 0;
+            for (let i = 0; i < 9; i++) {
+                let val = digitos[i];
+                if (i % 2 === 0) {
+                    val *= 2;
+                    if (val > 9) val -= 9;
                 }
+                suma += val;
             }
-            interface Usuario {
-                cor_cue: string; // Primary key
-                ced_usu: string;
-                nom_usu1: string;
-                nom_usu2?: string;
-                ape_usu1: string;
-                ape_usu2?: string;
-                fec_nac_usu: string;
-                num_tel_usu?: string;
-                id_car_per?: string;
-                rol_cue: string;
-                cont_cuenta: string;
-                enl_ced_cue?: string;
-                enl_mat_cue?: string;
-                img_user?: string;
-                carrera?: {
-                    id_car: string;
-                    nom_car: string;
-                    cod_car?: string;
-                };
+            const decenaSuperior = Math.ceil(suma / 10) * 10;
+            let digitoCalculado = decenaSuperior - suma;
+            if (digitoCalculado === 10) digitoCalculado = 0;
+            return digitoVerificador === digitoCalculado;
+        }
+
+        // Función para mostrar/ocultar el campo de carrera
+        function toggleCarreraField(rol: string): void {
+            const carreraContainer = document.getElementById("modificar-contenedor-carrera");
+            if (carreraContainer) {
+                carreraContainer.style.display = rol === 'ESTUDIANTE' ? 'block' : 'none';
+            }
+        }
+
+        // Funciones del modal
+        async function abrirModalModificarUsuario(usuarioId: string): Promise<void> {
+            const modal = document.getElementById("modalModificarUsuario");
+            const form = document.getElementById("formulario-modificar-usuario") as HTMLFormElement;
+            if (!modal || !form) return;
+
+            const usuariosInputs = document.querySelectorAll('input[name="usuario"]');
+            const usuarios: Usuario[] = Array.from(usuariosInputs).map((input) => JSON.parse((input as HTMLInputElement).value));
+            const usuario = usuarios.find((u) => u.cor_cue === usuarioId);
+
+            if (!usuario) return;
+
+            // Llenar el formulario
+            (form.querySelector('input[name="cor_cue_original"]') as HTMLInputElement).value = usuario.cor_cue || "";
+            (form.querySelector('input[name="cor_cue"]') as HTMLInputElement).value = usuario.cor_cue || "";
+            (form.querySelector('input[name="ced_usu"]') as HTMLInputElement).value = usuario.ced_usu || "";
+            (form.querySelector('input[name="nom_usu1"]') as HTMLInputElement).value = usuario.nom_usu1 || "";
+            (form.querySelector('input[name="nom_usu2"]') as HTMLInputElement).value = usuario.nom_usu2 || "";
+            (form.querySelector('input[name="ape_usu1"]') as HTMLInputElement).value = usuario.ape_usu1 || "";
+            (form.querySelector('input[name="ape_usu2"]') as HTMLInputElement).value = usuario.ape_usu2 || "";
+            const fechaNacimientoInput = form.querySelector('input[name="fec_nac_usu"]') as HTMLInputElement;
+            if (fechaNacimientoInput && usuario.fec_nac_usu) {
+                fechaNacimientoInput.value = new Date(usuario.fec_nac_usu).toISOString().split("T")[0];
+            }
+            (form.querySelector('input[name="num_tel_usu"]') as HTMLInputElement).value = usuario.num_tel_usu || "";
+            const rolSelect = form.querySelector('select[name="rol_cue"]') as HTMLSelectElement;
+            if(rolSelect) rolSelect.value = usuario.rol_cue || "";
+            const carreraSelect = form.querySelector('select[name="id_car_per"]') as HTMLSelectElement;
+            if(carreraSelect) carreraSelect.value = usuario.id_car_per || "";
+            
+            // Disparar lógica de UI
+            toggleCarreraField(rolSelect.value);
+            modal.style.display = "block";
+        }
+
+        function cerrarModalModificarUsuario(): void {
+            const modal = document.getElementById("modalModificarUsuario");
+            const form = document.getElementById("formulario-modificar-usuario") as HTMLFormElement;
+            if (modal && form) {
+                modal.style.display = "none";
+                form.reset();
+                const passwordCriteriaContainer = document.getElementById("modificar-password-criteria");
+                if(passwordCriteriaContainer) passwordCriteriaContainer.classList.remove('visible');
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // --- SELECCIÓN DE ELEMENTOS ---
+            const form = document.getElementById("formulario-modificar-usuario") as HTMLFormElement;
+            const cedulaInput = document.getElementById("modificar-cedula-input") as HTMLInputElement;
+            const telefonoInput = document.getElementById("modificar-telefono-input") as HTMLInputElement;
+            const nombre1Input = document.getElementById("modificar-nombre1-input") as HTMLInputElement;
+            const nombre2Input = document.getElementById("modificar-nombre2-input") as HTMLInputElement;
+            const apellido1Input = document.getElementById("modificar-apellido1-input") as HTMLInputElement;
+            const apellido2Input = document.getElementById("modificar-apellido2-input") as HTMLInputElement;
+            const fechaNacimientoInput = document.getElementById("modificar-fecha-nacimiento-input") as HTMLInputElement;
+            const rolSelect = document.getElementById("modificar-rol-select") as HTMLSelectElement;
+            const passwordInput = document.getElementById("modificar-password-input") as HTMLInputElement;
+            const passwordCriteriaContainer = document.getElementById("modificar-password-criteria") as HTMLDivElement;
+            
+            // --- FILTRADO DE ENTRADA ---
+            const filtrarSoloNumeros = (event: Event) => { (event.target as HTMLInputElement).value = (event.target as HTMLInputElement).value.replace(/\D/g, ''); };
+            const filtrarSoloLetras = (event: Event) => { (event.target as HTMLInputElement).value = (event.target as HTMLInputElement).value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚ\s]/g, ''); };
+            
+            if(cedulaInput) cedulaInput.addEventListener('input', filtrarSoloNumeros);
+            if(telefonoInput) telefonoInput.addEventListener('input', filtrarSoloNumeros);
+            if(nombre1Input) nombre1Input.addEventListener('input', filtrarSoloLetras);
+            if(nombre2Input) nombre2Input.addEventListener('input', filtrarSoloLetras);
+            if(apellido1Input) apellido1Input.addEventListener('input', filtrarSoloLetras);
+            if(apellido2Input) apellido2Input.addEventListener('input', filtrarSoloLetras);
+
+            // --- VALIDACIÓN DE FECHA DE NACIMIENTO ---
+            if (fechaNacimientoInput) {
+                const hoy = new Date();
+                const fechaMaxima = new Date(hoy.setFullYear(hoy.getFullYear() - 17)).toISOString().split("T")[0];
+                fechaNacimientoInput.setAttribute("max", fechaMaxima);
             }
 
-            let usuarioActualId: string = "";
+            // --- LÓGICA DE UI CONDICIONAL (CARRERA) ---
+            if (rolSelect) {
+                rolSelect.addEventListener('change', (e: Event) => toggleCarreraField((e.target as HTMLSelectElement).value));
+            }
 
-            async function abrirModalModificarUsuario(
-                usuarioId: string,
-            ): Promise<void> {
-                const modal = document.getElementById("modalModificarUsuario");
-                const form = document.getElementById(
-                    "formulario-modificar-usuario",
-                ) as HTMLFormElement;
+            // --- VALIDACIÓN DE CONTRASEÑA (OPCIONAL) ---
+            let passwordIsValid = true;
+            const passwordChecks = {
+                length: document.getElementById("modificar-length-check") as HTMLParagraphElement,
+                lower: document.getElementById("modificar-lower-check") as HTMLParagraphElement,
+                upper: document.getElementById("modificar-upper-check") as HTMLParagraphElement,
+                number: document.getElementById("modificar-number-check") as HTMLParagraphElement,
+                special: document.getElementById("modificar-special-check") as HTMLParagraphElement,
+            };
 
-                if (!modal || !form) return;
-
-                // Obtener todos los usuarios del DOM
-                const usuariosInputs = document.querySelectorAll(
-                    'input[name="usuario"]',
-                );
-                const usuarios = Array.from(usuariosInputs).map((input) =>
-                    JSON.parse((input as HTMLInputElement).value),
-                );
-                const usuario = usuarios.find(
-                    (u: Usuario) => u.cor_cue === usuarioId,
-                );
-
-                if (!usuario) return;
-
-                // Almacenar el ID del usuario actual
-                usuarioActualId = usuario.cor_cue || ""; // Llenar el formulario con los datos del usuario
-                const correo = form.querySelector(
-                    'input[name="cor_cue"]',
-                ) as HTMLInputElement;
-                const cedula = form.querySelector(
-                    'input[name="ced_usu"]',
-                ) as HTMLInputElement;
-                const nombre1 = form.querySelector(
-                    'input[name="nom_usu1"]',
-                ) as HTMLInputElement;
-                const nombre2 = form.querySelector(
-                    'input[name="nom_usu2"]',
-                ) as HTMLInputElement;
-                const apellido1 = form.querySelector(
-                    'input[name="ape_usu1"]',
-                ) as HTMLInputElement;
-                const apellido2 = form.querySelector(
-                    'input[name="ape_usu2"]',
-                ) as HTMLInputElement;
-                const fechaNacimiento = form.querySelector(
-                    'input[name="fec_nac_usu"]',
-                ) as HTMLInputElement;
-                const telefono = form.querySelector(
-                    'input[name="num_tel_usu"]',
-                ) as HTMLInputElement;
-                const carrera = form.querySelector(
-                    'select[name="id_car_per"]',
-                ) as HTMLSelectElement;
-                const rol = form.querySelector(
-                    'select[name="rol_cue"]',
-                ) as HTMLSelectElement;
-                const enlaceCedula = form.querySelector(
-                    'input[name="enl_ced_cue"]',
-                ) as HTMLInputElement;
-                const enlaceMatricula = form.querySelector(
-                    'input[name="enl_mat_cue"]',
-                ) as HTMLInputElement;
-                const imagenPerfil = form.querySelector(
-                    'input[name="img_user"]',
-                ) as HTMLInputElement;
-                const corCueHidden = form.querySelector(
-                    'input[name="cor_cue_original"]',
-                ) as HTMLInputElement;
-
-                // Asignar valores
-                if (correo) correo.value = usuario.cor_cue || "";
-                if (cedula) cedula.value = usuario.ced_usu || "";
-                if (nombre1) nombre1.value = usuario.nom_usu1;
-                if (nombre2) nombre2.value = usuario.nom_usu2 || "";
-                if (apellido1) apellido1.value = usuario.ape_usu1;
-                if (apellido2) apellido2.value = usuario.ape_usu2 || "";
-                if (fechaNacimiento) {
-                    const fecha = new Date(usuario.fec_nac_usu);
-                    fechaNacimiento.value = fecha.toISOString().split("T")[0];
+            const updateCheckUI = (element: HTMLParagraphElement | null, isValid: boolean) => {
+                if (!element) return;
+                if (isValid) {
+                    element.classList.remove("invalid");
+                    element.classList.add("valid");
+                    element.textContent = element.textContent?.replace("❌", "✅") || "";
+                } else {
+                    element.classList.remove("valid");
+                    element.classList.add("invalid");
+                    element.textContent = element.textContent?.replace("✅", "❌") || "";
                 }
-                if (telefono) telefono.value = usuario.num_tel_usu || "";
-                if (carrera) carrera.value = usuario.id_car_per || "";
-                if (rol) rol.value = usuario.rol_cue || "";
-                if (enlaceCedula)
-                    enlaceCedula.value = usuario.enl_ced_cue || "";
-                if (enlaceMatricula)
-                    enlaceMatricula.value = usuario.enl_mat_cue || "";
-                if (imagenPerfil) imagenPerfil.value = usuario.img_user || "";
-                if (corCueHidden) corCueHidden.value = usuario.cor_cue || "";
-
-                modal.style.display = "block";
-            }
-
-            function cerrarModalModificarUsuario(): void {
-                const modal = document.getElementById("modalModificarUsuario");
-                const form = document.getElementById(
-                    "formulario-modificar-usuario",
-                ) as HTMLFormElement;
-
-                if (modal && form) {
-                    modal.style.display = "none";
-                    form.reset();
+            };
+            
+            const validatePassword = () => {
+                const pass = passwordInput.value;
+                if (pass === '') {
+                    passwordIsValid = true;
+                    if(passwordCriteriaContainer) passwordCriteriaContainer.classList.remove('visible');
+                    return;
                 }
+                
+                const hasLength = pass.length >= 6;
+                const hasLower = /[a-z]/.test(pass);
+                const hasUpper = /[A-Z]/.test(pass);
+                const hasNumber = /[0-9]/.test(pass);
+                const hasSpecial = /[!@#$%^&*_=+\-.,:;?]/.test(pass);
+
+                updateCheckUI(passwordChecks.length, hasLength);
+                updateCheckUI(passwordChecks.lower, hasLower);
+                updateCheckUI(passwordChecks.upper, hasUpper);
+                updateCheckUI(passwordChecks.number, hasNumber);
+                updateCheckUI(passwordChecks.special, hasSpecial);
+
+                passwordIsValid = hasLength && hasLower && hasUpper && hasNumber && hasSpecial;
+            };
+
+            if (passwordInput && passwordCriteriaContainer) {
+                passwordInput.addEventListener('focus', () => {
+                    if(passwordInput.value === '') validatePassword();
+                    passwordCriteriaContainer.classList.add('visible');
+                });
+                passwordInput.addEventListener('input', validatePassword);
+                passwordInput.addEventListener('blur', () => {
+                    if (passwordInput.value === '' || passwordIsValid) {
+                        passwordCriteriaContainer.classList.remove('visible');
+                    }
+                });
             }
+            
+            // --- MANEJO DEL ENVÍO DEL FORMULARIO ---
+            if (form) {
+                form.addEventListener("submit", async (e: SubmitEvent) => {
+                    e.preventDefault();
+                    const { default: Swal } = await import("sweetalert2");
+                    const { actions } = await import("astro:actions");
 
-            document.addEventListener("DOMContentLoaded", () => {
-                const form = document.getElementById(
-                    "formulario-modificar-usuario",
-                ) as HTMLFormElement;
+                    const cedula = cedulaInput.value;
+                    const contrasena = passwordInput.value;
 
-                // Manejar envío del formulario
-                if (form) {
-                    form.addEventListener("submit", async (e) => {
-                        e.preventDefault();
-
-                        const formData = new FormData(form);
-
-                        // Obtener el correo original para la actualización
-                        const corCueOriginal = formData.get(
-                            "cor_cue_original",
-                        ) as string;
-
-                        if (!corCueOriginal) {
-                            const { default: Swal } = await import(
-                                "sweetalert2"
-                            );
-                            await Swal.fire({
-                                icon: "error",
-                                title: "Error",
-                                text: "No se pudo identificar el usuario a actualizar.",
-                                confirmButtonColor: "#dc2626",
-                            });
+                    if (!validarCedula(cedula)) {
+                        await Swal.fire({ icon: "error", title: "Cédula Inválida", text: "El número de cédula no es válido." });
+                        return;
+                    }
+                    
+                    if (contrasena !== '') {
+                        validatePassword();
+                        if (!passwordIsValid) {
+                            await Swal.fire({ icon: "error", title: "Contraseña no válida", text: "La nueva contraseña no cumple los criterios de seguridad." });
                             return;
-                        } // Crear objeto con los datos del usuario
-                        const usuarioData = {
-                            cor_cue: corCueOriginal,
-                            ced_usu: formData.get("ced_usu") as string,
-                            nom_usu1: formData.get("nom_usu1") as string,
-                            nom_usu2:
-                                (formData.get("nom_usu2") as string) ||
-                                undefined,
-                            ape_usu1: formData.get("ape_usu1") as string,
-                            ape_usu2:
-                                (formData.get("ape_usu2") as string) ||
-                                undefined,
-                            fec_nac_usu: formData.get("fec_nac_usu") as string,
-                            num_tel_usu:
-                                (formData.get("num_tel_usu") as string) ||
-                                undefined,
-                            id_car_per:
-                                (formData.get("id_car_per") as string) ||
-                                undefined,
-                            rol_cue: formData.get("rol_cue") as string,
-                            cont_cuenta:
-                                (formData.get("cont_cuenta") as string) ||
-                                undefined,
-                            enl_ced_cue:
-                                (formData.get("enl_ced_cue") as string) ||
-                                undefined,
-                            enl_mat_cue:
-                                (formData.get("enl_mat_cue") as string) ||
-                                undefined,
-                            img_user:
-                                (formData.get("img_user") as string) ||
-                                undefined,
-                        };
-
-                        try {
-                            // Importar actions dinámicamente
-                            const { actions } = await import("astro:actions");
-                            const { data, error } =
-                                await actions.actualizarUsuario(usuarioData);
-
-                            const { default: Swal } = await import(
-                                "sweetalert2"
-                            );
-                            if (data?.success) {
-                                await Swal.fire({
-                                    icon: "success",
-                                    title: "Éxito",
-                                    text:
-                                        data.message ||
-                                        "Usuario actualizado correctamente",
-                                    confirmButtonColor: "#059669",
-                                }).then(() => {
-                                    cerrarModalModificarUsuario();
-                                    window.location.reload();
-                                });
-                            } else {
-                                await Swal.fire({
-                                    icon: "error",
-                                    title: "Error",
-                                    text:
-                                        data?.message ||
-                                        error?.message ||
-                                        "No se pudo actualizar el usuario.",
-                                    confirmButtonColor: "#dc2626",
-                                });
-                            }
-                        } catch (error) {
-                            console.error("Error:", error);
-                            const { default: Swal } = await import(
-                                "sweetalert2"
-                            );
-                            await Swal.fire({
-                                icon: "error",
-                                title: "Error",
-                                text: "Error al procesar la solicitud",
-                                confirmButtonColor: "#dc2626",
-                            });
                         }
-                    });
-                }
+                    }
 
-                // Exponer funciones globalmente
-                window.abrirModalModificarUsuario = abrirModalModificarUsuario;
-                window.cerrarModalModificarUsuario =
-                    cerrarModalModificarUsuario;
-            });
-        </script>
+                    Swal.fire({ title: "Actualizando...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    
+                    const formData = new FormData(form);
+                    const usuarioData = {
+                        cor_cue: formData.get("cor_cue_original") as string,
+                        ced_usu: (formData.get("ced_usu") as string) || undefined,
+                        nom_usu1: (formData.get("nom_usu1") as string) || undefined,
+                        nom_usu2: (formData.get("nom_usu2") as string) || undefined,
+                        ape_usu1: (formData.get("ape_usu1") as string) || undefined,
+                        ape_usu2: (formData.get("ape_usu2") as string) || undefined,
+                        fec_nac_usu: (formData.get("fec_nac_usu") as string) || undefined,
+                        num_tel_usu: (formData.get("num_tel_usu") as string) || undefined,
+                        id_car_per: (formData.get("id_car_per") as string) || undefined,
+                        rol_cue: (formData.get("rol_cue") as string) || undefined,
+                        cont_cuenta: contrasena || undefined,
+                    };
+
+                    const { data, error } = await actions.actualizarUsuario(usuarioData);
+
+                    if (data?.success) {
+                        await Swal.fire({ icon: "success", title: "Éxito", text: data.message });
+                        window.location.reload();
+                    } else {
+                        await Swal.fire({ icon: "error", title: "Error", text: data?.message || error?.message });
+                    }
+                });
+            }
+            
+            window.abrirModalModificarUsuario = abrirModalModificarUsuario;
+            window.cerrarModalModificarUsuario = cerrarModalModificarUsuario;
+        });
+    </script>
     </div>
 </div>
 
 <style>
+
+    .password-criteria-container {
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out, opacity 0.3s ease-in;
+        margin-top: 8px;
+        padding-left: 5px;
+    }
+
+    .password-criteria-container.visible {
+        opacity: 1;
+        max-height: 10rem;
+        transition: max-height 0.4s ease-in, opacity 0.3s ease-out 0.1s;
+    }
+
+    .password-criteria-container p {
+        font-size: 13px;
+        margin: 4px 0;
+        transition: color 0.3s ease;
+    }
+
+    .password-criteria-container p.invalid {
+        color: #9ca3af;
+    }
+
+    .password-criteria-container p.valid {
+        color: #059669;
+        font-weight: 500;
+    }
+
     /* Estilos específicos para el modal de modificar usuario */
     .modal-contenido {
         max-height: 90vh;

@@ -603,8 +603,9 @@ const facultades = facultadesData?.facultades || [];
                         e.preventDefault();
                         await actualizarCarrera(e.target as HTMLFormElement);
                     });
-                } // Event listeners para cerrar modales al hacer clic fuera
-                document.addEventListener("click", (event) => {
+                }
+                 // Event listeners para cerrar modales al hacer clic fuera
+                /*document.addEventListener("click", (event) => {
                     const target = event.target as HTMLElement;
                     if (target.classList.contains("modal")) {
                         if (target.id === "modalNuevaCarrera")
@@ -615,7 +616,7 @@ const facultades = facultadesData?.facultades || [];
                             cerrarModalDetallesCarrera();
                     }
                 });
-
+                */
                 // Event listener para cerrar modales con ESC
                 document.addEventListener("keydown", (event) => {
                     if (event.key === "Escape") {
@@ -1080,6 +1081,8 @@ const facultades = facultadesData?.facultades || [];
                 interface Window {
                     abrirModalNuevaCarrera: () => void;
                     cerrarModalNuevaCarrera: () => void;
+                    abrirModalEditarCarrera: () => void; // Esta ya debería estar implícita
+                    cerrarModalEditarCarrera: () => void; // <- La añadimos aquí
                     editarCarrera?: (carreraId: string) => Promise<void>;
                     eliminarCarrera: (carreraId: string) => Promise<void>;
                     abrirModalDetallesCarrera: (
@@ -1091,6 +1094,7 @@ const facultades = facultadesData?.facultades || [];
 
             window.abrirModalNuevaCarrera = abrirModalNuevaCarrera;
             window.cerrarModalNuevaCarrera = cerrarModalNuevaCarrera;
+            window.cerrarModalEditarCarrera = cerrarModalEditarCarrera;
             window.editarCarrera = editarCarrera;
             window.eliminarCarrera = eliminarCarrera;
             window.abrirModalDetallesCarrera = abrirModalDetallesCarrera;

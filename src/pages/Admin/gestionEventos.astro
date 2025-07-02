@@ -127,8 +127,16 @@ function formatearFecha(fecha: string) {
                                         </p>
                                         <p>
                                             <strong>Organizador:</strong>{" "}
-                                            {evento.organizadores?.nom_org ||
-                                                "Sin organizador"}
+                                            {evento.organizadores
+                                                ? [
+                                                    evento.organizadores.nom_org1,
+                                                    evento.organizadores.nom_org2,
+                                                    evento.organizadores.ape_org1,
+                                                    evento.organizadores.ape_org2
+                                                  ]
+                                                    .filter(Boolean)
+                                                    .join(" ")
+                                                : "Sin organizador"}
                                         </p>
                                     </div>
                                     <div class="evento-estado">

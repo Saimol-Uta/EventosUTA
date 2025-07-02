@@ -73,6 +73,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="text"
                                 class="input-dato"
                                 name="ced_usu"
+                                id="cedula-input"
                                 required
                                 maxlength="10"
                                 pattern="[0-9]{10}"
@@ -90,10 +91,16 @@ const carreras = carrerasData?.carreras || [];
                                 type="password"
                                 class="input-dato"
                                 name="cont_cuenta"
+                                id="password-input"
                                 required
-                                minlength="6"
-                                title="La contraseña debe tener al menos 6 caracteres"
+                                title="La contraseña debe cumplir con los criterios de abajo."
                             />
+                        </div>
+                        <div id="password-criteria" class="password-criteria-container">
+                            <p id="length-check" class="invalid">❌ Mínimo 6 caracteres</p>
+                            <p id="lower-check" class="invalid">❌ Una letra minúscula (a-z)</p>
+                            <p id="upper-check" class="invalid">❌ Una letra mayúscula (A-Z)</p>
+                            <p id="special-check" class="invalid">❌ Un caracter especial (!@#$%^&*_=+-)</p>
                         </div>
                     </div>
 
@@ -107,6 +114,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu1"
+                                    id="nombre1-input"
                                     required
                                     maxlength="20"
                                 />
@@ -120,6 +128,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu2"
+                                    id="nombre2-input"
                                     maxlength="20"
                                 />
                             </div>
@@ -138,6 +147,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu1"
+                                    id="apellido1-input"
                                     required
                                     maxlength="20"
                                 />
@@ -151,6 +161,7 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu2"
+                                    id="apellido2-input"
                                     maxlength="20"
                                 />
                             </div>
@@ -168,6 +179,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="date"
                                 class="input-dato"
                                 name="fec_nac_usu"
+                                id="fecha-nacimiento-input"
                                 required
                             />
                         </div>
@@ -180,6 +192,7 @@ const carreras = carrerasData?.carreras || [];
                                 type="tel"
                                 class="input-dato"
                                 name="num_tel_usu"
+                                id="telefono-input"
                                 pattern="[0-9]{10}"
                                 maxlength="10"
                                 title="Ingrese un número de teléfono válido de 10 dígitos"
@@ -195,38 +208,55 @@ const carreras = carrerasData?.carreras || [];
                     </p>
 
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Carrera</p>
-                        <div class="contenedor-input">
-                            <select class="input-dato" name="id_car_per">
-                                <option value=""
-                                    >Seleccionar carrera (opcional)</option
-                                >
-                                {
-                                    carreras.map((carrera: any) => (
-                                        <option value={carrera.id_car}>
-                                            {carrera.nom_car}
-                                            {carrera.cod_car
-                                                ? ` (${carrera.cod_car})`
-                                                : ""}
-                                        </option>
-                                    ))
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="contenedor-dato">
                         <p class="texto-dato">
                             Rol <span style="color: red;">*</span>
                         </p>
                         <div class="contenedor-input">
-                            <select class="input-dato" name="rol_cue" required>
+                            <select
+                                class="input-dato"
+                                name="rol_cue"
+                                id="rol-select"
+                                required
+                            >
                                 <option value="">Seleccione un rol</option>
                                 <option value="ESTUDIANTE">Estudiante</option>
                                 <option value="ADMINISTRADOR"
                                     >Administrador</option
                                 >
                                 <option value="USUARIO">Usuario</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div
+                        class="contenedor-dato"
+                        id="contenedor-carrera"
+                        style="display: none;"
+                    >
+                        <p class="texto-dato">Carrera</p>
+                        <div class="contenedor-input">
+                            <select
+                                class="input-dato"
+                                name="id_car_per"
+                                id="carrera-select"
+                            >
+                                <option value=""
+                                    >Seleccionar carrera (opcional)</option
+                                >
+                                {
+                                    carreras.map((carrera: any) => (
+                                        <option value={carrera.id_car}>
+                                                                               
+                                                    {carrera.nom_car}           
+                                                                           {" "}
+                                            {carrera.cod_car
+                                                ? ` (${carrera.cod_car})`
+                                                : ""}
+                                                                               
+                                               {" "}
+                                        </option>
+                                    ))
+                                }
                             </select>
                         </div>
                     </div>
@@ -301,6 +331,41 @@ const carreras = carrerasData?.carreras || [];
 </div>
 
 <style>
+
+    .password-criteria-container {
+        opacity: 0;
+        max-height: 0; /* El elemento no tiene altura cuando está oculto */
+        overflow: hidden; /* Muy importante para que el contenido no se salga */
+        
+        /* La transición ahora animará la altura y la opacidad */
+        transition: max-height 0.4s ease-out, opacity 0.3s ease-in;
+
+        margin-top: 8px;
+        padding-left: 5px;
+    }
+
+    /* Estado visible: Se expande a su altura máxima y se vuelve opaco */
+    .password-criteria-container.visible {
+        opacity: 1;
+        max-height: 10rem; /* Una altura suficiente para que quepa todo el texto (1rem ≈ 16px) */
+        transition: max-height 0.4s ease-in, opacity 0.3s ease-out 0.1s; /* Se añade un pequeño retraso a la opacidad */
+    }
+
+    .password-criteria-container p {
+        font-size: 13px;
+        margin: 4px 0;
+        transition: color 0.3s ease;
+    }
+
+    .password-criteria-container p.invalid {
+        color: #9ca3af; /* Un gris para lo que falta */
+    }
+
+    .password-criteria-container p.valid {
+        color: #059669; /* Verde para lo cumplido */
+        font-weight: 500;
+    }
+
     /* Estilos específicos para el modal de nuevo usuario */
     .modal-contenido {
         max-height: 90vh;
@@ -584,15 +649,190 @@ const carreras = carrerasData?.carreras || [];
         }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById(
-            "formulario-nuevo-usuario",
-        ) as HTMLFormElement; // Manejar envío del formulario
+    function validarCedula(cedula: string): boolean {
+        if (!/^\d{10}$/.test(cedula)) return false;
+        const provincia = parseInt(cedula.substring(0, 2), 10);
+        if (provincia < 1 || provincia > 24) return false;
+
+        const digitos = cedula.split("").map(Number);
+        const digitoVerificador = digitos[9];
+        let suma = 0;
+
+        for (let i = 0; i < 9; i++) {
+            let val = digitos[i];
+            if (i % 2 === 0) {
+                val *= 2;
+                if (val > 9) {
+                    val -= 9;
+                }
+            }
+            suma += val;
+        }
+
+        const decenaSuperior = Math.ceil(suma / 10) * 10;
+        let digitoCalculado = decenaSuperior - suma;
+        if (digitoCalculado === 10) {
+            digitoCalculado = 0;
+        }
+
+        return digitoVerificador === digitoCalculado;
+    }
+
+document.addEventListener("DOMContentLoaded", () => {
+        // --- SELECCIÓN DE ELEMENTOS ---
+        const form = document.getElementById("formulario-nuevo-usuario") as HTMLFormElement;
+        const cedulaInput = document.getElementById("cedula-input") as HTMLInputElement;
+        const telefonoInput = document.getElementById("telefono-input") as HTMLInputElement;
+        const nombre1Input = document.getElementById("nombre1-input") as HTMLInputElement;
+        const nombre2Input = document.getElementById("nombre2-input") as HTMLInputElement;
+        const apellido1Input = document.getElementById("apellido1-input") as HTMLInputElement;
+        const apellido2Input = document.getElementById("apellido2-input") as HTMLInputElement;
+        const fechaNacimientoInput = document.getElementById("fecha-nacimiento-input") as HTMLInputElement;
+        const rolSelect = document.getElementById("rol-select") as HTMLSelectElement;
+        const carreraContainer = document.getElementById("contenedor-carrera") as HTMLDivElement;
+
+        const passwordInput = document.getElementById("password-input") as HTMLInputElement;
+        const passwordCriteriaContainer = document.getElementById("password-criteria") as HTMLDivElement;
+
+        const lengthCheck = document.getElementById("length-check") as HTMLParagraphElement;
+        const lowerCheck = document.getElementById("lower-check") as HTMLParagraphElement;
+        const upperCheck = document.getElementById("upper-check") as HTMLParagraphElement;
+        const specialCheck = document.getElementById("special-check") as HTMLParagraphElement;
+        
+        if (passwordInput && passwordCriteriaContainer) {
+            passwordInput.addEventListener('focus', () => {
+                passwordCriteriaContainer.classList.add('visible');
+            });
+
+            // Oculta la lista cuando el usuario sale del campo
+            passwordInput.addEventListener('blur', () => {
+                if (passwordInput.value === '' || passwordIsValid) {
+                    passwordCriteriaContainer.classList.remove('visible');
+                }
+            });
+        }
+
+        // --- VALIDACIÓN DE CONTRASEÑA EN TIEMPO REAL ---
+        let passwordIsValid = false;
+
+        // FIX: Tipado explícito para los parámetros de la función
+        const updateCheckUI = (element: HTMLParagraphElement | null, isValid: boolean): void => {
+            // Se añade una comprobación de nulidad para mayor robustez
+            if (!element) return;
+
+            if (isValid) {
+                element.classList.remove("invalid");
+                element.classList.add("valid");
+                element.textContent = element.textContent?.replace("❌", "✅") || "";
+            } else {
+                element.classList.remove("valid");
+                element.classList.add("invalid");
+                element.textContent = element.textContent?.replace("✅", "❌") || "";
+            }
+        };
+
+        const validatePassword = (): void => {
+            // FIX: La aserción de tipo en la selección de 'passwordInput' resuelve el error de '.value'
+            const pass = passwordInput.value;
+            
+            const hasLength = pass.length >= 6;
+            updateCheckUI(lengthCheck, hasLength);
+
+            const hasLower = /[a-z]/.test(pass);
+            updateCheckUI(lowerCheck, hasLower);
+
+            const hasUpper = /[A-Z]/.test(pass);
+            updateCheckUI(upperCheck, hasUpper);
+
+            const hasSpecial = /[!@#$%^&*_=+\-.,:;?]/.test(pass);
+            updateCheckUI(specialCheck, hasSpecial);
+
+            passwordIsValid = hasLength && hasLower && hasUpper && hasSpecial;
+        };
+
+        if (passwordInput) {
+            passwordInput.addEventListener('input', validatePassword);
+        }
+
+        // --- FUNCIONES DE FILTRADO DE ENTRADA ---
+        
+        // Función para permitir solo números
+        const filtrarSoloNumeros = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            input.value = input.value.replace(/\D/g, ''); // Reemplaza cualquier cosa que NO sea un dígito
+        };
+
+        // Función para permitir solo letras y espacios
+        const filtrarSoloLetras = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            // Permite letras (incluyendo acentos comunes en español), y espacios.
+            input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚ\s]/g, '');
+        };
+
+        // --- LÓGICA DE VALIDACIÓN Y UI ---
+
+        // 1. Validar edad mínima (17 años) en fecha de nacimiento
+        const hoy = new Date();
+        const anioMax = hoy.getFullYear() - 17;
+        hoy.setFullYear(anioMax);
+        // Formatea la fecha a YYYY-MM-DD para el atributo 'max'
+        const fechaMaxima = hoy.toISOString().split("T")[0];
+        if(fechaNacimientoInput) fechaNacimientoInput.setAttribute("max", fechaMaxima);
+        
+        // 2. Aplicar filtros de entrada a los campos correspondientes
+        if(cedulaInput) cedulaInput.addEventListener('input', filtrarSoloNumeros);
+        if(telefonoInput) telefonoInput.addEventListener('input', filtrarSoloNumeros);
+        
+        if(nombre1Input) nombre1Input.addEventListener('input', filtrarSoloLetras);
+        if(nombre2Input) nombre2Input.addEventListener('input', filtrarSoloLetras);
+        if(apellido1Input) apellido1Input.addEventListener('input', filtrarSoloLetras);
+        if(apellido2Input) apellido2Input.addEventListener('input', filtrarSoloLetras);
+
+        // 3. Lógica para mostrar/ocultar el campo de carrera según el rol
+        const toggleCarreraField = () => {
+            if (rolSelect.value === 'ESTUDIANTE') {
+                carreraContainer.style.display = 'block';
+            } else {
+                carreraContainer.style.display = 'none';
+            }
+        };
+
+        if(rolSelect) rolSelect.addEventListener('change', toggleCarreraField);
+        // Llamar una vez al cargar para establecer el estado inicial
+        toggleCarreraField();
+        
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
                 const formData = new FormData(form); // Convertir FormData a objeto para la validación
+                const cedula = formData.get("ced_usu") as string;
+                const contrasena = formData.get("cont_cuenta") as string;
+
+                if (!validarCedula(cedula)) {
+                     const { default: Swal } = await import("sweetalert2");
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Cédula Inválida",
+                        text: "Por favor, ingresa un número de cédula ecuatoriana válido.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return; // Detiene el envío
+                }
+
+                validatePassword();
+
+                if (!passwordIsValid) {
+                    const { default: Swal } = await import("sweetalert2");
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Contraseña no válida",
+                        text: "Por favor, asegúrate de que la contraseña cumpla todos los criterios.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
                 const userData = {
                     cor_cue: formData.get("cor_cue") as string,
                     ced_usu: formData.get("ced_usu") as string,
@@ -602,11 +842,17 @@ const carreras = carrerasData?.carreras || [];
                     ape_usu1: formData.get("ape_usu1") as string,
                     ape_usu2: (formData.get("ape_usu2") as string) || null,
                     fec_nac_usu: formData.get("fec_nac_usu") as string,
-                    num_tel_usu: (formData.get("num_tel_usu") as string) || null,
+                    num_tel_usu:
+                        (formData.get("num_tel_usu") as string) || null,
                     id_car_per: (formData.get("id_car_per") as string) || null,
-                    rol_cue: formData.get("rol_cue") as "ESTUDIANTE" | "ADMINISTRADOR" | "USUARIO",
-                    enl_ced_cue: (formData.get("enl_ced_cue") as string) || null,
-                    enl_mat_cue: (formData.get("enl_mat_cue") as string) || null,
+                    rol_cue: formData.get("rol_cue") as
+                        | "ESTUDIANTE"
+                        | "ADMINISTRADOR"
+                        | "USUARIO",
+                    enl_ced_cue:
+                        (formData.get("enl_ced_cue") as string) || null,
+                    enl_mat_cue:
+                        (formData.get("enl_mat_cue") as string) || null,
                     img_user: (formData.get("img_user") as string) || null,
                 };
                 try {
@@ -623,7 +869,8 @@ const carreras = carrerasData?.carreras || [];
                         },
                     });
 
-                    const { data, error } = await actions.crearUsuario(userData);
+                    const { data, error } =
+                        await actions.crearUsuario(userData);
 
                     if (data?.success) {
                         await Swal.fire({

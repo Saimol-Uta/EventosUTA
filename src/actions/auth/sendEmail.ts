@@ -12,6 +12,7 @@ const EMAIL_USER = process.env.EMAIL_USER;
 const WEBSITE_URL = process.env.WEBSITE_URL || 'http://localhost:4321'; // URL de tu sitio
 
 // Crear un cliente OAuth2
+/*
 const oauth2Client = new google.auth.OAuth2(
     CLIENT_ID,
     CLIENT_SECRET,
@@ -33,14 +34,12 @@ async function getAccessToken() {
         throw new Error('No se pudo obtener el token de acceso para enviar el correo.');
     }
 }
+*/
 
 // Crear un transporter de Nodemailer utilizando OAuth 2.0
 async function createTransporter() {
-    const accessToken = await getAccessToken();
-    if (!accessToken) {
-        throw new Error("No se pudo obtener el Access Token de Google.");
-    }
-    return nodemailer.createTransport({
+    // Nodemailer usará estos datos para obtener el access_token por su cuenta
+    const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
             type: 'OAuth2',
@@ -48,13 +47,15 @@ async function createTransporter() {
             clientId: CLIENT_ID,
             clientSecret: CLIENT_SECRET,
             refreshToken: REFRESH_TOKEN,
-            accessToken: accessToken
+            // No necesitas pasar 'accessToken' aquí. Nodemailer lo obtiene solo.
         },
         tls: {
-            rejectUnauthorized: true // Es más seguro mantenerlo en true para producción
+            rejectUnauthorized: true
         }
     });
+    return transporter;
 }
+
 
 // Acción para enviar el correo de verificación
 export async function sendVerificationEmail(email: string, token: string): Promise<void> {

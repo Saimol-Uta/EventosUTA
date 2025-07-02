@@ -156,6 +156,22 @@ import "../../../styles/Admin/ModalModificarEvento.css";
 
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById("formulario-modificar-organizador") as HTMLFormElement | null;
+
+        const nombre1Input = document.getElementById("modificar-nom_org1") as HTMLInputElement;
+        const nombre2Input = document.getElementById("modificar-nom_org2") as HTMLInputElement;
+        const apellido1Input = document.getElementById("modificar-ape_org1") as HTMLInputElement;
+        const apellido2Input = document.getElementById("modificar-ape_org2") as HTMLInputElement;
+
+        const filtrarSoloLetras = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+        };
+
+        if (nombre1Input) nombre1Input.addEventListener('input', filtrarSoloLetras);
+        if (nombre2Input) nombre2Input.addEventListener('input', filtrarSoloLetras);
+        if (apellido1Input) apellido1Input.addEventListener('input', filtrarSoloLetras);
+        if (apellido2Input) apellido2Input.addEventListener('input', filtrarSoloLetras);
+
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();

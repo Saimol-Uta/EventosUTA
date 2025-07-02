@@ -423,7 +423,9 @@ const inscripcionProximamente = () => {
                                 </div>
                                 
                                 <!-- Botón de pago si está aprobado y el evento es pagado -->
-                                {estadoInscripcion === 'FPendiente' && evento.precio && Number(evento.precio) > 0 && (
+                                {estadoInscripcion === 'FPendiente'
+                                    && evento.precio && Number(evento.precio) > 0
+                                    && !(inscripcion && inscripcion.enl_ord_pag_ins) && (
                                     <a
                                         href={`/Eventos/Pago/${evento.id_eve}`}
                                         style="display: block; background: linear-gradient(135deg, #16a34a, #15803d); color: white; padding: 1rem 2rem; border-radius: 12px; font-size: 1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4); transition: all 0.3s ease;"
@@ -433,7 +435,8 @@ const inscripcionProximamente = () => {
                                         <div style="font-size: 1.1rem; margin-bottom: 0.2rem;">💳</div>
                                         <div>Proceder con el pago</div>
                                         <div style="font-size: 0.8rem; opacity: 0.9; margin-top: 0.2rem;">${Number(evento.precio).toFixed(2)}</div>
-                                    </a>                                )}
+                                    </a>
+                                )}
                             </div>
                         ) : !session?.user ? (
                             <!-- Usuario no autenticado -->
@@ -474,7 +477,7 @@ const inscripcionProximamente = () => {
                                 
                                 <!-- Botón para ir al perfil -->
                                 <a
-                                    href="/"
+                                    href="/homeUser"
                                     style="display: block; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 1rem 2rem; border-radius: 12px; font-size: 1rem; font-weight: bold; text-decoration: none; text-align: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: all 0.3s ease;"
                                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.5)'"
                                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(59, 130, 246, 0.4)'"

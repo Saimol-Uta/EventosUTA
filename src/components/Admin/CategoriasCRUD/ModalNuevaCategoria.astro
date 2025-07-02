@@ -123,7 +123,7 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                     type="number"
                                     class="input-dato"
                                     name="pun_apr_cat"
-                                    min="0"
+                                    min="7"
                                     max="10"
                                     step="0.1"
                                     value="7.0"
@@ -143,9 +143,9 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                     type="number"
                                     class="input-dato"
                                     name="asi_cat"
-                                    min="0"
+                                    min="70"
                                     max="100"
-                                    value="80"
+                                    value="70"
                                 />
                                 <p>%</p>
                             </div>
@@ -180,6 +180,8 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         if (modal) {
             modal.style.display = "block";
         }
+        document.getElementById("requiere_puntaje")?.dispatchEvent(new Event('change'));
+        document.getElementById("requiere_asistencia")?.dispatchEvent(new Event('change'));
     }
     function cerrarModalNuevaCategoria(): void {
         const modal = document.getElementById("modalNuevaCategoria");
@@ -190,72 +192,44 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         if (modal && form) {
             modal.style.display = "none";
             form.reset();
-            // Resetear visibilidad de campos
-            const contenedorPuntaje = document.getElementById(
-                "contenedor-puntaje",
-            ) as HTMLElement;
-            const contenedorAsistencia = document.getElementById(
-                "contenedor-asistencia",
-            ) as HTMLElement;
-            if (contenedorPuntaje) contenedorPuntaje.style.display = "none";
-            if (contenedorAsistencia)
-                contenedorAsistencia.style.display = "none";
+            document.getElementById("requiere_puntaje")?.dispatchEvent(new Event('change'));
+            document.getElementById("requiere_asistencia")?.dispatchEvent(new Event('change'));
         }
     }
     document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById(
-            "formulario-nueva-categoria",
-        ) as HTMLFormElement;
+        const form = document.getElementById("formulario-nueva-categoria") as HTMLFormElement;
+        if (!form) return;
 
-        // Referencias a los checkboxes y contenedores
-        const requierePuntajeCheckbox = document.getElementById(
-            "requiere_puntaje",
-        ) as HTMLInputElement;
-        const requiereAsistenciaCheckbox = document.getElementById(
-            "requiere_asistencia",
-        ) as HTMLInputElement;
-        const contenedorPuntaje = document.getElementById(
-            "contenedor-puntaje",
-        ) as HTMLElement;
-        const contenedorAsistencia = document.getElementById(
-            "contenedor-asistencia",
-        ) as HTMLElement;
-        const inputPuntaje = document.querySelector(
-            'input[name="pun_apr_cat"]',
-        ) as HTMLInputElement;
-        const inputAsistencia = document.querySelector(
-            'input[name="asi_cat"]',
-        ) as HTMLInputElement;
+        // Referencias a los elementos del DOM
+        const requierePuntajeCheckbox = document.getElementById("requiere_puntaje") as HTMLInputElement;
+        const requiereAsistenciaCheckbox = document.getElementById("requiere_asistencia") as HTMLInputElement;
+        const contenedorPuntaje = document.getElementById("contenedor-puntaje") as HTMLElement;
+        const contenedorAsistencia = document.getElementById("contenedor-asistencia") as HTMLElement;
+        const inputPuntaje = form.querySelector('input[name="pun_apr_cat"]') as HTMLInputElement;
+        const inputAsistencia = form.querySelector('input[name="asi_cat"]') as HTMLInputElement;
 
-        // Función para toggle de campos
-        function toggleCampoPuntaje() {
-            if (requierePuntajeCheckbox?.checked) {
-                contenedorPuntaje.style.display = "block";
-                inputPuntaje.required = true;
-            } else {
-                contenedorPuntaje.style.display = "none";
-                inputPuntaje.required = false;
-                inputPuntaje.value = "7.0"; // Reset al valor por defecto
-            }
+        // Lógica para habilitar/deshabilitar los campos
+        function actualizarEstadoPuntaje() {
+            const isChecked = requierePuntajeCheckbox.checked;
+            contenedorPuntaje.style.display = isChecked ? "block" : "none";
+            inputPuntaje.required = isChecked;
+            inputPuntaje.disabled = !isChecked; // La clave: deshabilita si no está marcado
         }
 
-        function toggleCampoAsistencia() {
-            if (requiereAsistenciaCheckbox?.checked) {
-                contenedorAsistencia.style.display = "block";
-                inputAsistencia.required = true;
-            } else {
-                contenedorAsistencia.style.display = "none";
-                inputAsistencia.required = false;
-                inputAsistencia.value = "80"; // Reset al valor por defecto
-            }
+        function actualizarEstadoAsistencia() {
+            const isChecked = requiereAsistenciaCheckbox.checked;
+            contenedorAsistencia.style.display = isChecked ? "block" : "none";
+            inputAsistencia.required = isChecked;
+            inputAsistencia.disabled = !isChecked; // La clave: deshabilita si no está marcado
         }
 
         // Event listeners para los checkboxes
-        requierePuntajeCheckbox?.addEventListener("change", toggleCampoPuntaje);
-        requiereAsistenciaCheckbox?.addEventListener(
-            "change",
-            toggleCampoAsistencia,
-        );
+        requierePuntajeCheckbox.addEventListener("change", actualizarEstadoPuntaje);
+        requiereAsistenciaCheckbox.addEventListener("change", actualizarEstadoAsistencia);
+        
+        // Ejecutar las funciones una vez al inicio para establecer el estado correcto
+        actualizarEstadoPuntaje();
+        actualizarEstadoAsistencia();
 
         // Manejar envío del formulario
         if (form) {
