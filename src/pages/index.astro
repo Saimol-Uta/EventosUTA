@@ -1,45 +1,73 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
+import MenuAdmin from "../components/MenuAdministrador.astro";
 import InformacionFacultad from "../components/InformacionFacultad.astro";
 import Footer from "../components/Footer.astro";
 import Navbar from "../components/Navbar.astro";
 import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
-import InformacionUsuario from "@/components/InformacionUsuario.astro";
-import ContenedorInfo from "@/components/ContenedorInfo.astro";
-import prisma from "@/db";
+import CarruselUTA from "@/components/Home/CarruselUTA.astro";
 import { actions } from "astro:actions";
 
 const session = await getSession(Astro.request);
 let esAdmin = false;
 
-if (session && session.user) {
+if (session?.user) {
     const user = session.user as CustomUser;
     const rol = user.rol?.toUpperCase();
-    if (rol === "ADMINISTRADOR" || rol === "MASTER") {
-        esAdmin = true;
-    }
+    esAdmin = rol === "ADMINISTRADOR" || rol === "MASTER";
 }
 
-const { data: pagina } = await Astro.callAction(actions.getInfo, {});
+const id_fac = "a1b2c3d4-e5f6-4a7b-8c9d-1a1a1a1a1a1a";
+
+const { data: pagina } = await Astro.callAction(
+    actions.getPaginaSeleccionada,
+    {},
+);
 ---
 
 <Layout>
     <Header />
-    <Navbar />
-    <InformacionFacultad
-        tituloFacultad="Facultad de Ingenieria en Sistemas Electronica e Industrial"
-        tituloDescripcion="Descripción"
-        contenidoDescripcion={pagina?.data?.des_pag ?? ""}
-        imagenDescripcion="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
-        tituloMision="Misión"
-        contenidoMision={pagina?.data?.mis_pag ?? ""}
-        imagenMision="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80"
-        tituloVision="Visión"
-        contenidoVision={pagina?.data?.vis_pag ?? ""}
-        imagenVision="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+    {esAdmin ? <MenuAdmin /> : <Navbar />}
+    <CarruselUTA
+        img1={pagina?.facultad?.img_caru1 ?? ""}
+        img2={pagina?.facultad?.img_caru2 ?? ""}
+        img3={pagina?.facultad?.img_caru3 ?? ""}
+        tit_caru1={pagina?.facultad?.tit_caru1 ?? ""}
+        tit_caru2={pagina?.facultad?.tit_caru2 ?? ""}
+        tit_caru3={pagina?.facultad?.tit_caru3 ?? ""}
+        des_caru1={pagina?.facultad?.des_caru1 ?? ""}
+        des_caru2={pagina?.facultad?.des_caru2 ?? ""}
+        des_caru3={pagina?.facultad?.des_caru3 ?? ""}
         modoAdmin={esAdmin}
     />
-    <Footer />
-</Layout>;
+    <InformacionFacultad
+        tituloFacultad={pagina?.facultad?.nom_fac ?? ""}
+        decano={pagina?.facultad?.dec_fac ?? ""}
+        decanoImagen={pagina?.facultad?.dec_img ?? ""}
+        subdecano={pagina?.facultad?.sub_fac ?? ""}
+        subdecanoImagen={pagina?.facultad?.sub_img ?? ""}
+        tituloDescripcion="Descripción"
+        contenidoDescripcion={pagina?.facultad?.des_fac ?? ""}
+        imagenDescripcion={pagina?.facultad?.img_des ?? ""}
+        tituloMision="Misión"
+        contenidoMision={pagina?.facultad?.mis_fac ?? ""}
+        imagenMision={pagina?.facultad?.img_mis ?? ""}
+        tituloVision="Visión"
+        contenidoVision={pagina?.facultad?.vis_fac ?? ""}
+        imagenVision={pagina?.facultad?.img_vis ?? ""}
+        responsable={pagina?.facultad?.res_fac ?? ""}
+        responsableImagen={pagina?.facultad?.res_img ?? ""}
+        modoAdmin={esAdmin}
+    />
+    <div class="h-15 bg-white"></div>
+    <Footer
+        Twitter={pagina?.facultad?.twit_fac}
+        Facebook={pagina?.facultad?.face_fac}
+        Instagram={pagina?.facultad?.inst_fac}
+        Direccion={pagina?.facultad?.dir_fac}
+        Correo={pagina?.facultad?.cor_fac}
+        Solicitud={pagina?.facultad?.enl_sol}
+    />
+</Layout>

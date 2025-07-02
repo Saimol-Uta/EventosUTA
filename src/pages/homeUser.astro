@@ -7,330 +7,337 @@ import DocumentButton from "../components/DocumentButton.astro";
 import Card from "../components/Card.astro";
 import { actions } from "astro:actions";
 import { getSession } from "auth-astro/server";
-
+import Layout from "../layouts/Layout.astro";
+// 1. Obtenemos la sesión como antes
 const session = await getSession(Astro.request);
+const idUsuario = session?.user?.id;
 
-const { data: cuenta } = await Astro.callAction(
-  actions.getCuentaByIdSingle,
-  session?.user?.id || "",
-);
-
-if (!cuenta?.usuarios?.ced_usu) {
-  return Astro.redirect("/User/CompletarPerfilUser");
-}
-
-const idUsuario = cuenta?.id_usu_per;
-
-let eventosUsuario: any[] = [];
-let upcomingEvents: any[] = [];
-let certificates: any[] = [];
-
-if (idUsuario && typeof idUsuario === "string") {
-  const { data: eventosData } = await Astro.callAction(
-    actions.getEventosPorUsuario,
-    {
-      idUsuario,
-    },
-  );
-  eventosUsuario = eventosData?.eventos ?? [];
-
-  // CORRECCIÓN: Leemos la propiedad 'certificados' que ahora devuelve la action
-  const { data: resultCertificados } = await Astro.callAction(
-    actions.getCertificadosPorUsuario,
+// 2. Hacemos UNA ÚNICA LLAMADA a nuestra nueva acción
+const { data: dashboardData } = await Astro.callAction(
+    actions.getDashboardData,
     { idUsuario },
-  );
-  certificates = resultCertificados?.certificados ?? [];
-}
-
-const { data: resultProximos } = await Astro.callAction(
-  actions.getEventosProximos,
-  {},
 );
-upcomingEvents = resultProximos?.eventos ?? [];
+
+// 3. Extraemos todos los datos del objeto resultante
+const cuenta = dashboardData?.cuenta;
+const upcomingEvents = dashboardData?.eventosProximos ?? [];
+const eventosUsuarioRaw = dashboardData?.eventosUsuario ?? [];
+const certificates = dashboardData?.certificados ?? [];
+
+// 4. NORMALIZAMOS LOS DATOS (si todavía es necesario)
+const eventosUsuario = eventosUsuarioRaw.map((inscripcion) => ({
+    nombre: inscripcion.eventos.nom_eve,
+    fecha: inscripcion.eventos.fec_ini_eve,
+    estado: inscripcion.est_ins,
+}));
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <style>
-      .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.75);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-      .modal-content {
-        position: relative;
-        background-color: #fff;
-        padding: 8px;
-        border-radius: 8px;
-        width: 90%;
-        height: 90%;
-        max-width: 1000px;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      }
-      .modal-close-btn {
-        position: absolute;
-        top: -15px;
-        right: -15px;
-        background-color: #333;
-        color: white;
-        border: 2px solid white;
-        border-radius: 50%;
-        width: 35px;
-        height: 35px;
-        font-size: 24px;
-        line-height: 30px;
-        text-align: center;
-        cursor: pointer;
-        z-index: 1001;
-      }
-      #pdf-iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
-      }
-    </style>
-  </head>
-  <body>
-    <Header />
-    <NavBar />
+<Layout>
+        <Header />
+        <NavBar />
 
-    <div class="flex flex-col md:flex-row gap-6 p-6">
-      <!-- Perfil del Usuario -->
-      <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
-        <Avatar
-          defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
-          size="w-50 h-50"
-        />
-        <p class="text-red-800 font-semibold text-lg">
-          {session?.user?.name || "Usuario Anónimo"}
-        </p>
-        <Button text="Editar Perfil" href="../PerfilUserDos" />
-        <div class="text-center mt-4 text-red-800">Documentos</div>
-        <div class="flex gap-2 mt-2">
-          <DocumentButton
-            label="Cédula"
-            cuentaId={session?.user?.id}
-            currentImage={cuenta?.enl_ced_cue}
-            fieldName="enl_ced_cue"
-            size="w-24 h-24"
-          />
-          <DocumentButton
-            label="Matrícula"
-            cuentaId={session?.user?.id}
-            currentImage={cuenta?.enl_mat_cue}
-            fieldName="enl_mat_cue"
-            size="w-24 h-24"
-          />
-          <DocumentButton
-            label="Extensión"
-            cuentaId={session?.user?.id}
-            currentImage={cuenta?.enl_ext_cue}
-            fieldName="enl_ext_cue"
-            size="w-24 h-24"
-          />
-        </div>
-      </div>
-
-      <!-- Contenido principal -->
-      <div class="w-full md:w-3/4 flex flex-col gap-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-          <!-- Eventos Próximos -->
-          <Card title="Eventos Próximos">
-            <div class="flex flex-col gap-y-4">
-              {
-                upcomingEvents.slice(0, 4).map((evento) => (
-                  <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                    <>
-                      <strong>{evento.nom_eve}</strong>
-                      <br />
-                    </>
-                    <span class="text-sm text-gray-600">
-                      Inicio:{" "}
-                      {new Date(evento.fec_ini_eve).toLocaleDateString()}
-                    </span>
-                  </div>
-                ))
-              }
-              {
-                upcomingEvents.length > 4 && (
-                  <a
-                    href="/eventosProximos"
-                    class="text-red-800 underline text-sm mt-2"
-                  >
-                    Ver más...
-                  </a>
-                )
-              }
-            </div>
-          </Card>
-          <!-- Certificados -->
-          <Card title="Certificados">
-            <div class="flex flex-col gap-y-4">
-              {
-                certificates.length > 0 ? (
-                  certificates.slice(0, 4).map((certificado) => (
-                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                      <a
-                        href={certificado.enl_cer_par}
-                        class="text-red-800 underline js-view-cert"
-                      >
-                        {certificado.eventos.nom_eve}
-                      </a>
-                    </div>
-                  ))
-                ) : (
-                  <p class="text-sm text-gray-500">
-                    No tienes certificados para mostrar.
-                  </p>
-                )
-              }
-
-              {
-                certificates.length > 4 && (
-                  <a
-                    href="/User/certificadosUsuario"
-                    class="text-red-800 underline text-sm mt-2"
-                  >
-                    Ver más...
-                  </a>
-                )
-              }
-            </div>
-          </Card>
-        </div>
-
-        <!-- Historial de Eventos -->
-        <h1 class="text-xl font-semibold mt-8 text-red-800">
-          Historial de Eventos
-        </h1>
-        <div class="flex flex-col gap-6">
-          {
-            Array.isArray(eventosUsuario) && eventosUsuario.length > 0 ? (
-              eventosUsuario.map((evento) => (
-                <div class="bg-white border rounded-xl shadow-md p-4">
-                  <div class="font-bold text-lg text-gray-800">
-                    {evento?.nombre || evento?.nom_eve || "Sin nombre"}
-                  </div>
-                  <div class="text-gray-600 text-sm mt-1">
-                    Fecha: {evento?.fecha || evento?.fec_ini_eve || "Sin fecha"}
-                  </div>
-                  <div class="text-gray-600 text-sm">
-                    Estado:{" "}
-                    {evento?.estado || evento?.estado_inscripcion || "Inscrito"}
-                  </div>
+        <div class="flex flex-col md:flex-row gap-6 p-6">
+            <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
+                <Avatar
+                    defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
+                    size="w-50 h-50"
+                />
+                <p class="text-gray-800 font-semibold text-center">
+                    {
+                        (cuenta?.nom_usu1 || "") +
+                            " " +
+                            (cuenta?.nom_usu2 || "") +
+                            " " +
+                            (cuenta?.ape_usu1 || "") +
+                            " " +
+                            (cuenta?.ape_usu2 || "")
+                    }
+                </p>
+                <Button text="Editar Perfil" href="/PerfilUserDos" />
+                <div class="text-center text-red-700 font-medium">
+                    Documentos
                 </div>
-              ))
-            ) : (
-              <div class="text-gray-500">No tienes eventos registrados.</div>
-            )
-          }
+                <div class="flex gap-2 mt-2">
+                    <DocumentButton
+                        label="Cédula"
+                        cuentaId={session?.user?.id}
+                        currentImage={cuenta?.enl_ced_cue}
+                        fieldName="enl_ced_cue"
+                        size="w-20 h-20"
+                    />
+                    <DocumentButton
+                        label="Matrícula"
+                        cuentaId={session?.user?.id}
+                        currentImage={cuenta?.enl_mat_cue}
+                        fieldName="enl_mat_cue"
+                        size="w-20 h-20"
+                    />
+                </div>
+            </div>
+
+            <!-- Contenido Principal -->
+            <section class="flex-1 flex flex-col gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card title="Eventos Próximos">
+                        <div class="flex flex-col gap-3">
+                            {
+                                upcomingEvents.length > 0 ? (
+                                    upcomingEvents.slice(0, 4).map((evento) => (
+                                        <a
+                                            href={`/Eventos/${evento.id_eve}`}
+                                            class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300 block cursor-pointer hover:bg-gray-50"
+                                        >
+                                            <strong class="block text-gray-800 text-lg font-semibold mb-1">
+                                                {evento.nom_eve}
+                                            </strong>
+                                            <span class="text-sm text-gray-600 italic">
+                                                Inicio:{" "}
+                                                {new Date(
+                                                    evento.fec_ini_eve,
+                                                ).toLocaleDateString()}
+                                            </span>
+                                        </a>
+                                    ))
+                                ) : (
+                                    <p class="text-gray-700 bg-gray-50 border border-dashed border-gray-400 rounded-xl p-4 text-center">
+                                        No hay eventos próximos disponibles.
+                                    </p>
+                                )
+                            }
+                            {
+                                upcomingEvents.length > 4 && (
+                                    <a
+                                        href="/eventosProximos"
+                                        class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit"
+                                    >
+                                        Ver más...
+                                    </a>
+                                )
+                            }
+                        </div>
+                    </Card>
+
+                    <Card title="Certificados">
+                        <div class="flex flex-col gap-3">
+                            {
+                                certificates.length > 0 ? (
+                                    certificates
+                                        .slice(0, 4)
+                                        .map((certificado) => (
+                                            <div class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300">
+                                                <span
+                                                    class="text-gray-800 font-medium block cursor-pointer js-view-cert text-ellipsis overflow-hidden whitespace-nowrap"
+                                                    title={
+                                                        certificado.eventos
+                                                            .nom_eve
+                                                    }
+                                                    data-url={
+                                                        certificado.enl_cer_par
+                                                    }
+                                                >
+                                                    {
+                                                        certificado.eventos
+                                                            .nom_eve
+                                                    }
+                                                </span>
+                                            </div>
+                                        ))
+                                ) : (
+                                    <p class="text-gray-700 bg-red-50 border border-dashed border-red-400 rounded-xl p-4 text-center">
+                                        No tienes certificados para mostrar.
+                                    </p>
+                                )
+                            }
+                            {
+                                certificates.length > 4 && (
+                                    <a
+                                        href="/User/historial"
+                                        class="text-white bg-red-700 hover:bg-red-800 px-4 py-2 rounded text-center text-sm font-semibold w-fit mt-2"
+                                    >
+                                        Ver más
+                                    </a>
+                                )
+                            }
+                        </div>
+                    </Card>
+                </div>
+
+                <h2 class="text-gray-800 font-bold text-xl mt-4">
+                    Historial de Eventos
+                </h2>
+                <div class="flex flex-col gap-4">
+                    {
+                        Array.isArray(eventosUsuario) &&
+                        eventosUsuario.length > 0 ? (
+                            eventosUsuario.map((evento) => (
+                                <div class="border border-gray-300 rounded-xl p-4 bg-white shadow hover:shadow-lg transition duration-300">
+                                    <div class="font-bold text-gray-800 text-lg">
+                                        {evento?.nombre ||
+                                            evento?.nombre ||
+                                            "Sin nombre"}
+                                    </div>
+                                    <div class="text-sm text-gray-600 mt-1 italic">
+                                        Fecha:{" "}
+                                        {evento?.fecha
+                                            ? new Date(evento.fecha).toLocaleDateString(
+                                                  "es-EC",
+                                                  {
+                                                      year: "numeric",
+                                                      month: "long",
+                                                      day: "numeric",
+                                                  },
+                                              )
+                                            : "Sin fecha"}
+                                    </div>
+                                    <div class="text-sm text-gray-700">
+                                        Estado:{" "}
+                                        <span
+                                            class="font-medium"
+                                            style={
+                                                evento?.estado === "Rechazado"
+                                                    ? "color: rgb(108, 19, 19);"
+                                                    : evento?.estado === "Aprobado"
+                                                    ? "color: #09632a;"
+                                                    : (evento?.estado === "DPendiente" || evento?.estado === "FPendiente")
+                                                    ? "color: #916500;"
+                                                    : "color: #64748b;"
+                                            }
+                                        >
+                                            {evento?.estado === "DPendiente"
+                                                ? "Documentación pendiente"
+                                                : evento?.estado === "FPendiente"
+                                                ? "Facturación pendiente"
+                                                : evento?.estado === "Aprobado"
+                                                ? "Aprobado"
+                                                : evento?.estado === "Rechazado"
+                                                ? "Rechazado"
+                                                : "Inscrito"}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div class="text-gray-700 bg-red-50 border border-dashed border-red-400 rounded-xl p-4 text-center">
+                                No tienes eventos registrados.
+                            </div>
+                        )
+                    }
+                </div>
+            </section>
         </div>
-      </div>
-    </div>
-    <div id="pdf-modal-overlay" class="modal-overlay">
-      <div class="modal-content">
-        <button id="pdf-modal-close" class="modal-close-btn" title="Cerrar"
-          >&times;</button
+
+        <!-- Modal PDF -->
+        <div
+            id="pdf-modal-overlay"
+            class="fixed inset-0 bg-black bg-opacity-75 hidden justify-center items-center z-50"
         >
-        <iframe id="pdf-iframe" src="" frameborder="0" title="Visor de PDF"
-        ></iframe>
-      </div>
-    </div>
+            <div
+                class="bg-white rounded-xl w-11/12 max-w-4xl h-5/6 relative flex flex-col shadow-xl"
+            >
+                <button
+                    id="pdf-modal-close"
+                    class="absolute top-2 right-2 bg-gray-800 text-white rounded-full w-8 h-8 text-xl"
+                    >&times;</button
+                >
+                <iframe
+                    id="pdf-iframe"
+                    class="w-full h-full border-0 rounded-b-xl"></iframe>
+            </div>
+        </div>
+        <script>
+            import { actions } from "astro:actions";
+            import Swal from "sweetalert2";
 
-    <script>
-      import { actions } from "astro:actions";
-      import Swal from "sweetalert2";
+            const modalOverlay = document.getElementById("pdf-modal-overlay");
+            const modalCloseBtn = document.getElementById("pdf-modal-close");
+            const pdfIframe = document.getElementById(
+                "pdf-iframe",
+            ) as HTMLIFrameElement;
 
-      const modalOverlay = document.getElementById("pdf-modal-overlay");
-      const modalCloseBtn = document.getElementById("pdf-modal-close");
-      const pdfIframe = document.getElementById(
-        "pdf-iframe",
-      ) as HTMLIFrameElement;
+            function openModalWithPdf(url: string) {
+                if (pdfIframe && modalOverlay) {
+                    pdfIframe.src = url;
+                    modalOverlay.style.display = "flex";
+                }
+            }
 
-      function openModalWithPdf(url: string) {
-        if (pdfIframe && modalOverlay) {
-          pdfIframe.src = url;
-          modalOverlay.style.display = "flex";
-        }
-      }
+            function closeModal() {
+                if (modalOverlay && pdfIframe) {
+                    modalOverlay.style.display = "none";
+                    if (pdfIframe.src.startsWith("blob:")) {
+                        URL.revokeObjectURL(pdfIframe.src);
+                    }
+                    pdfIframe.src = "";
+                }
+            }
 
-      function closeModal() {
-        if (modalOverlay && pdfIframe) {
-          modalOverlay.style.display = "none";
-          if (pdfIframe.src.startsWith("blob:")) {
-            URL.revokeObjectURL(pdfIframe.src);
-          }
-          pdfIframe.src = "";
-        }
-      }
-
-      modalCloseBtn?.addEventListener("click", closeModal);
-      modalOverlay?.addEventListener("click", (event) => {
-        if (event.target === modalOverlay) closeModal();
-      });
-
-      // Buscamos todos los enlaces de certificados y les añadimos la funcionalidad
-      document.querySelectorAll(".js-view-cert").forEach((link) => {
-        link.addEventListener("click", async (event) => {
-          event.preventDefault();
-          const targetLink = event.currentTarget as HTMLAnchorElement;
-          const pdfUrl = targetLink.href;
-
-          if (!pdfUrl) {
-            alert("Este certificado no tiene un enlace válido.");
-            return;
-          }
-
-          const originalText = targetLink.textContent;
-
-          try {
-            // Llamamos a la nueva action, pasándole la URL del enlace
-            const result = await actions.recuperarCertificadoDesdeUrl({
-              url: pdfUrl,
+            modalCloseBtn?.addEventListener("click", closeModal);
+            modalOverlay?.addEventListener("click", (event) => {
+                if (event.target === modalOverlay) closeModal();
             });
 
-            if (result.data?.success && result.data.data?.pdfBase64) {
-              // Convertimos el base64 a un Blob y lo mostramos
-              const base64 = result.data.data.pdfBase64;
-              const byteCharacters = atob(base64);
-              const byteNumbers = new Array(byteCharacters.length);
-              for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-              }
-              const byteArray = new Uint8Array(byteNumbers);
-              const blob = new Blob([byteArray], { type: "application/pdf" });
-              const blobUrl = URL.createObjectURL(blob);
+            // Buscamos todos los enlaces de certificados y les añadimos la funcionalidad
+            document.querySelectorAll(".js-view-cert").forEach((link) => {
+                link.addEventListener("click", async (event) => {
+                    event.preventDefault();
+                    const targetElement = event.currentTarget as HTMLElement;
+                    const pdfUrl = targetElement.getAttribute("data-url");
 
-              openModalWithPdf(blobUrl);
-            } else {
-              Swal.fire(
-                "Error",
-                result.error?.message || "No se pudo cargar el certificado.",
-                "error",
-              );
-            }
-          } catch (error) {
-            console.error(error);
-            Swal.fire(
-              "Error",
-              error instanceof Error ? error.message : "Error inesperado.",
-              "error",
-            );
-          } finally {
-            targetLink.textContent = originalText;
-          }
-        });
-      });
-    </script>
-  </body>
-</html>
+                    if (!pdfUrl) {
+                        alert("Este certificado no tiene un enlace válido.");
+                        return;
+                    }
+
+                    const originalText = targetElement.textContent;
+
+                    try {
+                        // Llamamos a la nueva action, pasándole la URL del enlace
+                        const result =
+                            await actions.recuperarCertificadoDesdeUrl({
+                                url: pdfUrl,
+                            });
+
+                        if (
+                            result.data?.success &&
+                            result.data.data?.pdfBase64
+                        ) {
+                            // Convertimos el base64 a un Blob y lo mostramos
+                            const base64 = result.data.data.pdfBase64;
+                            const byteCharacters = atob(base64);
+                            const byteNumbers = new Array(
+                                byteCharacters.length,
+                            );
+                            for (let i = 0; i < byteCharacters.length; i++) {
+                                byteNumbers[i] = byteCharacters.charCodeAt(i);
+                            }
+                            const byteArray = new Uint8Array(byteNumbers);
+                            const blob = new Blob([byteArray], {
+                                type: "application/pdf",
+                            });
+                            const blobUrl = URL.createObjectURL(blob);
+
+                            openModalWithPdf(blobUrl);
+                        } else {
+                            Swal.fire(
+                                "Error",
+                                result.error?.message ||
+                                    "No se pudo cargar el certificado.",
+                                "error",
+                            );
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        Swal.fire(
+                            "Error",
+                            error instanceof Error
+                                ? error.message
+                                : "Error inesperado.",
+                            "error",
+                        );
+                    } finally {
+                        targetElement.textContent = originalText;
+                    }
+                });
+            });
+        </script>
+</Layout>

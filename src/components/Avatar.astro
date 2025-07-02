@@ -2,7 +2,7 @@
 import { getSession } from "auth-astro/server";
 const session = await getSession(Astro.request);
 
-const idCuenta = session?.user.id || "";
+const idCuenta = session?.user.email || "";
 
 const {
     defaultSrc = "/PerfilDefault.png",
@@ -63,7 +63,7 @@ const {
         "toast-message",
     ) as HTMLElement;
 
-    // ID de la cuenta desde el servidor
+    // Correo del usuario desde el servidor (para identificación)
     const cuentaId =
         document
             .querySelector("[data-cuenta-id]")
@@ -110,7 +110,7 @@ const {
         try {
             // Crear FormData para la action
             const formData = new FormData();
-            formData.append("cuentaId", cuentaId);
+            formData.append("cor_cue", cuentaId);
             formData.append("imagen", file);
 
             // Llamar a la action
@@ -186,5 +186,5 @@ const {
     }
 </script>
 
-<!-- Añadir el ID de cuenta como data attribute -->
+<!-- Añadir el correo del usuario como data attribute -->
 <div data-cuenta-id={idCuenta} style="display: none;"></div>

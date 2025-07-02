@@ -126,6 +126,7 @@ const links = [
                     {
                         inscripciones.length > 0 ? (
                             inscripciones.map((inscripcion: any) => (
+                                console.log("Procesando inscripción:", inscripcion),
                                 <div
                                     class="registro-fila"
                                     data-estado={inscripcion.est_ins}
@@ -380,6 +381,10 @@ const links = [
     function findInscripcionById(inscripcionId: string) {
         return inscripcionesData.find((ins) => ins.id_ins === inscripcionId);
     }    // Funciones para modales con parámetros de inscripción
+    function cerrarModalPagoInscripcion() {
+                const modal = document.getElementById("modalDetallesPago");
+                if (modal) modal.style.display = "none";
+            }
     function abrirModalDetallesInscripcion(inscripcionId: string) {
         console.log(
             "Abriendo modal de detalles para inscripción:",
@@ -445,17 +450,14 @@ const links = [
             `${inscripcion.usuarios?.nom_usu1 || ""} ${inscripcion.usuarios?.nom_usu2 || ""}`.trim();
         const apellidoCompleto =
             `${inscripcion.usuarios?.ape_usu1 || ""} ${inscripcion.usuarios?.ape_usu2 || ""}`.trim();
-        const correo =
-            inscripcion.usuarios?.cuentas?.[0]?.cor_cue || "No disponible";
-
-        // Buscar elementos específicos del modal de pago
+        const correo = inscripcion.usuarios?.cor_cue || "No disponible";        // Buscar elementos específicos del modal de pago
         const modalPago = document.getElementById("modalDetallesPago");
         if (modalPago) {
             const modalPagoTitulo = modalPago.querySelector("h2");
-            const pagoNombresModal = modalPago.querySelector("#usuario-nombres");
-            const pagoApellidosModal = modalPago.querySelector("#usuario-apellidos");
-            const pagoCorreoModal = modalPago.querySelector("#usuario-correo");
-            const pagoCedulaModal = modalPago.querySelector("#usuario-cedula");
+            const pagoNombresModal = modalPago.querySelector("#usuario-nombres-pago");
+            const pagoApellidosModal = modalPago.querySelector("#usuario-apellidos-pago");
+            const pagoCorreoModal = modalPago.querySelector("#usuario-correo-pago");
+            const pagoCedulaModal = modalPago.querySelector("#usuario-cedula-pago");
 
             if (modalPagoTitulo)
                 modalPagoTitulo.textContent = inscripcion.eventos?.nom_eve || "Evento";
@@ -464,120 +466,242 @@ const links = [
             if (pagoCorreoModal) pagoCorreoModal.textContent = correo;
             if (pagoCedulaModal)
                 pagoCedulaModal.textContent = inscripcion.usuarios?.ced_usu || "No disponible";
+        }        // Cargar y mostrar el comprobante de pago
+        cargarComprobantePagoModal(inscripcion);
+        
+        // Verificar requisitos y actualizar el botón de aprobar
+        verificarRequisitosPagoYActualizarBoton(inscripcion);
+
+        // Abrir el modal usando las funciones del componente
+        console.log("🔄 Delegando a las funciones del componente...");
+        
+        // Usar las funciones del componente directamente
+        if ((window as any).cargarInformacionUsuarioPago) {
+            (window as any).cargarInformacionUsuarioPago(inscripcionId);
+        }
+        if ((window as any).cargarComprobantePago) {
+            (window as any).cargarComprobantePago(inscripcionId);
+        }
+        if ((window as any).verificarRequisitosPagoYActualizarBoton) {
+            (window as any).verificarRequisitosPagoYActualizarBoton();
         }
 
-        // Abrir el modal directamente
+        // Abrir el modal
         const modal = document.getElementById("modalDetallesPago");
         if (modal) {
             modal.style.display = "block";
             window.currentInscripcionIdPago = inscripcionId;
         }
-    } // Función para aprobar inscripción
-    async function aprobarInscripcion(
-        inscripcionId: string,
-        tipo: "documentacion" | "pago",
-    ) {
+    }
+
+    // Función para cargar el comprobante de pago en el modal
+    function cargarComprobantePagoModal(inscripcion: any) {
+        const enlaceComprobante = document.getElementById("enlace-comprobante-pago") as HTMLAnchorElement;
+        const sinComprobante = document.getElementById("sin-comprobante") as HTMLSpanElement;
+
+        if (isValidDocumentLink(inscripcion.enl_ord_pag_ins)) {
+            if (enlaceComprobante) {
+                enlaceComprobante.href = inscripcion.enl_ord_pag_ins;
+                enlaceComprobante.style.display = "inline";
+            }
+            if (sinComprobante) {
+                sinComprobante.style.display = "none";
+            }
+        } else {
+            if (enlaceComprobante) {
+                enlaceComprobante.style.display = "none";
+            }
+            if (sinComprobante) {
+                sinComprobante.style.display = "inline";
+            }
+        }
+    }
+
+    // Función para verificar requisitos de pago y actualizar el botón
+    function verificarRequisitosPagoYActualizarBoton(inscripcion: any) {
+        const botonAprobar = document.getElementById("boton-aprobar-pago") as HTMLButtonElement;
+        console.log("[Pago] --- INICIO VERIFICACIÓN ---");
+        console.log("[Pago] Inscripción:", inscripcion);
+        if (!botonAprobar) {
+            console.warn("[Pago] No se encontró el botón de aprobar pago");
+            return;
+        }
+
+        // Deshabilitar por defecto
+        botonAprobar.disabled = true;
+        console.log("[Pago] Botón deshabilitado por defecto:", botonAprobar.disabled);
+
+        const evento = inscripcion.eventos || {};
+        console.log("[Pago] Evento:", evento);
+
+        // Verificar si el evento es de pago
+        const esPago = !evento.es_gratuito && evento.precio && Number(evento.precio) > 0;
+        console.log("[Pago] ¿Es evento de pago?", esPago);
+
+        if (!esPago) {
+            // Si el evento es gratuito, habilitar el botón
+            botonAprobar.disabled = false;
+            botonAprobar.title = "Evento gratuito - No requiere comprobante de pago";
+            botonAprobar.style.opacity = "1";
+            console.log("[Pago] Evento gratuito. Botón habilitado:", botonAprobar.disabled);
+            return;
+        }
+
+        // Si es evento de pago, verificar que existe el comprobante
+        const tieneComprobante = isValidDocumentLink(inscripcion.enl_ord_pag_ins);
+        console.log("[Pago] ¿Tiene comprobante de pago?", tieneComprobante);
+
+        botonAprobar.disabled = !tieneComprobante;
+        console.log("[Pago] Estado final del botón (debe estar", tieneComprobante ? "habilitado" : "deshabilitado", "):", botonAprobar.disabled);
+
+        if (!tieneComprobante) {
+            botonAprobar.title = `Evento de pago ($${Number(evento.precio).toFixed(2)}) - Falta comprobante de pago`;
+            botonAprobar.style.opacity = "0.4";
+        } else {
+            botonAprobar.title = `Evento de pago ($${Number(evento.precio).toFixed(2)}) - Comprobante disponible`;
+            botonAprobar.style.opacity = "1";
+        }
+        console.log("[Pago] --- FIN VERIFICACIÓN ---");
+    }
+
+    // Función auxiliar para validar enlaces de documentos
+    function isValidDocumentLink(link: string | null | undefined): boolean {
+        return (
+            link !== null &&
+            link !== undefined &&
+            link.trim() !== "" &&
+            link !== "null"
+        );
+    }    // Función para aprobar inscripción
+    async function aprobarInscripcion(inscripcionId: string, tipo: "documentacion" | "pago") {
         try {
-            const result = await Swal.fire({
-                title: "¿Aprobar inscripción?",
-                text: `¿Estás seguro de que deseas aprobar la ${tipo === "documentacion" ? "documentación" : "facturación"} de esta inscripción?`,
+            const inscripcion = findInscripcionById(inscripcionId);
+            if (!inscripcion) {
+                console.error("No se encontró la inscripción:", inscripcionId);
+                return;
+            }
+
+            const nombreCompleto = `${inscripcion.usuarios?.nom_usu1 || ""} ${inscripcion.usuarios?.nom_usu2 || ""}`.trim();
+            const apellidoCompleto = `${inscripcion.usuarios?.ape_usu1 || ""} ${inscripcion.usuarios?.ape_usu2 || ""}`.trim();
+            const tipoTexto = tipo === "documentacion" ? "documentación" : "pago";
+
+            const resultado = await Swal.fire({
+                title: `¿Aprobar ${tipoTexto}?`,
+                text: `¿Está seguro de aprobar la ${tipoTexto} de ${nombreCompleto} ${apellidoCompleto}?`,
                 icon: "question",
                 showCancelButton: true,
-                confirmButtonColor: "#10b981",
-                cancelButtonColor: "#ef4444",
+                confirmButtonColor: "#16a34a",
+                cancelButtonColor: "#dc2626",
                 confirmButtonText: "Sí, aprobar",
-                cancelButtonText: "Cancelar",
+                cancelButtonText: "Cancelar"
             });
 
-            if (result.isConfirmed) {
-                // Llamar a la acción para actualizar el estado de la inscripción
+            if (resultado.isConfirmed) {
                 const response = await actions.updateEstadoInscripcion({
                     inscripcionId: inscripcionId,
                     estado: "Aprobado",
-                    tipo: tipo,
+                    tipo: tipo
                 });
 
                 if (response.data?.success) {
                     await Swal.fire({
                         title: "¡Aprobado!",
-                        text:
-                            response.data.message ||
-                            "La inscripción ha sido aprobada correctamente.",
+                        text: response.data.message || `${tipoTexto} aprobada correctamente`,
                         icon: "success",
+                        confirmButtonText: "Entendido"
                     });
-
-                    // Recargar la página para mostrar los cambios
+                    
+                    // Recargar la página para actualizar los datos
                     window.location.reload();
                 } else {
-                    throw new Error(
-                        response.error?.message || "Error desconocido",
-                    );
+                    throw new Error(response.error?.message || "Error desconocido");
                 }
             }
         } catch (error) {
-            console.error("Error al aprobar inscripción:", error);
+            console.error(`Error al aprobar ${tipo}:`, error);
             await Swal.fire({
                 title: "Error",
-                text: "No se pudo aprobar la inscripción. Inténtalo de nuevo.",
+                text: `Error al aprobar la ${tipo === "documentacion" ? "documentación" : "pago"}`,
                 icon: "error",
-            });
-        }
-    } // Función para rechazar inscripción
-    async function rechazarInscripcion(
-        inscripcionId: string,
-        tipo: "documentacion" | "pago",
-    ) {
-        try {
-            const result = await Swal.fire({
-                title: "¿Rechazar inscripción?",
-                text: `¿Estás seguro de que deseas rechazar la ${tipo === "documentacion" ? "documentación" : "facturación"} de esta inscripción?`,
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#ef4444",
-                cancelButtonColor: "#6b7280",
-                confirmButtonText: "Sí, rechazar",
-                cancelButtonText: "Cancelar",
-            });
-
-            if (result.isConfirmed) {
-                // Llamar a la acción para actualizar el estado de la inscripción
-                const response = await actions.updateEstadoInscripcion({
-                    inscripcionId: inscripcionId,
-                    estado: "Rechazado",
-                    tipo: tipo,
-                });
-
-                if (response.data?.success) {
-                    await Swal.fire({
-                        title: "¡Rechazado!",
-                        text:
-                            response.data.message ||
-                            "La inscripción ha sido rechazada.",
-                        icon: "success",
-                    });
-
-                    // Recargar la página para mostrar los cambios
-                    window.location.reload();
-                } else {
-                    throw new Error(
-                        response.error?.message || "Error desconocido",
-                    );
-                }
-            }
-        } catch (error) {
-            console.error("Error al rechazar inscripción:", error);
-            await Swal.fire({
-                title: "Error",
-                text: "No se pudo rechazar la inscripción. Inténtalo de nuevo.",
-                icon: "error",
+                confirmButtonText: "Entendido"
             });
         }
     }
 
+    // Función para rechazar inscripción
+    async function rechazarInscripcion(inscripcionId: string, tipo: "documentacion" | "pago") {
+        try {
+            const inscripcion = findInscripcionById(inscripcionId);
+            if (!inscripcion) {
+                console.error("No se encontró la inscripción:", inscripcionId);
+                return;
+            }
+
+            const nombreCompleto = `${inscripcion.usuarios?.nom_usu1 || ""} ${inscripcion.usuarios?.nom_usu2 || ""}`.trim();
+            const apellidoCompleto = `${inscripcion.usuarios?.ape_usu1 || ""} ${inscripcion.usuarios?.ape_usu2 || ""}`.trim();
+            const tipoTexto = tipo === "documentacion" ? "documentación" : "pago";
+
+            const resultado = await Swal.fire({
+                title: `¿Rechazar ${tipoTexto}?`,
+                text: `¿Está seguro de rechazar la ${tipoTexto} de ${nombreCompleto} ${apellidoCompleto}?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc2626",
+                cancelButtonColor: "#6b7280",
+                confirmButtonText: "Sí, rechazar",
+                cancelButtonText: "Cancelar"
+            });
+
+            if (resultado.isConfirmed) {
+                const response = await actions.updateEstadoInscripcion({
+                    inscripcionId: inscripcionId,
+                    estado: "Rechazado",
+                    tipo: tipo
+                });
+
+                if (response.data?.success) {
+                    await Swal.fire({
+                        title: "Rechazado",
+                        text: response.data.message || `${tipoTexto} rechazada correctamente`,
+                        icon: "success",
+                        confirmButtonText: "Entendido"
+                    });
+                    
+                    // Recargar la página para actualizar los datos
+                    window.location.reload();
+                } else {
+                    throw new Error(response.error?.message || "Error desconocido");
+                }
+            }
+        } catch (error) {
+            console.error(`Error al rechazar ${tipo}:`, error);
+            await Swal.fire({
+                title: "Error",
+                text: `Error al rechazar la ${tipo === "documentacion" ? "documentación" : "pago"}`,
+                icon: "error",
+                confirmButtonText: "Entendido"
+            });
+        }
+    }
+
+    function aprobarInscripcionPago() {
+        if (window.currentInscripcionIdPago) {
+            aprobarInscripcion(window.currentInscripcionIdPago, "pago");
+            cerrarModalPagoInscripcion();
+        }
+    }
+
+    function rechazarInscripcionPago() {
+        if (window.currentInscripcionIdPago) {
+            rechazarInscripcion(window.currentInscripcionIdPago, "pago");
+            cerrarModalPagoInscripcion();
+        }
+    }
+
     // Hacer las funciones disponibles globalmente
-    (window as any).abrirModalDetallesInscripcion =
-        abrirModalDetallesInscripcion;
+    (window as any).abrirModalDetallesInscripcion = abrirModalDetallesInscripcion;
     (window as any).abrirModalPagoInscripcion = abrirModalPagoInscripcion;
     (window as any).aprobarInscripcion = aprobarInscripcion;
     (window as any).rechazarInscripcion = rechazarInscripcion;
-</script>
+    (window as any).aprobarInscripcionPago = aprobarInscripcionPago;
+    (window as any).rechazarInscripcionPago = rechazarInscripcionPago;

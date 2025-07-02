@@ -11,8 +11,8 @@
 
 .registros {
     position: fixed;
-    left: 200px;
-    right: 200px;
+    left: 100px;
+    right: 100px;
     top: 200px;
     bottom: 50px;
 }
@@ -21,7 +21,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    
+
 }
 
 .registros-superior {
@@ -52,6 +52,7 @@
     height: 36px;
     transition: color 0.15;
     transition: background-color 0.15s;
+    cursor: pointer;
 }
 
 .contenedor-boton-nuevo-registro:hover {
@@ -59,10 +60,12 @@
 }
 
 .boton-nuevo-registro {
+    cursor: pointer;
     font-weight: 500;
 }
 
-.registros-inferior, .registros-inferior-titulos {
+.registros-inferior,
+.registros-inferior-titulos {
     display: flex;
     gap: 20px;
     flex-direction: column;
@@ -118,6 +121,7 @@
     width: 100%;
     height: auto;
     transition: opacity 0.15;
+    cursor: pointer;
 }
 
 .imagen-boton-registro {

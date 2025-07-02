@@ -1,6 +1,5 @@
 ---
 import Header from "@components/Header.astro";
-import NavBar from "../components/Navbar.astro";
 import MenuAdmin from "../components/MenuAdministrador.astro";
 import Avatar from "../components/Avatar.astro";
 import Button from "../components/Button.astro";
@@ -9,26 +8,27 @@ import Card from "../components/Card.astro";
 import { actions } from "astro:actions";
 import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
+import Layout from "../layouts/Layout.astro";
 
 const links = [
-    { label: "Eventos", href: "/Admin/EventosCRUD" },
-    { label: "Usuarios", href: "/perfil" },
-    { label: "Organizadores", href: "/historial" },
-    { label: "Inscripciones", href: "/historial" },
-    { label: "Categorías", href: "/historial" },
-    { label: "Carreras", href: "/historial" },
+  { label: "Eventos", href: "/Admin/EventosCRUD" },
+  { label: "Usuarios", href: "/perfil" },
+  { label: "Organizadores", href: "/historial" },
+  { label: "Inscripciones", href: "/historial" },
+  { label: "Categorías", href: "/historial" },
+  { label: "Carreras", href: "/historial" },
 ];
 
 const { data: resultProximos } = await Astro.callAction(
-    actions.getEventosProximos,
-    {},
+  actions.getEventosProximos,
+  {}
 );
 
 const upcomingEvents = resultProximos?.eventos || [];
 
 const { data: resultInscripciones } = await Astro.callAction(
-    actions.getInscripcionesPendientes,
-    {},
+  actions.getInscripcionesPendientes,
+  {}
 );
 
 const inscripciones = resultInscripciones?.inscripciones || [];
@@ -36,8 +36,8 @@ const inscripciones = resultInscripciones?.inscripciones || [];
 const session = await getSession(Astro.request);
 
 const { data: cuenta } = await Astro.callAction(
-    actions.getCuentaByIdSingle,
-    session?.user?.id || "",
+  actions.getCuentaByIdSingle,
+  session?.user?.id || ""
 );
 
 console.log("🔍 Debug homeAdmin:");
@@ -45,136 +45,143 @@ console.log("Session user ID:", session?.user?.id);
 console.log("Cuenta data:", cuenta);
 console.log("enl_ced_cue:", cuenta?.enl_ced_cue);
 console.log("enl_mat_cue:", cuenta?.enl_mat_cue);
-console.log("enl_ext_cue:", cuenta?.enl_ext_cue);
 
 let nombreAdmin = "";
 
 if (session && session.user) {
-    const user = session.user as CustomUser;
-    const idUsuario = user.id;
-    nombreAdmin = user.name || "";
-    const rol = user.rol;
+  const user = session.user as CustomUser;
+  const idUsuario = user.id;
+  nombreAdmin = user.name || "";
+  const rol = user.rol;
 
-    let eventos = [];
-    let success = false;
+  let eventos = [];
+  let success = false;
 
-    if (idUsuario) {
-        const result = await Astro.callAction(actions.getEventosPorUsuario, {
-            idUsuario,
-        });
-        if (result && result.data) {
-            success = result.data.success;
-            eventos = result.data.eventos || [];
-        }
+  if (idUsuario) {
+    const result = await Astro.callAction(actions.getEventosPorUsuario, {
+      idUsuario,
+    });
+    if (result && result.data) {
+      success = result.data.success;
+      eventos = result.data.eventos || [];
     }
+  }
 }
 ---
 
-<html lang="es">
-    <head>
-        <meta charset="UTF-8" />
-    </head>
-    <body>
-        <Header />
-        <NavBar />
-        <MenuAdmin links={links} />
+<Layout>
+  <Header />
 
-        <div class="flex flex-col md:flex-row gap-6 p-6">
-            <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
-                <Avatar
-                    defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
-                    size="w-50 h-50"
-                />
-                <p class="text-red-800 font-semibold text-lg">{nombreAdmin}</p>
-                <Button text="Editar Perfil" href="/PerfilUserDos" />
-                <div class="text-center mt-4 text-red-800">Documentos</div>
-                <div class="flex gap-2 mt-2">
-                    <DocumentButton
-                        label="Cédula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ced_cue}
-                        fieldName="enl_ced_cue"
-                        size="w-24 h-24"
-                    />
+  <MenuAdmin links={links} />
 
-                    <DocumentButton
-                        label="Matrícula"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_mat_cue}
-                        fieldName="enl_mat_cue"
-                        size="w-24 h-24"
-                    />
+  <div class="flex flex-col md:flex-row gap-6 p-6">
+    <div class="flex flex-col items-center gap-4 w-full md:w-1/4">
+      <Avatar
+        defaultSrc={cuenta?.img_user || "/PerfilDefault.png"}
+        size="w-50 h-50"
+      />
+      <p class="text-red-800 font-semibold text-lg">{nombreAdmin}</p>
+      <Button text="Editar Perfil" href="/PerfilUserDos" />
+      <div class="flex gap-2 mt-2"></div>
+    </div>
 
-                    <DocumentButton
-                        label="Extensión"
-                        cuentaId={session?.user?.id}
-                        currentImage={cuenta?.enl_ext_cue}
-                        fieldName="enl_ext_cue"
-                        size="w-24 h-24"
-                    />
+    <div class="w-full md:w-3/4 flex flex-col gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
+        <Card title="Inscripciones Pendientes">
+          <div class="flex flex-col gap-y-4">
+            {
+              inscripciones.slice(0, 4).map((c) => (
+                <div class="bg-gray-50 border border-gray-200 rounded-2xl shadow-lg p-4 text-gray-700 hover:shadow-xl transition-shadow duration-300">
+                  <p class="mb-1">
+                    <strong class="text-gray-900">Estudiante:</strong>{" "}
+                    {[
+                      c.usuarios.nom_usu1,
+                      c.usuarios.nom_usu2,
+                      c.usuarios.ape_usu1,
+                      c.usuarios.ape_usu2
+                    ].filter(Boolean).join(" ")}
+                  </p>
+                  <p>
+                    <strong class="text-gray-900">Evento:</strong>{" "}
+                    {c.eventos.nom_eve}
+                  </p>
+                  <p>
+                    <strong class="text-gray-900">Estado:</strong>{" "}
+                    <span
+                      class="font-medium"
+                      style={
+                        c.est_ins === "Rechazado"
+                          ? "color: rgb(108, 19, 19);"
+                          : c.est_ins === "Aprobado"
+                          ? "color: #09632a;"
+                          : (c.est_ins === "DPendiente" || c.est_ins === "FPendiente")
+                          ? "color: #916500;"
+                          : "color: #64748b;"
+                      }
+                    >
+                      {c.est_ins === "DPendiente"
+                        ? "Documentación pendiente"
+                        : c.est_ins === "FPendiente"
+                        ? "Facturación pendiente"
+                        : c.est_ins === "Aprobado"
+                        ? "Aprobado"
+                        : c.est_ins === "Rechazado"
+                        ? "Rechazado"
+                        : "Inscrito"}
+                    </span>
+                  </p>
                 </div>
-            </div>
+              ))
+            }
 
-            <div class="w-full md:w-3/4 flex flex-col gap-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
-                    <Card title="Inscripciones Pendientes">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                inscripciones.slice(0, 4).map((c) => (
-                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                        <p>
-                                            <strong>Estudiante:</strong>{" "}
-                                            {c.usuarios.nom_usu1}
-                                        </p>
-                                        <p>
-                                            <strong>Evento:</strong>{" "}
-                                            {c.eventos.nom_eve}
-                                        </p>
-                                    </div>
-                                ))
-                            }
-                            {
-                                inscripciones.length > 4 && (
-                                    <a
-                                        href="/Admin/gestionEventos"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
-                    </Card>
+            {
+              inscripciones.length > 4 && (
+                <a
+                  href="/Admin/gestionEventos"
+                  class="text-red-700 text-sm underline hover:text-red-900 transition-colors duration-300"
+                >
+                  Ver más...
+                </a>
+              )
+            }
+          </div>
+        </Card>
 
-                    <Card title="Eventos Próximos">
-                        <div class="flex flex-col gap-y-4">
-                            {
-                                upcomingEvents.slice(0, 4).map((e) => (
-                                    <div class="bg-white border rounded-xl shadow-md p-4 text-gray-800">
-                                        <p>
-                                            <strong>Evento:</strong> {e.nom_eve}
-                                        </p>
-                                        <p>
-                                            <strong>Fecha de inicio:</strong>{" "}
-                                            {e.fec_ini_eve}
-                                        </p>
-                                    </div>
-                                ))
-                            }
-                            {
-                                upcomingEvents.length > 4 && (
-                                    <a
-                                        href="/eventosProximos"
-                                        class="text-red-800 underline text-sm mt-2"
-                                    >
-                                        Ver más...
-                                    </a>
-                                )
-                            }
-                        </div>
-                    </Card>
+        <Card title="Eventos Próximos">
+          <div class="flex flex-col gap-y-4">
+            {
+              upcomingEvents.slice(0, 4).map((e) => (
+                <div class="bg-gray-50 border border-gray-200 rounded-2xl shadow-lg p-4 text-gray-700 hover:shadow-xl transition-shadow duration-300">
+                  <p class="mb-1">
+                    <strong class="text-gray-900">Evento:</strong> {e.nom_eve}
+                  </p>
+                  <p>
+                    <strong class="text-gray-900">Fecha de inicio:</strong>{" "}
+                    {e?.fec_ini_eve
+                    ? new Date(e?.fec_ini_eve).toLocaleDateString("es-EC", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric"
+                    })
+                    : "Sin fecha"}
+                  </p>
                 </div>
-            </div>
-        </div>
-    </body>
-</html>
+              ))
+            }
+
+            {
+              upcomingEvents.length > 4 && (
+                <a
+                  href="/eventosProximos"
+                  class="text-red-700 text-sm underline hover:text-red-900 transition-colors duration-300"
+                >
+                  Ver más...
+                </a>
+              )
+            }
+          </div>
+        </Card>
+      </div>
+    </div>
+  </div>
+</Layout>

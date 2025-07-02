@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  mi-astro-app:
+    build: .
+    container_name: mi-astro-app
+    restart: unless-stopped
+    ports:
+      - "4321:4321"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=${DATABASE_URL}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_TRUST_HOST=${AUTH_TRUST_HOST:-true}
+      - AUTH_ORIGIN=${AUTH_ORIGIN}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - FORWARDED_HOST=${FORWARDED_HOST}
+      - NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED:-0}
+      - CLOUDINARY_CLOUD_NAME=dwwvecqnu
+      - CLOUDINARY_API_KEY=768872357128941
+      - CLOUDINARY_API_SECRET=Z7yF6Cfv9wnZl9Tpep9jOBjKxso
+      - VERIFALIA_SID=${VERIFALIA_SID}
+      - VERIFALIA_AUTH_TOKEN=${VERIFALIA_AUTH_TOKEN}
+      - AUTH_GOOGLE_ID=${AUTH_GOOGLE_ID}
+      - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET}
+      - EMAIL_USER=${EMAIL_USER}
+      - REDIRECT_URI=${REDIRECT_URI}
+      - REFRESH_TOKEN=${REFRESH_TOKEN}

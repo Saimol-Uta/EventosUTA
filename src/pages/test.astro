@@ -1,0 +1,22 @@
+---
+// No hay código de servidor aquí, solo HTML simple.
+const currentTime = new Date().toLocaleString('es-EC', { timeZone: 'America/Guayaquil' });
+---
+<html lang="es">
+  <head>
+    <title>Página de Prueba</title>
+    <meta charset="utf-8" />
+    <style>
+      body { font-family: sans-serif; background-color: #f4f4f9; color: #333; text-align: center; padding-top: 5rem; }
+      h1 { color: #4CAF50; font-size: 3rem; }
+      p { font-size: 1.2rem; }
+      strong { color: #d35400; }
+    </style>
+  </head>
+  <body>
+    <h1>¡La Infraestructura Funciona!</h1>
+    <p>Si puedes ver esta página, significa que el servidor de Astro, Docker y la red están configurados perfectamente.</p>
+    <p>La hora actual del servidor es: <strong>{currentTime}</strong></p>
+    <p>El problema está en el código de tu otra página.</p>
+  </body>
+</html>

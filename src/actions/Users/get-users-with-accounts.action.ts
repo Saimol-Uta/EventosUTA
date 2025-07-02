@@ -11,29 +11,30 @@ export const getUsersWithAccounts = defineAction({
     }),
     handler: async (input) => {
         try {
-            const skip = (input.page - 1) * input.limit;
-
-            // Construir filtros de búsqueda
+            const skip = (input.page - 1) * input.limit;            // Construir filtros de búsqueda
             const where = input.search ? {
                 OR: [
                     { ced_usu: { contains: input.search, mode: 'insensitive' as const } },
                     { nom_usu1: { contains: input.search, mode: 'insensitive' as const } },
                     { ape_usu1: { contains: input.search, mode: 'insensitive' as const } },
-                    { cuentas: { some: { cor_cue: { contains: input.search, mode: 'insensitive' as const } } } }
+                    { cor_cue: { contains: input.search, mode: 'insensitive' as const } }
                 ]
             } : {};
 
-            // Obtener usuarios con sus cuentas
+            // Obtener usuarios directamente (ya contienen toda la información)
             const usuarios = await prisma.usuarios.findMany({
                 where,
-                include: {
-                    cuentas: {
-                        select: {
-                            id_cue: true,
-                            cor_cue: true,
-                            rol_cue: true,
-                        }
-                    },
+                select: {
+                    cor_cue: true,
+                    ced_usu: true,
+                    nom_usu1: true,
+                    nom_usu2: true,
+                    ape_usu1: true,
+                    ape_usu2: true,
+                    rol_cue: true,
+                    fec_nac_usu: true,
+                    num_tel_usu: true,
+                    img_user: true,
                     carreras: {
                         select: {
                             id_car: true,
@@ -65,7 +66,7 @@ export const getUsersWithAccounts = defineAction({
                 }
             };
         } catch (error) {
-            console.error("Error al obtener usuarios con cuentas:", error);
+            console.error("Error al obtener usuarios:", error);
             return {
                 success: false,
                 message: "Error interno del servidor al obtener usuarios",

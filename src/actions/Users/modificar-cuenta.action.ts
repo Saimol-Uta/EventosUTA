@@ -1,27 +1,28 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import prisma from '../../db';
+import bcrypt from 'bcryptjs';
 
 export const modificarCuenta = defineAction({
     accept: 'form',
     input: z.object({
-        id_cue: z.string().uuid('ID de cuenta inválido'),
-        rol_cue: z.enum(['usuario', 'estudiante', 'administrador', 'master']),
-        con_cue: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional(),
+        cor_cue: z.string().email('Correo electrónico inválido'),
+        rol_cue: z.enum(['USUARIO', 'ESTUDIANTE', 'ADMINISTRADOR', 'MASTER']),
+        cont_cuenta: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional(),
     }),
     handler: async (input) => {
         try {
             console.log("Datos recibidos para modificar cuenta:", input);
 
-            // Verificar que la cuenta existe
-            const cuentaExistente = await prisma.cuentas.findUnique({
-                where: { id_cue: input.id_cue },
+            // Verificar que el usuario existe
+            const usuarioExistente = await prisma.usuarios.findUnique({
+                where: { cor_cue: input.cor_cue },
             });
 
-            if (!cuentaExistente) {
+            if (!usuarioExistente) {
                 return {
                     success: false,
-                    message: "La cuenta especificada no existe",
+                    message: "El usuario especificado no existe",
                 };
             }
 
@@ -31,30 +32,31 @@ export const modificarCuenta = defineAction({
             };
 
             // Solo actualizar contraseña si se proporciona
-            if (input.con_cue) {
-                dataToUpdate.con_cue = input.con_cue; // En un entorno real, esto debería estar hasheado
+            if (input.cont_cuenta) {
+                const hashedPassword = await bcrypt.hash(input.cont_cuenta, 10);
+                dataToUpdate.cont_cuenta = hashedPassword;
             }
 
-            // Actualizar la cuenta
-            const cuentaActualizada = await prisma.cuentas.update({
-                where: { id_cue: input.id_cue },
+            // Actualizar el usuario
+            const usuarioActualizado = await prisma.usuarios.update({
+                where: { cor_cue: input.cor_cue },
                 data: dataToUpdate,
             });
 
             return {
                 success: true,
-                message: "Cuenta actualizada correctamente",
+                message: "Usuario actualizado correctamente",
                 data: {
-                    id: cuentaActualizada.id_cue,
-                    correo: cuentaActualizada.cor_cue,
-                    rol: cuentaActualizada.rol_cue,
+                    correo: usuarioActualizado.cor_cue,
+                    rol: usuarioActualizado.rol_cue,
+                    nombre: `${usuarioActualizado.nom_usu1} ${usuarioActualizado.ape_usu1}`,
                 },
             };
         } catch (error) {
-            console.error("Error al modificar cuenta:", error);
+            console.error("Error al modificar usuario:", error);
             return {
                 success: false,
-                message: "Error interno del servidor al modificar la cuenta",
+                message: "Error interno del servidor al modificar el usuario",
             };
         }
     },

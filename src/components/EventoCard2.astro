@@ -1,0 +1,504 @@
+---
+import "../styles/global.css";
+
+// Función para formatear duración
+/*
+const formatearDuracion = (horas: number) => {
+    if (!horas) return "Sin especificar";
+    if (horas < 24) {
+        const horasRedondeadas = Math.round(horas * 100) / 100;
+        return horasRedondeadas === 1 ? "1 hora" : `${horasRedondeadas} horas`;
+    } else {
+        const dias = Math.floor(horas / 24);
+        const horasRestantes = Math.round(horas % 24);
+        if (horasRestantes === 0) {
+            return `${dias} ${dias === 1 ? "día" : "días"}`;
+        } else {
+            return `${dias} ${dias === 1 ? "día" : "días"} ${horasRestantes}h`;
+        }
+    }
+};
+*/
+const {
+    imagen,
+    titulo,
+    horas,
+    slug,
+    precio,
+    modoAdmin = false,
+    idEvento,
+    esDestacado = false,
+    cuposDis,
+    categoria,
+} = Astro.props;
+---
+
+<a
+    class={`card-evento relative ${cuposDis === "0" ? "sin-cupos-evento" : ""}`}
+    href={cuposDis === "0" ? "#" : `/Eventos/${slug}`}
+    data-titulo={titulo.toLowerCase()}
+    onclick={cuposDis === "0" ? "event.preventDefault(); return false;" : ""}
+>
+    {
+        modoAdmin && (
+            <button
+                class={`destacar-boton absolute top-4 right-4 w-10 h-10 rounded-full border border-white/25 backdrop-blur-md shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white hover:shadow-xl z-30 ${
+                    esDestacado
+                        ? "bg-yellow-400 text-yellow-900"
+                        : "bg-white/20 text-white hover:text-gray-700"
+                }`}
+                data-id={idEvento}
+                title="Marcar como destacado"
+                type="button"
+            >
+                <svg
+                    class="w-5 h-5 mx-auto"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+            </button>
+        )
+    }
+
+    <img
+        class="card-img"
+        src={imagen || "/img/UTA.jpg"}
+        alt="Imagen del evento"
+    />
+
+    <div class="info-overlay">
+        <h3 class="titulo">{titulo}</h3>
+
+        <div class="etiquetas-footer">
+            <div class="contenedor-etiquetas">
+                <div class="etiqueta horas">
+                    <svg
+                        class="w-2.5 h-2.5"
+                        width="200"
+                        height="200"
+                        viewBox="0 0 200 200"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <circle cx="100" cy="100" r="85" fill="currentColor"
+                        ></circle>
+
+                        <line
+                            x1="100"
+                            y1="100"
+                            x2="140"
+                            y2="140"
+                            stroke="white"
+                            stroke-width="16"
+                            stroke-linecap="round"></line>
+
+                        <!-- Manecilla de los minutos (12) -->
+                        <line
+                            x1="100"
+                            y1="100"
+                            x2="100"
+                            y2="50"
+                            stroke="white"
+                            stroke-width="16"
+                            stroke-linecap="round"></line>
+
+                        <!-- Centro del reloj -->
+                        <circle cx="100" cy="100" r="12" fill="white"></circle>
+                    </svg>
+
+                    {horas} horas
+                </div>
+
+                {
+                    precio == 0 || precio === null || precio === undefined ? (
+                        <div class="etiqueta gratis">
+                            <svg
+                                class="w-2.5 h-2.5"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                            Gratuito
+                        </div>
+                    ) : (
+                        <div class="etiqueta precio">
+                            $ {Number(precio).toFixed(2)}
+                        </div>
+                    )
+                }
+            </div>
+            <div class="contenedor-etiquetas">
+                {
+                    cuposDis && (
+                        <div
+                            class={`etiqueta cupos ${cuposDis === "0" ? "sin-cupos" : ""}`}
+                        >
+                            <svg
+                                class="w-2.5 h-2.5"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                            </svg>
+                            {cuposDis === "Sin límite"
+                                ? "Sin límite de cupos"
+                                : cuposDis === "0"
+                                  ? "Sin cupos disponibles"
+                                  : `${cuposDis} cupos disponibles`}
+                        </div>
+                    )
+                }
+                <div class="etiqueta categoria">
+                    <svg
+                        class="h-3 w-3 mt-1"
+                        viewBox="0 0 200 200"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M30 30 A20 20 0 0 1 50 10 H80 A10 10 0 0 1 90 20 V50 A20 20 0 0 1 70 70 H40 A10 10 0 0 1 30 60 Z"
+                            fill="none"
+                            stroke="black"
+                            stroke-width="12"></path>
+                        <path
+                            d="M110 30 A20 20 0 0 1 130 10 H160 A10 10 0 0 1 170 20 V50 A20 20 0 0 1 150 70 H120 A10 10 0 0 1 110 60 Z"
+                            fill="none"
+                            stroke="black"
+                            stroke-width="12"></path>
+                        <path
+                            d="M30 110 A20 20 0 0 1 50 90 H80 A10 10 0 0 1 90 100 V130 A20 20 0 0 1 70 150 H40 A10 10 0 0 1 30 140 Z"
+                            fill="none"
+                            stroke="black"
+                            stroke-width="12"></path>
+                        <path
+                            d="M110 110 A20 20 0 0 1 130 90 H160 A10 10 0 0 1 170 100 V130 A20 20 0 0 1 150 150 H120 A10 10 0 0 1 110 140 Z"
+                            fill="none"
+                            stroke="black"
+                            stroke-width="12"></path>
+                    </svg>
+
+                    {categoria}
+                </div>
+            </div>
+        </div>
+    </div>
+</a>
+
+<script>
+    // Función local para cargar eventos destacados (fallback si no está la global)
+    function cargarEventosDestacadosLocal() {
+        try {
+            const eventosGuardados = localStorage.getItem(
+                "eventosDestacadosTemp",
+            );
+            if (eventosGuardados) {
+                return new Set(JSON.parse(eventosGuardados));
+            }
+        } catch (error) {
+            console.error(
+                "Error al cargar eventos destacados desde localStorage:",
+                error,
+            );
+        }
+        return new Set();
+    }
+
+    // Función local para guardar eventos destacados (fallback si no está la global)
+    function guardarEventosDestacadosLocal(eventosSet: Set<string>) {
+        try {
+            localStorage.setItem(
+                "eventosDestacadosTemp",
+                JSON.stringify(Array.from(eventosSet)),
+            );
+        } catch (error) {
+            console.error(
+                "Error al guardar eventos destacados en localStorage:",
+                error,
+            );
+        }
+    }
+
+    // Función para manejar el clic en el botón de destacar
+    function manejarClicDestacar(event: Event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const boton = event.currentTarget as HTMLButtonElement;
+        const idEvento = boton.dataset.id;
+
+        // Debug antes del cambio
+        if ((window as any).debugEstadoSeleccion) {
+            (window as any).debugEstadoSeleccion(
+                `Antes de click en evento ${idEvento}`,
+            );
+        }
+
+        // Verificar si está en la selección temporal del usuario
+        const estaEnSeleccionTemporal = (window as any).eventosDestacados.has(
+            idEvento,
+        );
+
+        if (estaEnSeleccionTemporal) {
+            // Quitar de la selección temporal
+            boton.classList.remove("destacado");
+            boton.classList.remove("bg-yellow-400", "text-yellow-900");
+            boton.classList.add("bg-white/20", "text-white");
+            boton.title = "Marcar como destacado";
+            (window as any).eventosDestacados.delete(idEvento);
+        } else {
+            // Agregar a la selección temporal
+            boton.classList.add("destacado");
+            boton.classList.remove("bg-white/20", "text-white");
+            boton.classList.add("bg-yellow-400", "text-yellow-900");
+            boton.title = "Quitar de destacados";
+            (window as any).eventosDestacados.add(idEvento);
+        }
+
+        // Guardar en localStorage usando función global o local como fallback
+        const funcionGuardar =
+            (window as any).guardarEventosDestacados ||
+            guardarEventosDestacadosLocal;
+        funcionGuardar((window as any).eventosDestacados);
+
+        // Actualizar el estado del botón de guardar
+        if ((window as any).actualizarBotonGuardar) {
+            (window as any).actualizarBotonGuardar();
+        }
+
+        console.log(
+            "Eventos destacados:",
+            Array.from((window as any).eventosDestacados),
+        );
+
+        // Debug después del cambio
+        if ((window as any).debugEstadoSeleccion) {
+            (window as any).debugEstadoSeleccion(
+                `Después de click en evento ${idEvento}`,
+            );
+        }
+
+        // Verificar integridad después del cambio
+        setTimeout(() => {
+            if ((window as any).verificarIntegridadSeleccion) {
+                (window as any).verificarIntegridadSeleccion();
+            }
+        }, 50);
+    }
+
+    // Función separada para actualizar la visualización de los botones
+    function actualizarBotonesVisualmente() {
+        // Agregar event listeners a todos los botones de destacar
+        const botonesDestacar = document.querySelectorAll(".destacar-boton");
+        console.log(
+            "EventoCard2: Inicializando",
+            botonesDestacar.length,
+            "botones destacar",
+        );
+        console.log(
+            "EventoCard2: Estado actual eventosDestacados:",
+            Array.from((window as any).eventosDestacados || new Set()),
+        );
+
+        botonesDestacar.forEach((boton) => {
+            // Evitar agregar el listener múltiples veces
+            if (!boton.hasAttribute("data-listener-added")) {
+                boton.addEventListener("click", manejarClicDestacar);
+                boton.setAttribute("data-listener-added", "true");
+            }
+
+            // Verificar el estado del botón
+            const botonElement = boton as HTMLButtonElement;
+            const idEvento = botonElement.dataset.id;
+
+            // Verificar si está en la selección temporal del usuario
+            const estaEnSeleccionTemporal = (
+                window as any
+            ).eventosDestacados.has(idEvento);
+
+            console.log(
+                `EventoCard2: Evento ${idEvento} - enSeleccion: ${estaEnSeleccionTemporal}`,
+            );
+
+            // Actualizar visualmente basado SOLO en la selección temporal
+            // No considerar el estado de la BD para evitar conflictos
+            if (estaEnSeleccionTemporal) {
+                boton.classList.add("destacado");
+                boton.classList.remove("bg-white/20", "text-white");
+                boton.classList.add("bg-yellow-400", "text-yellow-900");
+                (boton as HTMLButtonElement).title = "Quitar de destacados";
+            } else {
+                // No está en selección temporal, mostrar como no seleccionado
+                boton.classList.remove("destacado");
+                boton.classList.remove("bg-yellow-400", "text-yellow-900");
+                boton.classList.add("bg-white/20", "text-white");
+                (boton as HTMLButtonElement).title = "Marcar como destacado";
+            }
+        });
+
+        // Actualizar el estado inicial del botón de guardar
+        if ((window as any).actualizarBotonGuardar) {
+            (window as any).actualizarBotonGuardar();
+        }
+    }
+
+    // Función para inicializar botones destacar
+    function inicializarBotonesDestacar() {
+        // Si no existe eventosDestacados, inicializarlo desde localStorage
+        if (!(window as any).eventosDestacados) {
+            const funcionCargar =
+                (window as any).cargarYSincronizarEventosDestacados ||
+                (window as any).cargarEventosDestacados ||
+                cargarEventosDestacadosLocal;
+
+            // Si tenemos la función de sincronización, usarla (es async)
+            if ((window as any).cargarYSincronizarEventosDestacados) {
+                (window as any)
+                    .cargarYSincronizarEventosDestacados()
+                    .then((eventosSet: Set<string>) => {
+                        (window as any).eventosDestacados = eventosSet;
+                        actualizarBotonesVisualmente();
+                    });
+                return; // Salir temprano, la actualización se hará en el callback
+            } else {
+                // Fallback a función síncrona
+                (window as any).eventosDestacados = funcionCargar();
+            }
+        }
+
+        actualizarBotonesVisualmente();
+    }
+
+    // Inicializar cuando se carga el DOM
+    document.addEventListener("DOMContentLoaded", function () {
+        // Escuchar el evento de inicialización desde cursosCompleto.astro
+        window.addEventListener("eventosDestacadosInicialized", function () {
+            console.log("EventoCard2: Recibido evento de inicialización");
+            inicializarBotonesDestacar();
+        });
+
+        // Fallback con timeout en caso de que el evento no llegue
+        setTimeout(() => {
+            if (
+                document.querySelectorAll(
+                    ".destacar-boton[data-listener-added]",
+                ).length === 0
+            ) {
+                console.log(
+                    "EventoCard2: Fallback timeout - inicializando botones",
+                );
+                inicializarBotonesDestacar();
+            }
+        }, 200);
+
+        // Escuchar cambios de página para re-inicializar
+        window.addEventListener("pageshow", function () {
+            setTimeout(() => {
+                inicializarBotonesDestacar();
+            }, 100);
+        });
+    });
+</script>
+
+<style>
+    .card-evento {
+        width: 100%;
+        max-width: 460px;
+        overflow: hidden;
+        -webkit-backdrop-filter: blur(14px) saturate(160%);
+        box-shadow: 0 0px 6px rgba(0, 0, 0, 0.25);
+        text-decoration: none;
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .card-evento:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0px 14px rgba(0, 0, 0, 0.25);
+    }
+    .sin-cupos-evento {
+        opacity: 0.7;
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
+    .sin-cupos-evento:hover {
+        transform: none !important;
+        box-shadow: 0 0px 6px rgba(0, 0, 0, 0.25) !important;
+    }
+    .card-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .info-overlay {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 160px;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    .titulo {
+        font-size: 1.3rem;
+        font-weight: 500;
+        color: rgb(108, 19, 19);
+        margin: 0;
+    }
+    .etiquetas-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .contenedor-etiquetas {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .etiqueta {
+        display: flex;
+        align-items: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 6px 14px;
+        background-color: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(6px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+        align-items: center;
+        gap: 0.25rem;
+        letter-spacing: 0.05em;
+    }
+
+    .horas {
+        color: rgb(213, 153, 33);
+        background-color: rgba(205, 152, 46, 0.106);
+        display: flex;
+    }
+    .gratis {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    .precio {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+    .categoria {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+    .cupos {
+        color: #b30000;
+        background-color: rgba(179, 0, 0, 0.1);
+    }
+    .sin-cupos {
+        color: #666;
+        background-color: rgba(102, 102, 102, 0.1);
+    }
+</style>

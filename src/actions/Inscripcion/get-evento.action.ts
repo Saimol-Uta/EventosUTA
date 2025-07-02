@@ -16,21 +16,37 @@ export const getEventosINS = defineAction({
             let whereClause = {};
 
             if (input.activos === true) {
-                // Eventos que no han terminado (fecha fin mayor a la actual)
+                // Eventos que no han terminado (fecha fin mayor a la actual) y no están finalizados
                 whereClause = {
                     fec_fin_eve: {
                         gte: fechaActual
+                    },
+                    estado_evento: {
+                        not: "FINALIZADO"
                     }
                 };
             } else if (input.activos === false) {
-                // Eventos que ya terminaron (fecha fin menor a la actual)
+                // Eventos que ya terminaron (fecha fin menor a la actual) o están finalizados
                 whereClause = {
-                    fec_fin_eve: {
-                        lt: fechaActual
+                    OR: [
+                        {
+                            fec_fin_eve: {
+                                lt: fechaActual
+                            }
+                        },
+                        {
+                            estado_evento: "FINALIZADO"
+                        }
+                    ]
+                };
+            } else {
+                // Si no se recibe nada (undefined), mostrar solo eventos no finalizados por defecto
+                whereClause = {
+                    estado_evento: {
+                        not: "FINALIZADO"
                     }
                 };
             }
-            // Si no se recibe nada (undefined), whereClause queda vacío y muestra todos
 
             const eventos = await prisma.eventos.findMany({
                 where: whereClause,

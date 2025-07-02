@@ -2,6 +2,35 @@
 import "../../../styles/Admin/ModalModificarEvento.css";
 ---
 
+<style>
+    .contenedor-checkboxes {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .contenedor-checkbox {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .contenedor-checkbox input[type="checkbox"] {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+        accent-color: #dc2626;
+    }
+
+    .contenedor-checkbox label {
+        font-size: 14px;
+        color: #333;
+        cursor: pointer;
+    }
+</style>
+
 <div id="modalNuevaCategoria" class="modal">
     <div class="modal-contenido">
         <span class="cerrar" onclick="cerrarModalNuevaCategoria()">&times;</span
@@ -29,7 +58,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             />
                         </div>
                     </div>
-
                     <div class="contenedor-dato">
                         <p class="texto-dato">Descripción</p>
                         <div class="contenedor-input">
@@ -41,33 +69,83 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         </div>
                     </div>
 
+                    <div class="contenedor-checkboxes">
+                        <p class="texto-centrado texto-roja">
+                            Configuración de Validación
+                        </p>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="requiere_puntaje"
+                                name="requiere_puntaje"
+                                value="true"
+                            />
+                            <label for="requiere_puntaje"
+                                >Requiere puntaje de aprobación</label
+                            >
+                        </div>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="requiere_asistencia"
+                                name="requiere_asistencia"
+                                value="true"
+                            />
+                            <label for="requiere_asistencia"
+                                >Requiere asistencia mínima</label
+                            >
+                        </div>
+
+                        <div class="contenedor-checkbox">
+                            <input
+                                type="checkbox"
+                                id="brinda_certificado"
+                                name="brinda_certificado"
+                                value="true"
+                            />
+                            <label for="brinda_certificado"
+                                >Brinda certificado</label
+                            >
+                        </div>
+                    </div>
+
                     <div class="contenedor-nombre">
-                        <div class="contenedor-dato">
+                        <div
+                            class="contenedor-dato"
+                            id="contenedor-puntaje"
+                            style="display: none;"
+                        >
                             <p class="texto-dato">Puntaje de Aprobación</p>
                             <div class="contenedor-input">
                                 <input
                                     type="number"
                                     class="input-dato"
                                     name="pun_apr_cat"
-                                    min="0"
+                                    min="7"
                                     max="10"
                                     step="0.1"
-                                    required
+                                    value="7.0"
                                 />
                                 <p>/10</p>
                             </div>
                         </div>
 
-                        <div class="contenedor-dato">
+                        <div
+                            class="contenedor-dato"
+                            id="contenedor-asistencia"
+                            style="display: none;"
+                        >
                             <p class="texto-dato">Asistencia para Aprobación</p>
                             <div class="contenedor-input">
                                 <input
                                     type="number"
                                     class="input-dato"
                                     name="asi_cat"
-                                    min="0"
+                                    min="70"
                                     max="100"
-                                    required
+                                    value="70"
                                 />
                                 <p>%</p>
                             </div>
@@ -102,8 +180,9 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         if (modal) {
             modal.style.display = "block";
         }
+        document.getElementById("requiere_puntaje")?.dispatchEvent(new Event('change'));
+        document.getElementById("requiere_asistencia")?.dispatchEvent(new Event('change'));
     }
-
     function cerrarModalNuevaCategoria(): void {
         const modal = document.getElementById("modalNuevaCategoria");
         const form = document.getElementById(
@@ -113,13 +192,44 @@ import "../../../styles/Admin/ModalModificarEvento.css";
         if (modal && form) {
             modal.style.display = "none";
             form.reset();
+            document.getElementById("requiere_puntaje")?.dispatchEvent(new Event('change'));
+            document.getElementById("requiere_asistencia")?.dispatchEvent(new Event('change'));
         }
     }
-
     document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById(
-            "formulario-nueva-categoria",
-        ) as HTMLFormElement;
+        const form = document.getElementById("formulario-nueva-categoria") as HTMLFormElement;
+        if (!form) return;
+
+        // Referencias a los elementos del DOM
+        const requierePuntajeCheckbox = document.getElementById("requiere_puntaje") as HTMLInputElement;
+        const requiereAsistenciaCheckbox = document.getElementById("requiere_asistencia") as HTMLInputElement;
+        const contenedorPuntaje = document.getElementById("contenedor-puntaje") as HTMLElement;
+        const contenedorAsistencia = document.getElementById("contenedor-asistencia") as HTMLElement;
+        const inputPuntaje = form.querySelector('input[name="pun_apr_cat"]') as HTMLInputElement;
+        const inputAsistencia = form.querySelector('input[name="asi_cat"]') as HTMLInputElement;
+
+        // Lógica para habilitar/deshabilitar los campos
+        function actualizarEstadoPuntaje() {
+            const isChecked = requierePuntajeCheckbox.checked;
+            contenedorPuntaje.style.display = isChecked ? "block" : "none";
+            inputPuntaje.required = isChecked;
+            inputPuntaje.disabled = !isChecked; // La clave: deshabilita si no está marcado
+        }
+
+        function actualizarEstadoAsistencia() {
+            const isChecked = requiereAsistenciaCheckbox.checked;
+            contenedorAsistencia.style.display = isChecked ? "block" : "none";
+            inputAsistencia.required = isChecked;
+            inputAsistencia.disabled = !isChecked; // La clave: deshabilita si no está marcado
+        }
+
+        // Event listeners para los checkboxes
+        requierePuntajeCheckbox.addEventListener("change", actualizarEstadoPuntaje);
+        requiereAsistenciaCheckbox.addEventListener("change", actualizarEstadoAsistencia);
+        
+        // Ejecutar las funciones una vez al inicio para establecer el estado correcto
+        actualizarEstadoPuntaje();
+        actualizarEstadoAsistencia();
 
         // Manejar envío del formulario
         if (form) {

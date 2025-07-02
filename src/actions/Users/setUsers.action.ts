@@ -1,100 +1,85 @@
 import { defineAction } from 'astro:actions';
 import { z } from 'astro:schema';
 import prisma from '../../db';
+import { getSession } from 'auth-astro/server';
+import { validateEmail } from '../auth/verificacionCorreo';
 
 export const setUser = defineAction({
     accept: 'form',
     input: z.object({
-        id_usu: z.string().optional(),
-        ced_usu: z.string().length(10),
-        nom_usu1: z.string(),
+        id_usu: z.string(), // El ID (correo) del usuario a actualizar. ¡Esencial!
+        ced_usu: z.string().regex(/^\d{10}$/, "La cédula debe tener 10 dígitos."),
+        nom_usu1: z.string().min(1, "El primer nombre es obligatorio."),
         nom_usu2: z.string().optional().nullable(),
-        ape_usu1: z.string(),
-        ape_usu2: z.string(),
-        fec_nac_usu: z.string().nullable().optional(),
-        num_tel_usu: z.string().optional().nullable(),
+        ape_usu1: z.string().min(1, "El primer apellido es obligatorio."),
+        ape_usu2: z.string().optional().nullable(),
+        fec_nac_usu: z.string().min(1, "La fecha de nacimiento es obligatoria."),
+        num_tel_usu: z.string().regex(/^\d{10}$/, "El teléfono debe tener 10 dígitos."),
         id_car_per: z.string().optional().nullable(),
+        cor_rec: z.string().email("El correo de recuperación no es válido.").optional().nullable(),
     }),
-    handler: async (input) => {
+    handler: async (input, { request }) => {
         try {
-            console.log("Datos recibidos en setUser:", input);
-
-            let fechaValida: Date;
-            if (input.fec_nac_usu) {
-                const fecha = new Date(input.fec_nac_usu);
-                fechaValida = !isNaN(fecha.getTime()) ? fecha : new Date("1900-01-01");
-            } else {
-                fechaValida = new Date("1900-01-01");
-            }
-
-            const existingUser = await prisma.usuarios.findUnique({
-                where: { ced_usu: input.ced_usu },
+            const usuarioActual = await prisma.usuarios.findUnique({
+                where: { cor_cue: input.id_usu },
+                select: { cor_rec: true } // Solo necesitamos el correo de recuperación actual
             });
 
-            const dataToSave = {
+            if (!usuarioActual) {
+                throw new Error("No se pudo encontrar el usuario para actualizar.");
+            }
+
+            const nuevoCorreoRec = input.cor_rec;
+            const correoRecExistente = usuarioActual.cor_rec;
+
+            if (nuevoCorreoRec && nuevoCorreoRec !== correoRecExistente && !nuevoCorreoRec.endsWith('@uta.edu.ec')) {
+                
+                console.log(`El correo de recuperación cambió. Iniciando validación con Verifalia para: ${nuevoCorreoRec}`);
+                const esValido = await validateEmail(nuevoCorreoRec);
+
+                if (!esValido) {
+                    return {
+                        success: false,
+                        error: `El nuevo correo de recuperación "${nuevoCorreoRec}" no es válido.`,
+                    };
+                }
+                console.log(`Validación de Verifalia exitosa para: ${nuevoCorreoRec}`);
+            }
+            
+            const datosParaActualizar = {
+                ced_usu: input.ced_usu,
                 nom_usu1: input.nom_usu1,
-                nom_usu2: input.nom_usu2 ?? null,
+                nom_usu2: input.nom_usu2,
                 ape_usu1: input.ape_usu1,
                 ape_usu2: input.ape_usu2,
-                fec_nac_usu: fechaValida,
-                num_tel_usu: input.num_tel_usu ?? null,
-                id_car_per: input.id_car_per ?? null,
-                ced_usu: input.ced_usu,
+                // Prisma necesita un objeto Date, lo convertimos
+                fec_nac_usu: new Date(input.fec_nac_usu), 
+                num_tel_usu: input.num_tel_usu,
+                id_car_per: input.id_car_per,
+                cor_rec: input.cor_rec,
             };
 
-            if (existingUser) {
-                // Actualizar el usuario existente
-                const updatedUser = await prisma.usuarios.update({
-                    where: { ced_usu: input.ced_usu },
-                    data: dataToSave,
-                });
+            // ✅ 3. Usamos 'update' con el ID del usuario para una operación atómica y segura.
+            // No hay necesidad de buscar primero. 'update' busca y actualiza.
+            await prisma.usuarios.update({
+                where: {
+                    cor_cue: input.id_usu, // Buscamos por la llave primaria
+                },
+                data: datosParaActualizar, // Actualizamos con los nuevos datos
+            });
 
-                // Si se proporciona id_usu (ID de la cuenta), actualizar esa cuenta específica
-                if (input.id_usu) {
-                    await prisma.cuentas.update({
-                        where: { id_cue: input.id_usu },
-                        data: { id_usu_per: updatedUser.id_usu }
-                    });
-                    console.log("Cuenta actualizada con ID del usuario:", updatedUser.id_usu);
-                }
+            // Devolvemos un resultado de éxito
+            return {
+                success: true,
+                value: { created: false, message: "Perfil actualizado con éxito." },
+            };
 
-                const requireReauth = true;
-
-                const response = {
-                    success: true,
-                    created: false,
-                    requireReauth
-                };
-                console.log("Retornando desde setUser (usuario existente):", response);
-                return response;
-            } else {
-                // Crear nuevo usuario
-                const newUser = await prisma.usuarios.create({
-                    data: dataToSave,
-                });
-
-                // Si se proporciona id_usu (ID de la cuenta), actualizar esa cuenta con el nuevo usuario
-                if (input.id_usu) {
-                    await prisma.cuentas.update({
-                        where: { id_cue: input.id_usu },
-                        data: { id_usu_per: newUser.id_usu }
-                    });
-                    console.log("Cuenta actualizada con nuevo usuario ID:", newUser.id_usu);
-                }
-
-                const response = {
-                    success: true,
-                    created: true,
-                    requireReauth: true
-                };
-                console.log("Retornando desde setUser (usuario nuevo):", response);
-                return response;
-            }
         } catch (error) {
             console.error("Error en setUser:", error);
+            // Si algo falla (ej: la base de datos está caída), devolvemos un error genérico.
             return {
                 success: false,
-                error: error instanceof Error ? error.message : "Error guardando usuario. Intente de nuevo.",
+                error: "No se pudieron guardar los cambios. Intente de nuevo.",
             };
         }
     },

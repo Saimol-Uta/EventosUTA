@@ -1,93 +1,59 @@
 ---
-const { isAdmin, isMaster } = Astro.locals;
+interface NavLink {
+  label: string;
+  href: string;
+}
+
+const links = [
+  { label: "Inicio", href: "/" },
+  { label: "Eventos", href: "/cursosCompleto" },
+];
+
+// Obtener ruta actual
+const currentUrl = new URL(Astro.request.url);
+const currentPath = currentUrl.pathname;
+
+// Función para verificar ruta activa
+const isActive = (href: string) => {
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+};
 ---
 
-<style>
-    nav {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        padding: 10px 20px;
-        background-color: white;
-        border-top: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
-        font-family: sans-serif;
-    }
+<nav class="bg-red-900 relative z-50">
+  <div class="flex items-center justify-between px-4 py-4 md:py-2 md:px-8">
+    <input type="checkbox" id="menu-toggle" class="hidden peer" />
+    <label for="menu-toggle" class="md:hidden cursor-pointer">
+      <svg
+        class="w-6 h-6 text-white"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </label>
 
-    .NavGlobal {
-        text-decoration: none;
-        margin-right: 20px;
-        color: darkred;
-        font-size: 14px;
-    }
-
-    @media (max-width: 600px) {
-        nav {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .NavGlobal {
-            margin-bottom: 10px;
-        }
-    }
-
-
-        .btn-nav-gradient {
-        font-family: sans-serif;
-        font-size: 14px;
-        text-decoration: none;
-        color: white;
-        font-weight: bold;
-        padding: 8px 16px;
-        border-radius: 6px;
-        background: linear-gradient(to right, #7e1d1d, #b91c1c);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        animation: pulse 2s infinite;
-        display: inline-block;
-        margin-left: 20px; /* reemplaza margin-left: auto */
-        }
-
-        .btn-nav-gradient:hover {
-        transform: scale(1.05);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-        }
-        50% {
-            opacity: 0.96;
-            transform: scale(1.02);
-        }
-        }
-
-</style>
-
-<nav>
-    <a class="NavGlobal" href="/">Inicio</a>
-    <a class="NavGlobal" href="/cursosCompleto">Eventos</a>
-    {
-        isAdmin && (
-            <a
-                href="/homeAdmin"
-                class="btn-nav-gradient"
-            >
-                Panel Admin
-            </a>
-        )
-    }
-    {
-        isMaster && (
-            <a
-                href="/homeAdmin"
-                class="btn-nav-gradient"
-            >
-                Panel Master
-            </a>
-        )
-    }
+    <!-- Menú principal -->
+    <div
+      class="w-full hidden peer-checked:flex flex-col items-center justify-center md:flex md:flex-row md:justify-center gap-4 md:gap-x-12"
+    >
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class={`py-2 relative text-white text-[14px] tracking-wide transition-colors duration-200 drop-shadow-sm
+                before:content-[''] before:absolute before:left-0 before:bottom-1 before:h-[2px] before:bg-white
+                before:transition-all before:duration-300
+                ${isActive(link.href) ? "before:w-full" : "before:w-0 hover:before:w-full"}`}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </div>
+  </div>
 </nav>

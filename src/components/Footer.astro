@@ -1,17 +1,19 @@
 ---
 const { isLoggedIn } = Astro.locals;
+
+const {Twitter, Facebook, Instagram, 
+        Direccion = "Av. Los Chásquis y Río Guayllabamba", 
+        Correo = "talleresfisei@uta.edu.ec", 
+        Solicitud
+} = Astro.props;
 ---
 
 <footer
-    style="background-color: #3B3751; color: white; padding: 40px 60px; font-family: 'Segoe UI', sans-serif;"
+    style="background-color:rgb(34, 34, 34); color: white; padding: 40px 80px;"
 >
     <style>
         footer a {
             transition: color 0.3s ease;
-        }
-
-        footer a:hover {
-            color: #c62828;
         }
 
         footer svg {
@@ -22,7 +24,12 @@ const { isLoggedIn } = Astro.locals;
 
         footer a:hover svg {
             transform: scale(1.1);
-            fill: #c62828;
+            fill: rgb(178, 0, 0);
+        }
+
+        .contacto-icon{
+          height: auto;
+          width: 18px;
         }
 
         .footer-cursos li {
@@ -40,48 +47,75 @@ const { isLoggedIn } = Astro.locals;
             bottom: -2px;
             width: 0%;
             height: 2px;
-            background-color: #c62828;
+            background-color: rgb(162, 0, 0);
             transition: width 0.3s ease;
         }
 
         .footer-cursos a:hover::after {
             width: 100%;
         }
+
+        .titulo{
+            color: rgb(169, 0, 0); 
+            margin-bottom: 20px; 
+            letter-spacing: 1px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+				.texto {
+					color: white;
+          font-size: 14px;
+				}
+
+				.btn-cambios {
+					background-color: #a80006; color: white; font-weight: 500; padding: 14px 28px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease; margin-right: 85px;
+				}
+
+				.btn-cambios:hover {
+					background-color: white;
+					color: rgb(122, 12, 12);
+				}
+
+				.derechos {
+					text-align: center; font-size: 12px; color: rgba(255, 255, 255, 0.5);
+				}
+
+        .contacto-contenido {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 8px;
+        }
     </style>
 
     <div
-        style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px;"
+        style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px; "
     >
-        <!-- CONTACTO -->
         <div>
-            <h3
-                style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;"
-            >
-                CONTACTO
-            </h3>
-            <p style="margin: 10px 0;">
-                <span style="margin-right: 10px;">📍</span>Av. Los Chasquis y
-                Río Guayllabamba
-            </p>
-            <p style="margin: 10px 0;">
-                <span style="margin-right: 10px;">✉️</span
-                >talleresfisei@uta.edu.ec
-            </p>
-            <p style="margin: 10px 0;">
-                <span style="margin-right: 10px;">✉️</span>ctt.fisei@uta.edu.ec
-            </p>
-            <p style="margin: 10px 0;">
-                <span style="margin-right: 10px;">💻</span><a
-                    href="#"
-                    style="color: #C62828; text-decoration: none;"
-                    >Plataforma Educativa</a
-                >
-            </p>
+            <h3 class="titulo">CONTACTO</h3>
+            <div class="contacto-contenido">
+              <svg class="contacto-icon" xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24">
+                <path d="M20 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+              </svg>
+              <p class="texto">{Correo}</p>
+            </div>
+						<div class="contacto-contenido">
+              <svg class="contacto-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+              </svg>
+              <p class="texto">{Direccion}</p>
+            </div>
+        </div>
 
+        <dir>
+            <h3 class="titulo" style="text-align: center;">
+                REDES
+            </h3>
             <div style="margin-top: 20px; display: flex; gap: 12px;">
-                <!-- Twitter -->
+            
                 <a
-                    href="https://twitter.com/tu_usuario"
+                    href={Twitter || "https://twitter.com/uta_fisei"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -97,9 +131,8 @@ const { isLoggedIn } = Astro.locals;
                     </svg>
                 </a>
 
-                <!-- Facebook -->
                 <a
-                    href="https://www.facebook.com/UTAFISEI"
+                    href={Facebook || "https://www.facebook.com/UTAFISEI"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -115,27 +148,8 @@ const { isLoggedIn } = Astro.locals;
                     </svg>
                 </a>
 
-                <!-- LinkedIn -->
                 <a
-                    href="https://linkedin.com/in/tu_usuario"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <svg
-                        width="24"
-                        height="24"
-                        fill="white"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            d="M19 0h-14C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM7.1 20H4V9h3.1v11zM5.5 7.7c-.99 0-1.8-.81-1.8-1.8S4.51 4.1 5.5 4.1s1.8.81 1.8 1.8-.81 1.8-1.8 1.8zM20 20h-3v-5.6c0-1.34-.03-3.07-1.87-3.07-1.88 0-2.17 1.46-2.17 2.97V20h-3V9h2.88v1.5h.04c.4-.76 1.38-1.56 2.84-1.56 3.03 0 3.59 1.99 3.59 4.58V20z"
-                        ></path>
-                    </svg>
-                </a>
-
-                <!-- Instagram -->
-                <a
-                    href="https://www.instagram.com/fisei_uta/"
+                    href={Instagram || "https://www.instagram.com/fisei_uta/"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -151,66 +165,19 @@ const { isLoggedIn } = Astro.locals;
                     </svg>
                 </a>
             </div>
-        </div>
+        </dir>
 
-        <!-- CURSOS -->
-        <div class="footer-cursos">
-            <h3
-                style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;"
-            >
-                Eventos
-            </h3>
-            <ul style="list-style: none; padding: 0;">
-                <li>
-                    <a
-                        href="/cursosCompleto"
-                        style="color: white; text-decoration: none;"
-                        >› FUNDAMENTOS DE PYTHON 1</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="/cursosCompleto"
-                        style="color: white; text-decoration: none;"
-                        >› FUNDAMENTOS DE PYTHON 2</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="/cursosCompleto"
-                        style="color: white; text-decoration: none;"
-                        >› JAVASCRIPT ESSENTIALS 1</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="/cursosCompleto"
-                        style="color: white; text-decoration: none;"
-                        >› JAVASCRIPT ESSENTIALS 2</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="/cursosCompleto"
-                        style="color: white; text-decoration: none;"
-                        >› CIENCIA Y ANALÍTICA DE DATOS</a
-                    >
-                </li>
-            </ul>
-        </div>
-
-        <!-- INFORMACIÓN -->
     
         <div>
-           {
-               !isLoggedIn ? (
-                    <p></p>
+						{
+								!isLoggedIn ? (
+                    <h3 class="titulo"> SUGERENCIAS</h3>
+                    <p class="texto" style="margin-right: 40px;">Inicie sesión para realizar sugerencias</p>
                 ) : (
-                    <h3 style="color: #C62828; margin-bottom: 20px; letter-spacing: 1px;"> INFORMACIÓN
+                    <h3 class="titulo"> SUGERENCIAS
             </h3>
-               <p style="margin-bottom: 20px;">Danos tus recomendaciones</p>
-                    <a href="/Formularios/FormularioSolicitudCambioUsuario"
-                        style="background-color: #C62828; color: white; padding: 12px 20px; border-radius: 5px; text-decoration: none; display: inline-block; transition: background-color 0.3s ease;">
+                    <a href={Solicitud}
+                        class="btn-cambios">
                         SOLICITAR CAMBIOS
                     </a>
                 )
@@ -218,20 +185,11 @@ const { isLoggedIn } = Astro.locals;
         </div>
     </div>
 
-    <!-- Línea roja -->
-    <hr
-        style="
-  margin: 40px auto;
-  border: none;
-  height: 3px;
-  max-width: 400px;
-  background: linear-gradient(to right, transparent, #C62828, transparent);
-  border-radius: 3px;
-"
-        aria-hidden="true"
-    />
+    <div class="derechos" style="margin: 12px 0 8px 0;">
+        Grupo 3 MYCS © 2025. Todos los derechos reservados.
+    </div>
 
-    <div style="text-align: center; font-size: 14px;">
-        © Copyright © Universidad Técnica de Ambato
+    <div class="derechos">
+        UNIVERSIDAD TÉCNICA DE AMBATO U.T.A.
     </div>
 </footer>

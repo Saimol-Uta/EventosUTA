@@ -29,7 +29,10 @@ const { organizadores = [] } = Astro.props;
                                 type="text"
                                 class="input-dato"
                                 name="ced_org"
+                                id="organizador-cedula"
                                 required
+                                maxlength="20"
+                                title="Ingrese un número de identificación válido."
                             />
                         </div>
                     </div>
@@ -42,6 +45,7 @@ const { organizadores = [] } = Astro.props;
                                     type="text"
                                     class="input-dato"
                                     name="nom_org1"
+                                    id="organizador-nombre1"
                                     required
                                 />
                             </div>
@@ -54,6 +58,7 @@ const { organizadores = [] } = Astro.props;
                                     type="text"
                                     class="input-dato"
                                     name="nom_org2"
+                                    id="organizador-nombre2"
                                 />
                             </div>
                         </div>
@@ -67,6 +72,7 @@ const { organizadores = [] } = Astro.props;
                                     type="text"
                                     class="input-dato"
                                     name="ape_org1"
+                                    id="organizador-apellido1"
                                     required
                                 />
                             </div>
@@ -79,6 +85,7 @@ const { organizadores = [] } = Astro.props;
                                     type="text"
                                     class="input-dato"
                                     name="ape_org2"
+                                    id="organizador-apellido2"
                                 />
                             </div>
                         </div>
@@ -141,6 +148,23 @@ const { organizadores = [] } = Astro.props;
 
     document.addEventListener("DOMContentLoaded", () => {
         const form = document.getElementById("formulario-nuevo-organizador") as HTMLFormElement | null;
+        const nombre1Input = document.getElementById("organizador-nombre1");
+        const nombre2Input = document.getElementById("organizador-nombre2");
+        const apellido1Input = document.getElementById("organizador-apellido1");
+        const apellido2Input = document.getElementById("organizador-apellido2");
+
+        // La función de solo números se eliminó del campo de cédula.
+        const filtrarSoloLetras = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚ\s]/g, '');
+        };
+
+        // Asignación de los filtros a los campos de nombre/apellido.
+        if (nombre1Input) nombre1Input.addEventListener('input', filtrarSoloLetras);
+        if (nombre2Input) nombre2Input.addEventListener('input', filtrarSoloLetras);
+        if (apellido1Input) apellido1Input.addEventListener('input', filtrarSoloLetras);
+        if (apellido2Input) apellido2Input.addEventListener('input', filtrarSoloLetras);
+
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();

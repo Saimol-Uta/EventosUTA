@@ -30,11 +30,12 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                 </div>
             </div>
 
-            <!--<div class="seccion-detalles">
+            <div class="seccion-detalles">
                 <h3>Eventos que Organiza</h3>
                 <div class="info-grid" id="organizador-eventos-lista">
-                     Aquí se listarán los eventos 
-                </div> -->
+                     <!-- Aquí se listarán los eventos -->
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -50,10 +51,16 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
 
     // Definición de la interfaz para el organizador
     interface EventoOrganizador {
-        id_eve: string; // <--- Agrega el id del evento
+        id_eve: string;
         nom_eve: string;
-        fec_ini_eve?: string;
-        // ...puedes agregar más campos si necesitas mostrar más info...
+        des_eve?: string;
+        fec_ini_eve?: string | Date;
+        fec_fin_eve?: string | Date;
+        ubi_eve?: string;
+        estado_evento?: string;
+        es_destacado?: boolean;
+        precio?: number;
+        es_gratuito?: boolean;
     }
 
     interface Organizador {
@@ -63,7 +70,7 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         ape_org1: string;
         ape_org2?: string;
         tit_aca_org: string;
-        eventos: Array<EventoOrganizador>;
+        eventos?: Array<EventoOrganizador> | EventoOrganizador[] | any;
     }
 
     // Función para cerrar el modal
@@ -120,42 +127,86 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         }
 
         // Eventos que organiza
-        //const eventosLista = modal.querySelector("#organizador-eventos-lista");
-        //if (eventosLista) {
-           //eventosLista.innerHTML = "";
-            // Información de eventos oculta por comentario
-            // Si quieres mostrar los eventos, descomenta el siguiente bloque:
-            /*
+        const eventosLista = modal.querySelector("#organizador-eventos-lista");
+        if (eventosLista) {
+            eventosLista.innerHTML = "";
+            
+            console.log("Datos del organizador completos:", organizador);
+            console.log("Eventos del organizador:", organizador.eventos);
+            
             let eventos: EventoOrganizador[] = [];
-            if (Array.isArray(organizador.eventos)) {
-                eventos = organizador.eventos;
-            } else if (organizador.eventos && typeof organizador.eventos === "object") {
-                eventos = Object.values(organizador.eventos);
+            
+            // Manejo más robusto de los diferentes tipos de datos que pueden llegar
+            if (organizador.eventos) {
+                if (Array.isArray(organizador.eventos)) {
+                    eventos = organizador.eventos;
+                } else if (typeof organizador.eventos === "object") {
+                    // Si es un objeto, intenta convertirlo a array
+                    eventos = Object.values(organizador.eventos);
+                }
             }
+            
+            console.log("Eventos procesados:", eventos);
+            
             // Filtra eventos válidos (con nombre)
             eventos = eventos.filter(ev => ev && ev.nom_eve);
+            
             if (eventos.length > 0) {
-                eventos.forEach((ev: EventoOrganizador) => {
-                    const p = document.createElement("p");
-                    let fecha = "";
+                eventos.forEach((ev: any) => {
+                    const eventoDiv = document.createElement("div");
+                    eventoDiv.style.cssText = "margin-bottom: 10px; padding: 8px; border-left: 3px solid rgb(108, 19, 19); background-color: #f8f9fa;";
+                    
+                    // Nombre del evento
+                    const nombreEvento = ev.nom_eve || "Evento sin nombre";
+                    
+                    // Fecha de inicio
+                    let fechaTexto = "";
                     if (ev.fec_ini_eve) {
                         try {
                             const fechaObj = new Date(ev.fec_ini_eve);
                             if (!isNaN(fechaObj.getTime())) {
-                                fecha = ` (${fechaObj.toLocaleDateString()})`;
+                                fechaTexto = fechaObj.toLocaleDateString('es-ES', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                });
                             }
-                        } catch (_) {}
+                        } catch (error) {
+                            console.log("Error procesando fecha:", error);
+                        }
                     }
-                    p.textContent = `${ev.nom_eve}${fecha}`;
-                    eventosLista.appendChild(p);
+                    
+                    // Estado del evento
+                    const estado = ev.estado_evento || "ACTIVO";
+                    
+                    // Ubicación
+                    const ubicacion = ev.ubi_eve || "Ubicación por definir";
+                    
+                    // Precio
+                    let precioTexto = "";
+                    if (ev.es_gratuito) {
+                        precioTexto = "Gratuito";
+                    } else if (ev.precio && ev.precio > 0) {
+                        precioTexto = `$${ev.precio}`;
+                    } else {
+                        precioTexto = "Precio no definido";
+                    }
+                    
+                    eventoDiv.innerHTML = `
+                        <strong style="color: #dc3545;">${nombreEvento}</strong><br>
+                        ${fechaTexto ? `<small><strong>Fecha:</strong> ${fechaTexto}</small><br>` : ''}
+                        <small><strong>Estado:</strong> ${estado}</small><br>
+                        <small><strong>Ubicación:</strong> ${ubicacion}</small><br>
+                        <small><strong>Precio:</strong> ${precioTexto}</small>
+                        ${ev.es_destacado ? '<br><small style="color: #ffc107;"><strong>⭐ Evento Destacado</strong></small>' : ''}
+                    `;
+                    
+                    eventosLista.appendChild(eventoDiv);
                 });
             } else {
-                eventosLista.innerHTML = "<p>No tiene eventos asignados.</p>";
+                eventosLista.innerHTML = "<p style='color: #6c757d; font-style: italic;'>No tiene eventos asignados actualmente.</p>";
             }
-            */
-            // Solo muestra el mensaje de información
-         //   eventosLista.innerHTML = "<p>Información de eventos asignados oculta por comentario.</p>";
-        //}
+        }
     }
 
     // Cerrar modal al hacer clic fuera de él

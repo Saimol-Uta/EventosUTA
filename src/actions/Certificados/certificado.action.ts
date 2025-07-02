@@ -39,10 +39,7 @@ export const GenerarCertificado = defineAction({
       const session = await getSession(context.request);
       if (!session?.user?.id) return { success: false, error: { message: 'Usuario no autenticado.' } };
 
-      const cuenta = await prisma.cuentas.findUnique({ where: { id_cue: session.user.id } });
-      if (!cuenta?.id_usu_per) return { success: false, error: { message: 'Perfil de usuario no encontrado.' } };
-
-      const userId = cuenta.id_usu_per;
+      const userId = session.user.id;
       const inscripcion = await prisma.inscripciones.findFirst({
         where: { id_usu_ins: userId, id_eve_ins: eventoId },
         include: { usuarios: true, eventos: true },
@@ -87,6 +84,8 @@ export const GenerarCertificado = defineAction({
         fechaFin: (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
         duracionHoras: inscripcion.eventos.dur_eve?.toString() ?? '40',
         fechaGeneracion: fechaParaElCertificado.toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+        nota: inscripcion.not_par?.toNumber() ?? 0,
+        asistencia: inscripcion.asi_par ?? 0
       });
 
       const uploadResult = await uploadToCloudinary(pdfBytes, inscripcion.id_ins);
@@ -172,6 +171,8 @@ export const generarCertificadoPublico = defineAction({
         fechaFin: (inscripcion.eventos.fec_fin_eve ?? inscripcion.eventos.fec_ini_eve).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
         duracionHoras: inscripcion.eventos.dur_eve?.toString() ?? '40',
         fechaGeneracion: fechaParaElCertificado.toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' }),
+        nota: inscripcion.not_par?.toNumber() ?? 0,
+        asistencia: inscripcion.asi_par ?? 0
       });
       
       const uploadResult = await uploadToCloudinary(pdfBytes, inscripcion.id_ins);

@@ -9,9 +9,7 @@ import "../../styles/Admin/EventosCRUD.css";
 import { actions } from "astro:actions";
 
 // Obtener usuarios con información relacionada
-const { data , error } = await Astro.callAction(actions.getAllUsers, {});
-
-
+const { data, error } = await Astro.callAction(actions.getAllUsers, {});
 
 // Obtener carreras para mostrar el nombre de la carrera
 const { data: carrerasData } = await Astro.callAction(actions.getAllCarreras, {});
@@ -23,27 +21,48 @@ if (error) {
 const usuarios = data?.data || [];
 const carreras = carrerasData?.carreras || [];
 
-// Obtener información completa de cada usuario con carrera y cuentas
+// Obtener información completa de cada usuario con carrera basado en el schema de Prisma
 const usuariosCompletos = await Promise.all(
     usuarios.map(async (usuario: any) => {
-        const carrera = carreras.find((c: any) => c.id_car === usuario.id_car_per);        // Buscar cuentas del usuario
-        let cuentas: any[] = [];
-        try {
+        // Buscar carrera por id_car_per que es la FK en la tabla usuarios
+        const carrera = carreras.find((c: any) => c.id_car === usuario.id_car_per);
         
-            const cuentasResult = await Astro.callAction(actions.getCuentaById, usuario.id_usu);
+        // Obtener contadores reales de inscripciones y cambios
+        let cantidadInscripciones = 0;
+        let cantidadSolicitudes = 0;
+        
+        try {
+            // Obtener inscripciones del usuario
+            const { data: inscripcionesData } = await Astro.callAction(actions.getInscripcionesByUser, {
+                userId: usuario.cor_cue
+            });
             
-            if (cuentasResult.data) {
-                cuentas = Array.isArray(cuentasResult.data) ? cuentasResult.data : [cuentasResult.data];
+            if (inscripcionesData?.success) {
+                cantidadInscripciones = Array.isArray(inscripcionesData.data) ? inscripcionesData.data.length : 0;
+            }
+
+            // Obtener cambios del usuario
+            const { data: cambiosData } = await Astro.callAction(actions.getCambiosByUser, {
+                userId: usuario.cor_cue
+            });
+            
+            if (cambiosData?.success) {
+                cantidadSolicitudes = Array.isArray(cambiosData.data) ? cambiosData.data.length : 0;
             }
         } catch (error) {
-            console.log("No se encontraron cuentas para el usuario:", usuario.id_usu);
+            console.error(`Error al obtener datos adicionales para usuario ${usuario.cor_cue}:`, error);
+            // En caso de error, usar valores por defecto
+            cantidadInscripciones = 0;
+            cantidadSolicitudes = 0;
         }
-
+        
         return {
             ...usuario,
             carrera: carrera,
-            cuentas: cuentas,
-            cantidadCuentas: cuentas.length
+            cantidadInscripciones: cantidadInscripciones,
+            cantidadSolicitudes: cantidadSolicitudes,
+            // Calcular edad basada en fecha de nacimiento
+            edad: usuario.fec_nac_usu ? Math.floor((Date.now() - new Date(usuario.fec_nac_usu).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : null
         };
     })
 );
@@ -71,24 +90,20 @@ const usuariosCompletos = await Promise.all(
                             <p class="anadir-icon">+</p>
                         </a>
                     </div>
-                </div>
-
-                <div class="registros-inferior-titulos">
+                </div>                <div class="registros-inferior-titulos">
                     <div class="registro-fila">
                         <div class="parte-izquierda-registro-encabezado">
                             Cédula
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
-                            Nombres
+                            Correo Electrónico
+                        </div>                        <div class="parte-izquierda-registro-encabezado">
+                            Primer Nombre
+                        </div>                        <div class="parte-izquierda-registro-encabezado">
+                            Primer Apellido
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
-                            Apellidos
-                        </div>
-                        <div class="parte-izquierda-registro-encabezado">
-                            Carrera
-                        </div>
-                        <div class="parte-izquierda-registro-encabezado">
-                            Cantidad de Cuentas
+                            Rol
                         </div>
                         <div class="parte-derecha-registro-encabezado">
                             Opciones
@@ -107,30 +122,32 @@ const usuariosCompletos = await Promise.all(
                                     {usuario.ced_usu || "N/A"}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {`${usuario.nom_usu1} ${usuario.nom_usu2 || ''}`}
+                                    {usuario.cor_cue || "Sin correo"}
+                                </div>                                <div class="parte-izquierda-registro-fila">
+                                    {usuario.nom_usu1 || "Sin nombre"}
+                                </div>                                <div class="parte-izquierda-registro-fila">
+                                    {usuario.ape_usu1 || "Sin apellido"}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {`${usuario.ape_usu1} ${usuario.ape_usu2 || ''}`}
+                                    <span class={`rol-badge rol-${usuario.rol_cue?.toLowerCase()}`}>
+                                        {usuario.rol_cue || "Sin rol"}
+                                    </span>
                                 </div>
-                                <div class="parte-izquierda-registro-fila">
-                                    {usuario.carrera?.nom_car || "Sin carrera"}
-                                </div>
-                                <div class="parte-izquierda-registro-fila">
-                                    {usuario.cantidadCuentas}
-                                </div>
-                                <div class="registro-opciones">                                    <button
+                                <div class="registro-opciones">
+                                    <button
                                         title="Detalles"
-                                        onclick={`mostrarDetallesUsuario('${usuario.id_usu}')`}
+                                        onclick={`mostrarDetallesUsuario('${usuario.cor_cue}')`}
                                     >
                                         <img
                                             src="/img/CRUD/mostrar-detalles.svg"
                                             alt="boton mostrar detalles"
                                             class="imagen-boton-registro"
                                         />
-                                    </button>                                    
+                                    </button>
+                                    
                                     <button
                                         title="Eliminar"
-                                        onclick={`eliminarUsuario('${usuario.id_usu}')`}
+                                        onclick={`eliminarUsuario('${usuario.cor_cue}')`}
                                     >
                                         <img
                                             src="/img/CRUD/eliminar-registro.svg"
@@ -140,7 +157,7 @@ const usuariosCompletos = await Promise.all(
                                     </button>
                                     <button
                                         title="Modificar"
-                                        onclick={`window.abrirModalModificarUsuario('${usuario.id_usu}')`}
+                                        onclick={`window.abrirModalModificarUsuario('${usuario.cor_cue}')`}
                                     >
                                         <img
                                             src="/img/CRUD/modificar-registro.svg"
@@ -151,22 +168,155 @@ const usuariosCompletos = await Promise.all(
                                 </div>
                             </div>
                         ))
-                    }
-                </div>
+                    }                </div>
             </div>
-        </main>
+        </main><style>
+            /* Estilos para badges de roles */
+            .rol-badge {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                color: white;
+                text-align: center;
+                min-width: 80px;
+            }
 
-        <script>
-            import { actions } from "astro:actions";
-            import Swal from "sweetalert2";            // Interfaces para tipado
+            .rol-admin,
+            .rol-administrador {
+                background-color: #dc2626;
+            }
+
+            .rol-organizador {
+                background-color: #ea580c;
+            }
+
+            .rol-estudiante {
+                background-color: #059669;
+            }
+
+            .rol-docente {
+                background-color: #0284c7;
+            }            .rol-badge:not(.rol-admin):not(.rol-administrador):not(.rol-organizador):not(.rol-estudiante):not(.rol-docente) {
+                background-color: #6b7280;
+            }            /* Mejoras en la tabla */
+            .registro-fila {
+                transition: background-color 0.2s ease;
+            }
+
+            .registro-fila:hover {
+                background-color: #f9fafb;
+            }
+
+            /* Centrar contenido de columnas específicas */
+            .registro-fila .parte-izquierda-registro-fila:nth-child(3),
+            .registro-fila .parte-izquierda-registro-fila:nth-child(4),
+            .registro-fila .parte-izquierda-registro-fila:nth-child(5) {
+                text-align: center;
+            }
+
+            /* Centrar encabezados de columnas específicas */
+            .registros-inferior-titulos .parte-izquierda-registro-encabezado:nth-child(3),
+            .registros-inferior-titulos .parte-izquierda-registro-encabezado:nth-child(4),
+            .registros-inferior-titulos .parte-izquierda-registro-encabezado:nth-child(5) {
+                text-align: center;
+            }
+
+            /* Estilos responsivos */
+            @media (max-width: 768px) {
+                .parte-izquierda-registro-encabezado,
+                .parte-izquierda-registro-fila {
+                    font-size: 12px;
+                    padding: 8px 4px;
+                }                .rol-badge {
+                    font-size: 10px;
+                    padding: 2px 6px;
+                    min-width: 60px;
+                }
+            }
+
+            /* Efectos para botones */
+            .registro-opciones button {
+                transition: all 0.2s ease;
+            }
+
+            .registro-opciones button:hover {
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+
+            /* Loading overlay para operaciones async */
+            .loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+
+            .loading-spinner {
+                border: 4px solid #f3f4f6;
+                border-top: 4px solid #fc041e;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>        <script>
+            // Interfaces para tipado basadas en el schema de Prisma
             interface Carrera {
                 id_car: string;
                 nom_car: string;
                 des_car: string;
+                cod_car?: string;
+                id_fac_per: string;
+            }
+
+            interface Facultad {
+                id_fac: string;
+                nom_fac: string;
+                des_fac?: string;
+            }
+
+            interface Inscripcion {
+                id_ins: string;
+                fec_ins: string;
+                met_pag_ins?: string;
+                est_ins: string;
+                est_par: string;
+                asi_par?: number;
+                not_par?: number;
+                enl_cer_par?: string;
+                fec_cer_par?: string;
+                cod_cer?: string;
+            }
+
+            interface CambioSolicitud {
+                num_cam: number;
+                fec_cam: string;
+                rol_sol_cam?: string;
+                des_cam: string;
+                mot_cam: string;
+                pri_cam?: string;
+                tip_cam?: string;
+                ori_cam?: string;
+                est_cam?: string;
             }
 
             interface Usuario {
-                id_usu: string;
+                cor_cue: string; // Primary key
                 ced_usu: string;
                 nom_usu1: string;
                 nom_usu2?: string;
@@ -175,15 +325,44 @@ const usuariosCompletos = await Promise.all(
                 fec_nac_usu: string;
                 num_tel_usu?: string;
                 id_car_per?: string;
+                rol_cue: string;
+                cont_cuenta: string;
+                enl_ced_cue?: string;
+                enl_mat_cue?: string;
+                img_user?: string;
                 carrera?: Carrera;
-                cantidadCuentas: number;
+                inscripciones?: Inscripcion[];
+                cambiosSolicitudes?: CambioSolicitud[];
+                cantidadInscripciones: number;
+                cantidadSolicitudes: number;
+                edad?: number;
+            }
+
+            // Función para recargar la página con datos actualizados
+            function recargarDatos() {
+                window.location.reload();
+            }
+
+            // Función para mostrar loading
+            async function mostrarLoading(mensaje = 'Procesando...') {
+                const { default: Swal } = await import("sweetalert2");
+                Swal.fire({
+                    title: mensaje,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
             }
 
             async function eliminarUsuario(usuarioId: string) {
                 try {
+                    const { actions } = await import("astro:actions");
+                    const { default: Swal } = await import("sweetalert2");
+
                     const resultado = await Swal.fire({
                         title: "¿Estás seguro?",
-                        text: "No podrás revertir esta acción",
+                        text: "Esta acción eliminará al usuario y todas sus inscripciones relacionadas",
                         icon: "warning",
                         showCancelButton: true,
                         confirmButtonColor: "#dc2626",
@@ -193,9 +372,13 @@ const usuariosCompletos = await Promise.all(
                     });
 
                     if (resultado.isConfirmed) {
+                        await mostrarLoading('Eliminando usuario...');
+
                         const { data, error } = await actions.eliminarUsuario({
-                            id_usuario: usuarioId,
-                        });                        if (error || !data?.success) {
+                            id_usuario: usuarioId, // Usar cor_cue como identificador principal
+                        });
+
+                        if (error || !data?.success) {
                             await Swal.fire({
                                 icon: "error",
                                 title: "Error",
@@ -205,53 +388,141 @@ const usuariosCompletos = await Promise.all(
                         } else {
                             await Swal.fire({
                                 icon: "success",
-                                title: "Eliminado",
-                                text: "El usuario ha sido eliminado correctamente",
+                                title: "Usuario eliminado",
+                                text: "El usuario y sus datos relacionados han sido eliminados correctamente",
                                 confirmButtonColor: "#059669",
-                            }).then(() => {
-                                window.location.reload();
                             });
+                            recargarDatos();
                         }
                     }
                 } catch (error) {
-                    console.error("Error:", error);
+                    console.error("Error al eliminar usuario:", error);
+                    const { default: Swal } = await import("sweetalert2");
                     await Swal.fire({
                         icon: "error",
                         title: "Error",
-                        text: "Error al procesar la solicitud",
+                        text: "Error al procesar la solicitud de eliminación",
                         confirmButtonColor: "#dc2626",
                     });
                 }
-            }            
-            function mostrarDetallesUsuario(usuarioId: string) {
-                const usuarios = Array.from(document.querySelectorAll('input[name="usuario"]'))
-                    .map(input => JSON.parse((input as HTMLInputElement).value));
-                
-                const usuario = usuarios.find((u: Usuario) => u.id_usu === usuarioId);
-                
-                if (!usuario) {
-                    console.error('Usuario no encontrado:', usuarioId);
-                    return;
-                }
+            }
 
-                // Llamar directamente a la función de abrirModalDetalles del modal
-                if (window.abrirModalDetallesUsuario) {
-                    window.abrirModalDetallesUsuario(usuario);
-                } else {
-                    console.error('La función abrirModalDetallesUsuario no está disponible');
+            async function mostrarDetallesUsuario(usuarioId: string) {
+                try {
+                    const usuarios = Array.from(document.querySelectorAll('input[name="usuario"]'))
+                        .map(input => JSON.parse((input as HTMLInputElement).value));
+                    
+                    const usuario = usuarios.find((u: Usuario) => u.cor_cue === usuarioId);
+                    
+                    if (!usuario) {
+                        console.error('Usuario no encontrado:', usuarioId);
+                        const { default: Swal } = await import("sweetalert2");
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "Usuario no encontrado",
+                            confirmButtonColor: "#dc2626",
+                        });
+                        return;
+                    }
+
+                    // Llamar a la función del modal para mostrar detalles
+                    if (window.abrirModalDetallesUsuario) {
+                        window.abrirModalDetallesUsuario(usuario);
+                    } else {
+                        console.error('La función abrirModalDetallesUsuario no está disponible');
+                        const { default: Swal } = await import("sweetalert2");
+                        await Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "No se pudo abrir el modal de detalles",
+                            confirmButtonColor: "#dc2626",
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error al mostrar detalles del usuario:', error);
+                    const { default: Swal } = await import("sweetalert2");
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al cargar los detalles del usuario",
+                        confirmButtonColor: "#dc2626",
+                    });
                 }
-            }            
-            
+            }
+
+            // Función para formatear fechas
+            function formatearFecha(fecha: string): string {
+                if (!fecha) return 'No especificada';
+                try {
+                    return new Intl.DateTimeFormat('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }).format(new Date(fecha));
+                } catch {
+                    return fecha;
+                }
+            }
+
+            // Función para obtener el color del rol
+            function getColorRol(rol: string): string {
+                switch (rol?.toLowerCase()) {
+                    case 'admin':
+                    case 'administrador':
+                        return '#dc2626';
+                    case 'organizador':
+                        return '#ea580c';
+                    case 'estudiante':
+                        return '#059669';
+                    case 'docente':
+                        return '#0284c7';
+                    default:
+                        return '#6b7280';
+                }
+            }
+
+            // Función para actualizar la tabla después de operaciones CRUD
+            async function actualizarTablaUsuarios() {
+                try {
+                    await mostrarLoading('Actualizando datos...');
+                    // Recargar la página para obtener datos frescos
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } catch (error) {
+                    console.error('Error al actualizar tabla:', error);
+                    const { default: Swal } = await import("sweetalert2");
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error al actualizar los datos",
+                        confirmButtonColor: "#dc2626",
+                    });
+                }
+            }
+
             declare global {
                 interface Window {
                     eliminarUsuario: (usuarioId: string) => Promise<void>;
-                    mostrarDetallesUsuario: (usuarioId: string) => void;
+                    mostrarDetallesUsuario: (usuarioId: string) => Promise<void>;
                     abrirModalDetallesUsuario: (usuario: any) => void;
                     abrirModalModificarUsuario: (usuarioId: string) => void;
+                    abrirModalNuevoUsuario: () => void;
+                    formatearFecha: (fecha: string) => string;
+                    getColorRol: (rol: string) => string;
+                    actualizarTablaUsuarios: () => Promise<void>;
+                    recargarDatos: () => void;
                 }
             }
+
+            // Asignar funciones al objeto global window
             window.eliminarUsuario = eliminarUsuario;
             window.mostrarDetallesUsuario = mostrarDetallesUsuario;
+            window.formatearFecha = formatearFecha;
+            window.getColorRol = getColorRol;
+            window.actualizarTablaUsuarios = actualizarTablaUsuarios;
+            window.recargarDatos = recargarDatos;
 
         </script>
     </body>

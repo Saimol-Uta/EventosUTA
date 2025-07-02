@@ -40,36 +40,42 @@ import "../styles/ModalDetallesInscripcion.css";
                 <div class="info-grid">
                     <p>
                         <strong>Cédula y Papeleta de votación:</strong>
-                        <a
-                            href="#"
+                        <button
                             id="enlace-cedula"
-                            target="_blank"
-                            style="display: none;">Ver documento</a
+                            class="btn-ver-documento"
+                            style="display: none;"
+                            type="button"
                         >
+                            Ver documento
+                        </button>
                         <span id="sin-cedula" style="color: #dc2626;"
                             >No disponible</span
                         >
                     </p>
-                    <p>
+                    <p id="campo-matricula" style="display:none;">
                         <strong>Certificado de Matriculación:</strong>
-                        <a
-                            href="#"
+                        <button
                             id="enlace-matricula"
-                            target="_blank"
-                            style="display: none;">Ver documento</a
+                            class="btn-ver-documento"
+                            style="display: none;"
+                            type="button"
                         >
+                            Ver documento
+                        </button>
                         <span id="sin-matricula" style="color: #dc2626;"
                             >No disponible</span
                         >
                     </p>
-                    <p>
+                    <p id="campo-motivacion" style="display:none;">
                         <strong>Carta de Motivación:</strong>
-                        <a
-                            href="#"
+                        <button
                             id="enlace-motivacion"
-                            target="_blank"
-                            style="display: none;">Ver documento</a
+                            class="btn-ver-documento"
+                            style="display: none;"
+                            type="button"
                         >
+                            Ver documento
+                        </button>
                         <span id="sin-motivacion" style="color: #dc2626;"
                             >No disponible</span
                         >
@@ -78,9 +84,13 @@ import "../styles/ModalDetallesInscripcion.css";
             </div>
             <div class="contenedor-boton-modificar">
                 <button
-                    class="boton-modificar"
-                    onclick="aprobarInscripcionDocumentacion()">Aprobar</button
+                    class="boton-modificar bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded mr-2 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    id="boton-aprobar-documentacion"
+                    disabled
+                    onclick="if (!this.disabled) aprobarInscripcionDocumentacion()"
                 >
+                    Aprobar
+                </button>
                 <button
                     class="boton-modificar"
                     onclick="rechazarInscripcionDocumentacion()"
@@ -88,280 +98,483 @@ import "../styles/ModalDetallesInscripcion.css";
                 >
             </div>
         </div>
-        <script>
-            declare global {
-                interface Window {
-                    cerrarModalDetallesInscripcion: () => void;
-                    abrirModalDetallesInscripcionComponent: (
-                        inscripcionId: string,
-                    ) => void;
-                    aprobarInscripcionDocumentacion: () => void;
-                    rechazarInscripcionDocumentacion: () => void;
-                    aprobarInscripcion: (
-                        inscripcionId: string,
-                        tipo: "documentacion" | "pago",
-                    ) => Promise<void>;
-                    rechazarInscripcion: (
-                        inscripcionId: string,
-                        tipo: "documentacion" | "pago",
-                    ) => Promise<void>;
-                    currentInscripcionId: string;
-                }
-            }
-            let currentInscripcionId = "";
-
-            function cerrarModalDetallesInscripcion() {
-                const modal = document.getElementById("modalDetallesReserva");
-                if (modal) modal.style.display = "none";
-            }
-            function abrirModalDetallesInscripcion(inscripcionId: string) {
-                const modal = document.getElementById("modalDetallesReserva");
-                if (modal) modal.style.display = "block";
-                currentInscripcionId = inscripcionId;
-                window.currentInscripcionId = inscripcionId;
-
-                cargarInformacionUsuario(inscripcionId);
-                cargarDocumentosInscripcion(inscripcionId);
-            }
-
-            function cargarInformacionUsuario(inscripcionId: string) {
-                try {
-                    // Obtener datos de inscripción desde el contexto global
-                    const inscripcionesData =
-                        (window as any).inscripcionesData || [];
-                    const inscripcion = inscripcionesData.find(
-                        (ins: any) => ins.id_ins === inscripcionId,
-                    );
-
-                    if (!inscripcion || !inscripcion.usuarios) {
-                        console.warn(
-                            "No se encontraron datos de usuario para la inscripción:",
-                            inscripcionId,
-                        );
-                        return;
-                    }
-                    const usuario = inscripcion.usuarios;
-
-                    // Construir nombres y apellidos completos
-                    const nombreCompleto =
-                        `${usuario.nom_usu1 || ""} ${usuario.nom_usu2 || ""}`.trim();
-                    const apellidoCompleto =
-                        `${usuario.ape_usu1 || ""} ${usuario.ape_usu2 || ""}`.trim();
-                    const correo =
-                        usuario.cuentas?.[0]?.cor_cue || "No disponible";
-
-                    // Actualizar elementos del DOM con la información del usuario
-                    const usuarioNombres =
-                        document.getElementById("usuario-nombres");
-                    const usuarioApellidos =
-                        document.getElementById("usuario-apellidos");
-                    const usuarioCorreo =
-                        document.getElementById("usuario-correo");
-                    const usuarioCedula =
-                        document.getElementById("usuario-cedula");
-
-                    if (usuarioNombres)
-                        usuarioNombres.textContent =
-                            nombreCompleto || "No disponible";
-                    if (usuarioApellidos)
-                        usuarioApellidos.textContent =
-                            apellidoCompleto || "No disponible";
-                    if (usuarioCorreo) usuarioCorreo.textContent = correo;
-                    if (usuarioCedula)
-                        usuarioCedula.textContent =
-                            usuario.ced_usu || "No disponible";
-                } catch (error) {
-                    console.error(
-                        "Error al cargar información del usuario:",
-                        error,
-                    );
-                }
-            }
-
-            function cargarDocumentosInscripcion(inscripcionId: string) {
-                try {
-                    // Obtener datos de inscripción desde el contexto global
-                    const inscripcionesData =
-                        (window as any).inscripcionesData || [];
-                    const inscripcion = inscripcionesData.find(
-                        (ins: any) => ins.id_ins === inscripcionId,
-                    );
-
-                    if (!inscripcion) {
-                        console.warn(
-                            "No se encontraron datos de inscripción:",
-                            inscripcionId,
-                        );
-                        mostrarDocumentosNoDisponibles();
-                        return;
-                    }
-
-                    if (
-                        !inscripcion.usuarios ||
-                        !inscripcion.usuarios.cuentas ||
-                        inscripcion.usuarios.cuentas.length === 0
-                    ) {
-                        console.warn(
-                            "No se encontraron datos de cuenta para la inscripción:",
-                            inscripcionId,
-                        );
-                        mostrarDocumentosNoDisponibles();
-                        return;
-                    }
-
-                    const cuenta = inscripcion.usuarios.cuentas[0];
-
-                    // Referencias a elementos DOM
-                    const enlaceCedula = document.getElementById(
-                        "enlace-cedula",
-                    ) as HTMLAnchorElement;
-                    const sinCedula = document.getElementById(
-                        "sin-cedula",
-                    ) as HTMLSpanElement;
-                    const enlaceMatricula = document.getElementById(
-                        "enlace-matricula",
-                    ) as HTMLAnchorElement;
-                    const sinMatricula = document.getElementById(
-                        "sin-matricula",
-                    ) as HTMLSpanElement;
-                    const enlaceMotivacion = document.getElementById(
-                        "enlace-motivacion",
-                    ) as HTMLAnchorElement;
-                    const sinMotivacion = document.getElementById(
-                        "sin-motivacion",
-                    ) as HTMLSpanElement;
-
-                    // Configurar enlace de cédula
-                    if (isValidDocumentLink(cuenta.enl_ced_cue)) {
-                        enlaceCedula.href = cuenta.enl_ced_cue;
-                        enlaceCedula.style.display = "inline";
-                        sinCedula.style.display = "none";
-                    } else {
-                        enlaceCedula.style.display = "none";
-                        sinCedula.style.display = "inline";
-                    }
-
-                    // Configurar enlace de matrícula
-                    if (isValidDocumentLink(cuenta.enl_mat_cue)) {
-                        enlaceMatricula.href = cuenta.enl_mat_cue;
-                        enlaceMatricula.style.display = "inline";
-                        sinMatricula.style.display = "none";
-                    } else {
-                        enlaceMatricula.style.display = "none";
-                        sinMatricula.style.display = "inline";
-                    } // Configurar enlace de carta de motivación
-                    if (isValidDocumentLink(cuenta.enl_ext_cue)) {
-                        enlaceMotivacion.href = cuenta.enl_ext_cue;
-                        enlaceMotivacion.style.display = "inline";
-                        sinMotivacion.style.display = "none";
-                    } else {
-                        enlaceMotivacion.style.display = "none";
-                        sinMotivacion.style.display = "inline";
-                    }
-
-                    // Actualizar badge de estado
-                    actualizarBadgeDocumentos(cuenta);
-                } catch (error) {
-                    console.error(
-                        "Error al cargar documentos de inscripción:",
-                        error,
-                    );
-                    mostrarDocumentosNoDisponibles();
-                }
-            }
-
-            function isValidDocumentLink(
-                link: string | null | undefined,
-            ): boolean {
-                return (
-                    link !== null &&
-                    link !== undefined &&
-                    link.trim() !== "" &&
-                    link !== "null"
-                );
-            }
-            function mostrarDocumentosNoDisponibles() {
-                const enlaces = [
-                    "enlace-cedula",
-                    "enlace-matricula",
-                    "enlace-motivacion",
-                ];
-                const spans = ["sin-cedula", "sin-matricula", "sin-motivacion"];
-
-                enlaces.forEach((id) => {
-                    const elemento = document.getElementById(id);
-                    if (elemento) elemento.style.display = "none";
-                });
-
-                spans.forEach((id) => {
-                    const elemento = document.getElementById(id);
-                    if (elemento) elemento.style.display = "inline";
-                });
-
-                // Actualizar badge para mostrar 0/3 documentos
-                const badge = document.getElementById("documentos-status");
-                if (badge) {
-                    badge.textContent = "0/3";
-                    badge.className = "documentos-badge incompleto";
-                }
-            }
-
-            function actualizarBadgeDocumentos(cuenta: any) {
-                const badge = document.getElementById("documentos-status");
-                if (!badge) return;
-
-                const documentos = [
-                    cuenta.enl_ced_cue,
-                    cuenta.enl_mat_cue,
-                    cuenta.enl_ext_cue,
-                ];
-
-                const disponibles = documentos.filter((doc) =>
-                    isValidDocumentLink(doc),
-                ).length;
-                const total = documentos.length;
-
-                badge.textContent = `${disponibles}/${total}`;
-
-                if (disponibles === total) {
-                    badge.className = "documentos-badge completo";
-                } else if (disponibles > 0) {
-                    badge.className = "documentos-badge parcial";
-                } else {
-                    badge.className = "documentos-badge incompleto";
-                }
-            }
-            function aprobarInscripcionDocumentacion() {
-                if (window.aprobarInscripcion && window.currentInscripcionId) {
-                    window.aprobarInscripcion(
-                        window.currentInscripcionId,
-                        "documentacion",
-                    );
-                    cerrarModalDetallesInscripcion();
-                }
-            }
-            function rechazarInscripcionDocumentacion() {
-                if (window.rechazarInscripcion && window.currentInscripcionId) {
-                    window.rechazarInscripcion(
-                        window.currentInscripcionId,
-                        "documentacion",
-                    );
-                    cerrarModalDetallesInscripcion();
-                }
-            }
-
-            window.onclick = function (event) {
-                const modal = document.getElementById("modalDetallesReserva");
-                if (event.target === modal) cerrarModalDetallesInscripcion();
-            };
-            window.cerrarModalDetallesInscripcion =
-                cerrarModalDetallesInscripcion;
-            (window as any).abrirModalDetallesInscripcionComponent =
-                abrirModalDetallesInscripcion;
-            window.aprobarInscripcionDocumentacion =
-                aprobarInscripcionDocumentacion;
-            window.rechazarInscripcionDocumentacion =
-                rechazarInscripcionDocumentacion;
-        </script>
     </div>
 </div>
+
+<!-- Modal para visualizar documentos -->
+<div id="modalVisualizarDocumento" class="modal" style="z-index: 1001;">
+    <div class="modal-contenido-documento">
+        <span class="cerrar-documento" onclick="cerrarModalDocumento()"
+            >&times;</span
+        >
+        <div class="contenedor-documento">
+            <h3 id="titulo-documento">Visualizar Documento</h3>
+            <div id="contenedor-preview">
+                <!-- Para imágenes -->
+                <img
+                    id="preview-imagen"
+                    style="display: none; max-width: 100%; max-height: 80vh; object-fit: contain;"
+                />
+                <!-- Para PDFs -->
+                <iframe
+                    id="preview-pdf"
+                    style="display: none; width: 100%; height: 80vh; border: none;"
+                ></iframe>
+                <!-- Mensaje de carga -->
+                <div
+                    id="cargando-documento"
+                    style="text-align: center; padding: 2rem;"
+                >
+                    <p>Cargando documento...</p>
+                </div>
+                <!-- Mensaje de error -->
+                <div
+                    id="error-documento"
+                    style="display: none; text-align: center; padding: 2rem; color: #dc2626;"
+                >
+                    <p>Error al cargar el documento</p>
+                </div>
+                <!-- Para texto (carta de motivación) -->
+                <div
+                    id="preview-texto"
+                    style="display: none; padding: 2rem; background-color: white; border-radius: 8px; margin: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-height: 70vh; overflow-y: auto;"
+                >
+                    <div
+                        id="contenido-texto"
+                        style="white-space: pre-wrap; line-height: 1.6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"
+                    >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    import { actions } from "astro:actions";
+    import Swal from "sweetalert2";
+
+    declare global {
+        interface Window {
+            cerrarModalDetallesInscripcion: () => void;
+            abrirModalDetallesInscripcionComponent: (
+                inscripcionId: string,
+            ) => void;
+            aprobarInscripcionDocumentacion: () => void;
+            rechazarInscripcionDocumentacion: () => void;
+            aprobarInscripcion: (
+                inscripcionId: string,
+                tipo: "documentacion" | "pago",
+            ) => Promise<void>;
+            rechazarInscripcion: (
+                inscripcionId: string,
+                tipo: "documentacion" | "pago",
+            ) => Promise<void>;
+            currentInscripcionId: string;
+            abrirModalDocumento: (url: string, titulo: string) => void;
+            abrirModalTexto: (texto: string, titulo: string) => void;
+            cerrarModalDocumento: () => void;
+        }
+    }
+
+    let currentInscripcionId = "";
+
+    function cerrarModalDetallesInscripcion() {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (modal) modal.style.display = "none";
+    }
+
+    function abrirModalDetallesInscripcionComponent(inscripcionId: string) {
+        const modal = document.getElementById("modalDetallesReserva");
+        if (modal) modal.style.display = "block";
+        window.currentInscripcionId = inscripcionId;
+
+        // Llama a las funciones para poblar el modal con los datos correctos
+        cargarInformacionUsuario(inscripcionId);
+        cargarDocumentosInscripcion(inscripcionId);
+        verificarRequisitosYActualizarBoton();
+    }
+
+    function verificarRequisitosYActualizarBoton() {
+        const botonAprobar = document.getElementById(
+            "boton-aprobar-documentacion",
+        ) as HTMLButtonElement;
+        if (!botonAprobar) return;
+
+        const inscripcionesData = (window as any).inscripcionesData || [];
+        const inscripcion = inscripcionesData.find(
+            (ins: any) => ins.id_ins === window.currentInscripcionId,
+        );
+        if (!inscripcion) return;
+
+        const usuario = inscripcion.usuarios || {};
+        const evento = inscripcion.eventos || {};
+        const asignacion = evento.asignaciones;
+        const tieneAsignacionValida =
+            asignacion &&
+            (asignacion.tip_asi === "FACULTAD" ||
+                asignacion.tip_asi === "CARRERA");
+        const esEstudiante = usuario.rol_cue === "ESTUDIANTE";
+        const eventoRequiereCarta = evento.requiere_carta || false;
+
+        let requisitosCumplidos = false;
+        if (!tieneAsignacionValida || !esEstudiante) {
+            requisitosCumplidos =
+                isValidDocumentLink(usuario.enl_ced_cue) &&
+                (eventoRequiereCarta
+                    ? inscripcion.car_mot_inscrip &&
+                      inscripcion.car_mot_inscrip.trim() !== ""
+                    : true);
+        } else {
+            requisitosCumplidos =
+                isValidDocumentLink(usuario.enl_ced_cue) &&
+                isValidDocumentLink(usuario.enl_mat_cue) &&
+                (eventoRequiereCarta
+                    ? inscripcion.car_mot_inscrip &&
+                      inscripcion.car_mot_inscrip.trim() !== ""
+                    : true);
+        }
+        botonAprobar.disabled = !requisitosCumplidos;
+    }
+
+    function cargarInformacionUsuario(inscripcionId: string) {
+        const inscripcionesData = (window as any).inscripcionesData || [];
+        const inscripcion = inscripcionesData.find(
+            (ins: any) => ins.id_ins === inscripcionId,
+        );
+        if (!inscripcion || !inscripcion.usuarios) return;
+
+        const usuario = inscripcion.usuarios;
+        const nombreCompleto =
+            `${usuario.nom_usu1 || ""} ${usuario.nom_usu2 || ""}`.trim();
+        const apellidoCompleto =
+            `${usuario.ape_usu1 || ""} ${usuario.ape_usu2 || ""}`.trim();
+
+        (
+            document.getElementById("usuario-nombres") as HTMLElement
+        ).textContent = nombreCompleto;
+        (
+            document.getElementById("usuario-apellidos") as HTMLElement
+        ).textContent = apellidoCompleto;
+        (document.getElementById("usuario-correo") as HTMLElement).textContent =
+            usuario.cor_cue;
+        (document.getElementById("usuario-cedula") as HTMLElement).textContent =
+            usuario.ced_usu;
+    }
+
+    function cargarDocumentosInscripcion(inscripcionId: string) {
+        const inscripcionesData = (window as any).inscripcionesData || [];
+        const inscripcion = inscripcionesData.find(
+            (ins: any) => ins.id_ins === inscripcionId,
+        );
+        if (!inscripcion || !inscripcion.usuarios) {
+            mostrarDocumentosNoDisponibles();
+            return;
+        }
+
+        const usuario = inscripcion.usuarios;
+        const evento = inscripcion.eventos || {};
+
+        // Mostrar/ocultar campos según requisitos del evento
+        const campoMatricula = document.getElementById("campo-matricula");
+        const campoMotivacion = document.getElementById("campo-motivacion");
+
+        // Verificar si el evento es dirigido a estudiantes (tiene asignación a carrera o facultad)
+        const asignacion = evento.asignaciones;
+        const esDirigidoAEstudiantes =
+            asignacion &&
+            (asignacion.tip_asi === "FACULTAD" ||
+                asignacion.tip_asi === "CARRERA");
+
+        if (campoMatricula) {
+            campoMatricula.style.display = esDirigidoAEstudiantes
+                ? "block"
+                : "none";
+        }
+        if (campoMotivacion) {
+            campoMotivacion.style.display = evento.requiere_carta
+                ? "block"
+                : "none";
+        }
+
+        const setupButton = (
+            buttonId: string,
+            spanId: string,
+            url: string,
+            titulo: string,
+            isText: boolean = false,
+        ) => {
+            const button = document.getElementById(
+                buttonId,
+            ) as HTMLButtonElement;
+            const span = document.getElementById(spanId) as HTMLSpanElement;
+            const hasContent = isText
+                ? url && url.trim() !== ""
+                : isValidDocumentLink(url);
+
+            if (hasContent) {
+                button.style.display = "inline-block";
+                span.style.display = "none";
+                button.onclick = isText
+                    ? () => window.abrirModalTexto(url, titulo)
+                    : () => window.abrirModalDocumento(url, titulo);
+            } else {
+                button.style.display = "none";
+                span.style.display = "inline";
+            }
+        };
+
+        setupButton(
+            "enlace-cedula",
+            "sin-cedula",
+            usuario.enl_ced_cue,
+            "Cédula y Papeleta de Votación",
+        );
+        if (esDirigidoAEstudiantes) {
+            setupButton(
+                "enlace-matricula",
+                "sin-matricula",
+                usuario.enl_mat_cue,
+                "Certificado de Matriculación",
+            );
+        }
+        if (evento.requiere_carta) {
+            setupButton(
+                "enlace-motivacion",
+                "sin-motivacion",
+                inscripcion.car_mot_inscrip,
+                "Carta de Motivación",
+                true,
+            );
+        }
+    }
+
+    function isValidDocumentLink(link: string | null | undefined): boolean {
+        return !!(link && link.trim() !== "" && link !== "null");
+    }
+
+    function mostrarDocumentosNoDisponibles() {
+        const enlaces = [
+            "enlace-cedula",
+            "enlace-matricula",
+            "enlace-motivacion",
+        ];
+        const spans = ["sin-cedula", "sin-matricula", "sin-motivacion"];
+
+        enlaces.forEach((id) => {
+            const elemento = document.getElementById(id);
+            if (elemento) elemento.style.display = "none";
+        });
+
+        spans.forEach((id) => {
+            const elemento = document.getElementById(id);
+            if (elemento) elemento.style.display = "inline";
+        });
+
+        // Actualizar badge para mostrar 0/3 documentos
+        const badge = document.getElementById("documentos-status");
+        if (badge) {
+            badge.textContent = "0/3";
+            badge.className = "documentos-badge incompleto";
+        }
+    }
+    function actualizarBadgeDocumentos(cuenta: any, inscripcion: any) {
+        console.log("Actualizando badge con datos:", { cuenta, inscripcion });
+
+        const badge = document.getElementById("documentos-status");
+        if (!badge) return;
+
+        const documentos = [
+            cuenta.enl_ced_cue,
+            cuenta.enl_mat_cue,
+            inscripcion.car_mot_inscrip, // Para carta, verificamos si hay texto
+        ];
+
+        console.log("Documentos para verificar:", documentos);
+
+        // Función para verificar si un documento está disponible
+        const estaDisponible = (doc: any, index: number) => {
+            if (index === 2) {
+                // Carta de motivación (índice 2)
+                const disponible = doc && doc.trim() !== "";
+                console.log(
+                    `Carta (índice ${index}): "${doc}" -> ${disponible}`,
+                );
+                return disponible;
+            } else {
+                // Documentos (cédula y matrícula)
+                const disponible = isValidDocumentLink(doc);
+                console.log(
+                    `Documento (índice ${index}): "${doc}" -> ${disponible}`,
+                );
+                return disponible;
+            }
+        };
+
+        const disponibles = documentos.filter((doc, index) =>
+            estaDisponible(doc, index),
+        ).length;
+        const total = documentos.length;
+
+        console.log(`Badge: ${disponibles}/${total}`);
+
+        badge.textContent = `${disponibles}/${total}`;
+
+        if (disponibles === total) {
+            badge.className = "documentos-badge completo";
+        } else if (disponibles > 0) {
+            badge.className = "documentos-badge parcial";
+        } else {
+            badge.className = "documentos-badge incompleto";
+        }
+    }
+
+    function aprobarInscripcionDocumentacion() {
+        if (window.aprobarInscripcion && window.currentInscripcionId) {
+            window.aprobarInscripcion(
+                window.currentInscripcionId,
+                "documentacion",
+            );
+            cerrarModalDetallesInscripcion();
+        }
+    }
+
+    function rechazarInscripcionDocumentacion() {
+        if (window.rechazarInscripcion && window.currentInscripcionId) {
+            window.rechazarInscripcion(
+                window.currentInscripcionId,
+                "documentacion",
+            );
+            cerrarModalDetallesInscripcion();
+        }
+    }
+
+    function cerrarModalDocumento() {
+        const modal = document.getElementById("modalVisualizarDocumento");
+        if (!modal) return;
+        modal.style.display = "none";
+
+        const previewPdf = document.getElementById(
+            "preview-pdf",
+        ) as HTMLIFrameElement;
+        if (previewPdf) {
+            if (previewPdf.src.startsWith("blob:")) {
+                URL.revokeObjectURL(previewPdf.src);
+            }
+            previewPdf.src = "about:blank";
+        }
+    }
+
+    async function abrirModalDocumento(url: string, titulo: string) {
+        const modal = document.getElementById("modalVisualizarDocumento");
+        if (!modal || !url) return;
+
+        const tituloElemento = document.getElementById("titulo-documento");
+        const cargando = document.getElementById("cargando-documento");
+        const errorDiv = document.getElementById("error-documento");
+        const previewPdf = document.getElementById(
+            "preview-pdf",
+        ) as HTMLIFrameElement;
+
+        const previewImagen = document.getElementById(
+            "preview-imagen",
+        ) as HTMLImageElement;
+        const previewTexto = document.getElementById("preview-texto");
+        if (previewImagen) previewImagen.style.display = "none";
+        if (previewTexto) previewTexto.style.display = "none";
+
+        // Resetear y mostrar modal en estado de carga
+        if (tituloElemento) tituloElemento.textContent = titulo;
+        if (cargando) cargando.style.display = "block";
+        if (errorDiv) errorDiv.style.display = "none";
+        if (previewPdf) previewPdf.style.display = "none";
+        modal.style.display = "block";
+
+        try {
+            // Llamamos a la action para obtener el contenido del PDF
+            const result = await actions.recuperarCertificadoDesdeUrl({ url });
+
+            if (result.data?.success && result.data.data?.pdfBase64) {
+                const base64 = result.data.data.pdfBase64;
+                const byteCharacters = atob(base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: "application/pdf" });
+                const blobUrl = URL.createObjectURL(blob);
+
+                previewPdf.src = blobUrl;
+                if (cargando) cargando.style.display = "none";
+                previewPdf.style.display = "block";
+            } else {
+                throw new Error(
+                    result.error?.message || "No se pudo cargar el PDF.",
+                );
+            }
+        } catch (error: any) {
+            if (cargando) cargando.style.display = "none";
+            if (errorDiv) {
+                errorDiv.style.display = "block";
+                (errorDiv.querySelector("p") as HTMLElement).textContent =
+                    error.message;
+            }
+        }
+    }
+
+    function abrirModalTexto(texto: string, titulo: string) {
+        const modal = document.getElementById("modalVisualizarDocumento");
+        if (!modal) return;
+
+        const tituloElemento = document.getElementById("titulo-documento");
+        const previewTexto = document.getElementById("preview-texto");
+        const contenidoTexto = document.getElementById("contenido-texto");
+
+        const previewImagen = document.getElementById(
+            "preview-imagen",
+        ) as HTMLImageElement;
+        const previewPdf = document.getElementById(
+            "preview-pdf",
+        ) as HTMLIFrameElement;
+        if (previewImagen) previewImagen.style.display = "none";
+        if (previewPdf) previewPdf.style.display = "none";
+
+        // Ocultar otros visores y mostrar el de texto
+        (document.getElementById("preview-pdf") as HTMLElement).style.display =
+            "none";
+        (
+            document.getElementById("preview-imagen") as HTMLElement
+        ).style.display = "none";
+        (
+            document.getElementById("cargando-documento") as HTMLElement
+        ).style.display = "none";
+        (
+            document.getElementById("error-documento") as HTMLElement
+        ).style.display = "none";
+
+        if (tituloElemento) tituloElemento.textContent = titulo;
+        if (contenidoTexto) contenidoTexto.textContent = texto;
+        if (previewTexto) previewTexto.style.display = "block";
+
+        modal.style.display = "block";
+    }
+
+    window.onclick = function (event) {
+        const modalReserva = document.getElementById("modalDetallesReserva");
+        const modalDocumento = document.getElementById(
+            "modalVisualizarDocumento",
+        );
+
+        if (event.target === modalReserva) cerrarModalDetallesInscripcion();
+        if (event.target === modalDocumento) cerrarModalDocumento();
+    };
+
+    window.cerrarModalDetallesInscripcion = cerrarModalDetallesInscripcion;
+    window.cerrarModalDocumento = cerrarModalDocumento;
+    window.abrirModalDocumento = abrirModalDocumento;
+    window.abrirModalTexto = abrirModalTexto;
+    window.abrirModalDetallesInscripcionComponent =
+        abrirModalDetallesInscripcionComponent;
+    window.aprobarInscripcionDocumentacion = aprobarInscripcionDocumentacion;
+    window.rechazarInscripcionDocumentacion = rechazarInscripcionDocumentacion;
+</script>

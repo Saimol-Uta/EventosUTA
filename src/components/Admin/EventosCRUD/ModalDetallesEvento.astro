@@ -4,15 +4,13 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
 
 <div id="modalDetallesReserva" class="modal">
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalDetallesEvento()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalDetallesEvento()">&times;</span
+        >
         <div class="detalles-reserva">
             <h2 id="evento-nombre">Nombre del Evento</h2>
 
             <div class="seccion-detalles centrar">
-                <img
-                    id="evento-imagen-detalle"
-                    class="imagen-curso"
-                />
+                <img id="evento-imagen-detalle" class="imagen-curso" />
                 <div class="descripcion-completa-container">
                     <p class="descripcion-completa">
                         <strong>Descripción:</strong>
@@ -20,7 +18,6 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     </p>
                 </div>
             </div>
-
             <div class="seccion-detalles">
                 <h3>Información General</h3>
                 <div class="info-grid">
@@ -33,11 +30,75 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                         <strong>Precio:</strong>
                         <span id="evento-precio"></span>
                     </p>
+                    <p>
+                        <strong>Es Gratuito:</strong>
+                        <span id="evento-es-gratuito"></span>
+                    </p>
+                    <p>
+                        <strong>Es Destacado:</strong>
+                        <span id="evento-es-destacado"></span>
+                    </p>
+                    <p>
+                        <strong>Requiere Carta:</strong>
+                        <span id="evento-requiere-carta"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Información de la Categoría -->
+            <div
+                class="seccion-detalles"
+                id="seccion-info-categoria"
+                style="display: none;"
+            >
+                <h3>Información de la Categoría</h3>
+                <div class="info-categoria-contenido">
+                    <div id="info-puntaje-detalle" style="display: none;">
+                        <p class="info-item">
+                            <strong>Puntaje de aprobación:</strong>
+                            <span id="valor-puntaje-detalle">-</span> puntos
+                        </p>
+                    </div>
+
+                    <div id="info-asistencia-detalle" style="display: none;">
+                        <p class="info-item">
+                            <strong>Requiere asistencia:</strong>
+                            <span id="valor-porcentaje-asistencia-detalle"
+                                >-</span
+                            >% mínimo
+                        </p>
+                    </div>
+
+                    <div id="info-certificado-detalle" style="display: none;">
+                        <p class="info-item">
+                            <strong>Brinda certificado:</strong> Sí
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <div class="seccion-detalles">
-                <h3>Programación</h3>
+                <h3>
+                    Fechas de Inscripción
+                    <span id="estado-inscripciones-badge" class="estado-badge"
+                    ></span>
+                </h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Inicio de Inscripción:</strong>
+                        <span id="evento-fecha-inicio-inscripcion"></span>
+                    </p>
+                    <p>
+                        <strong>Fin de Inscripción:</strong>
+                        <span id="evento-fecha-fin-inscripcion"></span>
+                    </p>
+                </div>
+            </div>
+            <div class="seccion-detalles">
+                <h3>
+                    Programación
+                    <span id="estado-evento-badge" class="estado-badge"></span>
+                </h3>
                 <div class="info-grid">
                     <p>
                         <strong>Fecha de Inicio:</strong>
@@ -65,6 +126,22 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                     </p>
                 </div>
             </div>
+
+            <div class="seccion-detalles">
+                <h3>Asignación</h3>
+                <div class="info-grid">
+                    <p>
+                        <strong>Asignación:</strong>
+                        <span id="evento-asignacion"></span>
+                    </p>
+                    <p>
+                        <strong>Descripción de Asignación:</strong>
+                        <span id="evento-asignacion-descripcion"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Sección de Carta de Motivación oculta por defecto -->
             <div class="seccion-detalles">
                 <h3>Organizador</h3>
                 <div class="info-grid">
@@ -80,25 +157,304 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                         <strong>Título Académico:</strong>
                         <span id="organizador-titulo"></span>
                     </p>
-                </div>
-            </div>
-
-            <div class="seccion-detalles">
-                <h3>Configuración de Evento</h3>
-                <div class="info-grid">
                     <p>
-                        <strong>Nota de Aprobación:</strong>
-                        <span id="evento-nota-aprobacion"></span>
+                        <strong>Email:</strong>
+                        <span id="organizador-email"></span>
                     </p>
                     <p>
-                        <strong>Tiempo de Registro:</strong>
-                        <span id="evento-tiempo-registro"></span>
+                        <strong>Teléfono:</strong>
+                        <span id="organizador-telefono"></span>
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .carta-motivacion-container {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 8px;
+        font-style: italic;
+        line-height: 1.6;
+        text-align: justify;
+        border-left: 4px solid var(--color-fuerte-uta);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    .info-detalle {
+        margin-bottom: 16px;
+    }
+
+    /* Estilos para información de categoría */
+    .info-categoria-contenido {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 8px;
+    }
+
+    .info-item {
+        margin: 6px 0;
+        font-size: 14px;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .info-item strong {
+        color: #1f2937;
+        min-width: 140px;
+    }
+
+    #seccion-info-categoria {
+        border-left: 3px solid #3b82f6;
+        padding-left: 12px;
+        background-color: #f0f9ff;
+        border-radius: 0 6px 6px 0;
+    }
+    .estado-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background-color: #f3f4f6;
+        color: #6b7280;
+        display: inline-block;
+        margin-left: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+        animation: fadeInBadge 0.3s ease-in;
+        white-space: nowrap;
+        flex-shrink: 0;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    @keyframes fadeInBadge {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .estado-badge.abierto {
+        background-color: #dcfce7;
+        color: #166534;
+        box-shadow: 0 1px 3px rgba(34, 197, 94, 0.2);
+    }
+
+    .estado-badge.cerrado {
+        background-color: #fee2e2;
+        color: #991b1b;
+        box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
+    }
+
+    .estado-badge.proximo {
+        background-color: #fef3c7;
+        color: #92400e;
+        box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
+    }
+
+    .estado-badge.en-curso {
+        background-color: #dbeafe;
+        color: #1e40af;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .estado-badge.finalizado {
+        background-color: #f1f5f9;
+        color: #475569;
+        box-shadow: 0 1px 3px rgba(100, 116, 139, 0.2);
+    }
+
+    .seccion-detalles {
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .seccion-detalles:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .seccion-detalles h3 {
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    .info-grid p {
+        margin-bottom: 8px;
+
+        justify-content: space-between;
+        align-items: flex-start;
+        transition: background-color 0.2s ease;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        min-height: 0;
+    }
+
+    .info-grid p:hover {
+        background-color: #f8fafc;
+    }
+
+    .info-grid p strong {
+        color: #374151;
+        min-width: 120px;
+        max-width: 140px;
+        font-weight: 600;
+        flex-shrink: 0;
+        margin-right: 8px;
+    }
+
+    .info-grid p span {
+        text-align: right;
+        flex: 1;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        min-width: 0;
+        max-width: 100%;
+    }
+    .imagen-curso {
+        transition: transform 0.3s ease;
+        cursor: pointer;
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    .imagen-curso:hover {
+        transform: scale(1.02);
+    }
+
+    .centrar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 100%;
+        box-sizing: border-box;
+    } /* Mejorar el contenedor de descripción */
+    .descripcion-completa-container {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .descripcion-completa-container p {
+        line-height: 1.6;
+        text-align: justify;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .descripcion-completa span {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    } /* Mejoras generales para evitar desbordamiento */
+    .modal-contenido {
+        box-sizing: border-box;
+        max-width: 900px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .detalles-reserva {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 0;
+    }
+
+    .seccion-detalles {
+        box-sizing: border-box;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .modal-contenido {
+            width: 95%;
+            margin: 10px auto;
+            max-height: 95vh;
+        }
+
+        .estado-badge {
+            margin-left: 5px;
+            margin-top: 5px;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+        }
+
+        .info-grid p strong {
+            min-width: 100px;
+            max-width: 120px;
+            font-size: 0.9rem;
+        }
+
+        .info-grid p span {
+            font-size: 0.9rem;
+        }
+
+        .seccion-detalles h3 {
+            font-size: 1rem;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .info-grid p {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-grid p strong {
+            min-width: auto;
+            max-width: 100%;
+            margin-bottom: 4px;
+        }
+
+        .info-grid p span {
+            text-align: left;
+            width: 100%;
+        }
+
+        .estado-badge {
+            margin-left: 0;
+            margin-top: 8px;
+        }
+    }
+</style>
 
 <script>
     declare global {
@@ -134,9 +490,7 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         // Actualizar descripción
         const descripcion = modal.querySelector("#evento-descripcion");
         if (descripcion)
-            descripcion.textContent = evento.des_eve || "Sin descripción";
-
-        // Actualizar imagen
+            descripcion.textContent = evento.des_eve || "Sin descripción"; // Actualizar imagen
         const imagen = modal.querySelector(
             "#evento-imagen-detalle",
         ) as HTMLImageElement;
@@ -145,38 +499,110 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
                 evento.img_eve ||
                 "https://via.placeholder.com/300x200?text=Sin+Imagen";
             imagen.alt = `Imagen de ${evento.nom_eve}`;
-        }
 
-        // Información General
+            // Agregar evento de clic para expandir imagen
+            imagen.onclick = () => expandirImagen(imagen);
+            imagen.style.cursor = "pointer";
+            imagen.title = "Clic para ampliar imagen";
+        } // Información General
         const categoria = modal.querySelector("#evento-categoria");
         if (categoria) {
             // Manejar tanto evento.categoria.data como evento.categoria directamente
-            const categoriaData = evento.categoria?.data || evento.categoria;
+            const categoriaData =
+                evento.categorias_eventos ||
+                evento.categoria?.data ||
+                evento.categoria;
             categoria.textContent = categoriaData?.nom_cat || "Sin categoría";
+
+            // Mostrar información adicional de la categoría
+            mostrarInformacionCategoria(categoriaData);
         }
 
         const area = modal.querySelector("#evento-area");
         if (area) area.textContent = evento.are_eve || "No especificada";
+        const precio = modal.querySelector("#evento-precio") as HTMLElement;
+        if (precio) {
+            if (evento.es_gratuito) {
+                precio.textContent = "Gratuito";
+                precio.style.color = "#059669";
+                precio.style.fontWeight = "bold";
+            } else {
+                precio.textContent = `$${Number(evento.precio || 0).toFixed(2)}`;
+            }
+        }
 
-        const precio = modal.querySelector("#evento-precio");
-        if (precio) precio.textContent = `$${evento.precio || 0}`;
+        const esGratuito = modal.querySelector(
+            "#evento-es-gratuito",
+        ) as HTMLElement;
+        if (esGratuito) {
+            esGratuito.textContent = evento.es_gratuito ? "Sí" : "No";
+            esGratuito.style.color = evento.es_gratuito ? "#059669" : "#6b7280";
+        }
+
+        const esDestacado = modal.querySelector(
+            "#evento-es-destacado",
+        ) as HTMLElement;
+        if (esDestacado) {
+            esDestacado.textContent = evento.es_destacado ? "Sí" : "No";
+            esDestacado.style.color = evento.es_destacado
+                ? "#dc2626"
+                : "#6b7280";
+        }
+
+        const requiereCarta = modal.querySelector(
+            "#evento-requiere-carta",
+        ) as HTMLElement;
+        if (requiereCarta) {
+            requiereCarta.textContent = evento.requiere_carta ? "Sí" : "No";
+            requiereCarta.style.color = evento.requiere_carta
+                ? "#dc2626"
+                : "#6b7280";
+        } // Fechas de Inscripción
+        const fechaInicioInscripcion = modal.querySelector(
+            "#evento-fecha-inicio-inscripcion",
+        );
+        if (fechaInicioInscripcion) {
+            if (evento.fec_ini_ins_eve) {
+                const fecha = new Date(evento.fec_ini_ins_eve);
+                const diasRestantes = calcularDiasRestantes(fecha);
+                fechaInicioInscripcion.textContent =
+                    formatearFechaAmigable(fecha) + diasRestantes;
+            } else {
+                fechaInicioInscripcion.textContent = "No especificada";
+            }
+        }
+
+        const fechaFinInscripcion = modal.querySelector(
+            "#evento-fecha-fin-inscripcion",
+        );
+        if (fechaFinInscripcion) {
+            if (evento.fec_fin_ins_eve) {
+                const fecha = new Date(evento.fec_fin_ins_eve);
+                const diasRestantes = calcularDiasRestantes(fecha);
+                fechaFinInscripcion.textContent =
+                    formatearFechaAmigable(fecha) + diasRestantes;
+            } else {
+                fechaFinInscripcion.textContent = "No especificada";
+            }
+        }
 
         // Programación
         const fechaInicio = modal.querySelector("#evento-fecha-inicio");
         if (fechaInicio) {
             const fecha = new Date(evento.fec_ini_eve);
-            fechaInicio.textContent = fecha.toLocaleDateString("es-ES");
+            const diasRestantes = calcularDiasRestantes(fecha);
+            fechaInicio.textContent =
+                formatearFechaAmigable(fecha) + diasRestantes;
         }
 
         const horaInicio = modal.querySelector("#evento-hora-inicio");
         if (horaInicio)
             horaInicio.textContent = evento.hor_ini_eve || "No especificada";
-
         const fechaFin = modal.querySelector("#evento-fecha-fin");
         if (fechaFin) {
             if (evento.fec_fin_eve) {
                 const fecha = new Date(evento.fec_fin_eve);
-                fechaFin.textContent = fecha.toLocaleDateString("es-ES");
+                fechaFin.textContent = formatearFechaAmigable(fecha);
             } else {
                 fechaFin.textContent = "No especificada";
             }
@@ -185,22 +611,77 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         const horaFin = modal.querySelector("#evento-hora-fin");
         if (horaFin)
             horaFin.textContent = evento.hor_fin_eve || "No especificada";
-
         const duracion = modal.querySelector("#evento-duracion");
         if (duracion) {
-            duracion.textContent = evento.dur_eve
-                ? `${evento.dur_eve} horas`
-                : "No especificada";
+            if (evento.dur_eve) {
+                // El campo dur_eve está en horas
+                const horas = evento.dur_eve;
+                if (horas < 24) {
+                    // Menos de 24 horas
+                    const horasRedondeadas = Math.round(horas * 100) / 100;
+                    if (horasRedondeadas === 1) {
+                        duracion.textContent = "1 hora";
+                    } else {
+                        duracion.textContent = `${horasRedondeadas} horas`;
+                    }
+                } else {
+                    // 24 horas o más, mostrar días y horas
+                    const dias = Math.floor(horas / 24);
+                    const horasRestantes = Math.round(horas % 24);
+                    if (horasRestantes === 0) {
+                        duracion.textContent = `${dias} ${dias === 1 ? "día" : "días"}`;
+                    } else {
+                        duracion.textContent = `${dias} ${dias === 1 ? "día" : "días"} ${horasRestantes}h`;
+                    }
+                }
+            } else {
+                duracion.textContent = "No especificada";
+            }
         }
 
         const ubicacion = modal.querySelector("#evento-ubicacion");
         if (ubicacion)
             ubicacion.textContent = evento.ubi_eve || "No especificada";
 
-        // Organizador - Cédula
+        // Asignación
+        const asignacion = modal.querySelector("#evento-asignacion");
+        if (asignacion) {
+            const asignacionData = evento.asignaciones || evento.asignacion;
+            asignacion.textContent = asignacionData?.nom_asi || "General";
+        }
+
+        const asignacionDescripcion = modal.querySelector(
+            "#evento-asignacion-descripcion",
+        );
+        if (asignacionDescripcion) {
+            const asignacionData = evento.asignaciones || evento.asignacion;
+            asignacionDescripcion.textContent =
+                asignacionData?.des_asi || "Sin descripción específica";
+        }
+
+        // Carta de Motivación
+        const seccionCartaMotivacion = modal.querySelector(
+            "#seccion-carta-motivacion",
+        ) as HTMLElement;
+        const cartaMotivacion = modal.querySelector("#evento-carta-motivacion");
+        if (seccionCartaMotivacion && cartaMotivacion) {
+            if (evento.requiere_carta && evento.car_mot_eve) {
+                seccionCartaMotivacion.style.display = "block";
+                cartaMotivacion.textContent = evento.car_mot_eve;
+            } else if (evento.requiere_carta) {
+                seccionCartaMotivacion.style.display = "block";
+                cartaMotivacion.textContent =
+                    "Se requiere carta de motivación pero no se han especificado instrucciones.";
+            } else {
+                seccionCartaMotivacion.style.display = "none";
+            }
+        } // Organizador - Cédula
         const organizadorCedula = modal.querySelector("#organizador-cedula");
         if (organizadorCedula) {
-            const orgData = evento.organizador?.data || evento.organizador;
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
             organizadorCedula.textContent =
                 orgData?.ced_org || "No especificada";
         }
@@ -208,7 +689,10 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
         // Organizador - Nombre
         const organizadorNombre = modal.querySelector("#organizador-nombre");
         if (organizadorNombre) {
-            const orgData = evento.organizador?.data || evento.organizador;
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
             if (orgData) {
                 const nombreCompleto =
                     `${orgData.nom_org1} ${orgData.nom_org2 || ""} ${orgData.ape_org1} ${orgData.ape_org2 || ""}`.trim();
@@ -216,29 +700,249 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
             } else {
                 organizadorNombre.textContent = "No especificado";
             }
-        } // Organizador - Título
+        }
+
+        // Organizador - Título
         const organizadorTitulo = modal.querySelector("#organizador-titulo");
         if (organizadorTitulo) {
-            const orgData = evento.organizador?.data || evento.organizador;
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
             organizadorTitulo.textContent =
                 orgData?.tit_aca_org || "No especificado";
         }
 
-        // Configuración del Evento - Nota de Aprobación
-        const notaAprobacion = modal.querySelector("#evento-nota-aprobacion");
-        if (notaAprobacion) {
-            notaAprobacion.textContent =
-                (evento.not_apr_eve || 7.0).toString() + " puntos";
+        // Organizador - Email
+        const organizadorEmail = modal.querySelector("#organizador-email");
+        if (organizadorEmail) {
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
+            organizadorEmail.textContent =
+                orgData?.ema_org || "No especificado";
         }
 
-        // Configuración del Evento - Tiempo de Registro
-        const tiempoRegistro = modal.querySelector("#evento-tiempo-registro");
-        if (tiempoRegistro) {
-            tiempoRegistro.textContent =
-                evento.tie_reg_asi !== false
-                    ? "Permitir registro en cualquier momento"
-                    : "Restringir tiempo de registro";
+        // Organizador - Teléfono
+        const organizadorTelefono = modal.querySelector(
+            "#organizador-telefono",
+        );
+        if (organizadorTelefono) {
+            const orgData =
+                evento.organizadores ||
+                evento.organizador?.data ||
+                evento.organizador;
+            organizadorTelefono.textContent =
+                orgData?.tel_org || "No especificado";
+        } // Estado del Evento
+        const estadoEventoBadge = modal.querySelector(
+            "#estado-evento-badge",
+        ) as HTMLElement;
+        if (estadoEventoBadge) {
+            const fechaHoy = new Date();
+            const fechaInicio = new Date(evento.fec_ini_eve);
+            const fechaFin = evento.fec_fin_eve
+                ? new Date(evento.fec_fin_eve)
+                : fechaInicio;
+
+            let estado = "";
+            let claseCSS = "";
+
+            if (fechaFin < fechaHoy) {
+                estado = "Finalizado";
+                claseCSS = "finalizado";
+            } else if (fechaInicio <= fechaHoy && fechaFin >= fechaHoy) {
+                estado = "En Curso";
+                claseCSS = "en-curso";
+            } else {
+                estado = "Próximo";
+                claseCSS = "proximo";
+            }
+
+            estadoEventoBadge.textContent = estado;
+            estadoEventoBadge.className = `estado-badge ${claseCSS}`;
         }
+
+        // Estado de Inscripciones
+        const estadoInscripcionesBadge = modal.querySelector(
+            "#estado-inscripciones-badge",
+        ) as HTMLElement;
+        if (estadoInscripcionesBadge) {
+            const fechaHoy = new Date();
+            let estadoInsc = "";
+            let claseCSS = "";
+
+            if (evento.fec_ini_ins_eve && evento.fec_fin_ins_eve) {
+                const fechaInicioInsc = new Date(evento.fec_ini_ins_eve);
+                const fechaFinInsc = new Date(evento.fec_fin_ins_eve);
+
+                if (fechaFinInsc < fechaHoy) {
+                    estadoInsc = "Cerradas";
+                    claseCSS = "cerrado";
+                } else if (
+                    fechaInicioInsc <= fechaHoy &&
+                    fechaFinInsc >= fechaHoy
+                ) {
+                    estadoInsc = "Abiertas";
+                    claseCSS = "abierto";
+                } else if (fechaInicioInsc > fechaHoy) {
+                    estadoInsc = "Próximamente";
+                    claseCSS = "proximo";
+                } else {
+                    estadoInsc = "No definidas";
+                    claseCSS = "";
+                }
+            } else {
+                estadoInsc = "No definidas";
+                claseCSS = "";
+            }
+
+            estadoInscripcionesBadge.textContent = estadoInsc;
+            estadoInscripcionesBadge.className = `estado-badge ${claseCSS}`;
+        }
+    }
+
+    // Función para mostrar información de categoría
+    function mostrarInformacionCategoria(categoriaData: any) {
+        const seccionInfoCategoria = document.getElementById(
+            "seccion-info-categoria",
+        ) as HTMLElement;
+        const infoPuntajeDetalle = document.getElementById(
+            "info-puntaje-detalle",
+        ) as HTMLElement;
+        const infoAsistenciaDetalle = document.getElementById(
+            "info-asistencia-detalle",
+        ) as HTMLElement;
+        const infoCertificadoDetalle = document.getElementById(
+            "info-certificado-detalle",
+        ) as HTMLElement;
+        const valorPuntajeDetalle = document.getElementById(
+            "valor-puntaje-detalle",
+        ) as HTMLElement;
+        const valorPorcentajeAsistenciaDetalle = document.getElementById(
+            "valor-porcentaje-asistencia-detalle",
+        ) as HTMLElement;
+
+        if (!categoriaData) {
+            if (seccionInfoCategoria)
+                seccionInfoCategoria.style.display = "none";
+            return;
+        }
+
+        // Obtener datos de la categoría
+        const puntajeApr = categoriaData.pun_apr_cat;
+        const porcentajeAsistencia = categoriaData.asi_cat;
+        const requierePuntaje = categoriaData.requiere_puntaje === true;
+        const requiereAsistencia = categoriaData.requiere_asistencia === true;
+        const brindaCertificado = categoriaData.brinda_certificado === true;
+
+        // Verificar si hay alguna información para mostrar
+        const tieneInfoPuntaje = requierePuntaje && puntajeApr;
+        const tieneInfoAsistencia = requiereAsistencia;
+        const tieneInfoCertificado = brindaCertificado;
+
+        const hayInformacion =
+            tieneInfoPuntaje || tieneInfoAsistencia || tieneInfoCertificado;
+
+        // Solo mostrar el contenedor si hay información que mostrar
+        if (seccionInfoCategoria) {
+            if (hayInformacion) {
+                seccionInfoCategoria.style.display = "block";
+
+                // Mostrar/ocultar información según los atributos
+                if (infoPuntajeDetalle && valorPuntajeDetalle) {
+                    if (tieneInfoPuntaje) {
+                        infoPuntajeDetalle.style.display = "block";
+                        valorPuntajeDetalle.textContent = puntajeApr;
+                    } else {
+                        infoPuntajeDetalle.style.display = "none";
+                    }
+                }
+
+                if (infoAsistenciaDetalle && valorPorcentajeAsistenciaDetalle) {
+                    if (tieneInfoAsistencia) {
+                        infoAsistenciaDetalle.style.display = "block";
+                        // Mostrar el porcentaje de asistencia si está disponible, sino un valor por defecto
+                        valorPorcentajeAsistenciaDetalle.textContent =
+                            porcentajeAsistencia || "80";
+                    } else {
+                        infoAsistenciaDetalle.style.display = "none";
+                    }
+                }
+
+                if (infoCertificadoDetalle) {
+                    if (tieneInfoCertificado) {
+                        infoCertificadoDetalle.style.display = "block";
+                    } else {
+                        infoCertificadoDetalle.style.display = "none";
+                    }
+                }
+            } else {
+                // Si no hay información, ocultar todo el contenedor
+                seccionInfoCategoria.style.display = "none";
+            }
+        }
+
+        console.log("📊 Información de categoría en detalles actualizada:", {
+            requierePuntaje,
+            requiereAsistencia,
+            brindaCertificado,
+            puntajeApr,
+            porcentajeAsistencia,
+            hayInformacion,
+            tieneInfoPuntaje,
+            tieneInfoAsistencia,
+            tieneInfoCertificado,
+        });
+    }
+
+    // Función para expandir imagen
+    function expandirImagen(img: HTMLImageElement) {
+        if (!img.src || img.src.includes("placeholder")) return;
+
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        `;
+
+        const expandedImg = document.createElement("img");
+        expandedImg.src = img.src;
+        expandedImg.alt = img.alt;
+        expandedImg.style.cssText = `
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        `;
+
+        overlay.appendChild(expandedImg);
+        document.body.appendChild(overlay);
+
+        // Cerrar al hacer clic
+        overlay.addEventListener("click", () => {
+            document.body.removeChild(overlay);
+        });
+
+        // Cerrar con Escape
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                document.body.removeChild(overlay);
+                document.removeEventListener("keydown", handleEscape);
+            }
+        };
+        document.addEventListener("keydown", handleEscape);
     } // Cerrar modal al hacer clic fuera de él
     window.onclick = function (event) {
         const modal = document.getElementById("modalDetallesReserva");
@@ -248,4 +952,27 @@ import "../../../styles/Admin/ModalDetallesEvento.css";
     }; // Exponer funciones globalmente
     window.cerrarModalDetallesEvento = cerrarModalDetallesEvento;
     window.abrirModalDetallesEvento = abrirModalDetallesEvento;
+
+    // Función helper para formatear fechas de manera más amigable
+    function formatearFechaAmigable(fecha: Date): string {
+        const opciones: Intl.DateTimeFormatOptions = {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        };
+        return fecha.toLocaleDateString("es-ES", opciones);
+    }
+
+    // Función helper para calcular días restantes
+    function calcularDiasRestantes(fecha: Date): string {
+        const hoy = new Date();
+        const diferencia = fecha.getTime() - hoy.getTime();
+        const dias = Math.ceil(diferencia / (1000 * 3600 * 24));
+
+        if (dias < 0) return "";
+        if (dias === 0) return " (Hoy)";
+        if (dias === 1) return " (Mañana)";
+        return ` (En ${dias} días)`;
+    }
 </script>

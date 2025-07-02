@@ -1,12 +1,13 @@
 ---
+import "../../styles/global.css";
 import Header from "@components/Header.astro";
 import MenuAdmin from "../../components/MenuAdministrador.astro";
 import Layout from "../../layouts/Layout.astro";
 import ModalDetallesEvento from "../../components/Admin/EventosCRUD/ModalDetallesEvento.astro";
 import ModalModificarEvento from "../../components/Admin/EventosCRUD/ModalModificarEvento.astro";
 import ModalNuevoEvento from "../../components/Admin/EventosCRUD/ModalNuevoEvento.astro";
-import ModalAsignaciones from "../../components/Admin/EventosCRUD/ModalAsignaciones.astro";
 import "../../styles/Admin/EventosCRUD.css";
+
 import { actions } from "astro:actions";
 
 const searchParams = Astro.url.searchParams;
@@ -18,8 +19,8 @@ const { data, error } = await Astro.callAction(actions.getEventos, {
 });
 
 // Obtener categorías para el filtro
-const { data: categoriasData } = await Astro.callAction(actions.getCategorias, {});
-const { data: organizadoresData } = await Astro.callAction(actions.getOrganizadores, {});
+const { data: categoriasData } = await Astro.callAction(actions.getAllCategorias, {});
+const { data: organizadoresData } = await Astro.callAction(actions.getOrganizadoresCR, {});
 
 if (error) {
     console.error("Error al obtener eventos:", error);
@@ -29,26 +30,19 @@ const eventos = data?.eventos || [];
 const categorias = categoriasData?.categorias || [];
 const organizadores = organizadoresData?.organizadores || [];
 
-// Obtener información completa de cada evento
-const eventosCompletos = await Promise.all(
-    eventos.map(async (evento: any) => {
-        const organizador = await Astro.callAction(
-            actions.getOrganizadorByEvento,
-            { id_evento: evento.id_eve }
-        );
+// Los eventos ya vienen con la información completa desde la acción getEventos
+const eventosCompletos = eventos;
 
-        const categoria = await Astro.callAction(
-            actions.getCategoriaById,
-            { id_categoria: evento.id_cat_eve }
-        );
-
-        return {
-            ...evento,
-            organizador: organizador.data,
-            categoria: categoria.data,
-        };
-    })
-);
+// Calcular estadísticas básicas
+const totalEventos = eventosCompletos.length;
+const eventosGratuitos = eventosCompletos.filter((e: any) => e.es_gratuito).length;
+const eventosPagos = totalEventos - eventosGratuitos;
+const fechaHoy = new Date();
+const eventosActivos = eventosCompletos.filter((e: any) => {
+    const fechaInicio = new Date(e.fec_ini_eve);
+    const fechaFin = e.fec_fin_eve ? new Date(e.fec_fin_eve) : fechaInicio;
+    return fechaInicio <= fechaHoy && fechaFin >= fechaHoy;
+}).length;
 
 ---
 
@@ -57,30 +51,33 @@ const eventosCompletos = await Promise.all(
         <Header />
         <MenuAdmin />        <ModalDetallesEvento />
         <ModalModificarEvento categorias={categorias} organizadores={organizadores} />
-        <ModalNuevoEvento categorias={categorias} organizadores={organizadores} />
-        <ModalAsignaciones />
+        <ModalNuevoEvento categorias={categorias} organizadores={organizadores} /><main class="registros">
+       
 
-        <main class="registros">
             <div class="registros-grid">
                 <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Eventos                        <select
-                            id="filtroCategoria"
-                            class="select-estado"
-                            onchange="window.location.href = `?categoria=${this.value}`"
-                        >
-                            <option value="" selected={!categoriaFiltro}>
-                                Todos los eventos
-                            </option>
-                            {categorias.map((categoria: any) => (
-                                <option
-                                    value={categoria.nom_cat}
-                                    selected={categoriaFiltro === categoria.nom_cat}
-                                >
-                                    {categoria.nom_cat}
+                        Eventos
+                        <form id="formFiltroCategoria" method="get" style="display:inline;">
+                            <select
+                                id="filtroCategoria"
+                                name="categoria"
+                                class="select-estado"
+                                onchange="this.form.submit()"
+                            >
+                                <option value="" selected={!categoriaFiltro}>
+                                    Todos los eventos
                                 </option>
-                            ))}
-                        </select>
+                                {categorias.map((categoria: any) => (
+                                    <option
+                                        value={categoria.id_cat}
+                                        selected={categoriaFiltro === categoria.id_cat}
+                                    >
+                                        {categoria.nom_cat}
+                                    </option>
+                                ))}
+                            </select>
+                        </form>
                     </div>
                     <div class="registros-superior-derecho">
                         <a
@@ -93,9 +90,7 @@ const eventosCompletos = await Promise.all(
                             <p class="anadir-icon">+</p>
                         </a>
                     </div>
-                </div>
-
-                <div class="registros-inferior-titulos">
+                </div>                <div class="registros-inferior-titulos">
                     <div class="registro-fila">
                         <div class="parte-izquierda-registro-encabezado">
                             Nombre
@@ -104,44 +99,61 @@ const eventosCompletos = await Promise.all(
                             Categoría
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
-                            Área
+                            Cupo Máximo
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
+                            Organizador
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado cupo-centro">
                             Fecha Inicio
                         </div>
+                        <div class="parte-izquierda-registro-encabezado cupo-centro">
+                            Precio
+                        </div>
                         <div class="parte-izquierda-registro-encabezado">
-                            Ubicación
+                            Asignación
                         </div>
                         <div class="parte-derecha-registro-encabezado">
                             Opciones
                         </div>
                     </div>
-                </div>
-                <div class="registros-inferior">
+                </div><div class="registros-inferior">
                     {
-                        eventosCompletos.map((evento) => (
+                        eventosCompletos.map((evento: any) => (
                             <input
                                 type="hidden"
                                 name="evento"
                                 value={JSON.stringify(evento)}
-                            />
-                            <div class="registro-fila">
+                            />                            <div class="registro-fila">
                                 <div class="parte-izquierda-registro-fila">
                                     {evento.nom_eve}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.categoria?.data?.nom_cat || "N/A"}
+                                    {evento.categorias_eventos?.nom_cat || "N/A"}
+                                </div>
+                                <div class="parte-izquierda-registro-fila cupo-centro">
+                                    {evento.cup_max ?? "-"}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.are_eve || "N/A"}
+                                    {evento.organizadores ? 
+                                        `${evento.organizadores.tit_aca_org} ${evento.organizadores.nom_org1} ${evento.organizadores.ape_org1}` 
+                                        : "N/A"}
                                 </div>
-                                <div class="parte-izquierda-registro-fila">
+                                <div class="parte-izquierda-registro-fila cupo-centro">
                                     {new Date(evento.fec_ini_eve)
-                                        .toISOString()
-                                        .split("T")[0]}
+                                        .toLocaleDateString('es-ES', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit'
+                                        })}
+                                </div>
+                                <div class="parte-izquierda-registro-fila cupo-centro">
+                                    {evento.es_gratuito 
+                                        ? "Gratuito" 
+                                        : `$${Number(evento.precio || 0).toFixed(2)}`}
                                 </div>
                                 <div class="parte-izquierda-registro-fila">
-                                    {evento.ubi_eve}
+                                    {evento.asignaciones?.nom_asi || "General"}
                                 </div>                                <div class="registro-opciones">
                                     <button
                                         title="Detalles"
@@ -152,17 +164,8 @@ const eventosCompletos = await Promise.all(
                                             alt="boton mostrar detalles"
                                             class="imagen-boton-registro"
                                         />
-                                    </button>                                    
-                                    <button
-                                        title="Eliminar"
-                                        onclick={`eliminarEvento('${evento.id_eve}')`}
-                                    >
-                                        <img
-                                            src="/img/CRUD/eliminar-registro.svg"
-                                            alt="boton eliminar registro"
-                                            class="imagen-boton-registro"
-                                        />
                                     </button>
+                                    
                                     <button
                                         title="Modificar"
                                         onclick={`window.abrirModalModificarEvento('${evento.id_eve}')`}
@@ -173,6 +176,18 @@ const eventosCompletos = await Promise.all(
                                             class="imagen-boton-modificar"
                                         />
                                     </button>
+                                    
+                                    <button
+                                        title="Eliminar"
+                                        onclick={`eliminarEvento('${evento.id_eve}')`}
+                                        style="background-color: #dc2626;"
+                                    >
+                                        <img
+                                            src="/img/CRUD/eliminar-registro.svg"
+                                            alt="boton eliminar registro"
+                                            class="imagen-boton-registro"
+                                        />
+                                    </button>
                                 </div>
                             </div>
                         ))
@@ -181,42 +196,45 @@ const eventosCompletos = await Promise.all(
             </div>
         </main>
 
+        <style>
+            .cupo-centro {
+                text-align: center;
+            }
+            .registro-opciones button {
+                margin: 0 2px;
+                border-radius: 4px;
+                transition: all 0.2s ease;
+            }
+            
+            .registro-opciones button:hover {
+                transform: scale(1.05);
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            
+            .parte-izquierda-registro-fila {
+                font-size: 0.9rem;
+                padding: 8px 4px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .estado-evento {
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: bold;
+                color: white;
+            }
+            
+            .evento-activo { background-color: #059669; }
+            .evento-finalizado { background-color: #6b7280; }
+            .evento-proximo { background-color: #3b82f6; }
+        </style>
+
         <script>
             import { actions } from "astro:actions";
-            import Swal from "sweetalert2";
-
-            // Interfaces para tipado
-            interface Organizador {
-                ced_org: string;
-                nom_org1: string;
-                nom_org2?: string;
-                ape_org1: string;
-                ape_org2: string;
-                tit_aca_org: string;
-            }
-
-            interface Categoria {
-                id_cat: string;
-                nom_cat: string;
-                des_cat: string;
-            }
-
-            interface Evento {
-                id_eve: string;
-                nom_eve: string;
-                des_eve: string;
-                fec_ini_eve: string;
-                fec_fin_eve?: string;
-                hor_ini_eve: string;
-                hor_fin_eve?: string;
-                dur_eve?: number;
-                are_eve?: string;
-                ubi_eve: string;
-                img_eve?: string;
-                precio: number;
-                organizador?: Organizador;
-                categoria?: Categoria;
-            }
+            import Swal from "sweetalert2";            // Interfaces para tipado simplificadas
 
             async function eliminarEvento(eventoId: string) {
                 try {
@@ -267,38 +285,103 @@ const eventosCompletos = await Promise.all(
                 const eventos = Array.from(document.querySelectorAll('input[name="evento"]'))
                     .map(input => JSON.parse((input as HTMLInputElement).value));
                 
-                const evento = eventos.find((e: Evento) => e.id_eve === eventoId);
+                const evento = eventos.find((e: any) => e.id_eve === eventoId);
                 
                 if (!evento) {
                     console.error('Evento no encontrado:', eventoId);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo encontrar la información del evento',
+                        confirmButtonColor: '#dc2626'
+                    });
                     return;
                 }
 
-                // Llamar directamente a la función de abrirModalDetallesEvento del modal
+                // Preparar datos del evento para el modal
+                const eventoDetallado = {
+                    ...evento,
+                    // Formatear fechas para mejor visualización
+                    fec_ini_eve_formatted: new Date(evento.fec_ini_eve).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }),
+                    fec_fin_eve_formatted: evento.fec_fin_eve ? new Date(evento.fec_fin_eve).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }) : 'No especificada',
+                    // Formatear precio
+                    precio_formatted: evento.es_gratuito ? 'Gratuito' : `$${Number(evento.precio || 0).toFixed(2)}`,
+                    // Formatear organizador
+                    organizador_completo: evento.organizadores ? 
+                        `${evento.organizadores.tit_aca_org} ${evento.organizadores.nom_org1} ${evento.organizadores.nom_org2 || ''} ${evento.organizadores.ape_org1} ${evento.organizadores.ape_org2 || ''}`.trim()
+                        : 'No asignado'
+                };
+
+                // Llamar a la función del modal
                 if (window.abrirModalDetallesEvento) {
-                    window.abrirModalDetallesEvento(evento);
+                    window.abrirModalDetallesEvento(eventoDetallado);
                 } else {
                     console.error('La función abrirModalDetallesEvento no está disponible');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo abrir el modal de detalles',
+                        confirmButtonColor: '#dc2626'
+                    });
                 }
             }            function abrirModalAsignacionesEvento(eventoId: string, nombreEvento: string) {
-                // Verificar si la función del modal está disponible
-                if (window.abrirModalAsignaciones) {
-                    window.abrirModalAsignaciones(eventoId, nombreEvento);
-                } else {
-                    console.error('La función abrirModalAsignaciones no está disponible');
-                }
-            }// Hacer funciones disponibles globalmente
+                // Función removida - ya no se usa gestión de asignaciones desde eventos
+                console.log('Función de asignaciones removida');
+            }            // Hacer funciones disponibles globalmente
             declare global {
                 interface Window {
                     eliminarEvento: (eventoId: string) => Promise<void>;
                     mostrarDetallesEvento: (eventoId: string) => void;
-                    abrirModalAsignaciones: (eventoId: string, nombreEvento: string) => Promise<void>;
-                    abrirModalAsignacionesEvento: (eventoId: string, nombreEvento: string) => void;
+                    abrirModalNuevoEvento: () => void;
+                    abrirModalModificarEvento: (eventoId: string) => void;
+                    abrirModalDetallesEvento: (evento: any) => void;
+                    refrescarPagina: () => void;
+                    mostrarNotificacionExito: (mensaje: string) => void;
+                    mostrarNotificacionError: (mensaje: string) => void;
                 }
-            }            window.eliminarEvento = eliminarEvento;
+            }
+
+            window.eliminarEvento = eliminarEvento;
             window.mostrarDetallesEvento = mostrarDetallesEvento;
-            window.abrirModalAsignacionesEvento = abrirModalAsignacionesEvento;
+            window.refrescarPagina = refrescarPagina;
+            window.mostrarNotificacionExito = mostrarNotificacionExito;
+            window.mostrarNotificacionError = mostrarNotificacionError;
             // La función abrirModalAsignaciones se expone desde el componente ModalAsignaciones
+            
+            // Función para refrescar la página después de operaciones exitosas
+            function refrescarPagina() {
+                window.location.reload();
+            }
+
+            // Función para mostrar notificaciones de éxito
+            function mostrarNotificacionExito(mensaje: string) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: mensaje,
+                    confirmButtonColor: '#059669',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }
+
+            // Función para mostrar notificaciones de error
+            function mostrarNotificacionError(mensaje: string) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: mensaje,
+                    confirmButtonColor: '#dc2626'
+                });
+            }
         </script>
     </body>
 </Layout>

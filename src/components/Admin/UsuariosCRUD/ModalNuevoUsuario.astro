@@ -21,14 +21,59 @@ const carreras = carrerasData?.carreras || [];
                 enctype="multipart/form-data"
             >
                 <div class="contenedor-superior">
-                    <p class="texto-centrado texto-roja">Información General</p>
+                    <!-- Vista previa de imagen de usuario -->
+                    <div
+                        class="contenedor-imagen-usuario"
+                        id="contenedor-imagen-usuario"
+                        style="display: none;"
+                    >
+                        <img
+                            id="imagen-usuario-preview"
+                            src=""
+                            alt="Vista previa del usuario"
+                            class="imagen-usuario-preview"
+                        />
+                        <button
+                            type="button"
+                            class="boton-quitar-imagen"
+                            onclick="quitarImagenPreview()"
+                        >
+                            <span>&times;</span>
+                        </button>
+                    </div>
+
+                    <p class="texto-centrado texto-roja">
+                        Información Personal
+                    </p>
+
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Cédula</p>
+                        <p class="texto-dato">
+                            Correo Electrónico <span style="color: red;">*</span
+                            >
+                        </p>
+                        <div class="contenedor-input">
+                            <input
+                                type="email"
+                                class="input-dato"
+                                name="cor_cue"
+                                required
+                                maxlength="150"
+                                placeholder="ejemplo@uta.edu.ec"
+                                title="Ingrese un correo electrónico válido"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Cédula <span style="color: red;">*</span>
+                        </p>
                         <div class="contenedor-input">
                             <input
                                 type="text"
                                 class="input-dato"
                                 name="ced_usu"
+                                id="cedula-input"
                                 required
                                 maxlength="10"
                                 pattern="[0-9]{10}"
@@ -37,15 +82,41 @@ const carreras = carrerasData?.carreras || [];
                         </div>
                     </div>
 
+                    <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Contraseña <span style="color: red;">*</span>
+                        </p>
+                        <div class="contenedor-input">
+                            <input
+                                type="password"
+                                class="input-dato"
+                                name="cont_cuenta"
+                                id="password-input"
+                                required
+                                title="La contraseña debe cumplir con los criterios de abajo."
+                            />
+                        </div>
+                        <div id="password-criteria" class="password-criteria-container">
+                            <p id="length-check" class="invalid">❌ Mínimo 6 caracteres</p>
+                            <p id="lower-check" class="invalid">❌ Una letra minúscula (a-z)</p>
+                            <p id="upper-check" class="invalid">❌ Una letra mayúscula (A-Z)</p>
+                            <p id="special-check" class="invalid">❌ Un caracter especial (!@#$%^&*_=+-)</p>
+                        </div>
+                    </div>
+
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Primer Nombre</p>
+                            <p class="texto-dato">
+                                Primer Nombre <span style="color: red;">*</span>
+                            </p>
                             <div class="contenedor-input">
                                 <input
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu1"
+                                    id="nombre1-input"
                                     required
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -57,6 +128,8 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="nom_usu2"
+                                    id="nombre2-input"
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -64,13 +137,19 @@ const carreras = carrerasData?.carreras || [];
 
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Primer Apellido</p>
+                            <p class="texto-dato">
+                                Primer Apellido <span style="color: red;"
+                                    >*</span
+                                >
+                            </p>
                             <div class="contenedor-input">
                                 <input
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu1"
+                                    id="apellido1-input"
                                     required
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
@@ -82,17 +161,25 @@ const carreras = carrerasData?.carreras || [];
                                     type="text"
                                     class="input-dato"
                                     name="ape_usu2"
+                                    id="apellido2-input"
+                                    maxlength="20"
                                 />
                             </div>
                         </div>
                     </div>
+
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Fecha de Nacimiento</p>
+                        <p class="texto-dato">
+                            Fecha de Nacimiento <span style="color: red;"
+                                >*</span
+                            >
+                        </p>
                         <div class="contenedor-input">
                             <input
                                 type="date"
                                 class="input-dato"
                                 name="fec_nac_usu"
+                                id="fecha-nacimiento-input"
                                 required
                             />
                         </div>
@@ -105,24 +192,122 @@ const carreras = carrerasData?.carreras || [];
                                 type="tel"
                                 class="input-dato"
                                 name="num_tel_usu"
+                                id="telefono-input"
                                 pattern="[0-9]{10}"
-                                title="Ingrese un número de teléfono válido"
+                                maxlength="10"
+                                title="Ingrese un número de teléfono válido de 10 dígitos"
                             />
                         </div>
                     </div>
+
+                    <p
+                        class="texto-centrado texto-roja"
+                        style="margin-top: 20px;"
+                    >
+                        Información Académica
+                    </p>
+
                     <div class="contenedor-dato">
+                        <p class="texto-dato">
+                            Rol <span style="color: red;">*</span>
+                        </p>
+                        <div class="contenedor-input">
+                            <select
+                                class="input-dato"
+                                name="rol_cue"
+                                id="rol-select"
+                                required
+                            >
+                                <option value="">Seleccione un rol</option>
+                                <option value="ESTUDIANTE">Estudiante</option>
+                                <option value="ADMINISTRADOR"
+                                    >Administrador</option
+                                >
+                                <option value="USUARIO">Usuario</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div
+                        class="contenedor-dato"
+                        id="contenedor-carrera"
+                        style="display: none;"
+                    >
                         <p class="texto-dato">Carrera</p>
                         <div class="contenedor-input">
-                            <select class="input-dato" name="id_car_per">
-                                <option value="">Seleccionar carrera</option>
+                            <select
+                                class="input-dato"
+                                name="id_car_per"
+                                id="carrera-select"
+                            >
+                                <option value=""
+                                    >Seleccionar carrera (opcional)</option
+                                >
                                 {
                                     carreras.map((carrera: any) => (
                                         <option value={carrera.id_car}>
-                                            {carrera.nom_car}
+                                                                               
+                                                    {carrera.nom_car}           
+                                                                           {" "}
+                                            {carrera.cod_car
+                                                ? ` (${carrera.cod_car})`
+                                                : ""}
+                                                                               
+                                               {" "}
                                         </option>
                                     ))
                                 }
                             </select>
+                        </div>
+                    </div>
+
+                    <!-- <p
+                        class="texto-centrado texto-roja"
+                        style="margin-top: 20px;"
+                    >
+                        Documentos y Enlaces (Opcional)
+                    </p> -->
+
+                    <div style="display: none;">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Enlace Cédula</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="url"
+                                    class="input-dato"
+                                    name="enl_ced_cue"
+                                    placeholder="URL del documento de cédula"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Enlace Matrícula</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="url"
+                                    class="input-dato"
+                                    name="enl_mat_cue"
+                                    placeholder="URL del documento de matrícula"
+                                />
+                            </div>
+                        </div>
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Imagen de Perfil</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="url"
+                                    class="input-dato"
+                                    name="img_user"
+                                    id="input-imagen-usuario"
+                                    placeholder="URL de la imagen de perfil"
+                                    onblur="mostrarVistaPrevia(this.value)"
+                                />
+                            </div>
+                            <small style="color: #6b7280; font-size: 12px;">
+                                La imagen se mostrará arriba cuando ingreses una
+                                URL válida
+                            </small>
                         </div>
                     </div>
 
@@ -131,6 +316,7 @@ const carreras = carrerasData?.carreras || [];
                             type="button"
                             class="boton-modificar"
                             onclick="cerrarModalNuevoUsuario()"
+                            style="background-color: #6b7280;"
                         >
                             Cancelar
                         </button>
@@ -144,14 +330,245 @@ const carreras = carrerasData?.carreras || [];
     </div>
 </div>
 
-<script>
-    import { actions } from "astro:actions";
-    import Swal from "sweetalert2";
+<style>
 
+    .password-criteria-container {
+        opacity: 0;
+        max-height: 0; /* El elemento no tiene altura cuando está oculto */
+        overflow: hidden; /* Muy importante para que el contenido no se salga */
+        
+        /* La transición ahora animará la altura y la opacidad */
+        transition: max-height 0.4s ease-out, opacity 0.3s ease-in;
+
+        margin-top: 8px;
+        padding-left: 5px;
+    }
+
+    /* Estado visible: Se expande a su altura máxima y se vuelve opaco */
+    .password-criteria-container.visible {
+        opacity: 1;
+        max-height: 10rem; /* Una altura suficiente para que quepa todo el texto (1rem ≈ 16px) */
+        transition: max-height 0.4s ease-in, opacity 0.3s ease-out 0.1s; /* Se añade un pequeño retraso a la opacidad */
+    }
+
+    .password-criteria-container p {
+        font-size: 13px;
+        margin: 4px 0;
+        transition: color 0.3s ease;
+    }
+
+    .password-criteria-container p.invalid {
+        color: #9ca3af; /* Un gris para lo que falta */
+    }
+
+    .password-criteria-container p.valid {
+        color: #059669; /* Verde para lo cumplido */
+        font-weight: 500;
+    }
+
+    /* Estilos específicos para el modal de nuevo usuario */
+    .modal-contenido {
+        max-height: 90vh;
+        overflow-y: auto;
+        width: 90%;
+        max-width: 600px;
+    }
+    .contenedor-superior {
+        padding: 20px;
+    }
+
+    /* Estilos para vista previa de imagen de usuario */
+    .contenedor-imagen-usuario {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px dashed #b01025;
+    }
+
+    .imagen-usuario-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #b01025;
+        box-shadow: 0 4px 12px rgba(176, 16, 37, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .imagen-usuario-preview:hover {
+        transform: scale(1.05);
+    }
+
+    .boton-quitar-imagen {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .boton-quitar-imagen:hover {
+        background-color: #b91c1c;
+        transform: scale(1.1);
+    }
+
+    .boton-quitar-imagen span {
+        line-height: 1;
+    }
+
+    .texto-centrado.texto-roja {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 20px 0 15px 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #b01025, #d42c44);
+        color: white;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .contenedor-dato {
+        margin-bottom: 15px;
+    }
+
+    .texto-dato {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #374151;
+    }
+
+    .input-dato,
+    select.input-dato {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+    }
+
+    .input-dato:focus,
+    select.input-dato:focus {
+        outline: none;
+        border-color: #b01025;
+        box-shadow: 0 0 0 3px rgba(176, 16, 37, 0.1);
+    }
+
+    .contenedor-nombre {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .contenedor-boton-modificar {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .boton-modificar {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 120px;
+    }
+
+    .boton-modificar[type="submit"] {
+        background-color: #b01025;
+        color: white;
+    }
+
+    .boton-modificar[type="submit"]:hover {
+        background-color: #8e0d1f;
+        transform: translateY(-1px);
+    }
+
+    .boton-modificar:not([type="submit"]) {
+        background-color: #6b7280;
+        color: white;
+    }
+
+    .boton-modificar:not([type="submit"]):hover {
+        background-color: #4b5563;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .modal-contenido {
+            width: 95%;
+            margin: 10px;
+        }
+
+        .contenedor-nombre {
+            grid-template-columns: 1fr;
+        }
+
+        .contenedor-boton-modificar {
+            flex-direction: column;
+        }
+
+        .texto-centrado.texto-roja {
+            font-size: 16px;
+            margin: 15px 0 10px 0;
+            padding: 8px;
+        }
+    }
+
+    /* Validación visual */
+    .input-dato:invalid {
+        border-color: #dc2626;
+    }
+
+    .input-dato:valid {
+        border-color: #56001a;
+    }
+
+    /* Estilos para campos requeridos */
+    span[style*="color: red"] {
+        font-weight: bold;
+    }
+
+    /* Mejorar el estilo de los selects */
+    select.input-dato {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 8px center;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-right: 40px;
+        appearance: none;
+    }
+</style>
+
+<script>
     declare global {
         interface Window {
             abrirModalNuevoUsuario: () => void;
             cerrarModalNuevoUsuario: () => void;
+            mostrarVistaPrevia: (url: string) => void;
+            quitarImagenPreview: () => void;
         }
     }
 
@@ -172,39 +589,305 @@ const carreras = carrerasData?.carreras || [];
         if (modal && form) {
             modal.style.display = "none";
             form.reset();
+            // Ocultar vista previa de imagen al cerrar
+            quitarImagenPreview();
         }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById(
-            "formulario-nuevo-usuario",
-        ) as HTMLFormElement;
+    function mostrarVistaPrevia(url: string): void {
+        const contenedorImagen = document.getElementById(
+            "contenedor-imagen-usuario",
+        );
+        const imagenPreview = document.getElementById(
+            "imagen-usuario-preview",
+        ) as HTMLImageElement;
 
-        // Manejar envío del formulario
+        if (!url || url.trim() === "") {
+            quitarImagenPreview();
+            return;
+        }
+
+        // Validar que sea una URL válida
+        try {
+            new URL(url);
+        } catch {
+            quitarImagenPreview();
+            return;
+        }
+
+        if (contenedorImagen && imagenPreview) {
+            imagenPreview.src = url;
+            imagenPreview.onload = () => {
+                contenedorImagen.style.display = "flex";
+            };
+            imagenPreview.onerror = () => {
+                quitarImagenPreview();
+                console.warn("No se pudo cargar la imagen:", url);
+            };
+        }
+    }
+
+    function quitarImagenPreview(): void {
+        const contenedorImagen = document.getElementById(
+            "contenedor-imagen-usuario",
+        );
+        const imagenPreview = document.getElementById(
+            "imagen-usuario-preview",
+        ) as HTMLImageElement;
+        const inputImagen = document.getElementById(
+            "input-imagen-usuario",
+        ) as HTMLInputElement;
+
+        if (contenedorImagen) {
+            contenedorImagen.style.display = "none";
+        }
+        if (imagenPreview) {
+            imagenPreview.src = "";
+        }
+        if (inputImagen) {
+            inputImagen.value = "";
+        }
+    }
+
+    function validarCedula(cedula: string): boolean {
+        if (!/^\d{10}$/.test(cedula)) return false;
+        const provincia = parseInt(cedula.substring(0, 2), 10);
+        if (provincia < 1 || provincia > 24) return false;
+
+        const digitos = cedula.split("").map(Number);
+        const digitoVerificador = digitos[9];
+        let suma = 0;
+
+        for (let i = 0; i < 9; i++) {
+            let val = digitos[i];
+            if (i % 2 === 0) {
+                val *= 2;
+                if (val > 9) {
+                    val -= 9;
+                }
+            }
+            suma += val;
+        }
+
+        const decenaSuperior = Math.ceil(suma / 10) * 10;
+        let digitoCalculado = decenaSuperior - suma;
+        if (digitoCalculado === 10) {
+            digitoCalculado = 0;
+        }
+
+        return digitoVerificador === digitoCalculado;
+    }
+
+document.addEventListener("DOMContentLoaded", () => {
+        // --- SELECCIÓN DE ELEMENTOS ---
+        const form = document.getElementById("formulario-nuevo-usuario") as HTMLFormElement;
+        const cedulaInput = document.getElementById("cedula-input") as HTMLInputElement;
+        const telefonoInput = document.getElementById("telefono-input") as HTMLInputElement;
+        const nombre1Input = document.getElementById("nombre1-input") as HTMLInputElement;
+        const nombre2Input = document.getElementById("nombre2-input") as HTMLInputElement;
+        const apellido1Input = document.getElementById("apellido1-input") as HTMLInputElement;
+        const apellido2Input = document.getElementById("apellido2-input") as HTMLInputElement;
+        const fechaNacimientoInput = document.getElementById("fecha-nacimiento-input") as HTMLInputElement;
+        const rolSelect = document.getElementById("rol-select") as HTMLSelectElement;
+        const carreraContainer = document.getElementById("contenedor-carrera") as HTMLDivElement;
+
+        const passwordInput = document.getElementById("password-input") as HTMLInputElement;
+        const passwordCriteriaContainer = document.getElementById("password-criteria") as HTMLDivElement;
+
+        const lengthCheck = document.getElementById("length-check") as HTMLParagraphElement;
+        const lowerCheck = document.getElementById("lower-check") as HTMLParagraphElement;
+        const upperCheck = document.getElementById("upper-check") as HTMLParagraphElement;
+        const specialCheck = document.getElementById("special-check") as HTMLParagraphElement;
+        
+        if (passwordInput && passwordCriteriaContainer) {
+            passwordInput.addEventListener('focus', () => {
+                passwordCriteriaContainer.classList.add('visible');
+            });
+
+            // Oculta la lista cuando el usuario sale del campo
+            passwordInput.addEventListener('blur', () => {
+                if (passwordInput.value === '' || passwordIsValid) {
+                    passwordCriteriaContainer.classList.remove('visible');
+                }
+            });
+        }
+
+        // --- VALIDACIÓN DE CONTRASEÑA EN TIEMPO REAL ---
+        let passwordIsValid = false;
+
+        // FIX: Tipado explícito para los parámetros de la función
+        const updateCheckUI = (element: HTMLParagraphElement | null, isValid: boolean): void => {
+            // Se añade una comprobación de nulidad para mayor robustez
+            if (!element) return;
+
+            if (isValid) {
+                element.classList.remove("invalid");
+                element.classList.add("valid");
+                element.textContent = element.textContent?.replace("❌", "✅") || "";
+            } else {
+                element.classList.remove("valid");
+                element.classList.add("invalid");
+                element.textContent = element.textContent?.replace("✅", "❌") || "";
+            }
+        };
+
+        const validatePassword = (): void => {
+            // FIX: La aserción de tipo en la selección de 'passwordInput' resuelve el error de '.value'
+            const pass = passwordInput.value;
+            
+            const hasLength = pass.length >= 6;
+            updateCheckUI(lengthCheck, hasLength);
+
+            const hasLower = /[a-z]/.test(pass);
+            updateCheckUI(lowerCheck, hasLower);
+
+            const hasUpper = /[A-Z]/.test(pass);
+            updateCheckUI(upperCheck, hasUpper);
+
+            const hasSpecial = /[!@#$%^&*_=+\-.,:;?]/.test(pass);
+            updateCheckUI(specialCheck, hasSpecial);
+
+            passwordIsValid = hasLength && hasLower && hasUpper && hasSpecial;
+        };
+
+        if (passwordInput) {
+            passwordInput.addEventListener('input', validatePassword);
+        }
+
+        // --- FUNCIONES DE FILTRADO DE ENTRADA ---
+        
+        // Función para permitir solo números
+        const filtrarSoloNumeros = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            input.value = input.value.replace(/\D/g, ''); // Reemplaza cualquier cosa que NO sea un dígito
+        };
+
+        // Función para permitir solo letras y espacios
+        const filtrarSoloLetras = (event: Event) => {
+            const input = event.target as HTMLInputElement;
+            // Permite letras (incluyendo acentos comunes en español), y espacios.
+            input.value = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚ\s]/g, '');
+        };
+
+        // --- LÓGICA DE VALIDACIÓN Y UI ---
+
+        // 1. Validar edad mínima (17 años) en fecha de nacimiento
+        const hoy = new Date();
+        const anioMax = hoy.getFullYear() - 17;
+        hoy.setFullYear(anioMax);
+        // Formatea la fecha a YYYY-MM-DD para el atributo 'max'
+        const fechaMaxima = hoy.toISOString().split("T")[0];
+        if(fechaNacimientoInput) fechaNacimientoInput.setAttribute("max", fechaMaxima);
+        
+        // 2. Aplicar filtros de entrada a los campos correspondientes
+        if(cedulaInput) cedulaInput.addEventListener('input', filtrarSoloNumeros);
+        if(telefonoInput) telefonoInput.addEventListener('input', filtrarSoloNumeros);
+        
+        if(nombre1Input) nombre1Input.addEventListener('input', filtrarSoloLetras);
+        if(nombre2Input) nombre2Input.addEventListener('input', filtrarSoloLetras);
+        if(apellido1Input) apellido1Input.addEventListener('input', filtrarSoloLetras);
+        if(apellido2Input) apellido2Input.addEventListener('input', filtrarSoloLetras);
+
+        // 3. Lógica para mostrar/ocultar el campo de carrera según el rol
+        const toggleCarreraField = () => {
+            if (rolSelect.value === 'ESTUDIANTE') {
+                carreraContainer.style.display = 'block';
+            } else {
+                carreraContainer.style.display = 'none';
+            }
+        };
+
+        if(rolSelect) rolSelect.addEventListener('change', toggleCarreraField);
+        // Llamar una vez al cargar para establecer el estado inicial
+        toggleCarreraField();
+        
         if (form) {
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
 
-                const formData = new FormData(form);
+                const formData = new FormData(form); // Convertir FormData a objeto para la validación
+                const cedula = formData.get("ced_usu") as string;
+                const contrasena = formData.get("cont_cuenta") as string;
 
+                if (!validarCedula(cedula)) {
+                     const { default: Swal } = await import("sweetalert2");
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Cédula Inválida",
+                        text: "Por favor, ingresa un número de cédula ecuatoriana válido.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return; // Detiene el envío
+                }
+
+                validatePassword();
+
+                if (!passwordIsValid) {
+                    const { default: Swal } = await import("sweetalert2");
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Contraseña no válida",
+                        text: "Por favor, asegúrate de que la contraseña cumpla todos los criterios.",
+                        confirmButtonColor: "#dc2626",
+                    });
+                    return;
+                }
+
+                const userData = {
+                    cor_cue: formData.get("cor_cue") as string,
+                    ced_usu: formData.get("ced_usu") as string,
+                    cont_cuenta: formData.get("cont_cuenta") as string,
+                    nom_usu1: formData.get("nom_usu1") as string,
+                    nom_usu2: (formData.get("nom_usu2") as string) || null,
+                    ape_usu1: formData.get("ape_usu1") as string,
+                    ape_usu2: (formData.get("ape_usu2") as string) || null,
+                    fec_nac_usu: formData.get("fec_nac_usu") as string,
+                    num_tel_usu:
+                        (formData.get("num_tel_usu") as string) || null,
+                    id_car_per: (formData.get("id_car_per") as string) || null,
+                    rol_cue: formData.get("rol_cue") as
+                        | "ESTUDIANTE"
+                        | "ADMINISTRADOR"
+                        | "USUARIO",
+                    enl_ced_cue:
+                        (formData.get("enl_ced_cue") as string) || null,
+                    enl_mat_cue:
+                        (formData.get("enl_mat_cue") as string) || null,
+                    img_user: (formData.get("img_user") as string) || null,
+                };
                 try {
-                    const { data, error } = await actions.setUser(formData);
+                    // Importar módulos dinámicamente para compatibilidad
+                    const { actions } = await import("astro:actions");
+                    const { default: Swal } = await import("sweetalert2");
+
+                    // Mostrar loading
+                    Swal.fire({
+                        title: "Creando usuario...",
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
+
+                    const { data, error } =
+                        await actions.crearUsuario(userData);
 
                     if (data?.success) {
                         await Swal.fire({
                             icon: "success",
                             title: "Éxito",
-                            text: "Usuario creado correctamente",
+                            text:
+                                data.message || "Usuario creado correctamente",
                             confirmButtonColor: "#059669",
-                        }).then(() => {
-                            window.location.reload();
                         });
+                        cerrarModalNuevoUsuario();
+                        window.location.reload();
                     } else {
                         await Swal.fire({
                             icon: "error",
                             title: "Error",
                             text:
-                                (data as any)?.error ||
+                                data?.message ||
                                 error?.message ||
                                 "No se pudo crear el usuario.",
                             confirmButtonColor: "#dc2626",
@@ -212,6 +895,7 @@ const carreras = carrerasData?.carreras || [];
                     }
                 } catch (error) {
                     console.error("Error:", error);
+                    const { default: Swal } = await import("sweetalert2");
                     await Swal.fire({
                         icon: "error",
                         title: "Error",
@@ -220,10 +904,10 @@ const carreras = carrerasData?.carreras || [];
                     });
                 }
             });
-        }
-
-        // Asignar funciones al objeto window
+        } // Asignar funciones al objeto window
         window.abrirModalNuevoUsuario = abrirModalNuevoUsuario;
         window.cerrarModalNuevoUsuario = cerrarModalNuevoUsuario;
+        window.mostrarVistaPrevia = mostrarVistaPrevia;
+        window.quitarImagenPreview = quitarImagenPreview;
     });
 </script>

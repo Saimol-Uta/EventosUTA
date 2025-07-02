@@ -1,60 +1,111 @@
+---
+import { actions } from "astro:actions";
+
+// Obtener filtros dinámicos de la base de datos
+const { data: filtrosData } = await Astro.callAction(actions.getFiltrosDinamicos, {});
+const carreras = filtrosData?.data?.carreras || [];
+const areas = filtrosData?.data?.areas || [];
+const rangosDuracion = filtrosData?.data?.rangosDuracion || [];
+---
+
 <nav class="filtros">
   <ul class="lista-filtros">
-    <!-- CATEGORÍAS -->
+    <!-- CARRERAS DINÁMICAS -->
     <li>
-      <button class="btn-filtro" data-target="cat-list">
-        Categorías <span class="flecha">▼</span>
+      <button class="btn-filtro" data-target="carrera-list">
+        <p>Carreras</p>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="black"
+          class="icon"
+        >
+          <path
+            d="M12 16.5c-.28 0-.53-.11-.71-.29l-7-7a1 1 0 0 1 1.42-1.42L12 14.09l6.29-6.3a1 1 0 0 1 1.42 1.42l-7 7a1 1 0 0 1-.71.29z"
+          ></path>
+        </svg>
       </button>
-      <ul id="cat-list" class="submenu">
-        <li data-filter-type="categoria" data-filter-value="TECNICA">TÉCNICA</li>
-        <li data-filter-type="categoria" data-filter-value="INDUSTRIAL">INDUSTRIAL</li>
-        <li data-filter-type="categoria" data-filter-value="INVESTIGACION">INVESTIGACIÓN</li>
-        <li data-filter-type="categoria" data-filter-value="REDES">REDES</li>
-        <li data-filter-type="categoria" data-filter-value="EMPRESARIAL">EMPRESARIAL</li>
-        <li data-filter-type="categoria" data-filter-value="ACADEMICA">ACADÉMICA</li>
-        <li data-filter-type="categoria" data-filter-value="PRACTICA">PRÁCTICA</li>
-        <li data-filter-type="categoria" data-filter-value="IA">IA</li>
+      <ul id="carrera-list" class="submenu">
+        {
+          carreras.map((carrera) => (
+            <li data-filter-type="carrera" data-filter-value={carrera}>
+              {carrera}
+            </li>
+          ))
+        }
       </ul>
     </li>
 
-    <!-- CARRERAS 
+    <!-- ÁREAS DINÁMICAS -->
     <li>
-      <button class="btn-filtro" data-target="car-list">
-        Carreras <span class="flecha">▼</span>
+      <button class="btn-filtro" data-target="area-list">
+        <p>Áreas</p>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="black"
+          class="icon"
+        >
+          <path
+            d="M12 16.5c-.28 0-.53-.11-.71-.29l-7-7a1 1 0 0 1 1.42-1.42L12 14.09l6.29-6.3a1 1 0 0 1 1.42 1.42l-7 7a1 1 0 0 1-.71.29z"
+          ></path>
+        </svg>
       </button>
-      <ul id="car-list" class="submenu">
-        <li data-filter-type="carrera" data-filter-value="Tecnologías de la Información">Tecnologías de la Información</li>
-        <li data-filter-type="carrera" data-filter-value="Telecomunicaciones">Telecomunicaciones</li>
-        <li data-filter-type="carrera" data-filter-value="Ingeniería de Software">Ingeniería de Software</li>
-        <li data-filter-type="carrera" data-filter-value="Ingeniería Industrial">Ingeniería Industrial</li>
-        <li data-filter-type="carrera" data-filter-value="Automatización y Robótica">Automatización y Robótica</li>
-        <li data-filter-type="carrera" data-filter-value="Ingeniería de Sistemas">Ingeniería de Sistemas</li>
+      <ul id="area-list" class="submenu">
+        {
+          areas.map((area) => (
+            <li data-filter-type="area" data-filter-value={area}>
+              {area}
+            </li>
+          ))
+        }
       </ul>
     </li>
-    -->
-    <!-- DURACIÓN -->
+
+    <!-- DURACIÓN DINÁMICA -->
     <li>
-      <button class="btn-filtro" data-target="dur-list">
-        Duración <span class="flecha">▼</span>
+      <button class="btn-filtro" data-target="duration-list">
+        <p>Duración</p>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="black"
+          class="icon"
+        >
+          <path
+            d="M12 16.5c-.28 0-.53-.11-.71-.29l-7-7a1 1 0 0 1 1.42-1.42L12 14.09l6.29-6.3a1 1 0 0 1 1.42 1.42l-7 7a1 1 0 0 1-.71.29z"
+          ></path>
+        </svg>
       </button>
-      <ul id="dur-list" class="submenu">
-        <li data-filter-type="duracion" data-filter-value="Menos de 5 horas">Menos de 5 horas</li>
-        <li data-filter-type="duracion" data-filter-value="De 5 a 30 horas">De 5 a 30 horas</li>
-        <li data-filter-type="duracion" data-filter-value="De 30 a 60 horas">De 30 a 60 horas</li>
-        <li data-filter-type="duracion" data-filter-value="Más de 60 horas">Más de 60 horas</li>
+      <ul id="duration-list" class="submenu">
+        {
+          rangosDuracion.map((rango) => (
+            <li data-filter-type="duracion" data-filter-value={rango.value}>
+              {rango.label}
+            </li>
+          ))
+        }
       </ul>
     </li>
   </ul>
 </nav>
 
 <style>
+  
   .filtros {
     display: flex;
     justify-content: flex-start;
-    padding: 1rem 2rem;
-    background-color: white;
-    border-top: 1px solid #e5e5e5;
-    border-bottom: 1px solid #e5e5e5;
+    padding: 0.75rem 0rem;
+    background-color: rgb(245, 245, 245);
+    position: absolute;
+    bottom: 0;
+    left: 50px;
   }
 
   .lista-filtros {
@@ -70,33 +121,32 @@
   }
 
   .btn-filtro {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     background: none;
     border: none;
-    font-size: 1rem;
-    color: #5a1e1e;
-    font-weight: 600;
+    font-size: 14px;
+    color: rgb(37, 37, 37);
+    font-weight: 500;
     cursor: pointer;
     padding: 0.3rem 0.6rem;
     border-radius: 0.3rem;
-    transition: background-color 0.3s ease;
-  }
-
-  .btn-filtro:hover {
-    color: #9e1c1c;
-    background-color: #f3f3f3;
-  }
-
-  .flecha {
-    margin-left: 0.5rem;
-    font-size: 0.85rem;
-    color: #777;
-    font-weight: 400;
-    transform: translateY(1px);
     transition: color 0.3s ease;
   }
 
-  .btn-filtro:hover .flecha {
-    color: #9e1c1c;
+  .icon {
+    width: 16px;
+    right: -4px;
+  }
+
+  .btn-filtro:hover {
+    color: rgb(108, 19, 19);
+  }
+
+  .btn-filtro:hover .icon {
+    fill: rgb(108, 19, 19);
   }
 
   .submenu {
@@ -111,20 +161,18 @@
     padding: 0.5rem 1rem;
     z-index: 100;
     min-width: 200px;
-    border-radius: 0.4rem;
   }
 
   .submenu li {
     padding: 0.4rem 0;
-    font-size: 0.95rem;
-    color: #333;
+    font-size: 12px;
+    color: rgb(107, 114, 128);
     cursor: pointer;
   }
 
   .submenu li:hover,
   .submenu li.activo {
-    color: #9e1c1c;
-    font-weight: bold;
+    color: rgb(108, 19, 19);
   }
 
   .submenu.show {
@@ -133,37 +181,37 @@
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('.btn-filtro');
-    const submenus = document.querySelectorAll('.submenu');
+  document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".btn-filtro");
+    const submenus = document.querySelectorAll(".submenu");
 
     // Mostrar y ocultar submenús
-    buttons.forEach(button => {
-      button.addEventListener('click', event => {
+    buttons.forEach((button) => {
+      button.addEventListener("click", (event) => {
         event.stopPropagation();
-        const targetId = button.getAttribute('data-target');
-        submenus.forEach(menu => {
-          menu.classList.toggle('show', menu.id === targetId);
+        const targetId = button.getAttribute("data-target");
+        submenus.forEach((menu) => {
+          menu.classList.toggle("show", menu.id === targetId);
         });
       });
     });
 
-    document.addEventListener('click', event => {
+    document.addEventListener("click", (event) => {
       const target = event.target;
       if (target instanceof HTMLElement) {
-        const isButton = target.closest('.btn-filtro');
-        const isMenu = target.closest('.submenu');
+        const isButton = target.closest(".btn-filtro");
+        const isMenu = target.closest(".submenu");
         if (!isButton && !isMenu) {
-          submenus.forEach(menu => menu.classList.remove('show'));
+          submenus.forEach((menu) => menu.classList.remove("show"));
         }
       }
     });
 
     // Actualizar URL combinando filtros sin borrar otros
-    document.querySelectorAll('.submenu li').forEach(item => {
-      item.addEventListener('click', () => {
-        const tipo = item.getAttribute('data-filter-type');
-        const valor = item.getAttribute('data-filter-value');
+    document.querySelectorAll(".submenu li").forEach((item) => {
+      item.addEventListener("click", () => {
+        const tipo = item.getAttribute("data-filter-type");
+        const valor = item.getAttribute("data-filter-value");
 
         if (tipo && valor) {
           const url = new URL(window.location.href);
@@ -175,12 +223,12 @@
 
     // ✅ Marcar visualmente los filtros activos
     const params = new URLSearchParams(window.location.search);
-document.querySelectorAll('.submenu li').forEach(item => {
-  const tipo = item.getAttribute('data-filter-type');
-  const valor = item.getAttribute('data-filter-value');
-  if (tipo && valor && params.get(tipo) === valor) {
-    item.classList.add('activo');
-  }
-});
+    document.querySelectorAll(".submenu li").forEach((item) => {
+      const tipo = item.getAttribute("data-filter-type");
+      const valor = item.getAttribute("data-filter-value");
+      if (tipo && valor && params.get(tipo) === valor) {
+        item.classList.add("activo");
+      }
+    });
   });
 </script>

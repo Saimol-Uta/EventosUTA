@@ -6,6 +6,15 @@ interface User {
     ci_pas?: string;
 };
 
+// Extender Window para propiedades globales
+declare global {
+    interface Window {
+        eventosDestacados: Set<number>;
+        guardarFavoritos: () => Promise<void>;
+        actualizarBotonGuardar: () => void;
+    }
+}
+
 // Extender App.Locals para que TypeScript no marque errores
 declare namespace App {
     interface Locals {

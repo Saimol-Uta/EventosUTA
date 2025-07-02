@@ -1,10 +1,19 @@
 ---
 import "../../../styles/Admin/ModalModificarEvento.css";
+
+interface Props {
+    categorias?: any[];
+    organizadores?: any[];
+}
+
+const { categorias = [], organizadores = [] } = Astro.props;
 ---
 
 <div id="modalModificarEvento" class="modal">
     <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModalModificarEvento()">&times;</span>
+        <span class="cerrar" onclick="cerrarModalModificarEvento()"
+            >&times;</span
+        >
         <div class="formulario-completo">
             <form
                 class="formulario-modificar-registro"
@@ -41,21 +50,99 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                     </div>
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
+                            <p class="texto-dato">Cupos Máximos</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    class="input-dato"
+                                    name="cup_max"
+                                    required
+                                    placeholder="Ej: 40"
+                                />
+                            </div>
+                        </div>
+                        <div class="contenedor-dato">
                             <p class="texto-dato">Categoría:</p>
                             <div class="contenedor-input">
                                 <select
                                     name="categoria"
                                     class="input-dato"
                                     required
+                                    onchange="mostrarInfoCategoriaModificar(this)"
                                 >
                                     <option value=""
                                         >Seleccione una categoría</option
                                     >
-                                    <!-- Las opciones se cargarán dinámicamente -->
+                                    {
+                                        categorias.map((categoria) => (
+                                            <option
+                                                value={categoria.id_cat}
+                                                data-puntaje={
+                                                    categoria.pun_apr_cat
+                                                }
+                                                data-asignacion={
+                                                    categoria.asi_cat
+                                                }
+                                                data-requiere-puntaje={
+                                                    categoria.requiere_puntaje
+                                                }
+                                                data-requiere-asistencia={
+                                                    categoria.requiere_asistencia
+                                                }
+                                                data-brinda-certificado={
+                                                    categoria.brinda_certificado
+                                                }
+                                                data-porcentaje-asistencia={
+                                                    categoria.asi_cat
+                                                }
+                                            >
+                                                {categoria.nom_cat}
+                                            </option>
+                                        ))
+                                    }
                                 </select>
                             </div>
                         </div>
 
+                        <!-- Información dinámica de la categoría -->
+                        <div
+                            id="info-categoria"
+                            class="contenedor-dato"
+                            style="display: none;"
+                        >
+                            <p class="texto-dato">
+                                Información de la Categoría
+                            </p>
+                            <div class="info-categoria-contenido">
+                                <div id="info-puntaje" style="display: none;">
+                                    <p class="info-item">
+                                        <strong>Puntaje de aprobación:</strong>
+                                        <span id="valor-puntaje">-</span> puntos
+                                    </p>
+                                </div>
+                                <div
+                                    id="info-asistencia"
+                                >
+                                    <p class="info-item">
+                                        <strong>Requiere asistencia:</strong>
+                                        <span id="valor-porcentaje-asistencia"
+                                            >-</span
+                                        >% mínimo
+                                    </p>
+                                </div>
+                                <div
+                                    id="info-certificado"
+                                >
+                                    <p class="info-item">
+                                        <strong>Brinda certificado:</strong> Sí
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contenedor-nombre">
                         <div class="contenedor-dato">
                             <p class="texto-dato">Área:</p>
                             <div class="contenedor-input">
@@ -79,55 +166,87 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                             </div>
                         </div>
                     </div>
-                    <div class="contenedor-dato">
-                        <p class="texto-dato">Precio (USD):</p>
-                        <div class="contenedor-input">
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                class="input-dato"
-                                name="precio"
-                                value="0"
-                            />
-                        </div>
-                    </div>
-
                     <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Nota de Aprobación:</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    min="0"
-                                    max="10"
-                                    class="input-dato"
-                                    name="nota_aprobacion"
-                                    value="7.0"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Tiempo de Registro:</p>
+                            <p class="texto-dato">¿Es gratuito?</p>
                             <div class="contenedor-input">
                                 <select
-                                    name="tiempo_registro_asignacion"
+                                    name="es_gratuito"
                                     class="input-dato"
+                                    id="es-gratuito-select"
+                                    onchange="togglePrecioModificar(this)"
                                 >
-                                    <option value="true" selected
-                                        >Se requiere registro de asistencia</option
-                                    >
                                     <option value="false"
-                                        >No se requiere registro de asistencia</option
+                                        >No, tiene costo</option
+                                    >
+                                    <option value="true">Sí, es gratuito</option
                                     >
                                 </select>
                             </div>
                         </div>
+
+                        <div class="contenedor-dato" id="contenedor-precio">
+                            <p class="texto-dato">Precio (USD):</p>
+                            <div class="contenedor-input precio-container">
+                                <span class="precio-label">$</span>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="999999.99"
+                                    class="input-dato"
+                                    name="precio"
+                                    value="0"
+                                    id="precio-input"
+                                    oninput="toggleGratuito(this)"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contenedor-nombre">
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">
+                                ¿Requiere carta de motivación?
+                            </p>
+                            <div class="contenedor-input">
+                                <select
+                                    name="requiere_carta"
+                                    class="input-dato"
+                                >
+                                    <option value="false"
+                                        >No requiere carta</option
+                                    >
+                                    <option value="true"
+                                        >Sí requiere carta</option
+                                    >
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato" style="display: none;">
+                            <p class="texto-dato">¿Es Destacado?</p>
+                            <div class="contenedor-input">
+                                <select name="es_destacado" class="input-dato">
+                                    <option value="false">No destacado</option>
+                                    <option value="true">Sí destacado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contenedor-dato" style="display: none;">
+                        <p class="texto-dato">
+                            Carta de Motivación (Opcional):
+                        </p>
+                        <div class="contenedor-input">
+                            <textarea
+                                class="input-dato"
+                                name="car_mot_eve"
+                                rows="3"
+                                placeholder="Instrucciones para la carta de motivación..."
+                            ></textarea>
+                        </div>
                     </div>
                 </div>
-
                 <div class="contenedor-superior">
                     <p class="texto-centrado texto-roja">Programación</p>
                     <div class="contenedor-nombre">
@@ -144,20 +263,6 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         </div>
 
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Hora de Inicio:</p>
-                            <div class="contenedor-input">
-                                <input
-                                    type="time"
-                                    class="input-dato"
-                                    name="hora_inicio"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="contenedor-nombre">
-                        <div class="contenedor-dato">
                             <p class="texto-dato">Fecha de Finalización:</p>
                             <div class="contenedor-input">
                                 <input
@@ -167,27 +272,43 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 />
                             </div>
                         </div>
+                    </div>
 
+                    <div class="contenedor-nombre">
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Hora de Finalización:</p>
+                            <p class="texto-dato">Fecha Inicio Inscripción:</p>
                             <div class="contenedor-input">
                                 <input
-                                    type="time"
+                                    type="date"
                                     class="input-dato"
-                                    name="hora_fin"
+                                    name="fecha_inicio_inscripcion"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="contenedor-dato">
+                            <p class="texto-dato">Fecha Fin Inscripción:</p>
+                            <div class="contenedor-input">
+                                <input
+                                    type="date"
+                                    class="input-dato"
+                                    name="fecha_fin_inscripcion"
+                                    required
                                 />
                             </div>
                         </div>
                     </div>
 
                     <div class="contenedor-dato">
-                        <p class="texto-dato">Duración (horas)</p>
+                        <p class="texto-dato">Duración (Horas)</p>
                         <div class="contenedor-input">
                             <input
                                 type="number"
                                 min="1"
                                 class="input-dato"
                                 name="duracion"
+                                placeholder="Duración en minutos"
                             />
                         </div>
                     </div>
@@ -217,65 +338,50 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 <option value=""
                                     >Seleccione un organizador</option
                                 >
-                                <!-- Las opciones se cargarán dinámicamente -->
+                                {
+                                    organizadores.map((organizador) => (
+                                        <option value={organizador.ced_org}>
+                                            {organizador.tit_aca_org}{" "}
+                                            {organizador.nom_org1}{" "}
+                                            {organizador.nom_org2 || ""}{" "}
+                                            {organizador.ape_org1}{" "}
+                                            {organizador.ape_org2 || ""} -{" "}
+                                            {organizador.ced_org}
+                                        </option>
+                                    ))
+                                }
                             </select>
                         </div>
                     </div>
-
-                    <!-- Sección de Asignaciones -->
+                    <!-- Sección de Asignación -->
                     <div class="contenedor-superior">
-                        <p class="texto-centrado texto-roja">Asignaciones</p>
+                        <p class="texto-centrado texto-roja">Asignación</p>
                         <div class="contenedor-dato">
-                            <p class="texto-dato">Asignaciones Actuales:</p>
-                            <div
-                                id="asignaciones-actuales"
-                                class="asignaciones-display"
-                            >
-                                <!-- Se mostrará la lista de asignaciones actuales -->
-                            </div>
-                        </div>
-
-                        <div class="contenedor-dato">
-                            <p class="texto-dato">Gestionar Asignaciones:</p>
+                            <p class="texto-dato">Asignación del Evento:</p>
                             <div class="contenedor-input">
                                 <select
-                                    id="asignaciones-disponibles"
+                                    name="id_asignacion"
                                     class="input-dato"
-                                    multiple
-                                    size="6"
+                                    id="asignacion-evento"
                                 >
+                                    <option value=""
+                                        >Seleccione una asignación</option
+                                    >
                                     <!-- Las opciones se cargarán dinámicamente -->
                                 </select>
                             </div>
                             <p class="texto-info-asignaciones">
-                                Selecciona las asignaciones que quieres agregar
-                                al evento. Las asignaciones actuales se
-                                mostrarán arriba.
+                                La asignación determina qué carreras pueden
+                                participar en este evento.
                             </p>
-                        </div>
-
-                        <div class="contenedor-botones-asignaciones">
-                            <button
-                                type="button"
-                                id="btn-agregar-asignaciones"
-                                class="boton-asignacion btn-agregar"
-                            >
-                                ➕ Agregar Seleccionadas
-                            </button>
-                            <button
-                                type="button"
-                                id="btn-gestionar-asignaciones"
-                                class="boton-asignacion btn-gestionar"
-                            >
-                                🔧 Gestionar Asignaciones
-                            </button>
                         </div>
                     </div>
                     <div class="contenedor-boton-modificar">
                         <button
                             type="button"
                             class="boton-modificar"
-                            onclick="cerrarModalModificarEvento()">Cancelar</button
+                            onclick="cerrarModalModificarEvento()"
+                            >Cancelar</button
                         >
                         <button type="submit" class="boton-modificar"
                             >Modificar Evento</button
@@ -317,6 +423,91 @@ import "../../../styles/Admin/ModalModificarEvento.css";
             </form>
         </div>
 
+        <style>
+            .texto-info-asignaciones {
+                margin-top: 5px;
+                color: #6b7280;
+                font-size: 12px;
+                font-style: italic;
+            }
+
+            .input-dato[name="precio"]:disabled {
+                background-color: #f3f4f6;
+                color: #6b7280;
+            }
+
+            .contenedor-nombre {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+
+            .contenedor-dato textarea {
+                resize: vertical;
+                min-height: 60px;
+            }
+
+            .precio-container {
+                position: relative;
+            }
+
+            .precio-label {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #6b7280;
+                pointer-events: none;
+            }
+
+            .input-dato[name="precio"] {
+                padding-left: 25px;
+            }
+
+            /* Estilos para información de categoría */
+            .info-categoria-contenido {
+                background-color: white;
+                border: 1px solid rgb(108, 19, 19);
+                border-radius: 6px;
+                padding: 12px;
+                margin-top: 8px;
+            }
+
+            .info-item {
+                margin: 6px 0;
+                font-size: 14px;
+                color: #374151;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .info-item strong {
+                color: #1f2937;
+                min-width: 140px;
+            }
+
+            #info-categoria {
+                border-left: 3px solid rgb(108, 19, 19);
+                padding-left: 12px;
+                background-color: rgb(255, 250, 250);
+                border-radius: 0 6px 6px 0;
+            }
+
+            #campos-puntaje,
+            #campos-asistencia {
+                border-left: 3px solid #10b981;
+                padding-left: 12px;
+                background-color: #f0fdf4;
+                border-radius: 0 6px 6px 0;
+            }
+
+            .categoria-destacada {
+                background-color: white !important;
+                border: 2px solid rgb(108, 19, 19) !important;
+            }
+        </style>
+
         <script>
             import { actions } from "astro:actions";
             import Swal from "sweetalert2";
@@ -326,8 +517,8 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 des_eve: string;
                 fec_ini_eve: string;
                 fec_fin_eve?: string;
-                hor_ini_eve: string;
-                hor_fin_eve?: string;
+                fec_ini_ins_eve: string;
+                fec_fin_ins_eve: string;
                 dur_eve?: number;
                 are_eve?: string;
                 ubi_eve: string;
@@ -335,263 +526,251 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 precio: number;
                 ced_org_eve: string;
                 id_cat_eve: string;
-                not_apr_eve?: number;
-                tie_reg_asi?: boolean;
+                es_gratuito: boolean;
+                requiere_carta: boolean;
+                es_destacado: boolean;
+                car_mot_eve?: string;
+                id_asi_eve?: string;
             }
             declare global {
                 interface Window {
                     abrirModalModificarEvento: (eventoId: string) => void;
                     cerrarModalModificarEvento: () => void;
-                    abrirAsignacionesModal: (eventoId: string) => void;
-                }
-            }
-            async function cargarCategoriasYOrganizadores() {
-                try {
-                    // Cargar categorías usando acciones de Astro
-                    const { data: categoriasData } =
-                        await actions.getCategorias({});
-
-                    if (categoriasData?.success) {
-                        const selectCategoria = document.querySelector(
-                            'select[name="categoria"]',
-                        ) as HTMLSelectElement;
-
-                        if (selectCategoria) {
-                            selectCategoria.innerHTML =
-                                '<option value="">Seleccione una categoría</option>';
-                            categoriasData.categorias.forEach(
-                                (categoria: any) => {
-                                    const option =
-                                        document.createElement("option");
-                                    option.value = categoria.id_cat;
-                                    option.textContent = categoria.nom_cat;
-                                    selectCategoria.appendChild(option);
-                                },
-                            );
-                        }
-                    }
-
-                    // Cargar organizadores usando acciones de Astro
-                    const { data: organizadoresData } =
-                        await actions.getOrganizadores({});
-
-                    if (organizadoresData?.success) {
-                        const selectOrganizador = document.querySelector(
-                            'select[name="cedula_organizador"]',
-                        ) as HTMLSelectElement;
-
-                        if (selectOrganizador) {
-                            selectOrganizador.innerHTML =
-                                '<option value="">Seleccione un organizador</option>';
-                            organizadoresData.organizadores.forEach(
-                                (organizador: any) => {
-                                    const option =
-                                        document.createElement("option");
-                                    option.value = organizador.ced_org;
-                                    option.textContent = `${organizador.nom_org1} ${organizador.nom_org2} ${organizador.ape_org1} ${organizador.ape_org2} - ${organizador.ced_org}`;
-                                    selectOrganizador.appendChild(option);
-                                },
-                            );
-                        }
-                    }
-                } catch (error) {
-                    console.error(
-                        "Error al cargar categorías y organizadores:",
-                        error,
-                    );
-                }
-            }
-            async function cargarAsignacionesActuales(eventoId: string) {
-                try {
-                    const { data: asignacionesData } =
-                        await actions.getAsignacionesByEvento({
-                            id_evento: eventoId,
-                        });
-
-                    const contenedorAsignaciones = document.getElementById(
-                        "asignaciones-actuales",
-                    );
-                    if (!contenedorAsignaciones) return;
-                    if (
-                        asignacionesData?.success &&
-                        asignacionesData.asignaciones.length > 0
-                    ) {
-                        contenedorAsignaciones.innerHTML =
-                            asignacionesData.asignaciones
-                                .map(
-                                    (asignacion: any) => `
-                            <div class="asignacion-item" data-asignacion-id="${asignacion.id_asi}">
-                                <span class="asignacion-nombre">${asignacion.nom_asi}</span>
-                                <span class="asignacion-detalle">${asignacion.des_asi}</span>
-                                <button type="button" class="btn-eliminar-asignacion" onclick="eliminarAsignacion('${asignacion.id_asi}', '${eventoId}')">
-                                    ❌
-                                </button>
-                            </div>
-                        `,
-                                )
-                                .join("");
-                    } else {
-                        contenedorAsignaciones.innerHTML =
-                            '<p class="no-asignaciones">No hay asignaciones asignadas a este evento.</p>';
-                    }
-                } catch (error) {
-                    console.error(
-                        "Error al cargar asignaciones actuales:",
-                        error,
-                    );
+                    toggleGratuitoModificar: (input: HTMLInputElement) => void;
+                    togglePrecioModificar: (select: HTMLSelectElement) => void;
+                    mostrarInfoCategoriaModificar: (
+                        select: HTMLSelectElement,
+                    ) => void;
                 }
             }
 
-            async function cargarAsignacionesDisponibles() {
-                try {
-                    const { data: plantillasData } =
-                        await actions.getAsignacionesPlantilla({});
+            let asignacionesDisponibles: any[] = [];
 
-                    const selectAsignaciones = document.getElementById(
-                        "asignaciones-disponibles",
-                    ) as HTMLSelectElement;
-                    if (!selectAsignaciones) return;
-                    if (plantillasData?.success) {
-                        selectAsignaciones.innerHTML = "";
-                        plantillasData.asignaciones.forEach(
-                            (asignacion: any) => {
-                                const option = document.createElement("option");
-                                option.value = asignacion.id_asi;
-                                option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
-                                selectAsignaciones.appendChild(option);
-                            },
-                        );
-                    }
-                } catch (error) {
-                    console.error(
-                        "Error al cargar asignaciones disponibles:",
-                        error,
-                    );
-                }
-            }
+            // Función para mostrar información de categoría
+            function mostrarInfoCategoriaModificar(
+                select: HTMLSelectElement,
+            ): void {
+                const selectedOption = select.selectedOptions[0];
 
-            async function agregarAsignacionesSeleccionadas(eventoId: string) {
-                const selectAsignaciones = document.getElementById(
-                    "asignaciones-disponibles",
-                ) as HTMLSelectElement;
-                if (!selectAsignaciones) return;
+                // Elementos de información
+                const infoCategoria = document.getElementById(
+                    "info-categoria",
+                ) as HTMLElement;
+                const infoPuntaje = document.getElementById(
+                    "info-puntaje",
+                ) as HTMLElement;
+                const infoAsistencia = document.getElementById(
+                    "info-asistencia",
+                ) as HTMLElement;
+                const infoCertificado = document.getElementById(
+                    "info-certificado",
+                ) as HTMLElement;
+                const valorPuntaje = document.getElementById(
+                    "valor-puntaje",
+                ) as HTMLElement;
+                const valorPorcentajeAsistencia = document.getElementById(
+                    "valor-porcentaje-asistencia",
+                ) as HTMLElement;
 
-                const asignacionesSeleccionadas = Array.from(
-                    selectAsignaciones.selectedOptions,
-                ).map((option) => option.value);
-
-                if (asignacionesSeleccionadas.length === 0) {
-                    await Swal.fire({
-                        icon: "warning",
-                        title: "Atención",
-                        text: "Por favor selecciona al menos una asignación.",
-                        confirmButtonColor: "#dc2626",
-                    });
+                if (!selectedOption || !selectedOption.value) {
+                    // Ocultar todo si no hay selección
+                    if (infoCategoria) infoCategoria.style.display = "none";
                     return;
                 }
-                try {
-                    for (const asignacionId of asignacionesSeleccionadas) {
-                        const { data, error } =
-                            await actions.duplicarAsignacionAEvento({
-                                id_asignacion_plantilla: asignacionId,
-                                id_evento_destino: eventoId,
-                            });
 
-                        if (!data?.success) {
-                            throw new Error(
-                                error?.message || "Error al agregar asignación",
-                            );
-                        }
-                    }
+                // Obtener datos de la categoría
+                const puntajeApr = selectedOption.getAttribute("data-puntaje");
+                const porcentajeAsistencia = selectedOption.getAttribute(
+                    "data-porcentaje-asistencia",
+                );
+                const requierePuntaje =
+                    selectedOption.getAttribute("data-requiere-puntaje") ===
+                    "true";
+                const requiereAsistencia =
+                    selectedOption.getAttribute("data-requiere-asistencia") ===
+                    "true";
+                const brindaCertificado =
+                    selectedOption.getAttribute("data-brinda-certificado") ===
+                    "true";
 
-                    await Swal.fire({
-                        icon: "success",
-                        title: "Éxito",
-                        text: `Se agregaron ${asignacionesSeleccionadas.length} asignación(es) al evento.`,
-                        confirmButtonColor: "#059669",
-                    });
+                // Mostrar información de la categoría
+                if (infoCategoria) {
+                    infoCategoria.style.display = "block";
 
-                    // Recargar asignaciones actuales y limpiar selección
-                    await cargarAsignacionesActuales(eventoId);
-                    selectAsignaciones.selectedIndex = -1;
-                } catch (error) {
-                    console.error("Error al agregar asignaciones:", error);
-                    await Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: "No se pudieron agregar las asignaciones seleccionadas.",
-                        confirmButtonColor: "#dc2626",
-                    });
-                }
-            }
-
-            async function eliminarAsignacion(
-                asignacionId: string,
-                eventoId: string,
-            ) {
-                const resultado = await Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "Esta acción eliminará la asignación del evento.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#dc2626",
-                    cancelButtonColor: "#6b7280",
-                    confirmButtonText: "Sí, eliminar",
-                    cancelButtonText: "Cancelar",
-                });
-
-                if (resultado.isConfirmed) {
-                    try {
-                        const { data, error } =
-                            await actions.eliminarAsignacion({
-                                id_asignacion: asignacionId,
-                            });
-
-                        if (data?.success) {
-                            await Swal.fire({
-                                icon: "success",
-                                title: "Eliminado",
-                                text: "Asignación eliminada correctamente.",
-                                confirmButtonColor: "#059669",
-                            });
-
-                            // Recargar asignaciones actuales
-                            await cargarAsignacionesActuales(eventoId);
+                    // Mostrar/ocultar información según los atributos
+                    if (infoPuntaje && valorPuntaje) {
+                        if (requierePuntaje && puntajeApr) {
+                            infoPuntaje.style.display = "block";
+                            valorPuntaje.textContent = puntajeApr;
                         } else {
-                            throw new Error(
-                                error?.message ||
-                                    "Error al eliminar asignación",
-                            );
+                            infoPuntaje.style.display = "none";
                         }
-                    } catch (error) {
-                        console.error("Error al eliminar asignación:", error);
-                        await Swal.fire({
-                            icon: "error",
-                            title: "Error",
-                            text: "No se pudo eliminar la asignación.",
-                            confirmButtonColor: "#dc2626",
-                        });
+                    }
+
+                    if (infoAsistencia && valorPorcentajeAsistencia) {
+                        if (requiereAsistencia && porcentajeAsistencia) {
+                            infoAsistencia.style.display = "block";
+                            valorPorcentajeAsistencia.textContent =
+                                porcentajeAsistencia;
+                        } else {
+                            infoAsistencia.style.display = "none";
+                        }
+                    }
+
+                    if (infoCertificado) {
+                        if (brindaCertificado) {
+                            infoCertificado.style.display = "block";
+                        } else {
+                            infoCertificado.style.display = "none";
+                        }
                     }
                 }
+
+                console.log("📊 Información de categoría actualizada:", {
+                    requierePuntaje,
+                    requiereAsistencia,
+                    brindaCertificado,
+                    puntajeApr,
+                    porcentajeAsistencia,
+                });
             }
-            function abrirAsignacionesModal(eventoId: string) {
-                // Esta función abrirá el modal de gestión de asignaciones existente
-                if (window.abrirModalAsignaciones) {
-                    window.abrirModalAsignaciones(eventoId, "Evento");
+
+            // Función para manejar el toggle de precio gratuito
+            function toggleGratuitoModificar(input: HTMLInputElement): void {
+                const esGratuitoSelect = document.querySelector(
+                    'select[name="es_gratuito"]',
+                ) as HTMLSelectElement;
+                const contenedorPrecio = document.getElementById(
+                    "contenedor-precio",
+                ) as HTMLElement;
+
+                if (parseFloat(input.value) === 0) {
+                    esGratuitoSelect.value = "true";
+                    input.disabled = true;
+                    if (contenedorPrecio)
+                        contenedorPrecio.style.display = "none";
+                } else {
+                    esGratuitoSelect.value = "false";
+                    input.disabled = false;
+                    if (contenedorPrecio)
+                        contenedorPrecio.style.display = "block";
                 }
             }
-            async function abrirModalModificarEvento(eventoId: string): Promise<void> {
+
+            // Función para manejar el toggle desde el select gratuito
+            function togglePrecioModificar(select: HTMLSelectElement): void {
+                const precioInput = document.querySelector(
+                    'input[name="precio"]',
+                ) as HTMLInputElement;
+                const contenedorPrecio = document.getElementById(
+                    "contenedor-precio",
+                ) as HTMLElement;
+
+                if (select.value === "true") {
+                    // Es gratuito - ocultar precio
+                    if (contenedorPrecio)
+                        contenedorPrecio.style.display = "none";
+                    if (precioInput) {
+                        precioInput.value = "0";
+                        precioInput.disabled = true;
+                    }
+                } else {
+                    // No es gratuito - mostrar precio
+                    if (contenedorPrecio)
+                        contenedorPrecio.style.display = "block";
+                    if (precioInput) {
+                        precioInput.disabled = false;
+                        if (precioInput.value === "0") precioInput.value = "";
+                    }
+                }
+            } // Cargar asignaciones disponibles
+            async function cargarAsignacionesModificar() {
+                try {
+                    console.log("🔄 Cargando asignaciones disponibles...");
+                    const { data, error } = await actions.getAllAsignaciones(
+                        {},
+                    );
+
+                    if (error) {
+                        console.error(
+                            "❌ Error al cargar asignaciones:",
+                            error,
+                        );
+                        return;
+                    }
+
+                    if (!data?.success || !data.asignaciones) {
+                        console.warn("⚠️ No se encontraron asignaciones");
+                        return;
+                    }
+
+                    asignacionesDisponibles = data.asignaciones;
+                    const select = document.getElementById(
+                        "asignacion-evento",
+                    ) as HTMLSelectElement;
+
+                    if (!select) {
+                        console.error(
+                            "❌ No se encontró el select de asignaciones",
+                        );
+                        return;
+                    }
+
+                    // Limpiar opciones existentes (excepto la primera)
+                    while (select.children.length > 1) {
+                        select.removeChild(select.lastChild!);
+                    }
+
+                    // Agregar asignaciones disponibles
+                    asignacionesDisponibles.forEach((asignacion) => {
+                        const option = document.createElement("option");
+                        option.value = asignacion.id_asi;
+                        option.textContent = `${asignacion.nom_asi} - ${asignacion.des_asi}`;
+                        select.appendChild(option);
+                    });
+
+                    console.log(
+                        `✅ ${asignacionesDisponibles.length} asignaciones cargadas exitosamente`,
+                    );
+                } catch (error) {
+                    console.error(
+                        "💥 Error crítico al cargar asignaciones:",
+                        error,
+                    );
+                }
+            }
+            async function cargarCategoriasOrganizadoresYAsignaciones() {
+                try {
+                    // Las categorías y organizadores ya vienen cargados desde las props del componente Astro
+                    // Solo cargamos las asignaciones dinámicamente
+                    console.log(
+                        "🔄 Cargando solo asignaciones (categorías y organizadores ya están en props)",
+                    );
+                    // Cargar asignaciones
+                    await cargarAsignacionesModificar();
+
+                    console.log("✅ Datos cargados correctamente");
+                } catch (error) {
+                    console.error("Error al cargar datos:", error);
+                }
+            }
+            async function abrirModalModificarEvento(
+                eventoId: string,
+            ): Promise<void> {
+                console.log("🔄 Abriendo modal para evento:", eventoId);
+
                 const modal = document.getElementById("modalModificarEvento");
                 const form = document.getElementById(
                     "formulario-modificar-evento",
                 ) as HTMLFormElement;
 
-                if (!modal || !form) return; // Cargar categorías y organizadores dinámicamente
-                await cargarCategoriasYOrganizadores();
+                if (!modal || !form) {
+                    console.error("❌ No se encontró el modal o formulario");
+                    return;
+                }
 
-                // Cargar asignaciones
-                await cargarAsignacionesActuales(eventoId);
-                await cargarAsignacionesDisponibles();
+                // Cargar categorías, organizadores y asignaciones dinámicamente
+                await cargarCategoriasOrganizadoresYAsignaciones();
 
                 // Obtener todos los eventos del DOM
                 const eventosInputs = document.querySelectorAll(
@@ -601,11 +780,18 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                     JSON.parse((input as HTMLInputElement).value),
                 );
 
+                console.log("📊 Eventos disponibles:", eventos.length);
+
                 const evento = eventos.find(
                     (e: Evento) => e.id_eve === eventoId,
                 );
 
-                if (!evento) return;
+                if (!evento) {
+                    console.error("❌ Evento no encontrado:", eventoId);
+                    return;
+                }
+
+                console.log("✅ Evento encontrado:", evento);
 
                 // Llenar el formulario con los datos del evento
                 const nombre = form.querySelector(
@@ -623,20 +809,35 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 const precio = form.querySelector(
                     'input[name="precio"]',
                 ) as HTMLInputElement;
+                const esGratuito = form.querySelector(
+                    'select[name="es_gratuito"]',
+                ) as HTMLSelectElement;
+                const requiereCarta = form.querySelector(
+                    'select[name="requiere_carta"]',
+                ) as HTMLSelectElement;
+                const esDestacado = form.querySelector(
+                    'select[name="es_destacado"]',
+                ) as HTMLSelectElement;
+                const carMotEve = form.querySelector(
+                    'textarea[name="car_mot_eve"]',
+                ) as HTMLTextAreaElement;
                 const fechaInicio = form.querySelector(
                     'input[name="fecha_inicio"]',
-                ) as HTMLInputElement;
-                const horaInicio = form.querySelector(
-                    'input[name="hora_inicio"]',
                 ) as HTMLInputElement;
                 const fechaFin = form.querySelector(
                     'input[name="fecha_fin"]',
                 ) as HTMLInputElement;
-                const horaFin = form.querySelector(
-                    'input[name="hora_fin"]',
+                const fechaInicioInscripcion = form.querySelector(
+                    'input[name="fecha_inicio_inscripcion"]',
+                ) as HTMLInputElement;
+                const fechaFinInscripcion = form.querySelector(
+                    'input[name="fecha_fin_inscripcion"]',
                 ) as HTMLInputElement;
                 const duracion = form.querySelector(
                     'input[name="duracion"]',
+                ) as HTMLInputElement;
+                const cupMax = form.querySelector(
+                    'input[name="cup_max"]',
                 ) as HTMLInputElement;
                 const ubicacion = form.querySelector(
                     'input[name="ubicacion"]',
@@ -644,11 +845,8 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 const cedulaOrganizador = form.querySelector(
                     'select[name="cedula_organizador"]',
                 ) as HTMLSelectElement;
-                const notaAprobacion = form.querySelector(
-                    'input[name="nota_aprobacion"]',
-                ) as HTMLInputElement;
-                const tiempoRegistro = form.querySelector(
-                    'select[name="tiempo_registro_asignacion"]',
+                const idAsignacion = form.querySelector(
+                    'select[name="id_asignacion"]',
                 ) as HTMLSelectElement;
                 const eventoIdInput = form.querySelector(
                     'input[name="evento_id"]',
@@ -658,44 +856,128 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 ) as HTMLImageElement;
 
                 // Asignar valores
-                if (nombre) nombre.value = evento.nom_eve;
-                if (descripcion) descripcion.value = evento.des_eve;
-                if (categoria) categoria.value = evento.id_cat_eve;
-                if (area) area.value = evento.are_eve || "";
-                if (precio) precio.value = evento.precio.toString();
-                if (fechaInicio)
+                console.log("📝 Asignando valores al formulario...");
+
+                if (nombre) {
+                    nombre.value = evento.nom_eve;
+                    console.log("✅ Nombre asignado:", evento.nom_eve);
+                }
+                if (descripcion) {
+                    descripcion.value = evento.des_eve;
+                    console.log("✅ Descripción asignada");
+                }
+                if (cupMax && evento.cup_max !== undefined) {
+                    cupMax.value = evento.cup_max.toString();
+                    console.log("✅ Cupo máximo asignado:", evento.cup_max);
+                }
+                if (categoria) {
+                    categoria.value = evento.id_cat_eve;
+                    console.log("✅ Categoría asignada:", evento.id_cat_eve);
+                    // Mostrar información de categoría después de seleccionar
+                    setTimeout(
+                        () => mostrarInfoCategoriaModificar(categoria),
+                        100,
+                    );
+                }
+                if (area) {
+                    area.value = evento.are_eve || "";
+                    console.log("✅ Área asignada:", evento.are_eve);
+                }
+                if (precio) {
+                    precio.value = evento.precio.toString();
+                    console.log("✅ Precio asignado:", evento.precio);
+                }
+                if (esGratuito) {
+                    esGratuito.value = evento.es_gratuito.toString();
+                    console.log("✅ Es gratuito asignado:", evento.es_gratuito);
+                    // Aplicar lógica de precio/gratuito después de establecer el valor
+                    setTimeout(() => togglePrecioModificar(esGratuito), 100);
+                }
+                if (requiereCarta) {
+                    requiereCarta.value = evento.requiere_carta.toString();
+                    console.log(
+                        "✅ Requiere carta asignado:",
+                        evento.requiere_carta,
+                    );
+                }
+                if (esDestacado) {
+                    esDestacado.value = evento.es_destacado.toString();
+                    console.log(
+                        "✅ Es destacado asignado:",
+                        evento.es_destacado,
+                    );
+                }
+                if (carMotEve) {
+                    carMotEve.value = evento.car_mot_eve || "";
+                    console.log("✅ Carta motivación asignada");
+                }
+                if (fechaInicio) {
                     fechaInicio.value = new Date(evento.fec_ini_eve)
                         .toISOString()
                         .split("T")[0];
-                if (horaInicio) horaInicio.value = evento.hor_ini_eve;
-                if (fechaFin && evento.fec_fin_eve)
+                    console.log(
+                        "✅ Fecha inicio asignada:",
+                        evento.fec_ini_eve,
+                    );
+                }
+                if (fechaFin && evento.fec_fin_eve) {
                     fechaFin.value = new Date(evento.fec_fin_eve)
                         .toISOString()
                         .split("T")[0];
-                if (horaFin && evento.hor_fin_eve)
-                    horaFin.value = evento.hor_fin_eve;
-                if (duracion && evento.dur_eve)
+                    console.log("✅ Fecha fin asignada:", evento.fec_fin_eve);
+                }
+                if (fechaInicioInscripcion && evento.fec_ini_ins_eve) {
+                    fechaInicioInscripcion.value = new Date(
+                        evento.fec_ini_ins_eve,
+                    )
+                        .toISOString()
+                        .split("T")[0];
+                    console.log(
+                        "✅ Fecha inicio inscripción asignada:",
+                        evento.fec_ini_ins_eve,
+                    );
+                }
+                if (fechaFinInscripcion && evento.fec_fin_ins_eve) {
+                    fechaFinInscripcion.value = new Date(evento.fec_fin_ins_eve)
+                        .toISOString()
+                        .split("T")[0];
+                    console.log(
+                        "✅ Fecha fin inscripción asignada:",
+                        evento.fec_fin_ins_eve,
+                    );
+                }
+                if (duracion && evento.dur_eve) {
                     duracion.value = evento.dur_eve.toString();
-                if (ubicacion) ubicacion.value = evento.ubi_eve;
-                if (cedulaOrganizador)
+                    console.log("✅ Duración asignada:", evento.dur_eve);
+                }
+                if (ubicacion) {
+                    ubicacion.value = evento.ubi_eve;
+                    console.log("✅ Ubicación asignada:", evento.ubi_eve);
+                }
+                if (cedulaOrganizador) {
                     cedulaOrganizador.value = evento.ced_org_eve;
-                if (notaAprobacion)
-                    notaAprobacion.value = (
-                        evento.not_apr_eve || 7.0
-                    ).toString();
-                if (tiempoRegistro)
-                    tiempoRegistro.value = (
-                        evento.tie_reg_asi !== false
-                    ).toString();
-                if (eventoIdInput) eventoIdInput.value = evento.id_eve;
-                if (eventoImagen)
+                    console.log("✅ Organizador asignado:", evento.ced_org_eve);
+                }
+                if (idAsignacion && evento.id_asi_eve) {
+                    idAsignacion.value = evento.id_asi_eve;
+                    console.log("✅ Asignación asignada:", evento.id_asi_eve);
+                }
+                if (eventoIdInput) {
+                    eventoIdInput.value = evento.id_eve;
+                    console.log("✅ ID evento asignado:", evento.id_eve);
+                }
+                if (eventoImagen) {
                     eventoImagen.src =
                         evento.img_eve ||
                         "https://via.placeholder.com/300x200?text=Sin+Imagen";
+                    eventoImagen.style.display = "block";
+                    console.log("✅ Imagen asignada:", evento.img_eve);
+                }
 
+                console.log("✅ Todos los valores asignados, mostrando modal");
                 modal.style.display = "block";
+                actualizarValidacionFechas();
             }
-
             function cerrarModalModificarEvento(): void {
                 const modal = document.getElementById("modalModificarEvento");
                 const form = document.getElementById(
@@ -705,6 +987,39 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 if (modal && form) {
                     modal.style.display = "none";
                     form.reset();
+
+                    // Resetear imagen
+                    const imagen = document.getElementById(
+                        "evento-imagen",
+                    ) as HTMLImageElement;
+                    const fileName = document.querySelector(
+                        "#modalModificarEvento .file-name",
+                    ) as HTMLElement;
+                    if (imagen) imagen.style.display = "none";
+                    if (fileName)
+                        fileName.textContent =
+                            "No se ha seleccionado ningún archivo";
+
+                    // Resetear precio y su contenedor
+                    const precioInput = document.querySelector(
+                        'input[name="precio"]',
+                    ) as HTMLInputElement;
+                    const contenedorPrecio = document.getElementById(
+                        "contenedor-precio",
+                    ) as HTMLElement;
+                    if (precioInput) {
+                        precioInput.value = "0";
+                        precioInput.disabled = false;
+                    }
+                    if (contenedorPrecio) {
+                        contenedorPrecio.style.display = "block";
+                    }
+
+                    // Resetear información de categoría
+                    const infoCategoria = document.getElementById(
+                        "info-categoria",
+                    ) as HTMLElement;
+                    if (infoCategoria) infoCategoria.style.display = "none";
                 }
             }
 
@@ -720,9 +1035,20 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 ) as HTMLElement;
                 const eventoImagen = document.getElementById(
                     "evento-imagen",
-                ) as HTMLImageElement;
+                ) as HTMLImageElement; // Manejar cambio de archivo
 
-                // Manejar cambio de archivo
+                const fechaInicioInscripcionesInput = document.querySelector('input[name="fecha_inicio_inscripcion"]') as HTMLInputElement;
+                const fechaFinInscripcionesInput = document.querySelector('input[name="fecha_fin_inscripcion"]') as HTMLInputElement;
+                const fechaInicioEventoInput = document.querySelector('input[name="fecha_inicio"]') as HTMLInputElement;
+                const fechaFinEventoInput = document.querySelector('input[name="fecha_fin"]') as HTMLInputElement;
+
+                fechaInicioInscripcionesInput.addEventListener("change", actualizarValidacionFechas);
+                fechaFinInscripcionesInput.addEventListener("change", actualizarValidacionFechas);
+                fechaInicioEventoInput.addEventListener("change", actualizarValidacionFechas);
+                fechaFinEventoInput.addEventListener("change", actualizarValidacionFechas);
+
+                // Llama una vez al cargar para inicializar restricciones
+                actualizarValidacionFechas();
                 if (fileInput && fileNameDisplay && eventoImagen) {
                     fileInput.addEventListener("change", (e: Event) => {
                         const target = e.target as HTMLInputElement;
@@ -743,26 +1069,88 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                                 "No se ha seleccionado ningún archivo válido";
                         }
                     });
-                }
+                } // Manejar lógica de precio/gratuito
+                const esGratuitoSelect = document.querySelector(
+                    'select[name="es_gratuito"]',
+                ) as HTMLSelectElement;
+                const precioInput = document.querySelector(
+                    'input[name="precio"]',
+                ) as HTMLInputElement;
 
-                // Manejar envío del formulario
+                if (esGratuitoSelect && precioInput) {
+                    function actualizarVisibilidadPrecio() {
+                        const esGratuito = esGratuitoSelect.value === "true";
+                        const contenedorPrecio = document.getElementById(
+                            "contenedor-precio",
+                        ) as HTMLElement;
+
+                        if (esGratuito) {
+                            precioInput.value = "0";
+                            precioInput.disabled = true;
+                            precioInput.style.opacity = "0.5";
+                            if (contenedorPrecio)
+                                contenedorPrecio.style.display = "none";
+                        } else {
+                            precioInput.disabled = false;
+                            precioInput.style.opacity = "1";
+                            if (contenedorPrecio)
+                                contenedorPrecio.style.display = "block";
+                        }
+                    }
+
+                    esGratuitoSelect.addEventListener(
+                        "change",
+                        actualizarVisibilidadPrecio,
+                    );
+
+                    // También manejar cambios en el input de precio
+                    precioInput.addEventListener("input", () => {
+                        if (parseFloat(precioInput.value) === 0) {
+                            esGratuitoSelect.value = "true";
+                            actualizarVisibilidadPrecio();
+                        } else if (esGratuitoSelect.value === "true") {
+                            esGratuitoSelect.value = "false";
+                            actualizarVisibilidadPrecio();
+                        }
+                    });
+
+                    // Ejecutar una vez al cargar
+                    actualizarVisibilidadPrecio();
+                } // Manejar envío del formulario
                 if (form) {
                     form.addEventListener("submit", async (e) => {
                         e.preventDefault();
 
-                        const formData = new FormData(form);
-
-                        // Obtener valores y validar área
+                        const formData = new FormData(form); // Obtener valores y validar
                         const areaValue = formData.get("area") as string;
                         const fechaFin = formData.get("fecha_fin") as string;
-                        const horaFin = formData.get("hora_fin") as string;
                         const duracionStr = formData.get("duracion") as string;
-                        const notaAprobacionStr = formData.get(
-                            "nota_aprobacion",
+                        const carMotEve = formData.get("car_mot_eve") as string;
+                        const fechaInicioInscripcion = formData.get(
+                            "fecha_inicio_inscripcion",
                         ) as string;
-                        const tiempoRegistroStr = formData.get(
-                            "tiempo_registro_asignacion",
+                        const fechaFinInscripcion = formData.get(
+                            "fecha_fin_inscripcion",
                         ) as string;
+
+                        // Renombrar campos para que coincidan con la acción
+                        if (carMotEve && carMotEve.trim() !== "") {
+                            formData.set("carta_motivacion", carMotEve);
+                            formData.delete("car_mot_eve");
+                        } else {
+                            formData.delete("car_mot_eve");
+                        }
+
+                        // Verificar si hay asignación seleccionada
+                        const idAsignacion = formData.get(
+                            "id_asignacion",
+                        ) as string;
+                        if (idAsignacion && idAsignacion.trim() !== "") {
+                            formData.set("asignacion_id", idAsignacion);
+                            formData.delete("id_asignacion");
+                        } else {
+                            formData.delete("id_asignacion");
+                        }
 
                         // Validar que el área sea uno de los valores permitidos
                         const areasPermitidas = [
@@ -778,32 +1166,44 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                         const areaValida =
                             areaValue && areasPermitidas.includes(areaValue)
                                 ? areaValue
-                                : undefined;
-
-                        // Limpiar campos vacíos
+                                : undefined; // Limpiar campos vacíos
                         if (!fechaFin || fechaFin.trim() === "") {
                             formData.delete("fecha_fin");
-                        }
-                        if (!horaFin || horaFin.trim() === "") {
-                            formData.delete("hora_fin");
                         }
                         if (!duracionStr || duracionStr.trim() === "") {
                             formData.delete("duracion");
                         }
-                        if (
-                            !notaAprobacionStr ||
-                            notaAprobacionStr.trim() === ""
-                        ) {
-                            formData.set("nota_aprobacion", "7.0");
-                        }
-                        if (
-                            !tiempoRegistroStr ||
-                            tiempoRegistroStr.trim() === ""
-                        ) {
-                            formData.set("tiempo_registro_asignacion", "true");
+                        if (!carMotEve || carMotEve.trim() === "") {
+                            formData.delete("car_mot_eve");
                         }
                         if (!areaValida) {
                             formData.delete("area");
+                        }
+
+                        // Validar fechas de inscripción
+                        if (
+                            !fechaInicioInscripcion ||
+                            fechaInicioInscripcion.trim() === ""
+                        ) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "La fecha de inicio de inscripción es requerida.",
+                                confirmButtonColor: "#dc2626",
+                            });
+                            return;
+                        }
+                        if (
+                            !fechaFinInscripcion ||
+                            fechaFinInscripcion.trim() === ""
+                        ) {
+                            await Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "La fecha de fin de inscripción es requerida.",
+                                confirmButtonColor: "#dc2626",
+                            });
+                            return;
                         }
 
                         // Verificar si hay imagen seleccionada
@@ -848,43 +1248,138 @@ import "../../../styles/Admin/ModalModificarEvento.css";
                 } // Asignar funciones al objeto window
                 window.abrirModalModificarEvento = abrirModalModificarEvento;
                 window.cerrarModalModificarEvento = cerrarModalModificarEvento;
-                window.abrirAsignacionesModal = abrirAsignacionesModal;
-
-                // Event listeners para botones de asignaciones
-                const btnAgregarAsignaciones = document.getElementById(
-                    "btn-agregar-asignaciones",
-                );
-                const btnGestionarAsignaciones = document.getElementById(
-                    "btn-gestionar-asignaciones",
-                );
-
-                if (btnAgregarAsignaciones) {
-                    btnAgregarAsignaciones.addEventListener(
-                        "click",
-                        async () => {
-                            const eventoIdInput = document.querySelector(
-                                'input[name="evento_id"]',
-                            ) as HTMLInputElement;
-                            if (eventoIdInput && eventoIdInput.value) {
-                                await agregarAsignacionesSeleccionadas(
-                                    eventoIdInput.value,
-                                );
-                            }
-                        },
-                    );
-                }
-
-                if (btnGestionarAsignaciones) {
-                    btnGestionarAsignaciones.addEventListener("click", () => {
-                        const eventoIdInput = document.querySelector(
-                            'input[name="evento_id"]',
-                        ) as HTMLInputElement;
-                        if (eventoIdInput && eventoIdInput.value) {
-                            abrirAsignacionesModal(eventoIdInput.value);
-                        }
-                    });
-                }
+                window.toggleGratuitoModificar = toggleGratuitoModificar;
+                window.togglePrecioModificar = togglePrecioModificar;
+                window.mostrarInfoCategoriaModificar =
+                    mostrarInfoCategoriaModificar;
             });
+
+            function ajustarFecha(fechaString: string, dias: number): string {
+                if (!fechaString) return "";
+                const fecha = new Date(fechaString + "T00:00:00");
+                fecha.setDate(fecha.getDate() + dias);
+                return fecha.toISOString().split("T")[0];
+            }
+
+            function actualizarValidacionFechas() {
+                const fechaInicioInscripcionesInput = document.querySelector(
+                    'input[name="fecha_inicio_inscripcion"]'
+                ) as HTMLInputElement;
+                const fechaFinInscripcionesInput = document.querySelector(
+                    'input[name="fecha_fin_inscripcion"]'
+                ) as HTMLInputElement;
+                const fechaInicioEventoInput = document.querySelector(
+                    'input[name="fecha_inicio"]'
+                ) as HTMLInputElement;
+                const fechaFinEventoInput = document.querySelector(
+                    'input[name="fecha_fin"]'
+                ) as HTMLInputElement;
+
+                const fechaInicioInscripciones = fechaInicioInscripcionesInput.value;
+                const fechaFinInscripciones = fechaFinInscripcionesInput.value;
+                const fechaInicioEvento = fechaInicioEventoInput.value;
+                const fechaFinEvento = fechaFinEventoInput.value;
+
+                // 1. Fin de inscripciones: mínimo 1 día después de inicio de inscripciones
+                if (fechaInicioInscripciones) {
+                    fechaFinInscripcionesInput.min = ajustarFecha(fechaInicioInscripciones, 1);
+                } else {
+                    fechaFinInscripcionesInput.min = "";
+                }
+
+                // 2. Inicio de evento: mínimo 2 días después de inicio de inscripciones
+                if (fechaInicioInscripciones) {
+                    fechaInicioEventoInput.min = ajustarFecha(fechaInicioInscripciones, 2);
+                } else {
+                    fechaInicioEventoInput.min = "";
+                }
+
+                // 3. Fin de inscripciones: máximo 1 día antes del inicio del evento
+                if (fechaInicioEvento) {
+                    fechaFinInscripcionesInput.max = ajustarFecha(fechaInicioEvento, -1);
+                } else {
+                    fechaFinInscripcionesInput.max = "";
+                }
+
+                // 4. Inicio de evento: mínimo 1 día después del fin de inscripciones
+                if (fechaFinInscripciones) {
+                    const minPorFinInscripciones = ajustarFecha(fechaFinInscripciones, 1);
+                    if (
+                        !fechaInicioEventoInput.min ||
+                        minPorFinInscripciones > fechaInicioEventoInput.min
+                    ) {
+                        fechaInicioEventoInput.min = minPorFinInscripciones;
+                    }
+                }
+
+                // 5. Inicio de evento: máximo igual a la fecha de fin de evento
+                if (fechaFinEvento) {
+                    fechaInicioEventoInput.max = ajustarFecha(fechaFinEvento, -1);
+                } else {
+                    fechaInicioEventoInput.max = "";
+                }
+
+                // 6. Fin de evento: mínimo 1 día después del inicio del evento
+                if (fechaInicioEvento) {
+                    fechaFinEventoInput.min = ajustarFecha(fechaInicioEvento, 1);
+                } else {
+                    fechaFinEventoInput.min = "";
+                }
+
+                // 7. Inicio de evento: no puede ser inferior a la de fin de inscripciones
+                if (fechaFinInscripciones) {
+                    const minPorFinInscripciones = ajustarFecha(fechaFinInscripciones, 1);
+                    if (
+                        !fechaInicioEventoInput.min ||
+                        minPorFinInscripciones > fechaInicioEventoInput.min
+                    ) {
+                        fechaInicioEventoInput.min = minPorFinInscripciones;
+                    }
+                }
+
+                // Control visual para inicio de inscripciones: máximo 2 días antes del inicio del evento
+                if (fechaInicioEvento) {
+                    fechaInicioInscripcionesInput.max = ajustarFecha(fechaInicioEvento, -2);
+                } else {
+                    fechaInicioInscripcionesInput.max = "";
+                }
+
+                // Control visual para fin de evento: mínimo 3 días después del inicio de inscripciones
+                if (fechaInicioInscripciones) {
+                    fechaFinEventoInput.min = ajustarFecha(fechaInicioInscripciones, 3);
+                } else {
+                    fechaFinEventoInput.min = "";
+                }
+
+                // Control visual: inicio de inscripciones debe ser al menos 1 día antes que fin de inscripciones
+                if (fechaFinInscripciones) {
+                    fechaInicioInscripcionesInput.max = ajustarFecha(fechaFinInscripciones, -1);
+                } else {
+                    fechaInicioInscripcionesInput.max = "";
+                }
+
+                // Control visual: fin de evento debe ser mínimo 1 día después del inicio de evento
+                if (fechaInicioEvento) {
+                    const minPorInicioEvento = ajustarFecha(fechaInicioEvento, 1);
+                    if (
+                        !fechaFinEventoInput.min ||
+                        new Date(minPorInicioEvento) > new Date(fechaFinEventoInput.min)
+                    ) {
+                        fechaFinEventoInput.min = minPorInicioEvento;
+                    }
+                }
+
+                // Control visual: fin de evento debe ser mínimo 2 días después del fin de inscripciones
+                if (fechaFinInscripciones) {
+                    const minPorFinInscripciones = ajustarFecha(fechaFinInscripciones, 2);
+                    if (
+                        !fechaFinEventoInput.min ||
+                        new Date(minPorFinInscripciones) > new Date(fechaFinEventoInput.min)
+                    ) {
+                        fechaFinEventoInput.min = minPorFinInscripciones;
+                    }
+                }
+            }
         </script>
     </div>
 </div>

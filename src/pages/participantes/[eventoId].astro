@@ -31,34 +31,111 @@ const participantes =
 
 console.log("Participantes obtenidos:", participantes.length);
 
+// Log detallado de cada participante para verificar estados
+if (participantes.length > 0) {
+    console.log("=== ESTADOS ACTUALES DE PARTICIPANTES ===");
+    participantes.forEach((p: any, index: number) => {
+        console.log(`Participante ${index + 1}:`, {
+            id: p.id_ins,
+            nombre: `${p.usuarios?.nom_usu1} ${p.usuarios?.ape_usu1}`,
+            est_par: p.est_par,
+            asi_par: p.asi_par,
+            not_par: p.not_par,
+        });
+    });
+    console.log("=========================================");
+}
+
+// Obtener información del evento y sus asignaciones
+const eventoInfo = participantes.length > 0 ? participantes[0].eventos : null;
+
+// Log para verificar los datos de la categoría
+console.log("=== DEBUG CATEGORÍA ===");
+console.log("Evento info:", eventoInfo);
+if (eventoInfo) {
+    console.log("Categorías del evento:", eventoInfo.categorias_eventos);
+    if (eventoInfo.categorias_eventos) {
+        console.log(
+            "Requiere asistencia:",
+            eventoInfo.categorias_eventos.requiere_asistencia,
+        );
+        console.log("Nombre categoría:", eventoInfo.categorias_eventos.nom_cat);
+        console.log(
+            "Descripción categoría:",
+            eventoInfo.categorias_eventos.des_cat,
+        );
+    } else {
+        console.log("❌ No se encontraron datos de categorías_eventos");
+    }
+}
+
+// Log para verificar datos de participantes
+if (participantes.length > 0) {
+    console.log("=== DEBUG PRIMER PARTICIPANTE ===");
+    console.log("Primer participante completo:", participantes[0]);
+    console.log("Eventos del primer participante:", participantes[0].eventos);
+    console.log(
+        "Categoría del evento del participante:",
+        participantes[0].eventos?.categorias_eventos,
+    );
+}
+console.log("=== FIN DEBUG ===");
+
 // Función para formatear la asistencia
-function formatearAsistencia(asiPar: number | null | undefined): {
+function formatearAsistencia(
+    asiPar: number | null | undefined,
+    requiereAsistencia: boolean,
+): {
     texto: string;
     clase: string;
 } {
+    if (!requiereAsistencia) {
+        return { texto: "No aplicable", clase: "no-aplicable" };
+    }
+
     if (asiPar === null || asiPar === undefined) {
         return { texto: "Sin registrar", clase: "sin-registrar" };
     }
-    return asiPar === 100
-        ? { texto: "Asistió", clase: "si" }
-        : { texto: "No asistió", clase: "no" };
+
+    if (asiPar === 0) {
+        return { texto: "No asistió (0%)", clase: "no" };
+    }
+
+    if (asiPar >= 1 && asiPar <= 100) {
+        return { texto: `${asiPar}%`, clase: asiPar >= 70 ? "si" : "parcial" };
+    }
+
+    return { texto: "Sin registrar", clase: "sin-registrar" };
 }
 
 // Función para formatear la nota
-function formatearNota(nota: number | string | null | undefined): string {
-    if (nota === null || nota === undefined) {
-        return "Sin calificar";
+function formatearNota(
+    nota: number | string | null | undefined,
+    requierePuntaje: boolean,
+    puntajeAprobacion: number = 7.0,
+): {
+    texto: string;
+    clase: string;
+} {
+    if (!requierePuntaje) {
+        return { texto: "No aplicable", clase: "no-aplicable" };
     }
 
-    // Convertir a número si es string
+    if (nota === null || nota === undefined || nota === "") {
+        return { texto: "Sin calificar", clase: "sin-calificar" };
+    }
+
     const numeroNota = typeof nota === "string" ? parseFloat(nota) : nota;
 
-    // Verificar que sea un número válido
     if (isNaN(numeroNota)) {
-        return "Sin calificar";
+        return { texto: "Sin calificar", clase: "sin-calificar" };
     }
 
-    return numeroNota.toFixed(1);
+    if (numeroNota >= puntajeAprobacion) {
+        return { texto: numeroNota.toFixed(1), clase: "aprobado" };
+    } else {
+        return { texto: numeroNota.toFixed(1), clase: "reprobado" };
+    }
 }
 
 // Función para formatear el estado de participación
@@ -77,6 +154,81 @@ function formatearEstadoParticipacion(estado: string): {
             return { texto: "Solo Asistió", clase: "asistio" };
         default:
             return { texto: estado, clase: "pendiente" };
+    }
+}
+
+// Función para calcular el estado dinámicamente según los requisitos de la categoría
+function calcularEstadoParticipacion(
+    asiPar: number | null | undefined,
+    notPar: number | null | undefined,
+    requiereAsistencia: boolean,
+    requierePuntaje: boolean,
+    puntajeAprobacion: number = 7.0,
+    porcentajeAsistenciaMinimo: number = 70,
+): {
+    estado: string;
+    motivo: string;
+} {
+    console.log("=== CALCULANDO ESTADO ===");
+    console.log("Asistencia:", asiPar);
+    console.log("Nota:", notPar);
+    console.log("Requiere asistencia:", requiereAsistencia);
+    console.log("Requiere puntaje:", requierePuntaje);
+    console.log("Puntaje aprobación:", puntajeAprobacion);
+
+    // Si no requiere nada, está aprobado por defecto
+    if (!requiereAsistencia && !requierePuntaje) {
+        return {
+            estado: "APROBADA",
+            motivo: "No requiere asistencia ni puntaje",
+        };
+    }
+
+    let cumpleAsistencia = true;
+    let cumplePuntaje = true;
+    let motivoRechazo = [];
+
+    // Verificar asistencia si es requerida
+    if (requiereAsistencia) {
+        if (asiPar === null || asiPar === undefined) {
+            cumpleAsistencia = false;
+            motivoRechazo.push("falta asistencia");
+        } else if (asiPar < porcentajeAsistenciaMinimo) {
+            cumpleAsistencia = false;
+            motivoRechazo.push(
+                `asistencia insuficiente (${asiPar}% < ${porcentajeAsistenciaMinimo}%)`,
+            );
+        }
+    }
+
+    // Verificar puntaje si es requerido
+    if (requierePuntaje) {
+        if (notPar === null || notPar === undefined) {
+            cumplePuntaje = false;
+            motivoRechazo.push("falta calificación");
+        } else {
+            const nota =
+                typeof notPar === "string" ? parseFloat(notPar) : notPar;
+            if (isNaN(nota) || nota < puntajeAprobacion) {
+                cumplePuntaje = false;
+                motivoRechazo.push(
+                    `nota insuficiente (${nota} < ${puntajeAprobacion})`,
+                );
+            }
+        }
+    }
+
+    // Determinar estado final
+    if (cumpleAsistencia && cumplePuntaje) {
+        return { estado: "APROBADA", motivo: "Cumple todos los requisitos" };
+    } else if (!cumpleAsistencia && !cumplePuntaje) {
+        return { estado: "REPROBADA", motivo: motivoRechazo.join(", ") };
+    } else if (!cumpleAsistencia) {
+        return { estado: "REPROBADA", motivo: motivoRechazo.join(", ") };
+    } else if (!cumplePuntaje) {
+        return { estado: "REPROBADA", motivo: motivoRechazo.join(", ") };
+    } else {
+        return { estado: "PENDIENTE", motivo: "En evaluación" };
     }
 }
 
@@ -108,35 +260,81 @@ const links = [
                             <label for="participante">Participante:</label>
                             <input type="text" id="participante" readonly />
                         </div>
-
                         <div class="form-group">
                             <label for="asistencia">Asistencia:</label>
-                            <select id="asistencia" name="asistencia">
-                                <option value="1">Asistió</option>
-                                <option value="0">No Asistió</option>
-                            </select>
+                            <div id="asistencia-container">
+                                <!-- Campo dinámico que cambiará según la categoría del evento -->
+                                <select
+                                    id="asistencia-select"
+                                    name="asistencia"
+                                    style="display: none;"
+                                >
+                                    <option value="100">Asistió</option>
+                                    <option value="0">No Asistió</option>
+                                </select>
+                                <input
+                                    type="number"
+                                    id="asistencia-number"
+                                    name="asistencia"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    placeholder="Porcentaje de asistencia (0-100)"
+                                    style="display: none;"
+                                />
+                                <p
+                                    id="asistencia-no-aplicable"
+                                    style="display: none; color: #6c757d; font-style: italic;"
+                                >
+                                    Este evento no requiere registro de
+                                    asistencia
+                                </p>
+                            </div>
                         </div>
-
                         <div class="form-group">
-                            <label for="nota">Nota (0-10):</label>
-                            <input
-                                type="number"
-                                id="nota"
-                                name="nota"
-                                min="0"
-                                max="10"
-                                step="0.1"
-                            />
+                            <div id="nota-container">
+                                <!-- Campo dinámico que cambiará según la categoría del evento -->
+                                <label for="nota">Nota (0-10):</label>
+                                <input
+                                    type="number"
+                                    id="nota-number"
+                                    name="nota"
+                                    min="0"
+                                    max="10"
+                                    step="0.1"
+                                    placeholder="Calificación (0.0 - 10.0)"
+                                    style="display: none;"
+                                />
+                                <p
+                                    id="nota-no-aplicable"
+                                    style="display: none; color: #6c757d; font-style: italic;"
+                                >
+                                    Este evento no requiere calificación
+                                </p>
+                                <small
+                                    id="nota-info"
+                                    style="display: none; color: #6c757d; font-size: 0.8rem;"
+                                >
+                                    Puntaje mínimo de aprobación: <span
+                                        id="puntaje-min"></span>
+                                </small>
+                            </div>
                         </div>
-
-                        <div class="form-group">
-                            <label for="estado">Estado:</label>
-                            <select id="estado" name="estado">
-                                <option value="PENDIENTE">Pendiente</option>
-                                <option value="APROBADA">Aprobada</option>
-                                <option value="REPROBADA">Reprobada</option>
-                                <option value="ASISTIO">Solo Asistió</option>
-                            </select>
+                        <!-- El estado se calcula automáticamente según los requisitos de la categoría -->
+                        <div
+                            class="form-group"
+                            id="estado-info"
+                            style="display: none; visibility: hidden; height: 0; padding: 0; margin: 0;"
+                        >
+                            <label>Estado actual:</label>
+                            <div id="estado-calculado" class="estado-preview">
+                                <span id="estado-texto" class="badge-estado"
+                                ></span>
+                                <small
+                                    id="estado-motivo"
+                                    style="display: block; margin-top: 0.5rem; color: #6c757d; font-style: italic;"
+                                ></small>
+                            </div>
                         </div>
 
                         <div class="modal-actions">
@@ -156,16 +354,69 @@ const links = [
             <div class="registros-grid">
                 <div class="registros-superior">
                     <div class="registros-superior-izquierdo">
-                        Participantes - {
-                            participantes.length > 0 && (
+                        {
+                            eventoInfo && (
                                 <span class="evento-nombre">
-                                    {participantes[0].eventos?.nom_eve}
+                                    {eventoInfo.nom_eve}
                                 </span>
                             )
                         }
-                        <span class="total-participantes"
-                            >({participantes.length} participantes)</span
-                        >
+
+                        {
+                            eventoInfo?.asignaciones && (
+                                <div class="info-asignacion" />
+                            )
+                        }
+                        {
+                            eventoInfo?.categorias_eventos && (
+                                <div class="info-requisitos">
+                                    <small>
+                                        <strong>Requisitos:</strong>{" "}
+                                        {!eventoInfo.categorias_eventos
+                                            .requiere_asistencia &&
+                                        !eventoInfo.categorias_eventos
+                                            .requiere_puntaje ? (
+                                            <span class="sin-requisitos">
+                                                No requiere asistencia ni
+                                                calificación - Aprobación
+                                                automática
+                                            </span>
+                                        ) : (
+                                            <>
+                                                {eventoInfo.categorias_eventos
+                                                    .requiere_asistencia && (
+                                                    <span class="requisito">
+                                                        Asistencia (
+                                                        {eventoInfo
+                                                            .categorias_eventos
+                                                            .asi_cat || 70}
+                                                        % mín.)
+                                                    </span>
+                                                )}
+                                                {eventoInfo.categorias_eventos
+                                                    .requiere_asistencia &&
+                                                    eventoInfo
+                                                        .categorias_eventos
+                                                        .requiere_puntaje && (
+                                                        <span> | </span>
+                                                    )}
+                                                {eventoInfo.categorias_eventos
+                                                    .requiere_puntaje && (
+                                                    <span class="requisito">
+                                                        Calificación (
+                                                        {eventoInfo
+                                                            .categorias_eventos
+                                                            .pun_apr_cat ||
+                                                            7.0}{" "}
+                                                        mín.)
+                                                    </span>
+                                                )}
+                                            </>
+                                        )}
+                                    </small>
+                                </div>
+                            )
+                        }
                     </div>
                     <div class="registros-superior-derecho">
                         <select
@@ -179,19 +430,65 @@ const links = [
                             <option value="REPROBADA">Reprobadas</option>
                             <option value="ASISTIO">Solo Asistió</option>
                         </select>
-                        Exportar
-                        <button
-                            class="btn-exportar"
-                            onclick="exportarCalificaciones()"
+
+                        {/* Mostrar estado del evento */}
+                        <span
+                            class={`estado-evento ${eventoInfo?.estado_evento?.toLowerCase()}`}
                         >
-                            SVG
-                        </button>
-                        <button class="btn-pdf" onclick="exportarPDF()">
-                            PDF
-                        </button>
+                            Estado: {eventoInfo?.estado_evento || "ACTIVO"}
+                        </span>
+
+                        {
+                            /* Botón finalizar evento - solo visible si está ACTIVO */
+                        }
+                        {
+                            eventoInfo?.estado_evento === "ACTIVO" && (
+                                <button
+                                    class="btn-finalizar"
+                                    onclick="finalizarEvento()"
+                                    title="Finalizar evento - bloqueará la edición de participaciones"
+                                >
+                                    🏁 Finalizar Evento
+                                </button>
+                            )
+                        }
+
+                        {
+                            /* Botones de exportar - solo visibles si el evento está FINALIZADO */
+                        }
+                        {
+                            eventoInfo?.estado_evento === "FINALIZADO" && (
+                                <>
+                                    Exportar
+                                    <button
+                                        class="btn-exportar"
+                                        onclick="exportarCalificaciones()"
+                                    >
+                                        SVG
+                                    </button>
+                                    <button
+                                        class="btn-pdf"
+                                        onclick="exportarPDF()"
+                                    >
+                                        PDF
+                                    </button>
+                                </>
+                            )
+                        }
+
+                        {/* Botón recalcular - solo visible si está ACTIVO */}
+                        {
+                            eventoInfo?.estado_evento === "ACTIVO" && (
+                                <button
+                                    class="btn-recalcular"
+                                    onclick="recalcularTodosLosEstados()"
+                                >
+                                    Recalcular Estados
+                                </button>
+                            )
+                        }
                     </div>
                 </div>
-
                 <div class="registros-inferior-titulos">
                     <div class="registro-fila">
                         <div class="parte-izquierda-registro-encabezado">
@@ -199,6 +496,9 @@ const links = [
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
                             Apellidos
+                        </div>
+                        <div class="parte-izquierda-registro-encabezado">
+                            Carrera
                         </div>
                         <div class="parte-izquierda-registro-encabezado">
                             Asistencia
@@ -218,28 +518,106 @@ const links = [
                     {
                         participantes.length > 0 ? (
                             participantes.map((participante: any) => {
-                                const asistencia = formatearAsistencia(
+                                const requiereAsistencia =
+                                    participante.eventos?.categorias_eventos
+                                        ?.requiere_asistencia || false;
+                                const requierePuntaje =
+                                    participante.eventos?.categorias_eventos
+                                        ?.requiere_puntaje || false;
+                                const puntajeAprobacion =
+                                    participante.eventos?.categorias_eventos
+                                        ?.pun_apr_cat || 7.0;
+                                const porcentajeAsistenciaMinimo =
+                                    participante.eventos?.categorias_eventos
+                                        ?.asi_cat || 70;
+
+                                // Log para cada participante
+                                console.log(
+                                    `=== PARTICIPANTE ${participante.id_ins} ===`,
+                                );
+                                console.log(
+                                    "Datos categoría del participante:",
+                                    participante.eventos?.categorias_eventos,
+                                );
+                                console.log(
+                                    "Requiere asistencia:",
+                                    requiereAsistencia,
+                                );
+                                console.log(
+                                    "Requiere puntaje:",
+                                    requierePuntaje,
+                                );
+                                console.log(
+                                    "Puntaje aprobación:",
+                                    puntajeAprobacion,
+                                );
+                                console.log(
+                                    "Porcentaje asistencia mínimo:",
+                                    porcentajeAsistenciaMinimo,
+                                );
+                                console.log(
+                                    "Asistencia actual:",
                                     participante.asi_par,
                                 );
+                                console.log(
+                                    "Nota actual:",
+                                    participante.not_par,
+                                );
+
+                                const asistencia = formatearAsistencia(
+                                    participante.asi_par,
+                                    requiereAsistencia,
+                                );
+                                const notaFormateada = formatearNota(
+                                    participante.not_par,
+                                    requierePuntaje,
+                                    puntajeAprobacion,
+                                );
+                                console.log(
+                                    "Asistencia formateada:",
+                                    asistencia,
+                                );
+                                console.log("Nota formateada:", notaFormateada); // Calcular estado dinámicamente según requisitos de la categoría
+                                const estadoCalculado =
+                                    calcularEstadoParticipacion(
+                                        participante.asi_par,
+                                        participante.not_par,
+                                        requiereAsistencia,
+                                        requierePuntaje,
+                                        puntajeAprobacion,
+                                        porcentajeAsistenciaMinimo,
+                                    );
+                                console.log(
+                                    "Estado calculado:",
+                                    estadoCalculado,
+                                );
+
                                 const estadoParticipacion =
                                     formatearEstadoParticipacion(
-                                        participante.est_par,
+                                        estadoCalculado.estado,
                                     );
                                 return (
                                     <div
                                         class="registro-fila"
-                                        data-estado={participante.est_par}
+                                        data-estado={estadoCalculado.estado}
                                         data-participante-id={
                                             participante.id_ins
                                         }
                                         data-asistencia={
-                                            participante.asi_par?.toString() ||
-                                            "0"
+                                            participante.asi_par || 0
                                         }
-                                        data-nota={
-                                            participante.not_par?.toString() ||
-                                            "0"
+                                        data-nota={participante.not_par || ""}
+                                        data-requiere-asistencia={
+                                            requiereAsistencia
                                         }
+                                        data-requiere-puntaje={requierePuntaje}
+                                        data-puntaje-aprobacion={
+                                            puntajeAprobacion
+                                        }
+                                        data-porcentaje-asistencia-minimo={
+                                            porcentajeAsistenciaMinimo
+                                        }
+                                        data-motivo={estadoCalculado.motivo}
                                     >
                                         <div class="parte-izquierda-registro-fila">
                                             {participante.usuarios?.nom_usu1}{" "}
@@ -252,16 +630,30 @@ const links = [
                                         </div>
                                         <div class="parte-izquierda-registro-fila">
                                             <span
+                                                class="carrera-info"
+                                                title={
+                                                    participante.usuarios
+                                                        ?.carreras?.des_car ||
+                                                    ""
+                                                }
+                                            >
+                                                {participante.usuarios?.carreras
+                                                    ? `${participante.usuarios.carreras.nom_car} (${participante.usuarios.carreras.facultades?.nom_fac || "Sin facultad"})`
+                                                    : "Sin carrera asignada"}
+                                            </span>
+                                        </div>
+                                        <div class="parte-izquierda-registro-fila">
+                                            <span
                                                 class={`badge-asistencia ${asistencia.clase}`}
                                             >
                                                 {asistencia.texto}
                                             </span>
-                                        </div>
+                                        </div>{" "}
                                         <div class="parte-izquierda-registro-fila">
-                                            <span class="nota-display">
-                                                {formatearNota(
-                                                    participante.not_par,
-                                                )}
+                                            <span
+                                                class={`badge-nota ${notaFormateada.clase}`}
+                                            >
+                                                {notaFormateada.texto}
                                             </span>
                                         </div>
                                         <div class="parte-izquierda-registro-fila">
@@ -270,28 +662,31 @@ const links = [
                                             >
                                                 {estadoParticipacion.texto}
                                             </span>
-                                        </div>
+                                        </div>{" "}
                                         <div class="registro-opciones">
                                             <button
-                                                onclick={`abrirModalCalificacion('${participante.id_ins}', '${participante.usuarios?.nom_usu1} ${participante.usuarios?.nom_usu2 || ""} ${participante.usuarios?.ape_usu1} ${participante.usuarios?.ape_usu2}')`}
-                                                title="Editar Calificación"
-                                                class="btn-calificar"
+                                                onclick={
+                                                    eventoInfo?.estado_evento ===
+                                                    "FINALIZADO"
+                                                        ? ""
+                                                        : `abrirModalCalificacion('${participante.id_ins}', '${participante.usuarios?.nom_usu1} ${participante.usuarios?.nom_usu2 || ""} ${participante.usuarios?.ape_usu1} ${participante.usuarios?.ape_usu2}', ${requiereAsistencia}, ${requierePuntaje})`
+                                                }
+                                                title={
+                                                    eventoInfo?.estado_evento ===
+                                                    "FINALIZADO"
+                                                        ? "Evento finalizado - No se pueden editar calificaciones"
+                                                        : requiereAsistencia ||
+                                                            requierePuntaje
+                                                          ? "Editar Calificación"
+                                                          : "Este evento no requiere calificación"
+                                                }
+                                                class={`btn-calificar ${(!requiereAsistencia && !requierePuntaje) || eventoInfo?.estado_evento === "FINALIZADO" ? "btn-disabled" : ""}`}
                                             >
-                                                <svg
+                                                <img
                                                     class="imagen-boton-registro"
-                                                    width="20"
-                                                    height="20"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    stroke-width="2"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                                    <path d="m18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                                </svg>
+                                                    src="/img/CRUD/modificar-registro.svg"
+                                                    alt="Calificar"
+                                                />
                                             </button>
                                         </div>
                                     </div>
@@ -312,19 +707,59 @@ const links = [
     </body>
 
     <style>
-        
-    /* Estilos para badges de asistencia */
+        /* Estilos para información de carrera */
+        .carrera-info {
+            font-size: 0.9rem;
+            color: #495057;
+            cursor: help;
+        } /* Estilos para información de asignación */
+        .info-asignacion {
+            margin-top: 0.5rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .info-asignacion small {
+            font-size: 0.8rem;
+        }
+
+        /* Estilos para información de requisitos */
+        .info-requisitos {
+            margin-top: 0.3rem;
+            color: #495057;
+        }
+
+        .info-requisitos small {
+            font-size: 0.8rem;
+        }
+
+        .info-requisitos .sin-requisitos {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .info-requisitos .requisito {
+            color: #b01025;
+            font-weight: 500;
+        }
+
+        /* Estilos para badges de asistencia */
         .badge-asistencia {
             padding: 0.25rem 0.5rem;
             border-radius: 12px;
             font-size: 0.8rem;
             font-weight: bold;
         }
-
         .badge-asistencia.si {
             background-color: #28a745;
             color: white;
         }
+
+        .badge-asistencia.parcial {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
         .badge-asistencia.no {
             background-color: #dc3545;
             color: white;
@@ -333,6 +768,44 @@ const links = [
         .badge-asistencia.sin-registrar {
             background-color: #6c757d;
             color: white;
+        }
+        .badge-asistencia.no-aplicable {
+            background-color: #e9ecef;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Estilos para badges de nota */
+        .badge-nota {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge-nota.aprobado {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .badge-nota.reprobado {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .badge-nota.sin-calificar {
+            background-color: #e2e3e5;
+            color: #6c757d;
+            border: 1px solid #d6d8db;
+        }
+
+        .badge-nota.no-aplicable {
+            background-color: #e9ecef;
+            color: #6c757d;
+            font-style: italic;
+            border: 1px solid #dee2e6;
         }
 
         /* Estilos para badges de estado */
@@ -397,9 +870,68 @@ const links = [
             cursor: pointer;
             font-weight: bold;
         }
-
         .btn-pdf:hover {
             background-color: var(--color-oscuro-uta);
+        }
+
+        .btn-recalcular {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-recalcular:hover {
+            background-color: #138496;
+        }
+
+        /* Estilos para botón finalizar evento */
+        .btn-finalizar {
+            background-color: #fd7e14;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .btn-finalizar:hover {
+            background-color: #e8670e;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para estado del evento */
+        .estado-evento {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-left: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        .estado-evento.activo {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .estado-evento.finalizado {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .estado-evento.cancelado {
+            background-color: #e2e3e5;
+            color: #6c757d;
+            border: 1px solid #d6d8db;
         }
         /* Modal styles */
         .modal {
@@ -468,6 +1000,21 @@ const links = [
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 1rem;
+        } /* Estilos para el campo de asistencia dinámico */
+        #asistencia-container input[type="number"],
+        #nota-container input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        #asistencia-container input[type="number"]:focus,
+        #nota-container input[type="number"]:focus {
+            outline: none;
+            border-color: #b01025;
+            box-shadow: 0 0 0 2px rgba(176, 16, 37, 0.1);
         }
 
         .modal-actions {
@@ -542,10 +1089,55 @@ const links = [
         .registro-fila[data-estado] {
             transition: opacity 0.3s ease;
         }
-
         .btn-calificar:hover {
             background-color: #f8f9fa;
             border-radius: 4px;
+        }
+
+        /* Estilos para botón deshabilitado */
+        .btn-calificar.btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-calificar.btn-disabled:hover {
+            background-color: transparent;
+            transform: none;
+        }
+
+        .btn-calificar.btn-disabled img {
+            filter: grayscale(100%);
+        }
+
+        /* Estilos para la vista previa del estado calculado */
+        .estado-preview {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        #estado-motivo {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        /* Estilos para información de carrera */
+        .carrera-info {
+            font-size: 0.9rem;
+            color: #495057;
+            cursor: help;
+        }
+
+        /* Estilos para información de asignación */
+        .info-asignacion {
+            margin-top: 0.5rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .info-asignacion small {
+            font-size: 0.8rem;
         }
 
         @media (max-width: 768px) {
@@ -570,21 +1162,261 @@ const links = [
         import jsPDF from "jspdf";
         import autoTable from "jspdf-autotable";
 
-        // Declarar tipos para funciones globales
+        // Extiende la interfaz Window para evitar errores de TypeScript
         declare global {
             interface Window {
-                abrirModalCalificacion: (
-                    participanteId: string,
-                    nombreCompleto: string,
-                ) => void;
-                exportarCalificaciones: () => void;
-                exportarPDF: () => void;
+                abrirModalCalificacion?: any;
+                exportarCalificaciones?: any;
+                exportarPDF?: any;
+                recalcularTodosLosEstados?: any;
+                finalizarEvento?: any;
+                limpiarMarcaRecalculo?: any;
             }
-        } // Función para abrir modal de calificación
+        }
+
+        // Función para calcular el estado dinámicamente (versión JavaScript)
+        function calcularEstadoModal(
+            asistencia: number | null,
+            nota: number | null,
+            requiereAsistencia: boolean,
+            requierePuntaje: boolean,
+            puntajeAprobacion: number = 7.0,
+            porcentajeAsistenciaMinimo: number = 70,
+        ): { estado: string; motivo: string; clase: string } {
+            console.log("=== CALCULANDO ESTADO EN MODAL ===");
+            console.log("Asistencia:", asistencia);
+            console.log("Nota:", nota);
+            console.log("Requiere asistencia:", requiereAsistencia);
+            console.log("Requiere puntaje:", requierePuntaje);
+
+            // Si no requiere nada, está aprobado por defecto
+            if (!requiereAsistencia && !requierePuntaje) {
+                return {
+                    estado: "APROBADA",
+                    motivo: "No requiere asistencia ni puntaje",
+                    clase: "aprobada",
+                };
+            }
+
+            let cumpleAsistencia = true;
+            let cumplePuntaje = true;
+            let motivoRechazo = [];
+
+            // Verificar asistencia si es requerida
+            if (requiereAsistencia) {
+                if (asistencia === null || asistencia === undefined) {
+                    cumpleAsistencia = false;
+                    motivoRechazo.push("falta asistencia");
+                } else if (asistencia < porcentajeAsistenciaMinimo) {
+                    cumpleAsistencia = false;
+                    motivoRechazo.push(
+                        `asistencia insuficiente (${asistencia}% < ${porcentajeAsistenciaMinimo}%)`,
+                    );
+                }
+            }
+
+            // Verificar puntaje si es requerido
+            if (requierePuntaje) {
+                if (nota === null || nota === undefined) {
+                    cumplePuntaje = false;
+                    motivoRechazo.push("falta calificación");
+                } else if (nota < puntajeAprobacion) {
+                    cumplePuntaje = false;
+                    motivoRechazo.push(
+                        `nota insuficiente (${nota} < ${puntajeAprobacion})`,
+                    );
+                }
+            }
+
+            // Determinar estado final
+            if (cumpleAsistencia && cumplePuntaje) {
+                return {
+                    estado: "APROBADA",
+                    motivo: "Cumple todos los requisitos",
+                    clase: "aprobada",
+                };
+            } else {
+                return {
+                    estado: "REPROBADA",
+                    motivo: motivoRechazo.join(", "),
+                    clase: "reprobada",
+                };
+            }
+        } // Función para actualizar la vista previa del estado
+        function actualizarEstadoPreview(
+            requiereAsistencia: boolean,
+            requierePuntaje: boolean,
+            puntajeAprobacion: number,
+            porcentajeAsistenciaMinimo: number = 70,
+        ) {
+            const asistenciaNumber = document.getElementById(
+                "asistencia-number",
+            ) as HTMLInputElement;
+            const notaNumber = document.getElementById(
+                "nota-number",
+            ) as HTMLInputElement;
+            const estadoTexto = document.getElementById(
+                "estado-texto",
+            ) as HTMLElement;
+            const estadoMotivo = document.getElementById(
+                "estado-motivo",
+            ) as HTMLElement;
+            const estadoInfo = document.getElementById(
+                "estado-info",
+            ) as HTMLElement;
+
+            if (!estadoTexto || !estadoMotivo || !estadoInfo) return;
+
+            // Obtener valores actuales
+            const asistenciaValor = requiereAsistencia
+                ? asistenciaNumber?.value
+                    ? parseFloat(asistenciaNumber.value)
+                    : null
+                : 100; // Si no requiere asistencia, consideramos que "asistió"
+
+            const notaValor = requierePuntaje
+                ? notaNumber?.value
+                    ? parseFloat(notaNumber.value)
+                    : null
+                : puntajeAprobacion; // Si no requiere nota, consideramos que "aprobó"            // Calcular estado
+            const resultado = calcularEstadoModal(
+                asistenciaValor,
+                notaValor,
+                requiereAsistencia,
+                requierePuntaje,
+                puntajeAprobacion,
+                porcentajeAsistenciaMinimo,
+            );
+
+            // Actualizar interfaz
+            estadoTexto.textContent =
+                resultado.estado === "APROBADA" ? "Aprobada" : "Reprobada";
+            estadoTexto.className = `badge-estado ${resultado.clase}`;
+            estadoMotivo.textContent = resultado.motivo;
+            estadoInfo.style.display = "block";
+        } // Función para abrir modal de calificación        // Función para resetear el modal antes de abrirlo
+        function resetearModal() {
+            console.log("=== RESETEANDO MODAL ===");
+
+            const modal = document.getElementById(
+                "modalCalificaciones",
+            ) as HTMLElement;
+            const asistenciaSelect = document.getElementById(
+                "asistencia-select",
+            ) as HTMLSelectElement;
+            const asistenciaNumber = document.getElementById(
+                "asistencia-number",
+            ) as HTMLInputElement;
+            const asistenciaNoAplicable = document.getElementById(
+                "asistencia-no-aplicable",
+            ) as HTMLElement;
+            const notaNumber = document.getElementById(
+                "nota-number",
+            ) as HTMLInputElement;
+            const notaNoAplicable = document.getElementById(
+                "nota-no-aplicable",
+            ) as HTMLElement;
+            const notaInfo = document.getElementById(
+                "nota-info",
+            ) as HTMLElement;
+            const estadoInfo = document.getElementById(
+                "estado-info",
+            ) as HTMLElement;
+
+            // Limpiar el data-participante-id del modal para evitar conflictos
+            if (modal) {
+                modal.removeAttribute("data-participante-id");
+                delete modal.dataset.participanteId;
+            }
+
+            // Resetear todos los campos a su estado inicial
+            if (asistenciaSelect) {
+                asistenciaSelect.style.display = "none";
+                asistenciaSelect.removeAttribute("name");
+                asistenciaSelect.disabled = false;
+                asistenciaSelect.value = "100";
+            }
+
+            if (asistenciaNumber) {
+                asistenciaNumber.style.display = "none";
+                asistenciaNumber.removeAttribute("name");
+                asistenciaNumber.disabled = false;
+                asistenciaNumber.value = "";
+            }
+
+            if (asistenciaNoAplicable) {
+                asistenciaNoAplicable.style.display = "none";
+            }
+
+            if (notaNumber) {
+                notaNumber.style.display = "none";
+                notaNumber.removeAttribute("name");
+                notaNumber.disabled = false;
+                notaNumber.value = "";
+            }
+
+            if (notaNoAplicable) {
+                notaNoAplicable.style.display = "none";
+            }
+
+            if (notaInfo) {
+                notaInfo.style.display = "none";
+            }
+
+            if (estadoInfo) {
+                estadoInfo.style.display = "none";
+            }
+
+            console.log("Modal reseteado completamente");
+        }
+
+        //@ts-ignore
         window.abrirModalCalificacion = function (
             participanteId: string,
             nombreCompleto: string,
+            requiereAsistencia: boolean,
+            requierePuntaje: boolean,
         ) {
+            console.log("=== VALIDANDO APERTURA DEL MODAL ===");
+            console.log("Participante ID:", participanteId);
+            console.log("Requiere asistencia:", requiereAsistencia);
+            console.log("Requiere puntaje:", requierePuntaje);
+
+            // Verificar si el evento está finalizado
+            const estadoEventoElement =
+                document.querySelector(".estado-evento");
+            const estadoEvento =
+                estadoEventoElement?.textContent?.includes("FINALIZADO");
+
+            if (estadoEvento) {
+                Swal.fire({
+                    title: "Evento finalizado",
+                    text: "No se pueden editar las calificaciones porque el evento ya está finalizado.",
+                    icon: "warning",
+                    confirmButtonText: "Entendido",
+                    confirmButtonColor: "#b01025",
+                });
+                return;
+            }
+
+            // Validar si el evento requiere al menos asistencia o puntaje
+            if (!requiereAsistencia && !requierePuntaje) {
+                // Mostrar mensaje informativo y no abrir el modal
+                Swal.fire({
+                    title: "No se requiere calificación",
+                    text: "Este evento no requiere registro de asistencia ni calificación. Los participantes están aprobados automáticamente.",
+                    icon: "info",
+                    confirmButtonText: "Entendido",
+                    confirmButtonColor: "#b01025",
+                });
+                return;
+            }
+
+            console.log("Validación pasada, abriendo modal...");
+
+            // IMPORTANTE: Resetear el modal antes de configurarlo
+            resetearModal();
+
             const modal = document.getElementById(
                 "modalCalificaciones",
             ) as HTMLElement;
@@ -592,46 +1424,149 @@ const links = [
                 "participante",
             ) as HTMLInputElement;
             const asistenciaSelect = document.getElementById(
-                "asistencia",
+                "asistencia-select",
             ) as HTMLSelectElement;
-            const notaInput = document.getElementById(
-                "nota",
+            const asistenciaNumber = document.getElementById(
+                "asistencia-number",
             ) as HTMLInputElement;
-            const estadoSelect = document.getElementById(
-                "estado",
-            ) as HTMLSelectElement;
+            const asistenciaNoAplicable = document.getElementById(
+                "asistencia-no-aplicable",
+            ) as HTMLElement;
+            const notaNumber = document.getElementById(
+                "nota-number",
+            ) as HTMLInputElement;
+            const notaNoAplicable = document.getElementById(
+                "nota-no-aplicable",
+            ) as HTMLElement;
+            const notaInfo = document.getElementById(
+                "nota-info",
+            ) as HTMLElement;
+            const puntajeMin = document.getElementById(
+                "puntaje-min",
+            ) as HTMLElement;
 
             if (modal && participanteInput) {
                 participanteInput.value = nombreCompleto;
 
                 // Buscar los datos actuales del participante en la tabla
+                // Ser específico para evitar seleccionar el modal que también tiene el mismo data-participante-id
                 const filaParticipante = document.querySelector(
-                    `[data-participante-id="${participanteId}"]`,
+                    `.registros-inferior .registro-fila[data-participante-id="${participanteId}"]`,
                 ) as HTMLElement;
+                let requiereAsistencia = false;
+                let requierePuntaje = false;
+                let puntajeAprobacion = 7.0;
+                let porcentajeAsistenciaMinimo = 70;
+                let asistenciaActual = "0";
+                let notaActual = "0";
                 if (filaParticipante) {
-                    // Extraer datos actuales de la fila
-                    const asistenciaActual =
+                    // Log para debug del modal
+                    console.log("=== DEBUG MODAL ===");
+                    console.log("Participante ID:", participanteId);
+                    console.log("Fila encontrada:", filaParticipante);
+                    console.log(
+                        "Dataset completo de la fila:",
+                        filaParticipante.dataset,
+                    ); // Extraer datos actuales de la fila
+                    asistenciaActual =
                         filaParticipante.dataset.asistencia || "0";
-                    const notaActual = filaParticipante.dataset.nota || "0";
-                    const estadoActual =
-                        filaParticipante.dataset.estado || "PENDIENTE";
+                    notaActual = filaParticipante.dataset.nota || "0";
+                    requiereAsistencia =
+                        filaParticipante.dataset.requiereAsistencia === "true";
+                    requierePuntaje =
+                        filaParticipante.dataset.requierePuntaje === "true";
+                    puntajeAprobacion = parseFloat(
+                        filaParticipante.dataset.puntajeAprobacion || "7.0",
+                    );
+                    porcentajeAsistenciaMinimo = parseFloat(
+                        filaParticipante.dataset.porcentajeAsistenciaMinimo ||
+                            "70",
+                    );
+                    console.log("Datos extraídos:");
+                    console.log("- Asistencia actual:", asistenciaActual);
+                    console.log("- Nota actual:", notaActual);
+                    console.log("- Requiere asistencia:", requiereAsistencia);
+                    console.log("- Requiere puntaje:", requierePuntaje);
+                    console.log("- Puntaje aprobación:", puntajeAprobacion);
+                    console.log("=== FIN DEBUG MODAL ===");
+                } // Configurar el campo de asistencia según la categoría del evento
+                console.log("=== CONFIGURACIÓN DEL MODAL ===");
+                console.log(
+                    "Configurando campos con requiereAsistencia:",
+                    requiereAsistencia,
+                );
+                console.log(
+                    "Configurando campos con requierePuntaje:",
+                    requierePuntaje,
+                );
 
-                    if (asistenciaSelect)
-                        asistenciaSelect.value = asistenciaActual;
-                    if (notaInput)
-                        notaInput.value =
-                            notaActual === "Sin calificar" ? "0" : notaActual;
-                    if (estadoSelect) estadoSelect.value = estadoActual;
+                if (!requiereAsistencia) {
+                    // Evento no requiere asistencia
+                    console.log(
+                        "Configurando modal para evento SIN asistencia",
+                    );
+                    asistenciaSelect.style.display = "none";
+                    asistenciaNumber.style.display = "none";
+                    asistenciaNoAplicable.style.display = "block";
+                    asistenciaSelect.removeAttribute("name");
+                    asistenciaNumber.removeAttribute("name");
+                } else {
+                    // Evento requiere asistencia - usar campo numérico
+                    console.log(
+                        "Configurando modal para evento CON asistencia, valor:",
+                        asistenciaActual,
+                    );
+                    asistenciaSelect.style.display = "none";
+                    asistenciaNumber.style.display = "block";
+                    asistenciaNoAplicable.style.display = "none";
+                    asistenciaSelect.removeAttribute("name");
+                    asistenciaNumber.setAttribute("name", "asistencia");
+                    asistenciaNumber.value = asistenciaActual;
                 }
 
+                // Configurar el campo de nota según la categoría del evento
+                if (!requierePuntaje) {
+                    // Evento no requiere puntaje
+                    console.log("Configurando modal para evento SIN puntaje");
+                    notaNumber.style.display = "none";
+                    notaNoAplicable.style.display = "block";
+                    notaInfo.style.display = "none";
+                    notaNumber.removeAttribute("name");
+                } else {
+                    // Evento requiere puntaje - usar campo numérico
+                    console.log(
+                        "Configurando modal para evento CON puntaje, valor:",
+                        notaActual,
+                    );
+                    if (notaNumber) {
+                        notaNumber.style.display = "block";
+                        notaNoAplicable.style.display = "none";
+                        notaInfo.style.display = "block";
+                        notaNumber.setAttribute("name", "nota"); // <--- ASEGÚRATE QUE SIEMPRE TENGA 'name' SI SE VA A ENVIAR
+                        // ¡Aquí está la clave! Si notaActual es "0" o "Sin calificar", se convierte a cadena vacía.
+                        notaNumber.value =
+                            notaActual === "Sin calificar" ? "" : notaActual;
+                    }
+                    puntajeMin.textContent = puntajeAprobacion.toString();
+                }
+                console.log("=== FIN CONFIGURACIÓN ===");
+
                 // Guardar el ID del participante en el modal para usarlo al enviar
-                modal.dataset.participanteId = participanteId;
+                modal.dataset.participanteId = participanteId; // Actualizar la vista previa del estado calculado
+                actualizarEstadoPreview(
+                    requiereAsistencia,
+                    requierePuntaje,
+                    puntajeAprobacion,
+                    porcentajeAsistenciaMinimo,
+                );
+
                 modal.style.display = "flex";
             }
-        };
-
-        // Cerrar modal
+        }; // Cerrar modal
         document.addEventListener("DOMContentLoaded", function () {
+            // Ejecutar recálculo automático al cargar la página
+            ejecutarRecalculoAutomatico();
+
             const closeBtn = document.querySelector(".close") as HTMLElement;
             const cancelBtn = document.querySelector(
                 ".btn-cancelar",
@@ -646,20 +1581,47 @@ const links = [
                 "filtroEstado",
             ) as HTMLSelectElement;
 
+            console.log("Formulario encontrado al cargar el DOM:", form);
+
             if (closeBtn && modal) {
                 closeBtn.addEventListener("click", function () {
                     modal.style.display = "none";
+                    resetearModal(); // Resetear cuando se cierre
                 });
             }
 
             if (cancelBtn && modal) {
                 cancelBtn.addEventListener("click", function () {
                     modal.style.display = "none";
+                    resetearModal(); // Resetear cuando se cancele
                 });
             } // Guardar calificación
             if (form && modal) {
                 form.addEventListener("submit", async function (e) {
                     e.preventDefault();
+
+                    // Validación manual para evitar valores inválidos en inputs tipo number
+                    const asistenciaInput = document.getElementById("asistencia-number") as HTMLInputElement;
+                    const notaInput = document.getElementById("nota-number") as HTMLInputElement;
+                    const formData = new FormData(this);
+                    if (asistenciaInput && asistenciaInput.hasAttribute("name")) {
+                        if (asistenciaInput.value !== "" && isNaN(Number(asistenciaInput.value))) {
+                            Swal.fire({
+                                title: "Error",
+                                text: "El valor de asistencia no es válido.",
+                                icon: "error",
+                                confirmButtonText: "OK",
+                            });
+                            return;
+                        }
+                    }
+                    if (asistenciaInput && asistenciaInput.hasAttribute("name") && asistenciaInput.value !== "") {
+                        formData.append("nota", asistenciaInput.value);
+                    }
+                    
+                    if (notaInput && notaInput.hasAttribute("name") && notaInput.value !== "") {
+                        formData.append("nota", notaInput.value);
+                    }
 
                     const participanteId = modal.dataset.participanteId;
                     if (!participanteId) {
@@ -667,8 +1629,15 @@ const links = [
                         return;
                     }
 
-                    const formData = new FormData(this);
                     formData.append("inscripcionId", participanteId);
+
+                    // ============ AÑADE ESTOS CONSOLE.LOGS ============
+                    console.log("=== Debugging FormData antes de enviar ===");
+                    for (let pair of formData.entries()) {
+                        console.log(pair[0] + ": " + pair[1]);
+                    }
+                    console.log("=========================================");
+                    // ===================================================
 
                     try {
                         const { data, error } =
@@ -682,6 +1651,7 @@ const links = [
                                 confirmButtonText: "OK",
                             });
                             modal.style.display = "none";
+                            resetearModal(); // Resetear después del éxito
                             window.location.reload();
                         } else {
                             await Swal.fire({
@@ -700,9 +1670,7 @@ const links = [
                         );
                     }
                 });
-            }
-
-            // Filtrar por estado
+            } // Filtrar por estado
             if (filtroEstado) {
                 filtroEstado.addEventListener("change", function () {
                     const filtro = this.value;
@@ -720,7 +1688,80 @@ const links = [
                     });
                 });
             }
+
+            // Agregar eventos para actualizar la vista previa del estado cuando cambien los valores
+            const asistenciaNumber = document.getElementById(
+                "asistencia-number",
+            ) as HTMLInputElement;
+            const notaNumber = document.getElementById(
+                "nota-number",
+            ) as HTMLInputElement;
+            if (asistenciaNumber) {
+                asistenciaNumber.addEventListener("input", function () {
+                    const modal = document.getElementById(
+                        "modalCalificaciones",
+                    ) as HTMLElement;
+                    const filaParticipante = document.querySelector(
+                        `.registros-inferior .registro-fila[data-participante-id="${modal.dataset.participanteId}"]`,
+                    ) as HTMLElement;
+
+                    if (filaParticipante) {
+                        const requiereAsistencia =
+                            filaParticipante.dataset.requiereAsistencia ===
+                            "true";
+                        const requierePuntaje =
+                            filaParticipante.dataset.requierePuntaje === "true";
+                        const puntajeAprobacion = parseFloat(
+                            filaParticipante.dataset.puntajeAprobacion || "7.0",
+                        );
+                        const porcentajeAsistenciaMinimo = parseFloat(
+                            filaParticipante.dataset
+                                .porcentajeAsistenciaMinimo || "70",
+                        );
+
+                        actualizarEstadoPreview(
+                            requiereAsistencia,
+                            requierePuntaje,
+                            puntajeAprobacion,
+                            porcentajeAsistenciaMinimo,
+                        );
+                    }
+                });
+            }
+            if (notaNumber) {
+                notaNumber.addEventListener("input", function () {
+                    const modal = document.getElementById(
+                        "modalCalificaciones",
+                    ) as HTMLElement;
+                    const filaParticipante = document.querySelector(
+                        `.registros-inferior .registro-fila[data-participante-id="${modal.dataset.participanteId}"]`,
+                    ) as HTMLElement;
+
+                    if (filaParticipante) {
+                        const requiereAsistencia =
+                            filaParticipante.dataset.requiereAsistencia ===
+                            "true";
+                        const requierePuntaje =
+                            filaParticipante.dataset.requierePuntaje === "true";
+                        const puntajeAprobacion = parseFloat(
+                            filaParticipante.dataset.puntajeAprobacion || "7.0",
+                        );
+                        const porcentajeAsistenciaMinimo = parseFloat(
+                            filaParticipante.dataset
+                                .porcentajeAsistenciaMinimo || "70",
+                        );
+
+                        actualizarEstadoPreview(
+                            requiereAsistencia,
+                            requierePuntaje,
+                            puntajeAprobacion,
+                            porcentajeAsistenciaMinimo,
+                        );
+                    }
+                });
+            }
         }); // Función para exportar calificaciones
+        //@ts-ignore
         window.exportarCalificaciones = function () {
             console.log("Exportando calificaciones...");
 
@@ -728,12 +1769,11 @@ const links = [
             const eventoNombre =
                 document
                     .querySelector(".evento-nombre")
-                    ?.textContent?.replace("- ", "") || "Evento";
-
-            // Crear encabezados CSV
+                    ?.textContent?.replace("- ", "") || "Evento"; // Crear encabezados CSV
             const headers = [
                 "Nombres",
                 "Apellidos",
+                "Carrera",
                 "Asistencia",
                 "Nota",
                 "Estado",
@@ -783,6 +1823,7 @@ const links = [
             window.URL.revokeObjectURL(url);
         };
 
+        //@ts-ignore
         window.exportarPDF = () => {
             const logoFISEI = new Image();
             const logoUTA = new Image();
@@ -838,13 +1879,12 @@ const links = [
                         `Fecha de exportación: ${new Date().toLocaleDateString("es-ES")}`,
                         14,
                         baseY + 16,
-                    );
-
-                    // Tabla
+                    ); // Tabla
                     const head = [
                         [
                             "Nombres",
                             "Apellidos",
+                            "Carrera",
                             "Asistencia",
                             "Nota",
                             "Estado",
@@ -893,6 +1933,297 @@ const links = [
             logoFISEI.onerror = () => {
                 alert("No se pudo cargar el logo de FISEI.");
             };
+        }; // Función para recalcular todos los estados de participación
+        //@ts-ignore
+        window.recalcularTodosLosEstados = async function () {
+            const resultado = await Swal.fire({
+                title: "¿Recalcular todos los estados?",
+                text: "Esto actualizará el estado de todos los participantes según los requisitos actuales de la categoría.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#17a2b8",
+                cancelButtonColor: "#dc2626",
+                confirmButtonText: "Sí, recalcular",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (!resultado.isConfirmed) return;
+
+            try {
+                // Mostrar loader
+                Swal.fire({
+                    title: "Recalculando estados...",
+                    text: "Por favor espera mientras se actualizan los estados.",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                // Obtener todas las filas de participantes
+                const filasParticipantes = document.querySelectorAll(
+                    ".registro-fila[data-participante-id]",
+                );
+                let actualizados = 0;
+                let errores = 0;
+
+                for (const fila of filasParticipantes) {
+                    try {
+                        const participanteId = (fila as HTMLElement).dataset
+                            .participanteId;
+                        const asistencia = (fila as HTMLElement).dataset
+                            .asistencia;
+                        const nota = (fila as HTMLElement).dataset.nota;
+
+                        console.log(
+                            `Recalculando participante ${participanteId}:`,
+                            { asistencia, nota },
+                        );
+
+                        const formData = new FormData();
+                        formData.append("inscripcionId", participanteId || "");
+                        if (
+                            asistencia !== undefined &&
+                            asistencia !== null &&
+                            asistencia !== "" &&
+                            asistencia !== "null" &&
+                            asistencia !== "undefined"
+                        ) {
+                            formData.append("asistencia", String(asistencia));
+                        }
+                        if (
+                            nota !== undefined &&
+                            nota !== null &&
+                            nota !== "" &&
+                            nota !== "null" &&
+                            nota !== "undefined" &&
+                            nota !== "Sin calificar"
+                        ) {
+                            formData.append("nota", String(nota));
+                        }
+
+                        const { data, error } =
+                            await actions.updateParticipante(formData);
+
+                        if (data?.success) {
+                            actualizados++;
+                        } else {
+                            console.error(
+                                `Error al actualizar participante ${participanteId}:`,
+                                error,
+                            );
+                            errores++;
+                        }
+                    } catch (error) {
+                        console.error("Error al procesar participante:", error);
+                        errores++;
+                    }
+                }
+
+                // Mostrar resultado
+                await Swal.fire({
+                    title: "Recálculo completado",
+                    text: `Se actualizaron ${actualizados} participantes. ${errores > 0 ? `${errores} errores encontrados.` : ""}`,
+                    icon: errores > 0 ? "warning" : "success",
+                    confirmButtonText: "OK",
+                });
+
+                // Recargar la página para mostrar los cambios
+                window.location.reload();
+            } catch (error) {
+                console.error("Error durante el recálculo:", error);
+                await Swal.fire({
+                    title: "Error",
+                    text: "Ocurrió un error durante el recálculo de estados.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            }
+        }; // Función para ejecutar recálculo automático sin confirmación al cargar la página
+        async function ejecutarRecalculoAutomatico() {
+            // Obtener el ID del evento actual
+            const eventoId = window.location.pathname.split("/").pop();
+            const storageKey = `recalculo_ejecutado_${eventoId}`;
+
+            // Verificar si ya se ejecutó el recálculo para este evento
+            const yaEjecutado = localStorage.getItem(storageKey);
+            if (yaEjecutado) {
+                console.log(
+                    "ℹ️ Recálculo automático ya ejecutado para este evento, saltando...",
+                );
+                return;
+            }
+
+            console.log(
+                "🔄 Iniciando recálculo automático de estados (primera vez)...",
+            );
+
+            try {
+                // Obtener todas las filas de participantes
+                const filasParticipantes = document.querySelectorAll(
+                    ".registro-fila[data-participante-id]",
+                );
+
+                if (filasParticipantes.length === 0) {
+                    console.log("ℹ️ No hay participantes para recalcular");
+                    return;
+                }
+
+                let actualizados = 0;
+                let errores = 0;
+
+                console.log(
+                    `📊 Procesando ${filasParticipantes.length} participantes...`,
+                );
+
+                for (const fila of filasParticipantes) {
+                    try {
+                        const participanteId = (fila as HTMLElement).dataset
+                            .participanteId;
+                        const asistencia = (fila as HTMLElement).dataset
+                            .asistencia;
+                        const nota = (fila as HTMLElement).dataset.nota;
+
+                        console.log(
+                            `🔄 Recalculando participante ${participanteId}:`,
+                            { asistencia, nota },
+                        );
+
+                        const formData = new FormData();
+                        formData.append("inscripcionId", participanteId || "");
+                        if (
+                            typeof asistencia === "string" &&
+                            asistencia !== "" &&
+                            asistencia !== "null" &&
+                            asistencia !== "undefined"
+                        ) {
+                            formData.append("asistencia", asistencia);
+                        }
+                        if (
+                            nota !== undefined &&
+                            nota !== null &&
+                            nota !== "" &&
+                            nota !== "null" &&
+                            nota !== "undefined" &&
+                            nota !== "Sin calificar"
+                        ) {
+                            formData.append("nota", String(nota));
+                        }
+
+                        const { data, error } =
+                            await actions.updateParticipante(formData);
+
+                        if (data?.success) {
+                            actualizados++;
+                        } else {
+                            console.error(
+                                `❌ Error al actualizar participante ${participanteId}:`,
+                                error,
+                            );
+                            errores++;
+                        }
+                    } catch (error) {
+                        console.error(
+                            "❌ Error al procesar participante:",
+                            error,
+                        );
+                        errores++;
+                    }
+                }
+                console.log(
+                    `✅ Recálculo automático completado: ${actualizados} actualizados, ${errores} errores`,
+                );
+
+                // Marcar como ejecutado en localStorage
+                localStorage.setItem(storageKey, "true");
+                console.log(
+                    "💾 Recálculo marcado como ejecutado para este evento",
+                );
+
+                // Si hubo actualizaciones, recargar la página para mostrar los cambios
+                if (actualizados > 0) {
+                    console.log("🔄 Recargando página para mostrar cambios...");
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error(
+                    "❌ Error durante el recálculo automático:",
+                    error,
+                );
+            }
+        }
+
+        // Función para finalizar evento
+        //@ts-ignore
+        window.finalizarEvento = async function () {
+            const resultado = await Swal.fire({
+                title: "¿Finalizar el evento?",
+                text: "Esta acción finalizará el evento y bloqueará la edición de participaciones. ¿Estás seguro?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#fd7e14",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Sí, finalizar evento",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (!resultado.isConfirmed) return;
+
+            try {
+                // Mostrar loader
+                Swal.fire({
+                    title: "Finalizando evento...",
+                    text: "Por favor espera mientras se finaliza el evento.",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                const eventoId = window.location.pathname.split("/").pop();
+                const formData = new FormData();
+                formData.append("eventoId", eventoId || "");
+
+                const { data, error } = await actions.finalizarEvento(formData);
+
+                if (data?.success) {
+                    await Swal.fire({
+                        title: "¡Evento finalizado!",
+                        text: data.message,
+                        icon: "success",
+                        confirmButtonText: "OK",
+                    });
+
+                    // Recargar la página para mostrar los cambios
+                    window.location.reload();
+                } else {
+                    await Swal.fire({
+                        title: "Error",
+                        text: error?.message || "Error al finalizar el evento",
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                }
+            } catch (error) {
+                console.error("Error al finalizar evento:", error);
+                await Swal.fire({
+                    title: "Error",
+                    text: "Ocurrió un error durante la finalización del evento.",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            }
+        };
+
+        // Función de utilidad para limpiar la marca de recálculo (para debugging o forzar nuevo recálculo)
+        //@ts-ignore
+        window.limpiarMarcaRecalculo = function () {
+            const eventoId = window.location.pathname.split("/").pop();
+            const storageKey = `recalculo_ejecutado_${eventoId}`;
+            localStorage.removeItem(storageKey);
+            console.log(
+                "🧹 Marca de recálculo limpiada. El próximo recálculo se ejecutará automáticamente.",
+            );
         };
 
         // Cerrar modal al hacer clic fuera
@@ -902,6 +2233,7 @@ const links = [
             ) as HTMLElement;
             if (event.target === modal && modal) {
                 modal.style.display = "none";
+                resetearModal(); // Resetear cuando se cierre haciendo clic fuera
             }
         });
     </script>
