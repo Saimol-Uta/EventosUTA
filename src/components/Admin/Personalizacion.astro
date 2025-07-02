@@ -907,6 +907,9 @@ const facultades = facultadesData?.facultades || [];
                         twitterInput.value = facultad.twit_fac || "";
                     if (instagramInput)
                         instagramInput.value = facultad.inst_fac || "";
+
+                    // Cargar imágenes existentes en las vistas previas
+                    cargarImagenesExistentes(facultad);
                 }
             } catch (error) {
                 console.error("Error al cargar facultad:", error);
@@ -914,6 +917,112 @@ const facultades = facultadesData?.facultades || [];
                     "Error al cargar los datos de la facultad",
                 );
             }
+        }
+
+        // Función para cargar imágenes existentes en las vistas previas
+        function cargarImagenesExistentes(facultad: any) {
+            // Mapeo de campos de imagen y sus contenedores de vista previa
+            const imagenesMap = [
+                {
+                    campo: "img_log",
+                    preview: "logo-preview",
+                    display: "file-name-display-logo",
+                },
+                {
+                    campo: "img_caru1",
+                    preview: "carrusel-preview-1",
+                    display: "file-name-display-carrusel-1",
+                },
+                {
+                    campo: "img_caru2",
+                    preview: "carrusel-preview-2",
+                    display: "file-name-display-carrusel-2",
+                },
+                {
+                    campo: "img_caru3",
+                    preview: "carrusel-preview-3",
+                    display: "file-name-display-carrusel-3",
+                },
+                {
+                    campo: "dec_img",
+                    preview: "decano-preview",
+                    display: "file-name-display-decano-preview",
+                },
+                {
+                    campo: "sub_img",
+                    preview: "subdecano-preview",
+                    display: "file-name-display-subdecano-preview",
+                },
+                {
+                    campo: "res_img",
+                    preview: "responsable-preview",
+                    display: "file-name-display-responsable-preview",
+                },
+                {
+                    campo: "img_mis",
+                    preview: "mision-preview",
+                    display: "file-name-display-mision-preview",
+                },
+                {
+                    campo: "img_vis",
+                    preview: "vision-preview",
+                    display: "file-name-display-vision-preview",
+                },
+            ];
+
+            imagenesMap.forEach((imagen) => {
+                const url = facultad[imagen.campo];
+                if (url && url.trim() !== "") {
+                    mostrarImagenExistente(url, imagen.preview, imagen.display);
+                }
+            });
+        }
+
+        // Función helper para mostrar una imagen existente en la vista previa
+        function mostrarImagenExistente(
+            imageUrl: string,
+            previewId: string,
+            displayId: string,
+        ) {
+            const previewContainer = document.getElementById(previewId);
+            const fileNameDisplay = document.getElementById(displayId);
+
+            if (!previewContainer) return;
+
+            // Limpiar vista previa anterior
+            const existingPreview =
+                previewContainer.querySelector(".preview-image");
+            if (existingPreview) existingPreview.remove();
+
+            // Mostrar nombre del archivo
+            if (fileNameDisplay) {
+                const fileName =
+                    imageUrl.split("/").pop() || "Imagen existente";
+                fileNameDisplay.textContent = fileName;
+                fileNameDisplay.style.display = "block";
+            }
+
+            // Crear y mostrar la imagen
+            const previewImg = document.createElement("img");
+            previewImg.className = "preview-image";
+            previewImg.src = imageUrl;
+            previewImg.alt = "Imagen existente";
+            previewImg.style.maxWidth = "100%";
+            previewImg.style.maxHeight = "200px";
+            previewImg.style.objectFit = "cover";
+            previewImg.style.borderRadius = "8px";
+            previewImg.style.marginBottom = "10px";
+
+            // Manejar error de carga de imagen
+            previewImg.onerror = function () {
+                console.warn("Error al cargar imagen:", imageUrl);
+                if (fileNameDisplay) {
+                    fileNameDisplay.textContent = "Error al cargar imagen";
+                    fileNameDisplay.style.color = "#dc2626";
+                }
+            };
+
+            previewContainer.prepend(previewImg);
         }
 
         function crearNuevaFacultad() {
@@ -938,7 +1047,57 @@ const facultades = facultadesData?.facultades || [];
                     "id_facultad",
                 ) as HTMLInputElement;
                 if (idInput) idInput.value = "";
+
+                // Limpiar todas las vistas previas de imágenes
+                limpiarTodasLasVistasPrevias();
             }
+        }
+
+        // Función para limpiar todas las vistas previas
+        function limpiarTodasLasVistasPrevias() {
+            const previewIds = [
+                "logo-preview",
+                "carrusel-preview-1",
+                "carrusel-preview-2",
+                "carrusel-preview-3",
+                "decano-preview",
+                "subdecano-preview",
+                "responsable-preview",
+                "mision-preview",
+                "vision-preview",
+            ];
+
+            const displayIds = [
+                "file-name-display-logo",
+                "file-name-display-carrusel-1",
+                "file-name-display-carrusel-2",
+                "file-name-display-carrusel-3",
+                "file-name-display-decano-preview",
+                "file-name-display-subdecano-preview",
+                "file-name-display-responsable-preview",
+                "file-name-display-mision-preview",
+                "file-name-display-vision-preview",
+            ];
+
+            // Limpiar vistas previas
+            previewIds.forEach((previewId) => {
+                const previewContainer = document.getElementById(previewId);
+                if (previewContainer) {
+                    const existingPreview =
+                        previewContainer.querySelector(".preview-image");
+                    if (existingPreview) existingPreview.remove();
+                }
+            });
+
+            // Limpiar displays de nombres de archivos
+            displayIds.forEach((displayId) => {
+                const display = document.getElementById(displayId);
+                if (display) {
+                    display.textContent = "";
+                    display.style.display = "none";
+                    display.style.color = ""; // Resetear color en caso de error previo
+                }
+            });
         }
 
         function volverAGestion() {
@@ -957,6 +1116,9 @@ const facultades = facultadesData?.facultades || [];
             if (formulario) {
                 formulario.style.display = "none";
                 formulario.reset();
+
+                // Limpiar todas las vistas previas
+                limpiarTodasLasVistasPrevias();
             }
 
             // Resetear selector
@@ -1148,5 +1310,8 @@ const facultades = facultadesData?.facultades || [];
         (window as any).volverAGestion = volverAGestion;
         (window as any).mostrarNotificacionExito = mostrarNotificacionExito;
         (window as any).mostrarNotificacionError = mostrarNotificacionError;
+        (window as any).cargarImagenesExistentes = cargarImagenesExistentes;
+        (window as any).limpiarTodasLasVistasPrevias =
+            limpiarTodasLasVistasPrevias;
     });
 </script>
