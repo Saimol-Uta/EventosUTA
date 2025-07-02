@@ -8,6 +8,7 @@ import { actions } from "astro:actions";
 import type { CustomUser } from "../../auth.config";
 import { getSession } from "auth-astro/server";
 import ContenedorEventos from "../components/ContenedorEvento.astro";
+import Footer from "../components/Footer.astro";
 
 // Extraer filtros desde la URL
 const url = new URL(Astro.request.url);
@@ -33,6 +34,13 @@ if (session && session.user) {
         esAdmin = true;
     }
 }
+
+const id_fac = "a1b2c3d4-e5f6-4a7b-8c9d-1a1a1a1a1a1a";
+
+const { data: pagina } = await Astro.callAction(
+    actions.getPaginaSeleccionada,
+    {},
+);
 ---
 
 <Layout>
@@ -185,6 +193,16 @@ if (session && session.user) {
             <p class="texto-vacio">Prueba buscando otro evento</p>
         </div>
     </section>
+
+        <div class="h-15 bg-white"></div>
+    <Footer
+        Twitter={pagina?.facultad?.twit_fac}
+        Facebook={pagina?.facultad?.face_fac}
+        Instagram={pagina?.facultad?.inst_fac}
+        Direccion={pagina?.facultad?.dir_fac}
+        Correo={pagina?.facultad?.cor_fac}
+        Solicitud={pagina?.facultad?.enl_sol}
+    />
 
     <style>
         .seccion-principal {
