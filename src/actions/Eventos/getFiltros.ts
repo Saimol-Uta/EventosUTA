@@ -19,6 +19,13 @@ export const getEventosFiltrados = defineAction({
         const where: any = {};
         const condiciones: any[] = [];
         
+        // Filtro para mostrar solo eventos que no estén finalizados
+        condiciones.push({
+            estado_evento: {
+                not: "FINALIZADO"
+            }
+        });
+        
         // Filtro por carrera usando las asignaciones
         if (carrera) {
             condiciones.push({ 
@@ -70,9 +77,8 @@ export const getEventosFiltrados = defineAction({
             }
         }
         
-        if (condiciones.length > 0) {
-            where.AND = condiciones;
-        }
+        // Siempre aplicamos las condiciones (al menos el filtro de estado_evento)
+        where.AND = condiciones;
 
         try {
             // SOLUCIÓN #2: Usamos $transaction para ejecutar ambas consultas en paralelo

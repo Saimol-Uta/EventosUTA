@@ -28,7 +28,7 @@ export const getDashboardData = defineAction({
         const eventosProximosPromise = prisma.eventos.findMany({
             where: { 
                 fec_ini_eve: { gte: fechaActual },
-                estado_evento: 'ACTIVO' // Solo eventos activos
+                estado_evento: { not: 'FINALIZADO' } // Excluir eventos finalizados
             },
             orderBy: { fec_ini_eve: 'asc' },
             take: 4, // Limitar a 4, como en tu frontend original

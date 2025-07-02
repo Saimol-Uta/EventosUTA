@@ -6,7 +6,10 @@ export const GET: APIRoute = async ({ request }) => {
         // Obtener todos los eventos marcados como destacados en la BD
         const eventosDestacados = await db.eventos.findMany({
             where: {
-                es_destacado: true
+                es_destacado: true,
+                estado_evento: {
+                    not: "FINALIZADO"
+                }
             },
             select: {
                 id_eve: true
