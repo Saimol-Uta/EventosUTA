@@ -978,6 +978,7 @@ const { categorias = [], organizadores = [] } = Astro.props;
 
                 console.log("✅ Todos los valores asignados, mostrando modal");
                 modal.style.display = "block";
+                actualizarValidacionFechas();
             }
             function cerrarModalModificarEvento(): void {
                 const modal = document.getElementById("modalModificarEvento");
@@ -1037,6 +1038,19 @@ const { categorias = [], organizadores = [] } = Astro.props;
                 const eventoImagen = document.getElementById(
                     "evento-imagen",
                 ) as HTMLImageElement; // Manejar cambio de archivo
+
+                const fechaInicioInscripcionesInput = document.querySelector('input[name="fecha_inicio_inscripcion"]') as HTMLInputElement;
+                const fechaFinInscripcionesInput = document.querySelector('input[name="fecha_fin_inscripcion"]') as HTMLInputElement;
+                const fechaInicioEventoInput = document.querySelector('input[name="fecha_inicio"]') as HTMLInputElement;
+                const fechaFinEventoInput = document.querySelector('input[name="fecha_fin"]') as HTMLInputElement;
+
+                fechaInicioInscripcionesInput.addEventListener("change", actualizarValidacionFechas);
+                fechaFinInscripcionesInput.addEventListener("change", actualizarValidacionFechas);
+                fechaInicioEventoInput.addEventListener("change", actualizarValidacionFechas);
+                fechaFinEventoInput.addEventListener("change", actualizarValidacionFechas);
+
+                // Llama una vez al cargar para inicializar restricciones
+                actualizarValidacionFechas();
                 if (fileInput && fileNameDisplay && eventoImagen) {
                     fileInput.addEventListener("change", (e: Event) => {
                         const target = e.target as HTMLInputElement;
@@ -1241,6 +1255,133 @@ const { categorias = [], organizadores = [] } = Astro.props;
                 window.mostrarInfoCategoriaModificar =
                     mostrarInfoCategoriaModificar;
             });
+
+            function ajustarFecha(fechaString: string, dias: number): string {
+                if (!fechaString) return "";
+                const fecha = new Date(fechaString + "T00:00:00");
+                fecha.setDate(fecha.getDate() + dias);
+                return fecha.toISOString().split("T")[0];
+            }
+
+            function actualizarValidacionFechas() {
+                const fechaInicioInscripcionesInput = document.querySelector(
+                    'input[name="fecha_inicio_inscripcion"]'
+                ) as HTMLInputElement;
+                const fechaFinInscripcionesInput = document.querySelector(
+                    'input[name="fecha_fin_inscripcion"]'
+                ) as HTMLInputElement;
+                const fechaInicioEventoInput = document.querySelector(
+                    'input[name="fecha_inicio"]'
+                ) as HTMLInputElement;
+                const fechaFinEventoInput = document.querySelector(
+                    'input[name="fecha_fin"]'
+                ) as HTMLInputElement;
+
+                const fechaInicioInscripciones = fechaInicioInscripcionesInput.value;
+                const fechaFinInscripciones = fechaFinInscripcionesInput.value;
+                const fechaInicioEvento = fechaInicioEventoInput.value;
+                const fechaFinEvento = fechaFinEventoInput.value;
+
+                // 1. Fin de inscripciones: mínimo 1 día después de inicio de inscripciones
+                if (fechaInicioInscripciones) {
+                    fechaFinInscripcionesInput.min = ajustarFecha(fechaInicioInscripciones, 1);
+                } else {
+                    fechaFinInscripcionesInput.min = "";
+                }
+
+                // 2. Inicio de evento: mínimo 2 días después de inicio de inscripciones
+                if (fechaInicioInscripciones) {
+                    fechaInicioEventoInput.min = ajustarFecha(fechaInicioInscripciones, 2);
+                } else {
+                    fechaInicioEventoInput.min = "";
+                }
+
+                // 3. Fin de inscripciones: máximo 1 día antes del inicio del evento
+                if (fechaInicioEvento) {
+                    fechaFinInscripcionesInput.max = ajustarFecha(fechaInicioEvento, -1);
+                } else {
+                    fechaFinInscripcionesInput.max = "";
+                }
+
+                // 4. Inicio de evento: mínimo 1 día después del fin de inscripciones
+                if (fechaFinInscripciones) {
+                    const minPorFinInscripciones = ajustarFecha(fechaFinInscripciones, 1);
+                    if (
+                        !fechaInicioEventoInput.min ||
+                        minPorFinInscripciones > fechaInicioEventoInput.min
+                    ) {
+                        fechaInicioEventoInput.min = minPorFinInscripciones;
+                    }
+                }
+
+                // 5. Inicio de evento: máximo igual a la fecha de fin de evento
+                if (fechaFinEvento) {
+                    fechaInicioEventoInput.max = ajustarFecha(fechaFinEvento, -1);
+                } else {
+                    fechaInicioEventoInput.max = "";
+                }
+
+                // 6. Fin de evento: mínimo 1 día después del inicio del evento
+                if (fechaInicioEvento) {
+                    fechaFinEventoInput.min = ajustarFecha(fechaInicioEvento, 1);
+                } else {
+                    fechaFinEventoInput.min = "";
+                }
+
+                // 7. Inicio de evento: no puede ser inferior a la de fin de inscripciones
+                if (fechaFinInscripciones) {
+                    const minPorFinInscripciones = ajustarFecha(fechaFinInscripciones, 1);
+                    if (
+                        !fechaInicioEventoInput.min ||
+                        minPorFinInscripciones > fechaInicioEventoInput.min
+                    ) {
+                        fechaInicioEventoInput.min = minPorFinInscripciones;
+                    }
+                }
+
+                // Control visual para inicio de inscripciones: máximo 2 días antes del inicio del evento
+                if (fechaInicioEvento) {
+                    fechaInicioInscripcionesInput.max = ajustarFecha(fechaInicioEvento, -2);
+                } else {
+                    fechaInicioInscripcionesInput.max = "";
+                }
+
+                // Control visual para fin de evento: mínimo 3 días después del inicio de inscripciones
+                if (fechaInicioInscripciones) {
+                    fechaFinEventoInput.min = ajustarFecha(fechaInicioInscripciones, 3);
+                } else {
+                    fechaFinEventoInput.min = "";
+                }
+
+                // Control visual: inicio de inscripciones debe ser al menos 1 día antes que fin de inscripciones
+                if (fechaFinInscripciones) {
+                    fechaInicioInscripcionesInput.max = ajustarFecha(fechaFinInscripciones, -1);
+                } else {
+                    fechaInicioInscripcionesInput.max = "";
+                }
+
+                // Control visual: fin de evento debe ser mínimo 1 día después del inicio de evento
+                if (fechaInicioEvento) {
+                    const minPorInicioEvento = ajustarFecha(fechaInicioEvento, 1);
+                    if (
+                        !fechaFinEventoInput.min ||
+                        new Date(minPorInicioEvento) > new Date(fechaFinEventoInput.min)
+                    ) {
+                        fechaFinEventoInput.min = minPorInicioEvento;
+                    }
+                }
+
+                // Control visual: fin de evento debe ser mínimo 2 días después del fin de inscripciones
+                if (fechaFinInscripciones) {
+                    const minPorFinInscripciones = ajustarFecha(fechaFinInscripciones, 2);
+                    if (
+                        !fechaFinEventoInput.min ||
+                        new Date(minPorFinInscripciones) > new Date(fechaFinEventoInput.min)
+                    ) {
+                        fechaFinEventoInput.min = minPorFinInscripciones;
+                    }
+                }
+            }
         </script>
     </div>
 </div>
