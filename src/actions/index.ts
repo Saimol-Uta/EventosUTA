@@ -66,7 +66,7 @@ import { crearCategoria, modificarCategoria, eliminarCategoria, getAllCategorias
 import { getByIdInscripcion, getEventosINS, updateParticipante, updateEstadoInscripcion } from './Inscripcion';
 
 import { getInfo, getInscripcionesPendientes, updatePaginaPrincipal } from './Admin';
-import { CreateUpdatePaginaFacultad, DeletePaginaFacultad, GetPaginaFacultad } from './PerzonalizarPagina';
+import { CreateUpdatePaginaFacultad, DeletePaginaFacultad, GetPaginaFacultad, getFacultadById as getFacultadByIdPersonalizacion } from './PerzonalizarPagina';
 
 export const server = {
     getEventos,
@@ -157,11 +157,12 @@ export const server = {
     getFiltrosDinamicos,
     getDetallesEventoCompleto,
 
-    // Nuevas acciones para Facultades
-    getAllFacultades,
-    getFacultadById,
 
     // Nuevas acciones para Pagina Facultad
+    getAllFacultades,
+    getFacultadById,
+    getFacultadByIdPersonalizacion,
+
     CreateUpdatePaginaFacultad,
     DeletePaginaFacultad,
     GetPaginaFacultad

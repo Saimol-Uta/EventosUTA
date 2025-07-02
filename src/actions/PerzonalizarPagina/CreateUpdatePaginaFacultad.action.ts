@@ -7,6 +7,20 @@ import { Prisma } from '@prisma/client';
 const MAX_FILE_SIZE = 1024 * 1024 * 10; // 10MB
 const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/svg+xml'];
 
+// Helper para validar archivos opcionales
+const optionalFileSchema = (fieldName: string) => z.instanceof(File)
+    .refine((file) => {
+        // Si el archivo está vacío (sin nombre), lo consideramos válido
+        if (!file.name || file.size === 0) return true;
+        return file.size <= MAX_FILE_SIZE;
+    }, `${fieldName} no debe superar 10MB`)
+    .refine((file) => {
+        // Si el archivo está vacío (sin nombre), lo consideramos válido
+        if (!file.name || file.size === 0) return true;
+        return ACCEPTED_FILE_TYPES.includes(file.type);
+    }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
+    .optional();
+
 export const CreateUpdatePaginaFacultad = defineAction({
     accept: 'form',
     input: z.object({
@@ -17,84 +31,39 @@ export const CreateUpdatePaginaFacultad = defineAction({
         nombre_facultad: z.string().min(1, 'El nombre de la facultad es requerido'),
 
         // Logo
-        logo_facultad: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'El logo no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        logo_facultad: optionalFileSchema('El logo'),
 
         // Carrusel - Imagen 1
         titulo_carrusel_1: z.string().min(1, 'El título del carrusel 1 es requerido'),
         descripcion_carrusel_1: z.string().optional(),
-        imagen_carrusel_1: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'La imagen del carrusel 1 no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        imagen_carrusel_1: optionalFileSchema('La imagen del carrusel 1'),
 
         // Carrusel - Imagen 2
         titulo_carrusel_2: z.string().min(1, 'El título del carrusel 2 es requerido'),
         descripcion_carrusel_2: z.string().optional(),
-        imagen_carrusel_2: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'La imagen del carrusel 2 no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        imagen_carrusel_2: optionalFileSchema('La imagen del carrusel 2'),
 
         // Carrusel - Imagen 3
         titulo_carrusel_3: z.string().min(1, 'El título del carrusel 3 es requerido'),
         descripcion_carrusel_3: z.string().optional(),
-        imagen_carrusel_3: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'La imagen del carrusel 3 no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        imagen_carrusel_3: optionalFileSchema('La imagen del carrusel 3'),
 
         // Equipo Académico
         nombre_decano: z.string().optional(),
-        imagen_decano: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'La imagen del decano no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        imagen_decano: optionalFileSchema('La imagen del decano'),
 
         nombre_subdecano: z.string().optional(),
-        imagen_subdecano: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'La imagen del subdecano no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        imagen_subdecano: optionalFileSchema('La imagen del subdecano'),
 
         nombre_responsable: z.string().optional(),
-        imagen_responsable: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'La imagen del responsable no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        imagen_responsable: optionalFileSchema('La imagen del responsable'),
 
         // Misión y Visión
         mision: z.string().optional(),
-        imagen_mision: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'La imagen de misión no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        imagen_mision: optionalFileSchema('La imagen de misión'),
 
         vision: z.string().optional(),
-        imagen_vision: z.instanceof(File)
-            .refine((file) => file.size <= MAX_FILE_SIZE, 'La imagen de visión no debe superar 10MB')
-            .refine((file) => {
-                return ACCEPTED_FILE_TYPES.includes(file.type);
-            }, `Solo se permiten archivos: ${ACCEPTED_FILE_TYPES.join(', ')}`)
-            .optional(),
+        imagen_vision: optionalFileSchema('La imagen de visión'),
 
         // Información de contacto
         direccion_contacto: z.string().optional(),
@@ -106,8 +75,7 @@ export const CreateUpdatePaginaFacultad = defineAction({
 
         // Eventos destacados (opcional)
         eventos_destacados: z.array(z.string().uuid()).optional(),
-    }),
-    handler: async (form, { request }) => {
+    }), handler: async (form, { request }) => {
         try {
             const isUpdate = !!form.id_facultad;
 
@@ -127,7 +95,8 @@ export const CreateUpdatePaginaFacultad = defineAction({
 
             // Función helper para subir imágenes
             const uploadImage = async (file: File | undefined, existingUrl?: string): Promise<string> => {
-                if (file && file.size > 0) {
+                // Solo procesar si el archivo existe, tiene contenido y tiene nombre
+                if (file && file.size > 0 && file.name) {
                     try {
                         return await ImageUpload.upload(file);
                     } catch (cloudinaryError: any) {
@@ -242,8 +211,9 @@ export const CreateUpdatePaginaFacultad = defineAction({
                     }
                 };
             }
-
         } catch (error: any) {
+            console.error('Error en CreateUpdatePaginaFacultad:', error);
+
             if (error instanceof Prisma.PrismaClientKnownRequestError) {
                 if (error.code === 'P2002') {
                     const target = error.meta?.target;

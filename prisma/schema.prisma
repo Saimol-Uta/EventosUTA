@@ -66,9 +66,6 @@ model eventos {
   asignaciones       asignaciones?      @relation(fields: [id_asi_eve], references: [id_asi], onDelete: NoAction, onUpdate: NoAction)
   categorias_eventos categorias_eventos @relation(fields: [id_cat_eve], references: [id_cat], onDelete: NoAction, onUpdate: NoAction)
   inscripciones      inscripciones[]
-
-  @@index([dur_eve], map: "idx_eventos_on_dur_eve")
-  @@index([nom_eve], map: "idx_eventos_on_nom_eve")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -125,8 +122,6 @@ model usuarios {
   cambios       cambios[]
   inscripciones inscripciones[]
   carreras      carreras?       @relation(fields: [id_car_per], references: [id_car], onDelete: NoAction, onUpdate: NoAction)
-
-  @@index([id_car_per], map: "idx_usuarios_on_id_car_per")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -156,24 +151,35 @@ model detalle_asignaciones {
 }
 
 model facultades {
-  id_fac   String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nom_fac  String     @db.VarChar(250)
-  des_fac  String?
-  mis_fac  String?
-  vis_fac  String?
-  img_des  String?
-  img_mis  String?
-  img_vis  String?
-  dir_fac  String?
-  cor_fac  String?
-  dec_fac  String?
-  dec_img  String?
-  sub_fac  String?
-  sub_img  String?
-  twit_fac String?
-  face_fac String?
-  inst_fac String?
-  res_fac  String?
-  res_img  String?
-  carreras carreras[]
+  id_fac    String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nom_fac   String     @db.VarChar(250)
+  des_fac   String?
+  mis_fac   String?
+  vis_fac   String?
+  img_des   String?
+  img_mis   String?
+  img_vis   String?
+  dir_fac   String?
+  cor_fac   String?
+  dec_fac   String?
+  dec_img   String?
+  sub_fac   String?
+  sub_img   String?
+  twit_fac  String?
+  face_fac  String?
+  inst_fac  String?
+  res_fac   String?
+  res_img   String?
+  tit_caru1 String?    @db.VarChar(250)
+  tit_caru2 String?    @db.VarChar(250)
+  tit_caru3 String?    @db.VarChar(250)
+  des_caru1 String?
+  des_caru2 String?
+  des_caru3 String?
+  img_caru1 String?
+  img_caru2 String?
+  img_caru3 String?
+  img_log   String?
+  enl_sol   String?
+  carreras  carreras[]
 }
