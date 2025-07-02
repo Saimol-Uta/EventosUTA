@@ -98,7 +98,8 @@ const publicRoutes = [
     '/contact',
     '/cursosCompleto',
     '/Eventos/*',
-    '/User/verificar-cuenta'
+    '/User/verificar-cuenta',
+    '/public/*'
 ];
 
 const eventosExcludedSubroutes = [
