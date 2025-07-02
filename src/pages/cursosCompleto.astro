@@ -20,11 +20,11 @@ const filtros = {
 
 
 
-// Extraer número de página (solo si no hay búsqueda)
+// Solo usamos paginación cuando NO hay búsqueda
+// Configuración de paginación
 const page = filtros.busqueda ? 1 : parseInt(url.searchParams.get("page") || "1", 10);
+const cursosPorPagina = filtros.busqueda ? 1000 : 10; // Mostrar todos los resultados en búsquedas
 
-// Mostrar todos los resultados si hay búsqueda, de lo contrario paginar
-const cursosPorPagina = filtros.busqueda ? 1000 : 10; // 1000 es un número alto para mostrar "todos"
 const session = await getSession(Astro.request);
 let esAdmin = false;
 
@@ -54,6 +54,7 @@ if (session && session.user) {
   type="text"
   placeholder="Buscar evento por nombre, categoría..."
   class="input-busqueda flex-grow bg-transparent outline-none text-gray-800 placeholder-gray-400 px-4 py-2 text-sm"
+  value={filtros.busqueda}
 />
 
 <button
@@ -340,63 +341,23 @@ if (session && session.user) {
 document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('input-busqueda');
   const btnBuscar = document.getElementById('btn-buscar');
-  let timeoutId;
 
-  // Función mejorada para buscar en las tarjetas
-  const buscarEventos = (termino) => {
-    const cards = document.querySelectorAll('.card-evento');
-    let hayResultados = false;
-    const terminoLower = termino.toLowerCase().trim();
-
-    // Ocultar mensaje de búsqueda URL si existe
-    const mensajeResultadosURL = document.querySelector('.contenedor-interno p');
-    if (mensajeResultadosURL && terminoLower) {
-      mensajeResultadosURL.style.display = 'none';
+  const realizarBusqueda = (termino) => {
+    const url = new URL(window.location.href);
+    
+    // Limpiar parámetros existentes
+    ['page', 'busqueda'].forEach(param => url.searchParams.delete(param));
+    
+    if (termino.trim()) {
+      url.searchParams.set('busqueda', termino);
     }
-
-    if (!terminoLower) {
-      // Mostrar todas las tarjetas si no hay término
-      cards.forEach(card => card.style.display = '');
-      document.querySelector('.cursos-sin-resultados').style.display = 'none';
-      if (mensajeResultadosURL) mensajeResultadosURL.style.display = '';
-      return;
-    }
-
-    cards.forEach(card => {
-      // Buscar en título (data-titulo) y categoría (texto dentro de .etiqueta.categoria)
-      const titulo = card.getAttribute('data-titulo') || '';
-      const categoriaElement = card.querySelector('.etiqueta.categoria');
-      const categoria = categoriaElement ? categoriaElement.textContent.toLowerCase() : '';
-      
-      const coincide = titulo.includes(terminoLower) || 
-                     categoria.includes(terminoLower);
-      
-      card.style.display = coincide ? '' : 'none';
-      if (coincide) hayResultados = true;
-    });
-
-    // Mostrar mensaje si no hay resultados
-    document.querySelector('.cursos-sin-resultados').style.display = 
-      hayResultados ? 'none' : 'flex';
+    
+    window.location.href = url.toString();
   };
 
-  // Eventos de búsqueda con debounce
-  input.addEventListener('input', (e) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => buscarEventos(e.target.value), 300);
-  });
-
-  btnBuscar.addEventListener('click', () => buscarEventos(input.value));
-  
+  btnBuscar.addEventListener('click', () => realizarBusqueda(input.value));
   input.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') buscarEventos(input.value);
-  });
-
-  // Limpiar búsqueda si se borra el texto
-  input.addEventListener('change', (e) => {
-    if (!e.target.value.trim()) {
-      buscarEventos('');
-    }
+    if (e.key === 'Enter') realizarBusqueda(input.value);
   });
 });
 </script>
