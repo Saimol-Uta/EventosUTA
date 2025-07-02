@@ -1,5 +1,7 @@
 ---
 const { isLoggedIn } = Astro.locals;
+
+const {Twitter, Facebook, Instagram} = Astro.props;
 ---
 
 <footer
@@ -86,7 +88,7 @@ const { isLoggedIn } = Astro.locals;
             <div style="margin-top: 20px; display: flex; gap: 12px;">
             
                 <a
-                    href="https://x.com/UTecnicaAmbato"
+                    href={Twitter || "https://twitter.com/uta_fisei"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -103,7 +105,7 @@ const { isLoggedIn } = Astro.locals;
                 </a>
 
                 <a
-                    href="https://www.facebook.com/UTAFISEI"
+                    href={Facebook || "https://www.facebook.com/UTAFISEI"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -120,7 +122,7 @@ const { isLoggedIn } = Astro.locals;
                 </a>
 
                 <a
-                    href="https://www.instagram.com/fisei_uta/"
+                    href={Instagram || "https://www.instagram.com/fisei_uta/"}
                     target="_blank"
                     rel="noopener noreferrer"
                 >

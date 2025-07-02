@@ -20,8 +20,11 @@ const nombreCompleto = (
   `${cuenta?.nom_usu1 || ""} ${cuenta?.nom_usu2 || ""} ${cuenta?.ape_usu1 || ""} ${cuenta?.ape_usu2 || ""}`
 ).trim() || "Usuario";
 
+const { data: pagina } = await Astro.callAction(actions.getPaginaSeleccionada, {});
+
 const imagenPerfil = cuenta?.img_user || "/PerfilDefault.png";
-const { logoFacultad, tituloLogo } = Astro.props;
+const logoFacultad = pagina?.facultad?.img_log || "/img/LogoFacultad.png";
+const tituloLogo = pagina?.facultad?.nom_fac || "Uta";
 ---
 
 {(isMaster || isStudent || isUser || isAdmin || isLoggedIn) ? (
@@ -29,8 +32,7 @@ const { logoFacultad, tituloLogo } = Astro.props;
     nombreUsuario={nombreCompleto}
     userImage={imagenPerfil}
     logoImage={logoFacultad}
-    titulo1={titulo1}
-    titulo2={titulo2}
+    titulo1={tituloLogo || "Uta"}
   />
 ) : (
   <header class="flex flex-wrap items-center justify-between px-8 py-2 border-b border-gray-300 bg-white">
