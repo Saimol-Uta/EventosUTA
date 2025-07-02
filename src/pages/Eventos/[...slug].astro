@@ -65,6 +65,7 @@ const formatearFecha = (fecha: string | Date) => {
 
 // Formatear duración (el campo dur_eve está en horas)
 const formatearDuracion = (horas: number) => {
+    /*
     if (horas < 24) {
         // Menos de 24 horas
         const horasRedondeadas = Math.round(horas * 100) / 100;
@@ -83,6 +84,8 @@ const formatearDuracion = (horas: number) => {
             return `${dias} ${dias === 1 ? 'día' : 'días'} ${horasRestantes}h`;
         }
     }
+        */
+    return `${horas} horas`;
 };
 
 // Función para comparar solo fechas (sin horas)
